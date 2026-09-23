@@ -4,7 +4,7 @@ import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength } from '@/app/landing/home/c
 import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
-import type { NavTheme } from '@/app/landing/home/navTheme'
+import { groundColor, inkColor } from '@/app/landing/home/palette'
 import { CompassMark } from '@/app/landing/home/parts/CompassMark'
 import { Dome } from '@/app/landing/home/parts/Dome'
 import { addDome } from '@/app/landing/home/parts/domeTween'
@@ -13,19 +13,6 @@ import { cn } from '@/lib/utils'
 import type { DestinationRow } from '@/services/types'
 
 const ROW_H = 28
-/**
- * The ground colour, as a concrete `hsl()` string.
- *
- * GSAP has to parse the colour it tweens to, so it cannot take
- * `hsl(var(--background))`. Reading the token keeps this stage in step with the
- * palette instead of pinning a hex that goes stale the next time the theme
- * changes.
- */
-function groundColor(): string {
-  const token = getComputedStyle(document.documentElement).getPropertyValue('--background').trim()
-  return token ? `hsl(${token})` : '#09392c'
-}
-
 const formatLat = (lat: number) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`
 const formatLng = (lng: number) => `${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`
 
@@ -86,14 +73,6 @@ export function DestinationsStage({
         const darkenAt = L + u(2.6)
         const domeAt = L + u(3.1)
 
-        // The nav follows whatever fills the top of the screen.
-        const themeAt = (t: number): NavTheme => {
-          if (t < revealAt + revealDur * 0.91) return 'dark'
-          if (t < L + u(2.9)) return 'light'
-          if (t < domeAt + u(0.4) * 0.85) return 'dark'
-          return 'light'
-        }
-
         // Header: blurs away as it scrolls up to the pin.
         gsap.fromTo(
           headerRef.current,
@@ -133,7 +112,11 @@ export function DestinationsStage({
         const n = rows.length
 
         const perFrame = () => {
-          setNavTheme(themeAt(tl.time()))
+          // Every ground this stage passes through is light under Arcade Neon
+          // Pop: the pink page, the white circle that opens over it, and the
+          // paper dome that closes it. Only the hero photograph is dark, so the
+          // nav no longer changes hands anywhere below it.
+          setNavTheme('light')
           if (tl.time() > L + u(0.2)) return // list has left; skip the per-row work
 
           const y = gsap.getProperty(baseList, 'y') as number
@@ -210,7 +193,7 @@ export function DestinationsStage({
         tl.fromTo(q('[data-wheel]'), { rotation: -30 }, { rotation: 100, duration: u(2.6) }, L + u(0.9))
         tl.fromTo(q('[data-arc]'), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: u(2.0) }, L + u(1.5))
         tl.to(q('[data-reveal]'), { backgroundColor: groundColor(), duration: u(0.6) }, darkenAt)
-        tl.to(q('[data-arc]'), { stroke: '#ffffff', duration: u(0.6) }, darkenAt)
+        tl.to(q('[data-arc]'), { stroke: inkColor(), duration: u(0.6) }, darkenAt)
         tl.to(q('[data-ring]'), { opacity: 0, duration: u(0.4) }, domeAt)
         addDome(tl, q('[data-dome]')[0], domeAt, u(0.4))
         tl.set({}, {}, total)
@@ -236,7 +219,7 @@ export function DestinationsStage({
   )
 
   return (
-    <section data-reduce-theme="dark" className="relative bg-background text-foreground">
+    <section data-reduce-theme="light" className="relative bg-background text-foreground">
       <header
         ref={headerRef}
         className="mx-auto max-w-7xl px-6 pb-[6.857rem] pt-[11.429rem] text-center motion-reduce:pb-12"
@@ -264,11 +247,11 @@ export function DestinationsStage({
           ))}
         </div>
 
-        {/* Scanner line and the ground-coloured copy clipped to it */}
+        {/* Scanner bar — ink — and the ground-coloured copy clipped to it */}
         <div
           data-scanner
           aria-hidden
-          className="absolute inset-x-0 top-1/2 -mt-3.5 h-7 bg-white motion-reduce:hidden"
+          className="absolute inset-x-0 top-1/2 -mt-3.5 h-7 bg-foreground motion-reduce:hidden"
         />
         <div
           aria-hidden
@@ -297,12 +280,12 @@ export function DestinationsStage({
               cy="36"
               r="35"
               fill="none"
-              stroke="rgba(238,214,200,0.4)"
+              className="stroke-foreground/40"
               strokeDasharray="1 5"
               strokeLinecap="round"
             />
           </svg>
-          <CompassMark data-mark className="absolute left-1/2 top-1/2 -ml-3 -mt-3 size-6 text-white" />
+          <CompassMark data-mark className="absolute left-1/2 top-1/2 -ml-3 -mt-3 size-6 text-background" />
         </div>
 
         {/* The circle that opens into the photo wheel */}
@@ -315,7 +298,7 @@ export function DestinationsStage({
         </div>
         <CompassMark
           data-reveal-mark
-          className="pointer-events-none absolute left-1/2 top-1/2 z-20 -ml-3 -mt-3 size-6 text-background opacity-0 motion-reduce:hidden"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-20 -ml-3 -mt-3 size-6 text-foreground opacity-0 motion-reduce:hidden"
         />
 
         <Dome tone="paper" />

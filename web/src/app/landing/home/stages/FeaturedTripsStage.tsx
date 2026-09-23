@@ -120,7 +120,7 @@ export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
     <section
       ref={ref}
       data-reduce-theme="light"
-      className="relative h-screen overflow-hidden bg-paper text-background motion-reduce:h-auto motion-reduce:py-24"
+      className="relative h-screen overflow-hidden bg-paper text-foreground motion-reduce:h-auto motion-reduce:py-24"
     >
       <svg
         data-dots
@@ -133,7 +133,7 @@ export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
           cy="50"
           r="49.5"
           fill="none"
-          className="stroke-background/20"
+          className="stroke-foreground/20"
           strokeDasharray="0.4 2.2"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"

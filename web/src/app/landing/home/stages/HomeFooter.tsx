@@ -89,15 +89,22 @@ export function HomeFooter() {
     <footer
       ref={ref}
       data-reduce-theme="light"
-      className="relative overflow-hidden bg-paper text-background"
+      className="relative overflow-hidden bg-paper text-foreground"
     >
       <div data-dim aria-hidden className="pointer-events-none absolute inset-0 bg-black opacity-0" />
 
       <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-[5.714rem] pt-[6.857rem] text-center">
+        {/* The wordmark is sized from its own width, not guessed at.
+            "ChillnGo" sets 5.391em wide in Sigmar One, so `26vw` asked for a
+            word 140vw across: the footer's `overflow-hidden` then cut the C and
+            the o off at the screen edges. Dividing by that ratio makes the
+            declared number mean what it says — the word spans 92vw, with the
+            remainder left as a gutter. Recompute the divisor if the display
+            face ever changes. */}
         <p
           data-wordmark
           aria-hidden
-          className="select-none font-display text-[26vw] text-white"
+          className="max-w-none select-none whitespace-nowrap font-display text-[calc(92vw/5.391)] text-foreground/10"
         >
           ChillnGo
         </p>
@@ -121,7 +128,7 @@ export function HomeFooter() {
             onMouseLeave={leave}
             onFocus={enter}
             onBlur={leave}
-            className="grid size-[max(12vw,160px)] place-items-center rounded-full bg-background px-6 text-center text-sm uppercase leading-snug tracking-[0.02em] text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            className="grid size-[max(12vw,160px)] place-items-center rounded-full bg-foreground px-6 text-center text-sm uppercase leading-snug tracking-[0.02em] text-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
             {isAuthenticated ? 'Đăng hành trình' : 'Bắt đầu ngay'}
           </Link>

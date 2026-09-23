@@ -25,16 +25,15 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* Transparent home navbar. Brand and links are recoloured by theme; the
-   glass controls (bell, auth CTAs) switch to a solid forest fill on light. */
+/* Transparent home navbar. Only the brand and the links are recoloured by
+   theme. The controls (bell, auth CTAs) are not: under Arcade Neon Pop
+   `.liquid-glass` is already a flat white card with an ink outline, which reads
+   on both the footage and the pink ground, so the old solid-fill override for
+   light sections is gone. */
 .nav-transparent .nav-brand,
 .nav-transparent .nav-link,
-.nav-controls .liquid-glass,
-.nav-controls .nav-login,
-.mobile-bottom-nav .liquid-glass {
-  transition:
-    background-color 300ms ease,
-    color 300ms ease;
+.nav-controls .nav-login {
+  transition: color 300ms ease;
 }
 
 .nav-transparent .nav-brand,
@@ -55,24 +54,16 @@ html.lenis body {
   color: rgb(255 255 255 / 0.8);
 }
 
+/* Light sections are the pink ground (#FFF0F6), so the nav wears the ink the
+   rest of the page is set in — deep purple — not `--background`, which under
+   this palette is the pink itself and left the links invisible. */
 html[data-nav-theme='light'] .nav-transparent .nav-brand,
 html[data-nav-theme='light'] .nav-transparent .nav-link:hover,
-html[data-nav-theme='light'] .nav-transparent .nav-link-active {
-  color: hsl(var(--background));
+html[data-nav-theme='light'] .nav-transparent .nav-link-active,
+html[data-nav-theme='light'] .nav-controls .nav-login {
+  color: hsl(var(--foreground));
 }
 
 html[data-nav-theme='light'] .nav-transparent .nav-link {
-  color: hsl(var(--background) / 0.7);
-}
-
-html[data-nav-theme='light'] .nav-controls .liquid-glass {
-  background-color: hsl(var(--background));
-}
-
-html[data-nav-theme='light'] .nav-controls .nav-login {
-  color: hsl(var(--background));
-}
-
-html[data-nav-theme='light'] .mobile-bottom-nav .liquid-glass {
-  background-color: hsl(var(--background) / 0.92);
+  color: hsl(var(--foreground) / 0.7);
 }

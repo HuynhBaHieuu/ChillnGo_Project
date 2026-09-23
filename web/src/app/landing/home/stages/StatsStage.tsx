@@ -5,6 +5,7 @@ import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/ho
 import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
+import { inkColor, mutedInkColor } from '@/app/landing/home/palette'
 import { CharLayers } from '@/app/landing/home/parts/CharLayers'
 import { Dome } from '@/app/landing/home/parts/Dome'
 import { addDome } from '@/app/landing/home/parts/domeTween'
@@ -47,7 +48,9 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
         const f = desktop ? 1 : MOBILE_PIN_FACTOR
         const u = (n: number) => n * f
         const total = u(UNITS.stats)
-        const lightFrom = u(0.8 + 0.7 * 0.85)
+        // The stage sits on the pink ground, so type lights up to the ink.
+        const tint = mutedInkColor()
+        const lit = inkColor()
 
         const circles = q<HTMLElement>('[data-circle]')
         const counts = q<HTMLElement>('[data-count]')
@@ -57,7 +60,7 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
 
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
-          onUpdate: () => setNavTheme(tl.time() >= lightFrom ? 'light' : 'dark'),
+          onUpdate: () => setNavTheme('light'),
         })
 
         tl.fromTo(
@@ -86,8 +89,8 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
         )
         tl.fromTo(
           split.chars,
-          { opacity: 0, color: 'rgba(255, 255, 255, 0.55)' },
-          { opacity: 1, color: '#ffffff', duration: u(0.05), stagger: { amount: u(0.2) } },
+          { opacity: 0, color: tint },
+          { opacity: 1, color: lit, duration: u(0.05), stagger: { amount: u(0.2) } },
           u(0.2),
         )
 
@@ -108,8 +111,8 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
         })
         tl.fromTo(
           counts,
-          { color: 'rgba(255, 255, 255, 0.35)' },
-          { color: '#ffffff', duration: u(0.35) },
+          { color: tint },
+          { color: lit, duration: u(0.35) },
           u(0.35),
         )
 
@@ -140,7 +143,7 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
   return (
     <section
       ref={ref}
-      data-reduce-theme="dark"
+      data-reduce-theme="light"
       className="relative h-screen overflow-hidden bg-background text-foreground motion-reduce:h-auto motion-reduce:py-32"
       style={{ '--d': 'max(11vw, 140px)' } as React.CSSProperties}
     >
@@ -158,7 +161,7 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
             <div
               key={item.label}
               data-circle
-              className="absolute left-1/2 top-0 ml-[calc(var(--d)*-0.5)] flex size-[var(--d)] flex-col items-center justify-center rounded-full border border-white/25 motion-reduce:static motion-reduce:ml-0"
+              className="absolute left-1/2 top-0 ml-[calc(var(--d)*-0.5)] flex size-[var(--d)] flex-col items-center justify-center rounded-full border border-foreground/25 motion-reduce:static motion-reduce:ml-0"
             >
               <span
                 data-count
@@ -166,7 +169,7 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
               >
                 {formatNumber(item.value)}
               </span>
-              <span className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/60">
+              <span className="mt-2 text-[10px] uppercase tracking-[0.2em] text-foreground/60">
                 {item.label}
               </span>
             </div>

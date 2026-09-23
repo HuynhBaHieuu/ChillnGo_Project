@@ -40,14 +40,14 @@ export function ArrowPill({ to, children }: { to: string; children: ReactNode })
       onMouseLeave={leave}
       onFocus={enter}
       onBlur={leave}
-      className="inline-flex items-center rounded-full bg-background py-[0.4286rem] pl-[1rem] pr-[1rem] text-sm uppercase tracking-[0.02em] text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+      className="inline-flex items-center rounded-full bg-foreground py-[0.4286rem] pl-[1rem] pr-[1rem] text-sm uppercase tracking-[0.02em] text-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
     >
       <span data-label className="inline-block py-1.5">
         {children}
       </span>
       <span
         data-dot
-        className="grid h-7 w-0 shrink-0 scale-0 place-items-center overflow-hidden rounded-full bg-white text-background"
+        className="grid h-7 w-0 shrink-0 scale-0 place-items-center overflow-hidden rounded-full bg-background text-foreground"
       >
         <ArrowRight data-arrow className="size-3.5 -translate-x-1.5" />
       </span>

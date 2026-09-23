@@ -5,6 +5,7 @@ import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/ho
 import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
+import { inkColor, mutedInkColor } from '@/app/landing/home/palette'
 import { CharLayers } from '@/app/landing/home/parts/CharLayers'
 import { GlassButton } from '@/components/Button'
 import { optionalEnv } from '@/lib/env'
@@ -24,8 +25,12 @@ const STATEMENT = [
   'Thấy hợp ý? Clone về làm của bạn chỉ với một chạm.',
 ]
 
-/** Colour of a character at the moment it starts to light up. */
-const CHAR_TINT = 'rgba(255, 255, 255, 0.55)'
+/*
+ * The statement lights up from a muted purple to the full ink — see
+ * `../palette`. It used to light up to white, which was right when the ground
+ * closing over the hero was forest; under Arcade Neon Pop that ground is the
+ * pink `--background`, and white on it was unreadable.
+ */
 
 /**
  * Stage A — the landing hero and the mission statement, on one pin.
@@ -69,6 +74,12 @@ export function IntroStage() {
         // Phones show a taller slice of the photo, so the copy has further to
         // travel before it is off screen.
         const lift = desktop ? 1 : 1.25
+        // The navbar follows the ground under it: white over the footage, ink
+        // once the pink has closed over it. Switched at 85% of the ground's
+        // fade rather than at its end, so the links are never white on pink.
+        const lightFrom = u(0.45 + 1.05 * 0.85)
+        const tint = mutedInkColor()
+        const lit = inkColor()
 
         gsap.from(q('[data-layer="range"]'), {
           opacity: 0,
@@ -82,7 +93,7 @@ export function IntroStage() {
 
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
-          onUpdate: () => setNavTheme('dark'),
+          onUpdate: () => setNavTheme(tl.time() >= lightFrom ? 'light' : 'dark'),
         })
 
         // Hero leaves as three layers at three speeds.
@@ -111,8 +122,8 @@ export function IntroStage() {
         )
         tl.fromTo(
           split.chars,
-          { opacity: 0, color: CHAR_TINT },
-          { opacity: 1, color: '#ffffff', duration: u(0.08), stagger: { amount: u(1.32) } },
+          { opacity: 0, color: tint },
+          { opacity: 1, color: lit, duration: u(0.08), stagger: { amount: u(1.32) } },
           u(2.1),
         )
         tl.to(

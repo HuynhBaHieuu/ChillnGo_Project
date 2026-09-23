@@ -26,8 +26,8 @@ const ITEM_H = 0.28
  * Stage C — the feature list sliding through a fixed forest band.
  *
  * The list is rendered twice and both copies move together. The base copy is
- * faint forest green; the second copy is white and sits inside a *stationary* wrapper
- * clipped to the band, so text turns white exactly where it crosses the band —
+ * faint ink; the second copy is the ground colour and sits inside a *stationary*
+ * wrapper clipped to the band, so text flips exactly where it crosses the band —
  * even an item half in, half out.
  *
  * Scroll (1 unit = 100vh, N = 6 items → 2.8 units):
@@ -55,7 +55,6 @@ export function HowItWorksStage() {
         const n = FEATURES.length
         const total = u(UNITS.howItWorks(n))
         const domeAt = total - u(0.6)
-        const darkFrom = domeAt + u(0.6) * 0.85
 
         const band = q('[data-band]')[0]
         const lists = q('[data-list]')
@@ -104,7 +103,7 @@ export function HowItWorksStage() {
           const slot = -y / h
           showDescription(slot > -0.5 && slot < n - 0.5 ? Math.round(slot) : -1)
 
-          setNavTheme(tl.time() >= darkFrom ? 'dark' : 'light')
+          setNavTheme('light')
         }
 
         const tl = gsap.timeline({ defaults: { ease: 'none' }, onUpdate: perFrame })
@@ -153,22 +152,22 @@ export function HowItWorksStage() {
     <section
       ref={ref}
       data-reduce-theme="light"
-      className="relative h-screen overflow-hidden bg-paper text-background motion-reduce:h-auto motion-reduce:py-24"
+      className="relative h-screen overflow-hidden bg-paper text-foreground motion-reduce:h-auto motion-reduce:py-24"
     >
       <div
         data-band
         aria-hidden
-        className="absolute inset-x-0 top-[36vh] h-[28vh] bg-background motion-reduce:hidden"
+        className="absolute inset-x-0 top-[36vh] h-[28vh] bg-foreground motion-reduce:hidden"
         style={{ transform: 'scaleY(0)' }}
       />
 
       {/* Section label. Outside [data-list] so it holds its place while the
           list travels past it. */}
-      <p className="absolute left-6 top-[29vh] text-[11px] font-medium uppercase tracking-[0.3em] text-background/60 md:left-[27vw] motion-reduce:static motion-reduce:mb-8 motion-reduce:px-6">
+      <p className="absolute left-6 top-[29vh] text-[11px] font-medium uppercase tracking-[0.3em] text-foreground/60 md:left-[27vw] motion-reduce:static motion-reduce:mb-8 motion-reduce:px-6">
         Cách ChillnGo hoạt động
       </p>
 
-      {/* Base list — faint forest green. */}
+      {/* Base list — faint ink. */}
       <div data-list className="absolute inset-x-0 top-[36vh] motion-reduce:static">
         <FeatureList tone="base" />
       </div>
@@ -190,7 +189,7 @@ export function HowItWorksStage() {
           <p
             key={feature.title}
             data-desc
-            className="absolute max-w-xl text-base text-white opacity-0"
+            className="absolute max-w-xl text-base text-background opacity-0"
           >
             {feature.desc}
           </p>
@@ -215,14 +214,14 @@ function FeatureList({ tone }: { tone: 'base' | 'highlight' }) {
             className={cn(
               'font-display text-[clamp(2.75rem,7vw,8rem)]',
               tone === 'base'
-                ? 'text-background/15 motion-reduce:text-background'
-                : 'text-white',
+                ? 'text-foreground/15 motion-reduce:text-foreground'
+                : 'text-background',
             )}
           >
             {feature.title}
           </h3>
           {tone === 'base' && (
-            <p className="mt-2 hidden text-sm text-background/70 motion-reduce:block">
+            <p className="mt-2 hidden text-sm text-foreground/70 motion-reduce:block">
               {feature.desc}
             </p>
           )}

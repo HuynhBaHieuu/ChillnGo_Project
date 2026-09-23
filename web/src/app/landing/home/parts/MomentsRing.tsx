@@ -50,7 +50,7 @@ export function MomentsRing({ photos }: { photos: string[] }) {
           strokeWidth={3}
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
-          style={{ stroke: '#002b42' }}
+          className="stroke-foreground/40"
         />
       </svg>
     </div>
