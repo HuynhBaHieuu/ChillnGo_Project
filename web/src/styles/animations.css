@@ -1,0 +1,53 @@
+/*
+ * fade-rise — the app's only entrance motion. Applied to the first-paint
+ * content of every page (hero text, feed on load, post detail header, modals)
+ * in four staggered steps, so a headline can arrive line by line ahead of the
+ * copy and the CTA beneath it.
+ *
+ * This stays CSS rather than GSAP on purpose: first-paint content must not
+ * depend on a script that loads after it, and `prefers-reduced-motion` is
+ * handled by the media query at the bottom with no JS branch to keep in sync.
+ * The curve is GSAP's `power3.out`, so entrances and scroll tweens share one
+ * feel.
+ */
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-rise,
+.animate-fade-rise-delay,
+.animate-fade-rise-delay-2,
+.animate-fade-rise-delay-3 {
+  animation: fade-rise 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+.animate-fade-rise-delay {
+  animation-delay: 0.14s;
+}
+
+.animate-fade-rise-delay-2 {
+  animation-delay: 0.28s;
+}
+
+.animate-fade-rise-delay-3 {
+  animation-delay: 0.42s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-rise,
+  .animate-fade-rise-delay,
+  .animate-fade-rise-delay-2,
+  .animate-fade-rise-delay-3 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

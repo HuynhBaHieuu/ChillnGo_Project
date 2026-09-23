@@ -1,0 +1,78 @@
+/*
+ * Home page scroll experience.
+ *
+ * The home page alternates forest and "paper" sections, so the fixed chrome has
+ * to follow the background under it. The stage timelines write the current
+ * theme to <html data-nav-theme="dark|light">; everything here keys off that.
+ */
+
+/* Lenis owns scrolling on the home page; native smooth scrolling would fight it
+   and make ScrollTrigger measure pins mid-animation. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Transparent home navbar. Brand and links are recoloured by theme; the
+   glass controls (bell, auth CTAs) switch to a solid forest fill on light. */
+.nav-transparent .nav-brand,
+.nav-transparent .nav-link,
+.nav-controls .liquid-glass,
+.nav-controls .nav-login,
+.mobile-bottom-nav .liquid-glass {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+.nav-transparent .nav-brand,
+.nav-transparent .nav-link:hover,
+.nav-transparent .nav-link-active {
+  color: #ffffff;
+}
+
+/* `.nav-login` joins the links here: its own `text-muted-foreground` is moss,
+   which clears AA on the app's solid forest ground but only reaches 3.2:1 over
+   the hero photograph.
+
+   0.8 rather than 0.7: measured against the brightest patch of cloud the nav
+   row crosses, 0.7 lands at 4.2:1 and 0.8 at 4.9:1. Active and hover states go
+   to full white above, which keeps the hierarchy. */
+.nav-transparent .nav-link,
+.nav-transparent .nav-login {
+  color: rgb(255 255 255 / 0.8);
+}
+
+html[data-nav-theme='light'] .nav-transparent .nav-brand,
+html[data-nav-theme='light'] .nav-transparent .nav-link:hover,
+html[data-nav-theme='light'] .nav-transparent .nav-link-active {
+  color: hsl(var(--background));
+}
+
+html[data-nav-theme='light'] .nav-transparent .nav-link {
+  color: hsl(var(--background) / 0.7);
+}
+
+html[data-nav-theme='light'] .nav-controls .liquid-glass {
+  background-color: hsl(var(--background));
+}
+
+html[data-nav-theme='light'] .nav-controls .nav-login {
+  color: hsl(var(--background));
+}
+
+html[data-nav-theme='light'] .mobile-bottom-nav .liquid-glass {
+  background-color: hsl(var(--background) / 0.92);
+}

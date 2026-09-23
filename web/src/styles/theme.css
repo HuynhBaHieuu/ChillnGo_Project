@@ -1,0 +1,84 @@
+/*
+ * ChillnGo design tokens — "Arcade Neon Pop" (designdotmd).
+ *
+ * Source: web/design.md. A maximalist mobile-game system — thick outlines,
+ * squishy radii, one loud accent on a near-white pink ground.
+ *
+ *   primary    #1A0B3C  deep purple — headlines and body copy
+ *   secondary  #8A7CA8  muted purple — borders, captions, metadata
+ *   tertiary   #FF3DA5  hot pink — the single interaction colour. Reserve it.
+ *   neutral    #FFF0F6  the page foundation
+ *   surface    #FFFFFF  cards
+ *
+ * Brand values stay bare `H S% L%` triplets so Tailwind can apply opacity
+ * modifiers (`bg-tertiary/20`).
+ *
+ * CONTRAST. Three of the spec's own pairings do not clear WCAG AA for
+ * body-size text, so each gets a tuned sibling and the spec value is kept for
+ * fills and large display type:
+ *
+ *   #8A7CA8 on #FFF0F6   3.44:1  →  --secondary-ink  #6A5C8A  5.43:1
+ *   #FFFFFF on #FF3DA5   3.25:1  →  ink on pink      #1A0B3C  5.59:1
+ *   #FF3DA5 on #FFF0F6   2.95:1  →  --tertiary-ink   #D60072  4.64:1
+ *
+ * The middle one is the important deviation: design.md specifies
+ * `button-primary { textColor: on-primary (#FFFFFF) }`, which is 3.25:1 on the
+ * pink and unreadable at button sizes. The deep purple is used instead.
+ */
+
+:root {
+  /* Typography */
+  /* design.md asks for Luckiest Guy + Fredoka. Neither ships a Vietnamese
+     subset (latin-ext only), so ế ệ ộ ợ ừ ữ would fall back mid-word to a
+     completely different face — the same trap the previous serif pairing hit.
+     Sigmar One and Baloo 2 are the closest chunky/rounded equivalents that do
+     cover Vietnamese, so the whole UI stays in one voice. */
+  --font-display: 'Sigmar One', 'Luckiest Guy', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Baloo 2', 'Fredoka', ui-rounded, system-ui, -apple-system, sans-serif;
+
+  /* Brand */
+  --primary-hue: 258 69% 14%; /* #1A0B3C */
+  --secondary-hue: 259 20% 57%; /* #8A7CA8 */
+  --tertiary: 328 100% 62%; /* #FF3DA5 */
+  --neutral: 336 100% 97%; /* #FFF0F6 */
+  --surface: 0 0% 100%; /* #FFFFFF */
+
+  /* Contrast-tuned siblings — see the note above. */
+  --secondary-ink: 259 20% 45%; /* #6A5C8A — 5.43:1 on neutral */
+  --tertiary-ink: 328 100% 42%; /* #D60072 — 4.64:1 on neutral */
+
+  /* Surface */
+  --background: var(--neutral);
+  --foreground: var(--primary-hue);
+
+  /* Cards are pure white on the pink ground, outlined rather than shadowed. */
+  --card: var(--surface);
+  --card-foreground: var(--primary-hue);
+  --popover: var(--surface);
+  --popover-foreground: var(--primary-hue);
+
+  /* Action. The one place tertiary is allowed, with ink on it for 5.59:1. */
+  --primary: var(--tertiary);
+  --primary-foreground: var(--primary-hue);
+
+  --secondary: var(--surface);
+  --secondary-foreground: var(--primary-hue);
+  --muted: 336 60% 94%;
+  --muted-foreground: var(--secondary-ink);
+  --accent: 336 100% 93%;
+  --accent-foreground: var(--primary-hue);
+
+  --destructive: 356 82% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Lines. "Thick outlines" is the system's defining trait, so the border is
+     the full-strength ink rather than a hairline. */
+  --paper: var(--surface);
+  --border: var(--primary-hue);
+  --input: var(--primary-hue);
+
+  --ring: var(--tertiary-ink);
+
+  /* Squishy. design.md: sm 10 / md 18 / lg 28. */
+  --radius: 18px;
+}

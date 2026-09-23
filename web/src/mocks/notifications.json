@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "n_001",
+    "userId": "u_001",
+    "type": "clone",
+    "actorId": "u_003",
+    "postId": "p_006",
+    "message": "đã clone lịch trình Ninh Bình 2N1Đ của bạn",
+    "read": false,
+    "createdAt": "2026-09-19T08:30:00.000Z"
+  },
+  {
+    "_id": "n_002",
+    "userId": "u_001",
+    "type": "like",
+    "actorId": "u_004",
+    "postId": "p_006",
+    "message": "đã thích bài viết của bạn",
+    "read": false,
+    "createdAt": "2026-09-19T03:05:00.000Z"
+  },
+  {
+    "_id": "n_003",
+    "userId": "u_001",
+    "type": "follow",
+    "actorId": "u_005",
+    "postId": null,
+    "message": "đã theo dõi bạn",
+    "read": false,
+    "createdAt": "2026-09-18T14:20:00.000Z"
+  },
+  {
+    "_id": "n_004",
+    "userId": "u_001",
+    "type": "comment",
+    "actorId": "u_002",
+    "postId": "p_006",
+    "message": "đã bình luận về bài viết của bạn",
+    "read": true,
+    "createdAt": "2026-09-16T09:45:00.000Z"
+  },
+  {
+    "_id": "n_005",
+    "userId": "u_001",
+    "type": "bookmark",
+    "actorId": "u_002",
+    "postId": "p_006",
+    "message": "đã lưu bài viết của bạn",
+    "read": true,
+    "createdAt": "2026-09-12T11:10:00.000Z"
+  },
+  {
+    "_id": "n_006",
+    "userId": "u_001",
+    "type": "system",
+    "actorId": null,
+    "postId": "p_009",
+    "message": "Bản nháp “Cát Bà 2N1Đ” chưa được đăng. Hoàn thiện để chia sẻ nhé.",
+    "read": true,
+    "createdAt": "2026-09-05T06:00:00.000Z"
+  }
+]

@@ -1,0 +1,48 @@
+/*
+ * .liquid-glass — kept as the app's one surface class so no call site has to
+ * change, but under Arcade Neon Pop it is not glass at all.
+ *
+ * The old treatment was a near-transparent white pane with a blur and a
+ * gradient rim, which only reads on a dark ground. This system's ground is
+ * #FFF0F6, where a white-on-white pane is invisible — and design.md forbids
+ * gradients outright. So the surface becomes what the spec actually calls for:
+ * a flat white card, a thick ink outline, and a hard offset shadow with no
+ * blur, which is what gives chunky arcade UI its sticker-like lift.
+ */
+
+.liquid-glass {
+  position: relative;
+  background: hsl(var(--surface));
+  border: 2px solid hsl(var(--border));
+  box-shadow: 4px 4px 0 0 hsl(var(--border));
+}
+
+/* The rim is gone; nothing needs the ::before layer any more. Call sites still
+   wrap their content in `relative z-[1]`, which is harmless. */
+.liquid-glass::before {
+  content: none;
+}
+
+/* Interactive surfaces press into the page rather than lifting off it. */
+.liquid-glass-interactive {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.liquid-glass-interactive:hover {
+  background-color: hsl(var(--accent));
+}
+
+.liquid-glass-interactive:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 hsl(var(--border));
+}
+
+/* Reduced motion keeps the colour change and drops the travel. */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass-interactive:active {
+    transform: none;
+  }
+}
