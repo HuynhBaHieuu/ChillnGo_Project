@@ -5,10 +5,14 @@ import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
+import { PasswordInput } from '@/components/PasswordInput'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AuthCard } from '@/features/auth/AuthCard'
-import { authService } from '@/services'
+import { AuthDivider, GoogleSignInButton } from '@/features/auth/GoogleSignInButton'
+import { ResendVerificationButton } from '@/features/auth/ResendVerificationButton'
+import { homePathFor } from '@/lib/roles'
+import { ApiError, authService } from '@/services'
 import type { AuthSession } from '@/services/types'
 import { useAuthStore } from '@/store'
 
@@ -17,22 +21,25 @@ interface FromState {
 }
 
 export function LoginPage() {
-  const [email, setEmail] = useState('minh@chillngo.vn')
-  const [password, setPassword] = useState('chillngo')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const signIn = useAuthStore((s) => s.signIn)
   const navigate = useNavigate()
   const location = useLocation()
 
   /** Where RequireAuth sent us from, if anywhere. */
-  const redirectTo = (location.state as FromState | null)?.from?.pathname ?? '/feed'
+  const from = (location.state as FromState | null)?.from?.pathname
 
   const mutation = useMutation({
     mutationFn: () => authService.login({ email, password }),
     onSuccess: (session: AuthSession) => {
       signIn(session)
-      void navigate(redirectTo, { replace: true })
+      void navigate(from ?? homePathFor(session.user), { replace: true })
     },
   })
+
+  const needsVerification =
+    mutation.error instanceof ApiError && mutation.error.code === 'EMAIL_NOT_VERIFIED'
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -68,9 +75,8 @@ export function LoginPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Mật khẩu</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             required
             autoComplete="current-password"
             value={password}
@@ -79,21 +85,35 @@ export function LoginPage() {
           />
         </div>
 
-        {mutation.isError && (
-          <p className="text-sm text-destructive">
+        {mutation.isError && !needsVerification && (
+          <p role="alert" className="text-sm text-destructive">
             {(mutation.error as Error).message}
           </p>
+        )}
+
+        {needsVerification && (
+          <div role="alert" className="space-y-3 rounded-2xl bg-muted p-4">
+            <p className="text-sm font-semibold text-foreground">Email chưa được xác nhận</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Hãy mở email xác nhận chúng tôi đã gửi tới{' '}
+              <span className="break-all font-semibold text-foreground">{email.trim()}</span> và bấm
+              nút <span className="font-semibold text-foreground">Xác nhận email</span>. Không
+              thấy email? Gửi lại một email mới:
+            </p>
+            <ResendVerificationButton email={email} />
+          </div>
         )}
 
         <GlassButton type="submit" size="lg" tone="sunset" className="w-full" disabled={mutation.isPending}>
           {mutation.isPending && <Loader2 className="animate-spin" />}
           Đăng nhập
         </GlassButton>
-
-        <p className="text-xs text-muted-foreground">
-          Đây là bản demo — xác thực chưa được nối. Mật khẩu nào cũng vào được.
-        </p>
       </form>
+
+      <div className="mt-6 space-y-6">
+        <AuthDivider />
+        <GoogleSignInButton redirectTo={from} />
+      </div>
     </AuthCard>
   )
 }

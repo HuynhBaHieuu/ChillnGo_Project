@@ -4,16 +4,19 @@ React + Vite + TypeScript front end for ChillnGo, a travel social network where
 people publish real multi-day trip itineraries and clone each other's into their
 own plans.
 
-**The Express API does not exist yet.** Every data call in this app goes through
-a function in `src/services/`, which today reads local JSON fixtures with a
-300–400ms artificial delay. Swapping in the real API means editing those
-function bodies — never a component.
+**Auth is real; everything else is still mocked.** Login, register and session
+checks call the Express API in `../server` (MongoDB). Every other data call goes
+through a function in `src/services/` that reads local JSON fixtures with a
+300–400ms artificial delay. Moving those to the API means editing the function
+bodies — never a component.
 
 ## Running it
 
+Start the API first (see `../server/README.md`), then:
+
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5173, proxies /api to localhost:4000
 npm run build    # type-check + production build
 npm run lint
 ```
@@ -22,6 +25,8 @@ Optional configuration — copy `.env.example` to `.env.local`:
 
 | Variable | Effect if unset |
 | --- | --- |
+| `VITE_GOOGLE_CLIENT_ID` | The "Đăng nhập bằng Google" button and its divider are hidden. Setup steps are in `../server/README.md`. |
+| `VITE_API_URL` | Requests go to `/api` on the same origin. Fine for local dev, where Vite proxies them to the API. Set it to the deployed API URL in production. |
 | `VITE_MAPBOX_TOKEN` | `<MapPreview />` renders a static SVG sketch of the route instead of an interactive map. Everything else works. |
 | `VITE_HERO_VIDEO_URL` | The landing hero falls back to a public sample clip. Replace it with real travel footage. |
 
@@ -41,7 +46,7 @@ src/
     map/                Mapbox layer and its no-token fallback
     social/             profile, follow, notifications
     itinerary-clone/    my itineraries, drag-and-drop reorder, merge
-    discovery-admin/    Discover filters/map, admin shell
+    discovery-admin/    Discover filters/map, admin console (AdminLayout + admin/)
   mocks/          one JSON fixture per MongoDB collection
   services/       the only place that knows where data comes from
   store/          Zustand (auth session, transient UI state)
@@ -64,7 +69,7 @@ keeps the API swap contained.
 | `/itineraries`, `/itineraries/:id` | Cloned itineraries, drag to reorder | signed in |
 | `/users/:id` | Profile with Bài viết / Đã lưu / Lịch trình đã clone | — |
 | `/login`, `/register` | Auth forms | — |
-| `/admin` | Tabs + empty states only | admin role |
+| `/admin/*` | Admin console with its own sidebar layout: overview, users, admins, content, audit log, settings. Real data from the API | admin or superadmin; sections by permission |
 
 ## Home page scroll experience
 
@@ -109,8 +114,11 @@ table.
 
 ## What is deliberately not real yet
 
-- **Auth.** Any password works. The token looks like a JWT but is unsigned, and
-  is stored in Zustand + localStorage. `RequireAuth` is wired and ready.
+- **Auth is the exception: it is real.** Passwords are checked by the API and the
+  token is a signed JWT, stored in Zustand + localStorage. `SessionSync` re-checks
+  a stored token on load, and any 401 signs the user out. Signed-in users are
+  also copied into the mock `db.users` table so the still-mocked services can
+  find them (see `auth.service.ts`).
 - **Image upload.** Picking a file in the form builder assigns a deterministic
   placeholder URL; no bytes leave the browser.
 - **Mapbox Directions.** The "route" is a straight polyline through the stops in
@@ -119,8 +127,9 @@ table.
   re-based dates; reorder is an array move plus renumbering; merge appends. The
   real versions (route re-optimisation, travel-time reconciliation, conflict
   handling) land with the API. See `itinerary.service.ts`.
-- **Admin.** Tabs and empty states only. The reads it will need already exist in
-  `discovery.service.ts` and are intentionally unwired.
+- **Admin content moderation.** The admin console manages accounts for real, but
+  its "Nội dung" section (posts, reports, categories) waits for that data to move
+  to the API.
 
 Submitting the post form logs the full payload to the console in the exact
 `TripPost` shape, so the form and the schema can be checked against each other

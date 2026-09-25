@@ -47,7 +47,12 @@ export interface User {
   followerCount: number
   followingCount: number
   postCount: number
-  role: 'user' | 'admin'
+  role: 'user' | 'admin' | 'superadmin'
+  /**
+   * Admin modules this account may use. Sent by the API; absent on mock users.
+   * See web/src/lib/roles.ts.
+   */
+  permissions?: ('users' | 'content' | 'reports' | 'categories' | 'stats')[]
   createdAt: ISODate
 }
 
@@ -214,6 +219,16 @@ export interface Credentials {
 export interface RegisterPayload extends Credentials {
   username: string
   displayName: string
+}
+
+/**
+ * What `POST /api/auth/register` returns. There is no session yet: the account
+ * is signed in when the emailed confirmation link is opened.
+ */
+export interface RegisterResult {
+  email: string
+  /** False when the account was created but the email could not be sent. */
+  emailSent: boolean
 }
 
 /** Exactly what `POST /api/posts` will accept. */

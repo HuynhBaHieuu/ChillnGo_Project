@@ -1,4 +1,4 @@
-import { LogOut, Menu, PenSquare, User as UserIcon } from 'lucide-react'
+import { LogOut, Menu, PenSquare, ShieldCheck, User as UserIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
@@ -19,6 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { isStaff } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 import { useAuthStore, useUiStore } from '@/store'
 
@@ -167,6 +168,14 @@ function NavControls() {
                   Profile
                 </Link>
               </DropdownMenuItem>
+              {isStaff(user) && (
+                <DropdownMenuItem asChild>
+                  <Link to="/admin">
+                    <ShieldCheck />
+                    Quản trị
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
                 <Link to="/posts/new">
                   <PenSquare />

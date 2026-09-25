@@ -55,14 +55,19 @@ export function nowIso(): string {
   return new Date().toISOString()
 }
 
-/** Thrown for anything the real API would answer with a 4xx. */
+/**
+ * Thrown for anything the API answers with a 4xx/5xx. `code` is set for
+ * errors the UI reacts to specifically, e.g. EMAIL_NOT_VERIFIED.
+ */
 export class ApiError extends Error {
   status: number
+  code?: string
 
-  constructor(message: string, status = 404) {
+  constructor(message: string, status = 404, code?: string) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.code = code
   }
 }
 

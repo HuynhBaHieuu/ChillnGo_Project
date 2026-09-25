@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
 
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { Navbar } from '@/components/Navbar'
 import { useUiStore } from '@/store'
@@ -22,6 +23,7 @@ export function RootLayout() {
         <Outlet />
       </main>
       <MobileBottomNav />
+      <AnnouncementBanner />
       <ScrollRestoration />
     </div>
   )

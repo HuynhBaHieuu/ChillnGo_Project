@@ -6,7 +6,9 @@ import { RootLayout } from '@/app/layout/RootLayout'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
-import { AdminPage } from '@/features/discovery-admin/AdminPage'
+import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage'
+import { ADMIN_SECTIONS } from '@/features/discovery-admin/admin/sections'
+import { AdminIndex, AdminLayout, AdminSectionPage } from '@/features/discovery-admin/AdminLayout'
 import { DiscoverPage } from '@/features/discovery-admin/DiscoverPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
@@ -63,17 +65,27 @@ export const router = createBrowserRouter([
 
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
-
-      {
-        path: '/admin',
-        element: (
-          <RequireAuth adminOnly>
-            <AdminPage />
-          </RequireAuth>
-        ),
-      },
+      { path: '/verify-email', element: <VerifyEmailPage /> },
 
       { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+
+  // The admin console has its own shell, outside the public site's layout.
+  {
+    path: '/admin',
+    element: (
+      <RequireAuth adminOnly>
+        <AdminLayout />
+      </RequireAuth>
+    ),
+    children: [
+      { index: true, element: <AdminIndex /> },
+      ...ADMIN_SECTIONS.map((section) => ({
+        path: section.path,
+        element: <AdminSectionPage path={section.path} />,
+      })),
+      { path: '*', element: <AdminIndex /> },
     ],
   },
 ])

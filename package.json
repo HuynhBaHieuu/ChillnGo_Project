@@ -1,0 +1,16 @@
+{
+  "name": "chillngo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/run-all.mjs dev",
+    "setup": "node scripts/run-all.mjs install",
+    "build": "node scripts/run-all.mjs build",
+    "typecheck": "node scripts/run-all.mjs typecheck",
+    "seed": "npm --prefix server run seed --",
+    "seed:superadmin": "npm --prefix server run seed:superadmin --"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

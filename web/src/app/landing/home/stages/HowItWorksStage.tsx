@@ -212,7 +212,7 @@ function FeatureList({ tone }: { tone: 'base' | 'highlight' }) {
         >
           <h3
             className={cn(
-              'font-display text-[clamp(2.75rem,7vw,8rem)]',
+              'font-display text-[clamp(2rem,min(5.5vw,11vh),8rem)] leading-[1.05]',
               tone === 'base'
                 ? 'text-foreground/15 motion-reduce:text-foreground'
                 : 'text-background',

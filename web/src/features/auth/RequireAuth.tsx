@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
+import { isStaff } from '@/lib/roles'
 import { useAuthStore } from '@/store'
 
 interface RequireAuthProps {
   children: ReactNode
-  /** Additionally require the admin role — used by /admin. */
+  /** Additionally require an admin or superadmin — used by /admin. */
   adminOnly?: boolean
 }
 
@@ -29,7 +30,7 @@ export function RequireAuth({ children, adminOnly = false }: RequireAuthProps) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (adminOnly && user.role !== 'admin') {
+  if (adminOnly && !isStaff(user)) {
     return <Navigate to="/feed" replace />
   }
 

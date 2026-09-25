@@ -1,99 +1,119 @@
 /**
- * Fake authentication.
+ * Authentication, backed by the real API in `server/` (MongoDB).
  *
- * No password is ever checked and the token is a base64 blob, not a JWT — it
- * exists so the store, the guard and the navbar have something real-shaped to
- * pass around. Real auth lands with the Express API.
+ * The rest of the app still reads mock data from `./client`, and those mock
+ * services look users up in `db.users`. So every signed-in user is also
+ * mirrored into that in-memory table; otherwise a newly registered account
+ * would have no profile page and could not post or comment. The mirror goes
+ * away once the other services move to the API.
  */
 
 import { travelAvatar, travelBanner } from '@/lib/photos'
+import { useAuthStore } from '@/store/auth.store'
 
-import { ApiError, clone, db, delay, nextId, nowIso } from './client'
-import type { AuthSession, Credentials, RegisterPayload, User } from './types'
-
-/**
- * Base64 a UTF-8 string.
- *
- * `btoa` only accepts Latin-1, so passing it a display name with Vietnamese
- * diacritics throws `InvalidCharacterError`. Encoding to UTF-8 bytes first is
- * what real JWT libraries do, and what keeps "Trần Nhật Minh" from breaking
- * sign-in.
- */
-function base64Utf8(value: string): string {
-  const bytes = new TextEncoder().encode(value)
-  let binary = ''
-  for (const byte of bytes) binary += String.fromCharCode(byte)
-  return btoa(binary)
-}
-
-/** Looks like a JWT (three dot-separated segments) but is not signed. */
-function fakeToken(user: User): string {
-  const header = base64Utf8(JSON.stringify({ alg: 'none', typ: 'JWT' }))
-  const payload = base64Utf8(
-    JSON.stringify({
-      sub: user._id,
-      name: user.displayName,
-      role: user.role,
-      iat: Math.floor(Date.now() / 1000),
-    }),
-  )
-  return `${header}.${payload}.mock-signature`
-}
+import { clone, db } from './client'
+import { http } from './http'
+import type { AuthSession, Credentials, RegisterPayload, RegisterResult, User } from './types'
 
 /**
- * POST /api/auth/login.
- *
- * Any password works. An unknown email falls back to the seed account so the
- * demo never dead-ends on a typo.
+ * The API stores an empty avatar/cover for new accounts; the web app decides
+ * what the default looks like, using the same travel photos as the mock users.
  */
+function withDefaultPhotos(user: User): User {
+  return {
+    ...user,
+    avatarUrl: user.avatarUrl || travelAvatar(user.username),
+    coverUrl: user.coverUrl || travelBanner(user.username),
+  }
+}
+
+/** Insert or refresh the signed-in user in the mock `db.users` table. */
+function mirrorIntoMockDb(user: User): void {
+  const index = db.users.findIndex((u) => u._id === user._id)
+  if (index === -1) db.users.push(clone(user))
+  else db.users[index] = { ...db.users[index], ...clone(user) }
+}
+
+function adopt(session: AuthSession): AuthSession {
+  const user = withDefaultPhotos(session.user)
+  mirrorIntoMockDb(user)
+  return { token: session.token, user }
+}
+
+// A session restored from localStorage after a reload must be in the mock
+// table before any page's first mock query reads it.
+const restoredUser = useAuthStore.getState().user
+if (restoredUser) mirrorIntoMockDb(restoredUser)
+
+/** POST /api/auth/login */
 export async function login(credentials: Credentials): Promise<AuthSession> {
-  await delay()
-
-  const email = credentials.email.trim().toLowerCase()
-  const user =
-    db.users.find((u) => u.email.toLowerCase() === email) ??
-    db.users.find((u) => u._id === 'u_001')
-
-  if (!user) throw new ApiError('Không tìm thấy tài khoản', 401)
-
-  return { token: fakeToken(user), user: clone(user) }
+  const session = await http<AuthSession>('/api/auth/login', {
+    method: 'POST',
+    body: { email: credentials.email.trim(), password: credentials.password },
+    auth: false,
+  })
+  return adopt(session)
 }
 
-/** POST /api/auth/register — creates a real record in the in-memory db. */
-export async function register(payload: RegisterPayload): Promise<AuthSession> {
-  await delay()
-
-  const email = payload.email.trim().toLowerCase()
-  if (db.users.some((u) => u.email.toLowerCase() === email)) {
-    throw new ApiError('Email này đã được đăng ký', 409)
-  }
-
-  const seed = payload.username || 'new-user'
-  const user: User = {
-    _id: nextId('u'),
-    username: payload.username.trim(),
-    displayName: payload.displayName.trim() || payload.username.trim(),
-    email,
-    avatarUrl: travelAvatar(seed),
-    coverUrl: travelBanner(seed),
-    bio: 'Thành viên mới của ChillnGo.',
-    location: 'Việt Nam',
-    followerCount: 0,
-    followingCount: 0,
-    postCount: 0,
-    role: 'user',
-    createdAt: nowIso(),
-  }
-
-  db.users.push(user)
-
-  return { token: fakeToken(user), user: clone(user) }
+/**
+ * POST /api/auth/register — creates an unverified account and emails a
+ * confirmation link. Does not sign in.
+ */
+export function register(payload: RegisterPayload): Promise<RegisterResult> {
+  return http<RegisterResult>('/api/auth/register', {
+    method: 'POST',
+    body: {
+      displayName: payload.displayName.trim(),
+      username: payload.username.trim(),
+      email: payload.email.trim(),
+      password: payload.password,
+    },
+    auth: false,
+  })
 }
 
-/** GET /api/auth/me — re-reads the user behind a persisted token. */
-export async function getCurrentUser(userId: string): Promise<User> {
-  await delay()
-  const user = db.users.find((u) => u._id === userId)
-  if (!user) throw new ApiError('Phiên đăng nhập không hợp lệ', 401)
-  return clone(user)
+/**
+ * POST /api/auth/google — signs in with the ID token from Google's button.
+ * Creates the account on first use.
+ */
+export async function loginWithGoogle(credential: string): Promise<AuthSession> {
+  const session = await http<AuthSession>('/api/auth/google', {
+    method: 'POST',
+    body: { credential },
+    auth: false,
+  })
+  return adopt(session)
+}
+
+/**
+ * POST /api/auth/verify-email — confirms the address with the token from the
+ * emailed link and returns a session, so the user is signed in right away.
+ */
+export async function verifyEmail(token: string): Promise<AuthSession> {
+  const session = await http<AuthSession>('/api/auth/verify-email', {
+    method: 'POST',
+    body: { token },
+    auth: false,
+  })
+  return adopt(session)
+}
+
+/** POST /api/auth/resend-verification — sends a fresh confirmation link. */
+export function resendVerification(email: string): Promise<{ message: string }> {
+  return http<{ message: string }>('/api/auth/resend-verification', {
+    method: 'POST',
+    body: { email: email.trim() },
+    auth: false,
+  })
+}
+
+/**
+ * GET /api/auth/me — re-reads the user behind the stored token.
+ * Throws ApiError 401 when the token is expired or invalid.
+ */
+export async function getCurrentUser(): Promise<User> {
+  const { user } = await http<{ user: User }>('/api/auth/me')
+  const fresh = withDefaultPhotos(user)
+  mirrorIntoMockDb(fresh)
+  return fresh
 }
