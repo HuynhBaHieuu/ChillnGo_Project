@@ -40,7 +40,10 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          'liquid-glass animate-fade-rise fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2',
+          // Centred with inset-0 + margin:auto rather than translate(-50%): the
+          // entrance animation sets its own transform, which used to cancel the
+          // centring and push every dialog into the bottom-right corner.
+          'liquid-glass animate-fade-rise fixed inset-0 z-50 m-auto grid h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto',
           'gap-4 rounded-2xl bg-[hsl(var(--background))]/85 p-6 shadow-2xl',
           className,
         )}

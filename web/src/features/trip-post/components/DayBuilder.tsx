@@ -148,33 +148,51 @@ function LocationRow({
   return (
     <div className="rounded-2xl border border-border p-4">
       <div className="flex items-start gap-4">
-        <span className="mt-2.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-[11px]">
+        <span className="mt-7 flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold">
           {index + 1}
         </span>
 
         <div className="min-w-0 flex-1 space-y-3">
           <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
-            <Input
-              value={location.name}
-              onChange={(e) => onChange({ name: e.target.value })}
-              aria-label={`Tên địa điểm ${index + 1}`}
-            />
-            <Input
-              type="number"
-              min={0}
-              step={1000}
-              value={location.estCost}
-              onChange={(e) => onChange({ estCost: Number(e.target.value) || 0 })}
-              aria-label={`Chi phí ước tính cho địa điểm ${index + 1}`}
-            />
+            <div className="space-y-1.5">
+              <Label htmlFor={`${location._id}-name`} className="text-xs">
+                Tên địa điểm
+              </Label>
+              <Input
+                id={`${location._id}-name`}
+                value={location.name}
+                onChange={(e) => onChange({ name: e.target.value })}
+                aria-label={`Tên địa điểm ${index + 1}`}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor={`${location._id}-cost`} className="text-xs">
+                Chi phí (₫)
+              </Label>
+              <Input
+                id={`${location._id}-cost`}
+                type="number"
+                min={0}
+                step={1000}
+                value={location.estCost}
+                onChange={(e) => onChange({ estCost: Number(e.target.value) || 0 })}
+                aria-label={`Chi phí ước tính cho địa điểm ${index + 1}`}
+              />
+            </div>
           </div>
 
-          <Textarea
-            value={location.note}
-            onChange={(e) => onChange({ note: e.target.value })}
-            rows={2}
-            aria-label={`Ghi chú cho địa điểm ${index + 1}`}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor={`${location._id}-note`} className="text-xs">
+              Ghi chú
+            </Label>
+            <Textarea
+              id={`${location._id}-note`}
+              value={location.note}
+              onChange={(e) => onChange({ note: e.target.value })}
+              rows={2}
+              aria-label={`Ghi chú cho địa điểm ${index + 1}`}
+            />
+          </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {location.photoUrl && (

@@ -1,5 +1,5 @@
 /**
- * Profile images on Cloudinary.
+ * Images on Cloudinary: profile avatars and covers, and check-in photos.
  *
  * The browser uploads the file straight to Cloudinary with a signature from
  * this server, so image bytes never pass through our API (Vercel caps request
@@ -10,6 +10,8 @@
  * Nothing is left behind when an image is replaced. The stored URL includes
  * the version number, so browsers and CDNs see a new URL after each change.
  */
+
+import { randomBytes } from 'node:crypto'
 
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -120,5 +122,84 @@ export async function removeImage(userId: string, kind: ImageKind): Promise<void
   account()
   await cloudinary.uploader.destroy(publicIdFor(userId, kind), { invalidate: true }).catch((error: unknown) => {
     console.error(`Could not delete ${kind} for ${userId}:`, error)
+  })
+}
+
+/* ---------------------------------------------------------------- check-ins */
+
+/**
+ * Check-in photos: many per user, each at its own random public id under
+ * chillngo/checkins/<userId>/, never overwritten.
+ */
+const CHECKIN_STORED_LIMIT = 'c_limit,w_2048,h_2048'
+const CHECKIN_DELIVERY = [{ width: 1600, height: 1600, crop: 'limit' }, { fetch_format: 'auto', quality: 'auto' }]
+
+export function checkinFolder(userId: string): string {
+  return `chillngo/checkins/${userId}`
+}
+
+/** One signed upload for one check-in photo. `publicId` is what to send back when posting. */
+export function signCheckinUpload(userId: string) {
+  const { cloudName, apiKey, apiSecret } = account()
+  const publicId = `${checkinFolder(userId)}/${randomBytes(8).toString('hex')}`
+  const params = {
+    timestamp: Math.round(Date.now() / 1000),
+    public_id: publicId,
+    allowed_formats: ALLOWED_FORMATS,
+    transformation: CHECKIN_STORED_LIMIT,
+  }
+  const signature = cloudinary.utils.api_sign_request(params, apiSecret)
+
+  return {
+    publicId,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    fields: { ...params, timestamp: String(params.timestamp), api_key: apiKey, signature },
+  }
+}
+
+export interface StoredPhoto {
+  publicId: string
+  url: string
+  width: number
+  height: number
+}
+
+/**
+ * Checks a photo the browser says it uploaded: it must sit in this user's
+ * check-in folder and exist on Cloudinary. Returns what to store.
+ */
+export async function confirmCheckinPhoto(userId: string, publicId: string): Promise<StoredPhoto> {
+  account()
+  const prefix = `${checkinFolder(userId)}/`
+  const suffix = publicId.startsWith(prefix) ? publicId.slice(prefix.length) : ''
+  if (!/^[a-f0-9]{16}$/.test(suffix)) {
+    throw new HttpError(400, 'Ảnh không hợp lệ. Vui lòng tải ảnh lên lại.', 'UPLOAD_INVALID')
+  }
+
+  let resource: { public_id: string; version: number; bytes: number; width: number; height: number }
+  try {
+    resource = await cloudinary.api.resource(publicId)
+  } catch {
+    throw new HttpError(400, 'Không tìm thấy ảnh vừa tải lên. Vui lòng thử lại.', 'UPLOAD_MISSING')
+  }
+  if (resource.bytes > MAX_BYTES) {
+    await cloudinary.uploader.destroy(publicId, { invalidate: true }).catch(() => undefined)
+    throw new HttpError(413, 'Ảnh quá lớn. Vui lòng chọn ảnh khác.', 'UPLOAD_TOO_LARGE')
+  }
+
+  return {
+    publicId: resource.public_id,
+    url: cloudinary.url(resource.public_id, { version: resource.version, secure: true, transformation: CHECKIN_DELIVERY }),
+    width: resource.width,
+    height: resource.height,
+  }
+}
+
+/** Deletes images (e.g. a deleted check-in's photos). Failures are logged, not thrown. */
+export async function destroyImages(publicIds: string[]): Promise<void> {
+  if (!env.cloudinary || publicIds.length === 0) return
+  account()
+  await cloudinary.api.delete_resources(publicIds, { invalidate: true }).catch((error: unknown) => {
+    console.error('Could not delete images:', publicIds, error)
   })
 }

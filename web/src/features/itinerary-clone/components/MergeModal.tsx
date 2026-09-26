@@ -6,6 +6,7 @@ import { Modal } from '@/components/Modal'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMergeIntoItinerary } from '@/features/itinerary-clone/hooks'
 import { usePublishedPosts } from '@/features/trip-post/hooks'
@@ -111,11 +112,12 @@ export function MergeModal({
       }
     >
       <div className="space-y-4">
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Tìm hành trình theo tên hoặc thẻ"
-        />
+        <div className="space-y-1.5">
+          <Label htmlFor="merge-search" className="text-xs">
+            Tìm hành trình theo tên hoặc thẻ
+          </Label>
+          <Input id="merge-search" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
 
         {selectedDayIds.size > 0 && (
           <p className="text-sm text-muted-foreground">

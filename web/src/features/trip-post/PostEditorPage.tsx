@@ -1,7 +1,7 @@
 import { Loader2, Plus, Save } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
@@ -158,6 +158,32 @@ export function PostEditorPage() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
 
+  /**
+   * /posts/new?focus=… — the Newsfeed composer's shortcuts land on a specific
+   * field: cover (Ảnh), days (Lịch trình), place (Địa điểm). Default: title.
+   * Runs once when the page opens; later edits never move the cursor.
+   */
+  const [searchParams] = useSearchParams()
+  const focusTarget = isEdit ? null : (searchParams.get('focus') ?? 'title')
+  useEffect(() => {
+    if (!focusTarget) return
+    const selector: Record<string, string> = {
+      title: '#title',
+      cover: '#coverUrl',
+      days: '[data-editor-days] input[id$="-title"]',
+      place: '[data-editor-days] input[aria-label="Tên địa điểm 1"]',
+    }
+    const timer = window.setTimeout(() => {
+      const field = document.querySelector<HTMLElement>(selector[focusTarget] ?? '#title')
+      if (!field) return
+      field.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      field.focus({ preventScroll: true })
+    }, 50)
+    return () => window.clearTimeout(timer)
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const createPost = useCreatePost()
   const updatePost = useUpdatePost(id ?? '')
   const mutation = isEdit ? updatePost : createPost
@@ -284,7 +310,7 @@ export function PostEditorPage() {
           </GlassCard>
 
           {/* Days */}
-          <section className="space-y-5">
+          <section className="space-y-5" data-editor-days>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-2xl">
                 Lịch trình ({form.days.length} ngày)

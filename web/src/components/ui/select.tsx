@@ -18,7 +18,7 @@ function SelectTrigger({
       className={cn(
         'flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-white/[0.03] px-3 py-2 text-sm transition-colors',
         'data-[placeholder]:text-muted-foreground/70',
-        'focus:outline-none focus:border-white/40 disabled:cursor-not-allowed disabled:opacity-50',
+        'focus:outline-none focus:border-foreground focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
         '[&>span]:line-clamp-1',
         className,
       )}
@@ -71,7 +71,7 @@ function SelectItem({
     <SelectPrimitive.Item
       className={cn(
         'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-3 text-sm outline-none transition-colors',
-        'focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'focus:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
       {...props}

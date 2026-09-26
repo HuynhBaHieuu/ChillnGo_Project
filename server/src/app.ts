@@ -7,6 +7,7 @@ import { HttpError, errorHandler } from './lib/errors.js'
 import { getSettings } from './models/Setting.js'
 import { adminRouter } from './routes/admin.js'
 import { authRouter } from './routes/auth.js'
+import { checkinsRouter } from './routes/checkins.js'
 import { usersRouter } from './routes/users.js'
 
 export const app = express()
@@ -44,6 +45,7 @@ app.use('/api', async (_req, _res, next) => {
 app.use('/api/auth', authRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/checkins', checkinsRouter)
 
 /** Settings every visitor needs: the announcement banner and whether sign-up is open. */
 app.get('/api/settings/public', async (_req, res) => {

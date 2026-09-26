@@ -21,6 +21,11 @@ export async function getUserById(id: ObjectId): Promise<User> {
 }
 
 /** GET /api/users/:id/follow — is `viewerId` following `userId`? */
+/** Ids of the accounts `viewerId` follows. Mock data, like the rest of this file. */
+export async function getFollowingIds(viewerId: ObjectId): Promise<ObjectId[]> {
+  return db.follows.filter((f) => f.followerId === viewerId).map((f) => f.followingId)
+}
+
 export async function isFollowing(
   userId: ObjectId,
   viewerId: ObjectId | null,

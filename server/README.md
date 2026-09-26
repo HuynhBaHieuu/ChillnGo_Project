@@ -67,6 +67,10 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/auth/login` | `email`, `password` | `200 { token, user }`, or `403` with `code: EMAIL_NOT_VERIFIED`. |
 | `POST /api/users/me/upload-signature` | `kind`: `avatar` or `cover` | `200 { uploadUrl, fields }`: post the file plus `fields` straight to Cloudinary. |
 | `PATCH /api/users/me` | any of `displayName`, `username`, `bio`, `location`, `avatar`/`cover` (`"uploaded"` or `"remove"`) | `200 { user }` |
+| `GET /api/checkins?authors=a,b&before=ISO` | none | `200 { items }`: newest 20 photo check-ins with authors. Public. |
+| `POST /api/checkins/upload-signature` | none | `200 { publicId, uploadUrl, fields }`: one per photo. |
+| `POST /api/checkins` | `caption`, `photos` (0–4 publicIds), `feeling` (key from `src/lib/feelings.ts`) or null, `location` (`name`, `address`, `lat`, `lng`) or null. Needs photos, a feeling or a caption. | `201 { checkin }` |
+| `DELETE /api/checkins/:id` | none | `200`. Author only; also deletes the photos from Cloudinary. |
 | `GET /api/settings/public` | none | `200 { settings }`: announcement and whether registration is open. |
 | `GET /api/auth/me` | none; header `Authorization: Bearer <token>` | `200 { user }` |
 | `GET /api/health` | none | `200 { ok: true }` |
@@ -173,6 +177,10 @@ WebP, or JPEG on Safari). A typical phone photo leaves the browser at a few
 hundred KB. Cloudinary also caps what it stores at those sizes, even for
 uploads made without our web page.
 
+**Check-in photos** go to `chillngo/checkins/<userId>/<random>`, one per photo,
+never overwritten. The server only accepts ids from the poster's own folder that
+exist on Cloudinary, and deletes them with the check-in.
+
 Each user has one image per kind, at `chillngo/users/<userId>/avatar` and
 `.../cover`. A new upload overwrites the old one, so nothing piles up. The stored
 URL carries the version number and a crop: 400×400 for avatars, 1800×600 for
@@ -267,6 +275,9 @@ src/
   routes/auth.ts        register, verify-email, resend-verification, login, me
   routes/admin.ts       back office: users, admins, stats, audit log, settings
   routes/users.ts       the signed-in user's profile and image uploads
+  routes/checkins.ts    photo check-ins
+  models/CheckIn.ts     check-in: photos, caption, feeling, place
+  lib/feelings.ts       the fixed list of feelings and activities
   lib/cloudinary.ts     signed uploads, upload check, delivery URLs
   lib/permissions.ts    roles, admin modules, who may act on whom
   middleware/staff.ts   loads the signed-in user; role and permission guards

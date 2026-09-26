@@ -3,9 +3,10 @@
  * uploads going straight from the browser to Cloudinary.
  */
 
+import { uploadToCloudinary } from '@/lib/cloudinaryUpload'
+import type { SignedUpload } from '@/lib/cloudinaryUpload'
 import { checkImageFile as checkImage, prepareImageForUpload } from '@/lib/images'
 
-import { ApiError } from './client'
 import { http } from './http'
 import type { User } from './types'
 
@@ -24,11 +25,6 @@ export interface ProfileUpdate {
   cover?: 'uploaded' | 'remove'
 }
 
-interface UploadSignature {
-  uploadUrl: string
-  fields: Record<string, string>
-}
-
 /** Explains why a file cannot be used, or returns null when it can. */
 export const checkImageFile = checkImage
 
@@ -40,37 +36,11 @@ export const checkImageFile = checkImage
 export async function uploadImage(kind: ImageKind, original: File, onProgress?: (percent: number) => void): Promise<void> {
   const file = await prepareImageForUpload(original, MAX_SIDE[kind])
 
-  const { uploadUrl, fields } = await http<UploadSignature>('/api/users/me/upload-signature', {
+  const signature = await http<SignedUpload>('/api/users/me/upload-signature', {
     method: 'POST',
     body: { kind },
   })
-
-  const form = new FormData()
-  for (const [key, value] of Object.entries(fields)) form.append(key, value)
-  form.append('file', file)
-
-  await new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('POST', uploadUrl)
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100))
-    }
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve()
-        return
-      }
-      let detail = ''
-      try {
-        detail = (JSON.parse(xhr.responseText) as { error?: { message?: string } }).error?.message ?? ''
-      } catch {
-        // not JSON
-      }
-      reject(new ApiError(`Không tải được ảnh lên${detail ? `: ${detail}` : ''}.`, xhr.status))
-    }
-    xhr.onerror = () => reject(new ApiError('Không kết nối được tới máy chủ ảnh. Vui lòng thử lại.', 0))
-    xhr.send(form)
-  })
+  await uploadToCloudinary(signature, file, onProgress)
 }
 
 export async function updateProfile(update: ProfileUpdate): Promise<User> {
