@@ -8,16 +8,21 @@ import { GlassButton } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
 import { TripCard, TripCardSkeleton } from '@/components/TripCard'
 import { CheckInCard } from '@/features/checkin/CheckInCard'
+import { LivestreamCard } from '@/features/livestream/LivestreamCard'
+import { LiveNowStrip } from '@/features/livestream/LiveNowStrip'
+import { ReplayCard } from '@/features/livestream/ReplayCard'
 import { PostComposer } from '@/features/trip-post/components/PostComposer'
 import { useFeed } from '@/features/trip-post/hooks'
-import { checkinService, socialService } from '@/services'
+import { checkinService, livestreamService, socialService } from '@/services'
 import type { CheckIn } from '@/services/checkin.service'
+import type { Livestream } from '@/services/livestream.service'
 import type { TripPostWithAuthor } from '@/services/types'
 import { useAuthStore, useViewerId } from '@/store'
 
 type FeedItem =
   | { kind: 'post'; at: string; post: TripPostWithAuthor }
   | { kind: 'checkin'; at: string; checkin: CheckIn }
+  | { kind: 'replay'; at: string; stream: Livestream }
 
 /**
  * Trip posts (still mock data) and photo check-ins (from the API), newest
@@ -41,14 +46,30 @@ export function FeedPage() {
     enabled: !viewerId || following.isSuccess,
   })
 
+  // Who is live right now. Polled: the list changes as streams start and end.
+  const live = useQuery({
+    queryKey: ['livestreams', 'feed', authors?.join(',') ?? 'everyone'],
+    queryFn: () => livestreamService.listLive(authors),
+    enabled: !viewerId || following.isSuccess,
+    refetchInterval: 20_000,
+  })
+
+  // Streams that are over and were recorded: in the timeline, to watch again.
+  const replays = useQuery({
+    queryKey: ['livestreams', 'replays', 'feed', authors?.join(',') ?? 'everyone'],
+    queryFn: () => livestreamService.listReplays(authors),
+    enabled: !viewerId || following.isSuccess,
+  })
+
   const items = useMemo<FeedItem[]>(() => {
     const all: FeedItem[] = [
       ...(posts ?? []).map((post) => ({ kind: 'post' as const, at: post.createdAt, post })),
       // A check-in feed that fails to load (API down) should not hide the posts.
       ...(checkins.data ?? []).map((checkin) => ({ kind: 'checkin' as const, at: checkin.createdAt, checkin })),
+      ...(replays.data?.items ?? []).map((stream) => ({ kind: 'replay' as const, at: stream.endedAt ?? stream.startedAt, stream })),
     ]
     return all.sort((a, b) => b.at.localeCompare(a.at))
-  }, [posts, checkins.data])
+  }, [posts, checkins.data, replays.data])
 
   return (
     <PageContainer>
@@ -75,6 +96,8 @@ export function FeedPage() {
         </div>
       )}
 
+      <LiveNowStrip />
+
       {isPending && (
         <div className="flex flex-col gap-6">
           {[0, 1, 2].map((i) => (
@@ -85,7 +108,15 @@ export function FeedPage() {
 
       {isError && <EmptyState title="Không tải được newsfeed" description={(error as Error).message} />}
 
-      {posts && items.length === 0 && (
+      {live.data && live.data.length > 0 && (
+        <div className="mb-6 flex flex-col gap-6">
+          {live.data.map((stream) => (
+            <LivestreamCard key={stream._id} stream={stream} />
+          ))}
+        </div>
+      )}
+
+      {posts && items.length === 0 && !live.data?.length && (
         <EmptyState
           icon={Users}
           title="Newsfeed đang trống"
@@ -103,6 +134,8 @@ export function FeedPage() {
           {items.map((item) =>
             item.kind === 'post' ? (
               <TripCard key={`post-${item.post._id}`} post={item.post} />
+            ) : item.kind === 'replay' ? (
+              <ReplayCard key={`replay-${item.stream._id}`} stream={item.stream} showHost />
             ) : (
               <CheckInCard key={`checkin-${item.checkin._id}`} checkin={item.checkin} viewerId={viewerId} />
             ),

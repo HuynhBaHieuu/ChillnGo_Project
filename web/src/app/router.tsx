@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { HomePage } from '@/app/landing/home/HomePage'
@@ -13,10 +14,16 @@ import { DiscoverPage } from '@/features/discovery-admin/DiscoverPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
 import { EditProfilePage } from '@/features/social/EditProfilePage'
+import { LiveNowPage } from '@/features/livestream/LiveNowPage'
 import { ProfilePage } from '@/features/social/ProfilePage'
 import { FeedPage } from '@/features/trip-post/FeedPage'
 import { PostDetailPage } from '@/features/trip-post/PostDetailPage'
 import { PostEditorPage } from '@/features/trip-post/PostEditorPage'
+
+/** Loaded on demand: it brings the LiveKit video library with it. */
+const LivestreamPage = lazy(() =>
+  import('@/features/livestream/LivestreamPage').then((m) => ({ default: m.LivestreamPage })),
+)
 
 export const router = createBrowserRouter([
   {
@@ -63,6 +70,17 @@ export const router = createBrowserRouter([
       },
 
       { path: '/users/:id', element: <ProfilePage /> },
+      { path: '/live', element: <LiveNowPage /> },
+      {
+        path: '/live/:id',
+        element: (
+          <RequireAuth>
+            <Suspense fallback={null}>
+              <LivestreamPage />
+            </Suspense>
+          </RequireAuth>
+        ),
+      },
       {
         path: '/profile/edit',
         element: (

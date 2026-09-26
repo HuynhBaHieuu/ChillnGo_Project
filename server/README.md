@@ -48,6 +48,8 @@ shows Minh's trips.
 | `SMTP_HOST`, `SMTP_PORT` | no | Default `smtp.gmail.com` and `465`. |
 | `MAIL_FROM` | no | Sender shown in the inbox. Default `ChillnGo <SMTP_USER>`. |
 | `CLOUDINARY_URL` | no | Cloudinary "API environment variable" (`cloudinary://KEY:SECRET@CLOUD`), for profile images. Unset: image changes answer `503`, text fields still save. |
+| `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | no | LiveKit project for livestreams. Unset: livestream routes answer `503` and the Newsfeed shows no live cards. See [Livestream](#livestream). |
+| `RECORDING_S3_*` | no | Private S3-compatible bucket (B2, R2, S3) for livestream recordings. Unset: no recording option. See [Livestream](#livestream). |
 | `GOOGLE_CLIENT_ID` | no | OAuth client ID for Sign in with Google. Unset makes `/api/auth/google` answer `503`. See [Sign in with Google](#sign-in-with-google). |
 
 The server refuses to start if a required variable is missing.
@@ -186,6 +188,137 @@ Each user has one image per kind, at `chillngo/users/<userId>/avatar` and
 URL carries the version number and a crop: 400×400 for avatars, 1800×600 for
 covers, format and quality chosen per browser.
 
+## Livestream
+
+Video goes through **LiveKit**, a WebRTC service with a media server in the
+middle, so one host can reach many viewers reliably. This API never carries
+video; it only:
+
+- creates the LiveKit room and hands out short-lived (10 min) access tokens.
+  The host's token can publish camera and microphone; viewers can only watch.
+  Nobody can publish data messages. A viewer's identity is `<userId>~<random>`,
+  so one account can watch from several tabs; counts group by person.
+- stores the stream in `livestreams`, its comments in `livestreamcomments` and
+  one row per person who watched in `livestreamviewers` (the "unique viewers"
+  statistic).
+- takes comments (1–300 characters, 8 per 20 s per user) and reactions
+  (`heart`, `fire`, `clap`, `wow`, `haha`; taps bundled up to 10 per request, 20
+  requests per 10 s per user) through the API, stores them, then sends them to
+  everyone in the room itself. The author always comes from the login.
+- lets the host moderate: delete any comment, or block a viewer (disconnected
+  at once, cannot rejoin, comment, react or preview; their comments go).
+- keeps the LIVE status honest. On every list or read it asks LiveKit who is in
+  the room: a stream whose room is gone, or whose host has been away for more
+  than 45 s (closed tab, lost connection), is ended automatically. A page
+  refresh within that window resumes the same stream. The same check updates
+  the viewer count and the peak (open live pages ask every 15 s).
+- tells the host's followers when a public or followers-only stream starts
+  (a `live` notification).
+- issues **preview** tokens for the muted picture on Newsfeed cards: hidden in
+  the room, watch-only, never counted as a viewer. Anyone may ask for a public
+  stream's preview (30 per minute per address).
+
+**Audience.** `public` (anyone), `followers` (the host's followers) or
+`private` (only the host, for a test run). It applies to the list, the page,
+tokens, previews, comments, the replay and the history.
+
+**Setup.** Create a free project at <https://cloud.livekit.io>, then copy the
+WebSocket URL, API key and secret from *Settings > Keys* into
+`LIVEKIT_URL`, `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`. The web app needs
+no key: it receives the URL with each token.
+
+**Optional webhook.** In LiveKit, point a webhook at
+`https://<api>/api/livestreams/webhook`. Streams then end the moment LiveKit
+closes their room, the peak viewer count updates as people join, and
+recordings show up as soon as they are uploaded, instead of on the next
+request. Signatures are checked with the same API key.
+
+**Recording (optional).** LiveKit can record a stream to an MP4 and upload it
+to any S3-compatible bucket; the host ticks "Lưu lại buổi phát" before going
+live and the replay plays on the stream's page afterwards. The bucket stays
+**private**: `GET /api/livestreams/:id` hands each viewer the stream's audience
+allows a signed link valid for 6 hours, so a followers-only or private replay
+cannot be opened by guessing its address.
+
+Backblaze B2 works without a credit card (10 GB free; private buckets need no
+payment details):
+
+1. Sign up at <https://www.backblaze.com/sign-up/cloud-storage>.
+2. *Buckets > Create a Bucket*: name `chillngo-recordings`, **Private**. Note the
+   bucket's *Endpoint*, e.g. `s3.us-east-005.backblazeb2.com`.
+3. *Application Keys > Add a New Application Key*: access to that bucket only,
+   *Read and Write*. Copy the *keyID* and *applicationKey* (shown once).
+
+| Variable | Backblaze B2 | Cloudflare R2 |
+| --- | --- | --- |
+| `RECORDING_S3_BUCKET` | `chillngo-recordings` | the bucket name |
+| `RECORDING_S3_ACCESS_KEY` | keyID | R2 token's Access Key ID |
+| `RECORDING_S3_SECRET` | applicationKey | R2 token's Secret Access Key |
+| `RECORDING_S3_ENDPOINT` | `https://s3.us-east-005.backblazeb2.com` | `https://<account-id>.r2.cloudflarestorage.com` |
+| `RECORDING_S3_REGION` | `us-east-005` (the part of the endpoint after `s3.`) | `auto` |
+
+For AWS S3 leave the endpoint blank and use the bucket's region. Files are
+stored as `livestreams/<streamId>.mp4`. The storage keys go to LiveKit with
+each recording request and never to the database or browsers. Without these
+variables the option is simply not offered. Recording uses LiveKit egress
+minutes (check your plan's allowance), and B2's free daily download
+allowance counts each chunk a video player fetches.
+
+**Rewind while live.** The same recording also uploads the stream as HLS
+segments (4 s each) under `livestreams/<streamId>-hls/` while it is live.
+Viewers of a recorded stream get a timeline under the video: dragging it back
+switches their player from the real-time WebRTC picture to those segments
+(`hls.js`, loaded on first use); "Trực tiếp" switches back. The playlist goes
+through `GET /api/livestreams/:id/dvr.m3u8`, which re-checks the audience on
+every reload and signs each segment; its `access` token is signed with a key
+derived from `JWT_SECRET`, so it can never be used as a sign-in token (nor
+the other way round). Once the replay MP4 is ready, the segments are deleted.
+The bucket needs a CORS rule allowing `GET`/`HEAD` from the web app's origin
+(the player fetches segments with JavaScript), for example on B2 via the S3
+API: `AllowedOrigins ["*"]`, `AllowedMethods ["GET","HEAD"]`,
+`AllowedHeaders ["*"]`. The bucket stays private: every request still needs a
+signed link.
+
+**Local testing without an account.** Download `livekit-server` from
+<https://github.com/livekit/livekit/releases>, run `livekit-server --dev`, and
+use `LIVEKIT_URL=ws://127.0.0.1:7880`, key `devkey`, secret `secret`.
+Recording needs LiveKit's separate egress service, which `--dev` does not
+include.
+
+| Route | Who | Result |
+| --- | --- | --- |
+| `GET /api/livestreams?authors=a,b` | anyone | streams live now that you may watch |
+| `GET /api/livestreams/config` | anyone | `{ live, recording }`: what this server offers |
+| `GET /api/livestreams/history?host=id&before=iso` | anyone | a host's ended streams you may see, with stats, 12 per page |
+| `GET /api/livestreams/replays?authors=a,b&before=iso` | anyone | recorded ended streams you may watch again (ready or processing), 12 per page |
+| `POST /api/livestreams` `{ title, description, audience, record }` | signed in | `201 { livestream, connection }`; `409 ALREADY_LIVE` if you are already live |
+| `GET /api/livestreams/:id` | anyone who may see it | `{ livestream, blocked }` (live or ended, with stats and replay) |
+| `POST /api/livestreams/:id/connection` | signed in | `{ connection: { url, token, role } }`; `410 LIVE_ENDED` once over, `403 LIVE_BLOCKED` |
+| `POST /api/livestreams/:id/preview` | anyone who may see it | hidden watch-only `{ connection }` |
+| `GET /api/livestreams/:id/dvr` | signed in, may watch | `{ playlist }`: the rewind playlist address with a 6 h access token; `404 DVR_UNAVAILABLE` if not recorded |
+| `GET /api/livestreams/:id/dvr.m3u8?access=` | holder of a valid access token | the HLS playlist, segments signed; `404 DVR_NOT_READY` before the first segment |
+| `POST /api/livestreams/:id/end` | host only | ends it and closes the room; `{ livestream }` with the final stats |
+| `GET /api/livestreams/:id/comments?limit=50` | anyone who may see it | latest comments (max 200), oldest first |
+| `POST /api/livestreams/:id/comments` `{ text }` | signed in | `201 { comment }` |
+| `DELETE /api/livestreams/:id/comments/:commentId` | host, or the author | removed for everyone |
+| `POST /api/livestreams/:id/reactions` `{ kind, count }` | signed in | `{ total }`, shown to everyone |
+| `POST /api/livestreams/:id/block` `{ userId }` | host only | removes that viewer for good |
+
+## Follows and notifications
+
+| Route | Who | Result |
+| --- | --- | --- |
+| `GET /api/users/:id` | anyone | `{ user, followedByMe }`: public profile (no email, no admin details) |
+| `POST /api/users/:id/follow` | signed in | toggles; `{ following, followerCount }`. Staff accounts cannot be followed |
+| `GET /api/users/me/following` | signed in | `{ ids }` |
+| `GET /api/notifications` | signed in | latest 50, newest first (`follow`, `live`) |
+| `POST /api/notifications/read` | signed in | marks all read |
+
+Follows live in `follows` (unique per pair; the users' follower counts are
+kept in step). Notifications live in `notifications` and delete themselves
+after 90 days. The web app still keeps the demo accounts from its fixtures
+(`u_001`…) on mock data; real accounts use these routes.
+
 ## Sending email
 
 Verification emails go out over SMTP. The template is in
@@ -242,7 +375,8 @@ Deploy the API and the web client as **two Vercel projects from the same repo**.
 1. Import the repo on Vercel and set **Root Directory** to `server`. Vercel
    detects Express and runs `src/index.ts` as a function. No `vercel.json` is needed.
 2. Add the environment variables `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
-   `APP_URL`, `SMTP_USER`, `SMTP_PASS`, `GOOGLE_CLIENT_ID`, and `CLOUDINARY_URL`. Set both `CORS_ORIGIN` and `APP_URL`
+   `APP_URL`, `SMTP_USER`, `SMTP_PASS`, `GOOGLE_CLIENT_ID`, `CLOUDINARY_URL`, and the
+   three `LIVEKIT_*` variables (plus the `RECORDING_*` ones to offer replays). Set both `CORS_ORIGIN` and `APP_URL`
    to the web project's URL, e.g. `https://chillngo.vercel.app`. The API refuses
    to start on Vercel without `APP_URL` and SMTP settings.
 3. Deploy. Check `https://<api-project>.vercel.app/api/health`.
@@ -276,6 +410,15 @@ src/
   routes/admin.ts       back office: users, admins, stats, audit log, settings
   routes/users.ts       the signed-in user's profile and image uploads
   routes/checkins.ts    photo check-ins
+  routes/livestreams.ts livestreams: start, watch, preview, end, comments, reactions,
+                        moderation, history, LiveKit webhook
+  lib/livekit.ts        every LiveKit call (rooms, tokens, messages, recording, webhooks)
+  lib/recordings.ts     signed links to replays and rewind playlists; cleanup
+  models/Livestream.ts  livestream, its comments, its viewers
+  routes/profiles.ts    public profiles and follows
+  routes/notifications.ts  the signed-in user's notifications
+  models/Follow.ts      who follows whom
+  models/Notification.ts   notifications + notify()
   models/CheckIn.ts     check-in: photos, caption, feeling, place
   lib/feelings.ts       the fixed list of feelings and activities
   lib/cloudinary.ts     signed uploads, upload check, delivery URLs
@@ -305,7 +448,6 @@ src/
 | `clonePost` | `POST /api/posts/:id/clone` |
 | `getMyItineraries` | `GET /api/itineraries` |
 | `discoverPosts` | `GET /api/discover` |
-| `toggleFollow` | `POST /api/users/:id/follow` |
 
 New routes that need a signed-in user use the `requireAuth` middleware and read
 the user id from `res.locals.userId`.

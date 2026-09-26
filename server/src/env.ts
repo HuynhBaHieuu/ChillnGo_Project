@@ -64,6 +64,43 @@ function readCloudinary() {
   return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null
 }
 
+/**
+ * LiveKit, the realtime video service behind livestreams. LIVEKIT_URL is the
+ * wss:// address from the LiveKit project settings. Unset: livestream routes
+ * answer 503 and the Newsfeed simply shows no live cards.
+ */
+function readLiveKit() {
+  const url = process.env.LIVEKIT_URL?.trim()
+  const apiKey = process.env.LIVEKIT_API_KEY?.trim()
+  const apiSecret = process.env.LIVEKIT_API_SECRET?.trim()
+  if (!url || !apiKey || !apiSecret) return null
+  // The server API speaks HTTP on the same host the browsers reach over WebSocket.
+  const httpUrl = url.replace(/^ws(s?):\/\//, 'http$1://')
+  return { url, httpUrl, apiKey, apiSecret }
+}
+
+/**
+ * Where livestream recordings are uploaded: any S3-compatible bucket
+ * (Backblaze B2, Cloudflare R2, AWS S3…). LiveKit records the room and
+ * uploads the MP4 itself. The bucket stays private: each allowed viewer gets
+ * a short-lived signed link to the replay. Unset: no recording option.
+ */
+function readRecording() {
+  const bucket = process.env.RECORDING_S3_BUCKET?.trim()
+  const accessKey = process.env.RECORDING_S3_ACCESS_KEY?.trim()
+  const secret = process.env.RECORDING_S3_SECRET?.trim()
+  if (!bucket || !accessKey || !secret) return null
+  return {
+    bucket,
+    accessKey,
+    secret,
+    /** Blank for AWS S3; the provider's S3 endpoint otherwise (B2, R2…). */
+    endpoint: process.env.RECORDING_S3_ENDPOINT?.trim() || '',
+    /** The bucket's region: e.g. us-east-005 on B2, auto on R2. */
+    region: process.env.RECORDING_S3_REGION?.trim() || 'auto',
+  }
+}
+
 if (isVercel && !smtp) {
   throw new Error('SMTP_USER and SMTP_PASS are required on Vercel, or no verification email can be sent.')
 }
@@ -90,5 +127,7 @@ export const env = {
    */
   googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() || null,
   cloudinary: readCloudinary(),
+  livekit: readLiveKit(),
+  recording: readRecording(),
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }

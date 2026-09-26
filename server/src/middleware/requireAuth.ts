@@ -16,3 +16,14 @@ export const requireAuth: RequestHandler = (req, res, next) => {
   res.locals.userId = claims.sub
   next()
 }
+
+/**
+ * Like requireAuth, but lets anonymous requests through: `res.locals.userId`
+ * is set only when a valid token came with the request.
+ */
+export const optionalAuth: RequestHandler = (req, res, next) => {
+  const [scheme, token] = (req.get('authorization') ?? '').split(' ')
+  const claims = scheme === 'Bearer' && token ? verifyToken(token) : null
+  if (claims) res.locals.userId = claims.sub
+  next()
+}

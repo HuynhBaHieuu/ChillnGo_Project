@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useMyItineraries } from '@/features/itinerary-clone/hooks'
+import { LiveHistory } from '@/features/livestream/LiveHistory'
 import { FollowButton } from '@/features/social/components/FollowButton'
 import { useBookmarkedPosts, useUser } from '@/features/social/hooks'
 import { usePostsByAuthor } from '@/features/trip-post/hooks'
@@ -22,6 +23,7 @@ const TABS: { value: ProfileTab; label: string }[] = [
   { value: 'posts', label: 'Bài viết' },
   { value: 'saved', label: 'Đã lưu' },
   { value: 'cloned', label: 'Lịch trình đã clone' },
+  { value: 'live', label: 'Livestream' },
 ]
 
 export function ProfilePage() {
@@ -131,7 +133,8 @@ export function ProfilePage() {
         onValueChange={(value) => setSearchParams({ tab: value }, { replace: true })}
         className="mt-12"
       >
-        <TabsList>
+        {/* Scrolls sideways on phones rather than widening the page. */}
+        <TabsList className="max-w-full overflow-x-auto">
           {TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {tab.label}
@@ -241,6 +244,10 @@ export function ProfilePage() {
               )}
             </>
           )}
+        </TabsContent>
+
+        <TabsContent value="live">
+          <LiveHistory userId={user._id} isOwn={isOwnProfile} />
         </TabsContent>
       </Tabs>
     </PageContainer>

@@ -1,4 +1,4 @@
-import { ImagePlus } from 'lucide-react'
+import { ImagePlus, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { GlassCard } from '@/components/GlassCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CheckInDialog } from '@/features/checkin/CheckInDialog'
+import { LivestreamSetupDialog } from '@/features/livestream/LivestreamSetupDialog'
 import type { CheckInStart } from '@/features/checkin/CheckInDialog'
 import { cn } from '@/lib/utils'
 import type { User } from '@/services/types'
@@ -29,9 +30,11 @@ const SHORTCUTS: {
  *   prompt pill  → the post editor: a full day-by-day trip itinerary
  *   Ảnh          → a check-in (photos, feeling or activity, place), with the
  *                  file picker opened right away
+ *   Livestream   → camera check, then a live broadcast
  */
 export function PostComposer({ user }: { user: User }) {
   const [checkIn, setCheckIn] = useState<CheckInStart | null>(null)
+  const [goingLive, setGoingLive] = useState(false)
 
   return (
     <GlassCard className="p-3 sm:p-4">
@@ -69,6 +72,16 @@ export function PostComposer({ user }: { user: User }) {
               <span className="hidden lg:inline">{label}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setGoingLive(true)}
+            aria-label="Phát trực tiếp"
+            title="Phát trực tiếp"
+            className="flex items-center gap-2 rounded-full p-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:px-3"
+          >
+            <Video className="size-6 text-rose-600" aria-hidden />
+            <span className="hidden lg:inline">Livestream</span>
+          </button>
         </div>
       </div>
 
@@ -78,6 +91,7 @@ export function PostComposer({ user }: { user: User }) {
         user={user}
         start={checkIn ?? 'photos'}
       />
+      <LivestreamSetupDialog open={goingLive} onOpenChange={setGoingLive} user={user} />
     </GlassCard>
   )
 }

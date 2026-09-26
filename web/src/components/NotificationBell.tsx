@@ -1,5 +1,6 @@
-import { Bell, Bookmark, Copy, Heart, MessageCircle, UserPlus } from 'lucide-react'
+import { Bell, Bookmark, Copy, Heart, MessageCircle, Radio, UserPlus } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
@@ -20,18 +21,31 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   clone: Copy,
   bookmark: Bookmark,
   system: Bell,
+  live: Radio,
+}
+
+/** Where a notification leads: the stream, the post, or the person who followed you. */
+function targetOf(n: { livestreamId?: string | null; postId: string | null; type: NotificationType; actorId: string | null }): string | null {
+  if (n.livestreamId) return `/live/${n.livestreamId}`
+  if (n.postId) return `/posts/${n.postId}`
+  if (n.type === 'follow' && n.actorId) return `/users/${n.actorId}`
+  return null
 }
 
 export function NotificationBell() {
   const { data: notifications, isLoading } = useNotifications()
   const markRead = useMarkNotificationsRead()
+  // Controlled, so following a notification's link also closes the menu.
+  const [open, setOpen] = useState(false)
 
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0
 
   return (
     <DropdownMenu
-      onOpenChange={(open) => {
-        if (open && unreadCount > 0) markRead.mutate()
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (next && unreadCount > 0) markRead.mutate()
       }}
     >
       <DropdownMenuTrigger asChild>
@@ -90,7 +104,12 @@ export function NotificationBell() {
                   !notification.read && 'bg-white/[0.04]',
                 )}
               >
-                <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10">
+                <span
+                  className={cn(
+                    'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full',
+                    notification.type === 'live' ? 'bg-rose-600 text-white' : 'bg-white/10',
+                  )}
+                >
                   <Icon className="size-3.5" />
                 </span>
                 <div className="min-w-0">
@@ -112,8 +131,9 @@ export function NotificationBell() {
               </div>
             )
 
-            return notification.postId ? (
-              <Link key={notification._id} to={`/posts/${notification.postId}`} className="block">
+            const target = targetOf(notification)
+            return target ? (
+              <Link key={notification._id} to={target} onClick={() => setOpen(false)} className="block">
                 {body}
               </Link>
             ) : (

@@ -8,6 +8,9 @@ import { getSettings } from './models/Setting.js'
 import { adminRouter } from './routes/admin.js'
 import { authRouter } from './routes/auth.js'
 import { checkinsRouter } from './routes/checkins.js'
+import { livestreamsRouter } from './routes/livestreams.js'
+import { notificationsRouter } from './routes/notifications.js'
+import { profilesRouter } from './routes/profiles.js'
 import { usersRouter } from './routes/users.js'
 
 export const app = express()
@@ -44,8 +47,12 @@ app.use('/api', async (_req, _res, next) => {
 
 app.use('/api/auth', authRouter)
 app.use('/api/admin', adminRouter)
+// Public profiles and follows first; usersRouter (all sign-in only) takes the rest.
+app.use('/api/users', profilesRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/notifications', notificationsRouter)
 app.use('/api/checkins', checkinsRouter)
+app.use('/api/livestreams', livestreamsRouter)
 
 /** Settings every visitor needs: the announcement banner and whether sign-up is open. */
 app.get('/api/settings/public', async (_req, res) => {

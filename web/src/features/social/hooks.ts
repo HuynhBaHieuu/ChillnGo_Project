@@ -36,6 +36,8 @@ export function useNotifications() {
     queryKey: qk.social.notifications(viewerId ?? ''),
     queryFn: () => socialService.getNotifications(viewerId as string),
     enabled: Boolean(viewerId),
+    // New followers and 'X is live' arrive from the server: check now and then.
+    refetchInterval: 30_000,
   })
 }
 
@@ -116,6 +118,9 @@ export function useToggleFollow(userId: string) {
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: followingKey })
       void queryClient.invalidateQueries({ queryKey: userKey })
+      // Who you follow decides what the Newsfeed shows, live streams included.
+      void queryClient.invalidateQueries({ queryKey: ['following', viewerId] })
+      void queryClient.invalidateQueries({ queryKey: ['livestreams'] })
     },
   })
 }

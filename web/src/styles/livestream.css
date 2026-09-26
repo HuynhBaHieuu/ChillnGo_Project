@@ -1,0 +1,54 @@
+/*
+ * The rewind timeline under a live video (features/livestream/DvrBar.tsx).
+ * The input's own track is invisible: the coloured layers underneath show
+ * what is recorded and what has been watched. Only the thumb is drawn here.
+ */
+
+.dvr-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 36px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dvr-range:focus-visible {
+  outline: none;
+}
+
+.dvr-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+}
+
+.dvr-range::-moz-range-track {
+  height: 6px;
+  background: transparent;
+}
+
+.dvr-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgb(225 29 72);
+}
+
+.dvr-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgb(225 29 72);
+}
+
+.dvr-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px rgb(225 29 72), 0 0 0 5px rgb(255 255 255 / 0.6);
+}
+
+.dvr-range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 2px rgb(225 29 72), 0 0 0 5px rgb(255 255 255 / 0.6);
+}

@@ -1,6 +1,7 @@
 @import './styles/theme.css';
 @import './styles/liquid-glass.css';
 @import './styles/animations.css';
+@import './styles/livestream.css';
 @import './styles/home.css';
 
 @tailwind base;

@@ -17,6 +17,11 @@ import { ApiError } from './client'
  */
 const API_URL = (optionalEnv(import.meta.env.VITE_API_URL) ?? '').replace(/\/$/, '')
 
+/** The full address of an API path, for things that fetch it themselves (a video player). */
+export function apiUrl(path: string): string {
+  return `${API_URL}${path}`
+}
+
 interface HttpOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   body?: unknown

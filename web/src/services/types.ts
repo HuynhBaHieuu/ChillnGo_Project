@@ -32,6 +32,8 @@ export type NotificationType =
   | 'clone'
   | 'bookmark'
   | 'system'
+  /** Someone you follow went live. From the API (server/src/models/Notification.ts). */
+  | 'live'
 
 /* ------------------------------------------------------------------ User */
 
@@ -177,6 +179,8 @@ export interface Notification {
   type: NotificationType
   actorId: ObjectId | null
   postId: ObjectId | null
+  /** Set on 'live' notifications. */
+  livestreamId?: ObjectId | null
   message: string
   read: boolean
   createdAt: ISODate
@@ -260,7 +264,7 @@ export interface DiscoverFilters {
   query: string
 }
 
-export type ProfileTab = 'posts' | 'saved' | 'cloned'
+export type ProfileTab = 'posts' | 'saved' | 'cloned' | 'live'
 
 /* ------------------------------------------------------------ Home page */
 

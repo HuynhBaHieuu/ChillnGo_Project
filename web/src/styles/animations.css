@@ -51,3 +51,34 @@
     transform: none;
   }
 }
+
+/*
+ * reaction-float — a livestream reaction (❤️ 🔥 …) rising over the video and
+ * fading out. --drift (set inline per emoji) sways each one sideways so a
+ * burst of taps spreads out instead of stacking.
+ */
+
+@keyframes reaction-float {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(calc(var(--drift, 0px) * 0.2), -24px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift, 0px), -220px) scale(0.9);
+  }
+}
+
+.animate-reaction-float {
+  animation: reaction-float 2.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reaction-float {
+    animation: fade-rise 0.6s ease-out reverse forwards;
+  }
+}

@@ -19,6 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { useLiveNow } from '@/features/livestream/useLiveNow'
 import { cn } from '@/lib/utils'
 import { useAuthStore, useUiStore } from '@/store'
 
@@ -29,6 +30,7 @@ import { useAuthStore, useUiStore } from '@/store'
 const NAV_LINKS = [
   { to: '/discover', label: 'Khám phá' },
   { to: '/feed', label: 'Newsfeed' },
+  { to: '/live', label: 'Đang live' },
   { to: '/itineraries', label: 'Hành trình của tôi' },
   { to: '/', label: 'Về ChillnGo' },
 ] as const
@@ -110,13 +112,28 @@ function DesktopLinks({
           to={link.to}
           end={link.to === '/'}
           className={({ isActive }) =>
-            cn('text-sm transition-colors', linkClassName, isActive && activeClassName)
+            cn('flex items-center gap-1.5 text-sm transition-colors', linkClassName, isActive && activeClassName)
           }
         >
           {link.label}
+          {link.to === '/live' && <LiveCount />}
         </NavLink>
       ))}
     </div>
+  )
+}
+
+/** How many people are live right now, as a red pill beside "Đang live". Nothing when nobody is. */
+function LiveCount({ className }: { className?: string }) {
+  const { data } = useLiveNow()
+  if (!data?.length) return null
+  return (
+    <span
+      aria-label={`${data.length} người đang phát trực tiếp`}
+      className={cn('inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold leading-5 text-white', className)}
+    >
+      {data.length}
+    </span>
   )
 }
 
@@ -233,6 +250,7 @@ function NavControls() {
                 }
               >
                 {link.label}
+                {link.to === '/live' && <LiveCount className="ml-2" />}
               </NavLink>
             ))}
           </div>

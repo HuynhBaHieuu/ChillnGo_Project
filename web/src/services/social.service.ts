@@ -1,6 +1,16 @@
-/** Users, follows, bookmarks and notifications. */
+/**
+ * Users, follows, bookmarks and notifications.
+ *
+ * Real accounts (MongoDB ids) go to the API: profiles, follows and
+ * notifications live in server/. The demo accounts from the fixtures
+ * ("u_001"…) stay on the mock database, so the seeded content keeps working
+ * until it moves to the server too.
+ */
+
+import { travelAvatar, travelBanner } from '@/lib/photos'
 
 import { assertFound, clone, db, delay, nextId, nowIso } from './client'
+import { http } from './http'
 import { decorate } from './post.service'
 import type {
   NotificationWithActor,
@@ -9,8 +19,28 @@ import type {
   User,
 } from './types'
 
+/** An account stored on the server, as opposed to a fixture account. */
+export function isServerId(id: string): boolean {
+  return /^[0-9a-f]{24}$/i.test(id)
+}
+
+/** New accounts have no photos yet: the same travel defaults the signed-in user gets (auth.service). */
+function withAvatar(user: User): User {
+  return {
+    ...user,
+    avatarUrl: user.avatarUrl || travelAvatar(user.username),
+    coverUrl: user.coverUrl || travelBanner(user.username),
+  }
+}
+
+async function fetchProfile(id: ObjectId): Promise<{ user: User; followedByMe: boolean }> {
+  const result = await http<{ user: User; followedByMe: boolean }>(`/api/users/${id}`)
+  return { ...result, user: withAvatar(result.user) }
+}
+
 /** GET /api/users/:id */
 export async function getUserById(id: ObjectId): Promise<User> {
+  if (isServerId(id)) return (await fetchProfile(id)).user
   await delay()
   return clone(
     assertFound(
@@ -20,18 +50,22 @@ export async function getUserById(id: ObjectId): Promise<User> {
   )
 }
 
-/** GET /api/users/:id/follow — is `viewerId` following `userId`? */
-/** Ids of the accounts `viewerId` follows. Mock data, like the rest of this file. */
+/** Ids of the accounts `viewerId` follows: server follows plus any demo accounts followed this session. */
 export async function getFollowingIds(viewerId: ObjectId): Promise<ObjectId[]> {
-  return db.follows.filter((f) => f.followerId === viewerId).map((f) => f.followingId)
+  const local = db.follows.filter((f) => f.followerId === viewerId).map((f) => f.followingId)
+  if (!isServerId(viewerId)) return local
+  const { ids } = await http<{ ids: ObjectId[] }>('/api/users/me/following')
+  return [...ids, ...local]
 }
 
+/** Is `viewerId` following `userId`? */
 export async function isFollowing(
   userId: ObjectId,
   viewerId: ObjectId | null,
 ): Promise<boolean> {
-  await delay()
   if (!viewerId) return false
+  if (isServerId(userId)) return (await fetchProfile(userId)).followedByMe
+  await delay()
   return db.follows.some(
     (f) => f.followerId === viewerId && f.followingId === userId,
   )
@@ -46,6 +80,10 @@ export async function toggleFollow(
   userId: ObjectId,
   viewerId: ObjectId,
 ): Promise<{ following: boolean; followerCount: number }> {
+  if (isServerId(userId)) {
+    return http<{ following: boolean; followerCount: number }>(`/api/users/${userId}/follow`, { method: 'POST' })
+  }
+
   await delay()
 
   const target = assertFound(
@@ -91,30 +129,37 @@ export async function getBookmarkedPosts(
     .map((p) => decorate(p, viewerId))
 }
 
-/** GET /api/notifications */
+/** GET /api/notifications, together with the demo notifications for fixture accounts. */
 export async function getNotifications(
   viewerId: ObjectId,
 ): Promise<NotificationWithActor[]> {
-  await delay()
-
-  return db.notifications
+  const local: NotificationWithActor[] = db.notifications
     .filter((n) => n.userId === viewerId)
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
     .map((n) => ({
       ...clone(n),
       actor: n.actorId
         ? clone(db.users.find((u) => u._id === n.actorId) ?? null)
         : null,
     }))
+
+  let remote: NotificationWithActor[] = []
+  if (isServerId(viewerId)) {
+    const { items } = await http<{ items: NotificationWithActor[] }>('/api/notifications')
+    remote = items.map((n) => ({ ...n, actor: n.actor ? withAvatar(n.actor) : null }))
+  } else {
+    await delay()
+  }
+
+  return [...remote, ...local].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 }
 
 /** POST /api/notifications/read */
 export async function markAllNotificationsRead(
   viewerId: ObjectId,
 ): Promise<{ unreadCount: number }> {
-  await delay()
   for (const n of db.notifications) {
     if (n.userId === viewerId) n.read = true
   }
+  if (isServerId(viewerId)) await http('/api/notifications/read', { method: 'POST' })
   return { unreadCount: 0 }
 }
