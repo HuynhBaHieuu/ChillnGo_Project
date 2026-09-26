@@ -8,7 +8,17 @@ import type { MapPin } from '@/features/map/geometry'
 import { cn } from '@/lib/utils'
 import type { RouteGeoJson } from '@/services/types'
 
-const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11'
+/**
+ * Mapbox Streets: the light, full-colour street map (roads, water, parks)
+ * closest to Google Maps. The route and pins below are coloured for it.
+ */
+const MAP_STYLE = 'mapbox://styles/mapbox/streets-v12'
+
+/** ChillnGo's pink (tertiary ink) and white outlines, so marks read over busy map colours. */
+const ROUTE = '#D60072'
+const PIN = '#FF3DA5'
+const INK = '#1A0B3C'
+const OUTLINE = '#FFFFFF'
 
 interface MapboxMapProps {
   route?: RouteGeoJson
@@ -60,13 +70,15 @@ export default function MapboxMap({
 
   return (
     <div
-      className={cn('relative overflow-hidden rounded-2xl bg-white/5', className)}
+      className={cn('relative overflow-hidden rounded-2xl bg-muted', className)}
       role="img"
       aria-label={label}
     >
       <Map
         mapboxAccessToken={MAPBOX_TOKEN}
         mapStyle={MAP_STYLE}
+        // Place names in Vietnamese where Mapbox has them, local names otherwise.
+        language="vi"
         initialViewState={{ bounds, fitBoundsOptions: { padding: 56 } }}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
@@ -79,13 +91,13 @@ export default function MapboxMap({
               id="trip-route-casing"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{ 'line-color': '#000000', 'line-opacity': 0.4, 'line-width': 6 }}
+              paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 7 }}
             />
             <Layer
               id="trip-route-line"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{ 'line-color': '#ffffff', 'line-width': 2.5 }}
+              paint={{ 'line-color': ROUTE, 'line-width': 3.5 }}
             />
           </Source>
         )}
@@ -104,10 +116,10 @@ export default function MapboxMap({
               type="circle"
               filter={['has', 'point_count']}
               paint={{
-                'circle-color': 'rgba(255,255,255,0.9)',
+                'circle-color': PIN,
                 'circle-radius': ['step', ['get', 'point_count'], 16, 3, 22, 6, 28],
-                'circle-stroke-width': 1.4,
-                'circle-stroke-color': 'rgba(255,255,255,0.45)',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': OUTLINE,
               }}
             />
             <Layer
@@ -119,17 +131,17 @@ export default function MapboxMap({
                 'text-size': 12,
                 'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
               }}
-              paint={{ 'text-color': '#0a0a0a' }}
+              paint={{ 'text-color': INK }}
             />
             <Layer
               id="pin-single"
               type="circle"
               filter={['!', ['has', 'point_count']]}
               paint={{
-                'circle-color': '#ffffff',
-                'circle-radius': 6,
-                'circle-stroke-width': 1.4,
-                'circle-stroke-color': 'rgba(0,0,0,0.5)',
+                'circle-color': ROUTE,
+                'circle-radius': 7,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': OUTLINE,
               }}
             />
           </Source>
@@ -139,7 +151,7 @@ export default function MapboxMap({
         {!cluster &&
           routeCoords.map(([lng, lat], i) => (
             <Marker key={`${lng},${lat},${i}`} longitude={lng} latitude={lat} anchor="center">
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+              <span className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-primary text-[11px] font-semibold text-primary-foreground shadow-md">
                 {i + 1}
               </span>
             </Marker>
