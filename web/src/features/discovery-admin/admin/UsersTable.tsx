@@ -62,7 +62,6 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên, username hoặc email"
             aria-label="Tìm tài khoản"
             className="pl-9"
           />

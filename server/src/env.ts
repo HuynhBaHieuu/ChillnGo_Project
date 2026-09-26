@@ -46,6 +46,24 @@ function readSmtp() {
 }
 
 const smtp = readSmtp()
+
+/**
+ * Cloudinary account for profile images. Either CLOUDINARY_URL
+ * (cloudinary://API_KEY:API_SECRET@CLOUD_NAME, as shown on the Cloudinary
+ * dashboard) or the three separate variables. Unset: image changes answer 503,
+ * everything else on the profile still saves.
+ */
+function readCloudinary() {
+  const url = process.env.CLOUDINARY_URL?.trim()
+  const match = url?.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/)
+  if (match) return { apiKey: match[1], apiSecret: match[2], cloudName: match[3] }
+
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim()
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim()
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim()
+  return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null
+}
+
 if (isVercel && !smtp) {
   throw new Error('SMTP_USER and SMTP_PASS are required on Vercel, or no verification email can be sent.')
 }
@@ -71,5 +89,6 @@ export const env = {
    * web/.env.local as VITE_GOOGLE_CLIENT_ID. Unset disables Google sign-in.
    */
   googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() || null,
+  cloudinary: readCloudinary(),
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }

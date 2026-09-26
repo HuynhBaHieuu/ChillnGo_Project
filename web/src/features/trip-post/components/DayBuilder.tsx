@@ -1,5 +1,5 @@
 import { ImagePlus, Plus, Trash2 } from 'lucide-react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 import { GlassCard } from '@/components/GlassCard'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { dayCostOf } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
+import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
 import { themeFromText, travelPhoto } from '@/lib/photos'
 import type { TripDay, TripLocation } from '@/services/types'
 
@@ -73,7 +74,6 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
                 id={`${day._id}-title`}
                 value={day.title}
                 onChange={(e) => patchDay({ title: e.target.value })}
-                placeholder="Ví dụ: Hà Nội → Hà Giang → Quản Bạ"
               />
             </div>
             <div className="space-y-2">
@@ -143,6 +143,7 @@ function LocationRow({
   onRemove: () => void
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   return (
     <div className="rounded-2xl border border-border p-4">
@@ -156,7 +157,6 @@ function LocationRow({
             <Input
               value={location.name}
               onChange={(e) => onChange({ name: e.target.value })}
-              placeholder="Tên địa điểm"
               aria-label={`Tên địa điểm ${index + 1}`}
             />
             <Input
@@ -165,7 +165,6 @@ function LocationRow({
               step={1000}
               value={location.estCost}
               onChange={(e) => onChange({ estCost: Number(e.target.value) || 0 })}
-              placeholder="Chi phí (₫)"
               aria-label={`Chi phí ước tính cho địa điểm ${index + 1}`}
             />
           </div>
@@ -173,7 +172,6 @@ function LocationRow({
           <Textarea
             value={location.note}
             onChange={(e) => onChange({ note: e.target.value })}
-            placeholder="Ghi chú: giờ mở cửa, mẹo đặt chỗ, món nên gọi…"
             rows={2}
             aria-label={`Ghi chú cho địa điểm ${index + 1}`}
           />
@@ -190,12 +188,15 @@ function LocationRow({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept={ACCEPT_ATTRIBUTE}
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0]
-                if (file) onChange({ photoUrl: placeholderUrlFor(file.name) })
                 e.target.value = ''
+                if (!file) return
+                const problem = checkImageFile(file)
+                setPhotoError(problem)
+                if (!problem) onChange({ photoUrl: placeholderUrlFor(file.name) })
               }}
             />
 
@@ -222,8 +223,13 @@ function LocationRow({
             )}
 
             <span className="text-xs text-muted-foreground">
-              Upload chưa được nối — ảnh chỉ là placeholder.
+              {ACCEPTED_LABEL}, tối đa 15 MB. Upload chưa được nối — ảnh chỉ là placeholder.
             </span>
+            {photoError && (
+              <span role="alert" className="w-full text-xs text-destructive">
+                {photoError}
+              </span>
+            )}
           </div>
         </div>
 

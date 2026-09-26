@@ -114,7 +114,7 @@ export function MergeModal({
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Tìm theo tên hành trình hoặc thẻ…"
+          aria-label="Tìm hành trình theo tên hoặc thẻ"
         />
 
         {selectedDayIds.size > 0 && (

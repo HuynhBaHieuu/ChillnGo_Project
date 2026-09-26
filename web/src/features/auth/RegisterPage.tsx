@@ -116,7 +116,6 @@ export function RegisterPage() {
             autoComplete="name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Trần Nhật Minh"
           />
         </div>
 
@@ -132,7 +131,6 @@ export function RegisterPage() {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="minhtran"
           />
         </div>
 
@@ -145,7 +143,6 @@ export function RegisterPage() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="ban@email.com"
           />
           <p className="text-xs text-muted-foreground">
             Chúng tôi sẽ gửi email xác nhận tới địa chỉ này.
@@ -185,7 +182,6 @@ export function RegisterPage() {
               setConfirmPassword(e.target.value)
               setFormError(null)
             }}
-            placeholder="Nhập lại mật khẩu"
           />
           <p id="confirm-password-hint" aria-live="polite" className="text-xs">
             {confirmMismatch && <span className="text-destructive">Mật khẩu xác nhận không khớp.</span>}

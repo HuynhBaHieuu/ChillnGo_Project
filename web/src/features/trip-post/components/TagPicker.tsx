@@ -81,9 +81,7 @@ export function TagPicker({ value, onChange, max = 6 }: TagPickerProps) {
         onKeyDown={handleKeyDown}
         onBlur={() => addTag(draft)}
         disabled={value.length >= max}
-        placeholder={
-          value.length >= max ? `Tối đa ${max} thẻ` : 'Nhập thẻ rồi nhấn Enter…'
-        }
+        aria-label={value.length >= max ? `Đã đủ tối đa ${max} thẻ` : 'Thêm thẻ, nhấn Enter để thêm'}
       />
 
       {unused.length > 0 && value.length < max && (

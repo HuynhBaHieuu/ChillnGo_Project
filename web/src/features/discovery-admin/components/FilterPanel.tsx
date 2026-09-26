@@ -83,7 +83,6 @@ export function FilterPanel({
           id="discover-search"
           value={filters.query}
           onChange={(e) => patch({ query: e.target.value })}
-          placeholder="Hà Giang, biển, săn mây…"
         />
       </div>
 

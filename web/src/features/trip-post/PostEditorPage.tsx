@@ -259,7 +259,6 @@ export function PostEditorPage() {
                 required
                 value={form.title}
                 onChange={(e) => patch({ title: e.target.value })}
-                placeholder="Hà Giang Loop 4N3Đ — cung đường đá và mây"
               />
             </div>
 
@@ -271,7 +270,6 @@ export function PostEditorPage() {
                 rows={3}
                 value={form.summary}
                 onChange={(e) => patch({ summary: e.target.value })}
-                placeholder="Một đoạn ngắn nói rõ chuyến đi này hợp với ai và có gì đáng đi."
               />
             </div>
 
@@ -281,7 +279,6 @@ export function PostEditorPage() {
                 id="coverUrl"
                 value={form.coverUrl}
                 onChange={(e) => patch({ coverUrl: e.target.value })}
-                placeholder="Để trống sẽ dùng ảnh placeholder"
               />
             </div>
           </GlassCard>

@@ -88,7 +88,6 @@ function SettingsForm({ saved, onNotice }: { saved: AppSettings; onNotice: (noti
           value={draft.announcement}
           maxLength={ANNOUNCEMENT_MAX}
           onChange={(e) => setDraft({ ...draft, announcement: e.target.value })}
-          placeholder="Ví dụ: ChillnGo bảo trì từ 22:00 đến 23:00 tối nay."
           rows={3}
         />
         <p className="text-right text-xs text-muted-foreground">

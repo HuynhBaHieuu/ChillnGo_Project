@@ -149,7 +149,6 @@ export function VerifyEmailPage() {
             autoComplete="email"
             value={resendEmail}
             onChange={(e) => setResendEmail(e.target.value)}
-            placeholder="ban@email.com"
           />
         </div>
 

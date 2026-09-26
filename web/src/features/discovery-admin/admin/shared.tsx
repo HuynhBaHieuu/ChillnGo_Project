@@ -168,7 +168,7 @@ export function formatDateTime(iso: string | null): string {
 
 export function Avatar({ user }: { user: Pick<AdminUser, 'avatarUrl' | 'displayName'> }) {
   return user.avatarUrl ? (
-    <img src={user.avatarUrl} alt="" className="size-9 shrink-0 rounded-full border border-foreground/10 object-cover" />
+    <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="size-9 shrink-0 rounded-full border border-foreground/10 object-cover" />
   ) : (
     <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-sm font-semibold">
       {user.displayName.charAt(0).toUpperCase()}

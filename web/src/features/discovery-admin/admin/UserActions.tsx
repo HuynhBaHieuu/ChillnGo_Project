@@ -162,7 +162,6 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
             value={reason}
             maxLength={200}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Ví dụ: Đăng nội dung spam"
           />
         </div>
       </ConfirmDialog>

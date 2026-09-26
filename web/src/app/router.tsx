@@ -12,6 +12,7 @@ import { AdminIndex, AdminLayout, AdminSectionPage } from '@/features/discovery-
 import { DiscoverPage } from '@/features/discovery-admin/DiscoverPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
+import { EditProfilePage } from '@/features/social/EditProfilePage'
 import { ProfilePage } from '@/features/social/ProfilePage'
 import { FeedPage } from '@/features/trip-post/FeedPage'
 import { PostDetailPage } from '@/features/trip-post/PostDetailPage'
@@ -62,6 +63,14 @@ export const router = createBrowserRouter([
       },
 
       { path: '/users/:id', element: <ProfilePage /> },
+      {
+        path: '/profile/edit',
+        element: (
+          <RequireAuth>
+            <EditProfilePage />
+          </RequireAuth>
+        ),
+      },
 
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },

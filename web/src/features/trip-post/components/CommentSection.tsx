@@ -70,7 +70,7 @@ export function CommentSection({ postId, commentCount }: CommentSectionProps) {
               <Textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Hỏi về chi phí, thời điểm đi, hoặc kể chuyến đi của bạn…"
+                aria-label="Viết bình luận"
                 rows={3}
               />
               <div className="flex justify-end">
@@ -200,7 +200,7 @@ function CommentItem({
             <Textarea
               value={replyDraft}
               onChange={(e) => onReplyDraftChange(e.target.value)}
-              placeholder={`Trả lời ${comment.author.displayName}…`}
+              aria-label={`Trả lời ${comment.author.displayName}`}
               rows={2}
               autoFocus
             />

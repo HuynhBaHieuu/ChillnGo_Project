@@ -71,7 +71,7 @@ export function ProfilePage() {
       */}
       <div className="animate-fade-rise">
         <div className="aspect-[3/1] w-full overflow-hidden bg-white/5 sm:aspect-[16/9]">
-          <img src={user.coverUrl} alt="" className="size-full object-cover" />
+          <img src={user.coverUrl} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
         </div>
 
         <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -93,9 +93,14 @@ export function ProfilePage() {
 
           <div className="shrink-0">
             {isOwnProfile ? (
-              <Button asChild variant="outline">
-                <Link to="/posts/new">Đăng bài mới</Link>
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline">
+                  <Link to="/profile/edit">Chỉnh sửa hồ sơ</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/posts/new">Đăng bài mới</Link>
+                </Button>
+              </div>
             ) : (
               <FollowButton userId={user._id} />
             )}

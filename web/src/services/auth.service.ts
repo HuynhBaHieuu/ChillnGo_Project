@@ -34,6 +34,16 @@ function mirrorIntoMockDb(user: User): void {
   else db.users[index] = { ...db.users[index], ...clone(user) }
 }
 
+/**
+ * Takes a user record fresh from the API (after a profile edit, say) and makes
+ * it the one the app shows: default photos filled in, mock table refreshed.
+ */
+export function adoptUser(user: User): User {
+  const shown = withDefaultPhotos(user)
+  mirrorIntoMockDb(shown)
+  return shown
+}
+
 function adopt(session: AuthSession): AuthSession {
   const user = withDefaultPhotos(session.user)
   mirrorIntoMockDb(user)

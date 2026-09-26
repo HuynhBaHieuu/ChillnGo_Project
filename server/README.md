@@ -47,6 +47,7 @@ shows Minh's trips.
 | `SMTP_USER`, `SMTP_PASS` | on Vercel | Mail account that sends verification emails. Blank in local dev prints the link in the terminal instead. See [Sending email](#sending-email). |
 | `SMTP_HOST`, `SMTP_PORT` | no | Default `smtp.gmail.com` and `465`. |
 | `MAIL_FROM` | no | Sender shown in the inbox. Default `ChillnGo <SMTP_USER>`. |
+| `CLOUDINARY_URL` | no | Cloudinary "API environment variable" (`cloudinary://KEY:SECRET@CLOUD`), for profile images. Unset: image changes answer `503`, text fields still save. |
 | `GOOGLE_CLIENT_ID` | no | OAuth client ID for Sign in with Google. Unset makes `/api/auth/google` answer `503`. See [Sign in with Google](#sign-in-with-google). |
 
 The server refuses to start if a required variable is missing.
@@ -64,6 +65,8 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/auth/resend-verification` | `email` | `200 { message }` when a new email went out. Otherwise `404 NO_ACCOUNT`, `409 ALREADY_VERIFIED`, or `429 RESEND_COOLDOWN` within a minute of the last send. |
 | `POST /api/auth/google` | `credential`, the ID token from Google's button | `200 { token, user }`. Creates or links the account. |
 | `POST /api/auth/login` | `email`, `password` | `200 { token, user }`, or `403` with `code: EMAIL_NOT_VERIFIED`. |
+| `POST /api/users/me/upload-signature` | `kind`: `avatar` or `cover` | `200 { uploadUrl, fields }`: post the file plus `fields` straight to Cloudinary. |
+| `PATCH /api/users/me` | any of `displayName`, `username`, `bio`, `location`, `avatar`/`cover` (`"uploaded"` or `"remove"`) | `200 { user }` |
 | `GET /api/settings/public` | none | `200 { settings }`: announcement and whether registration is open. |
 | `GET /api/auth/me` | none; header `Authorization: Bearer <token>` | `200 { user }` |
 | `GET /api/health` | none | `200 { ok: true }` |
@@ -143,6 +146,38 @@ collection.
 **System settings** (Super Admin): close registration, which blocks email sign-up
 and first-time Google sign-up, and set a site-wide announcement.
 
+## Profile images (Cloudinary)
+
+1. Create a free account at <https://cloudinary.com>. On the dashboard, copy the
+   **API environment variable**, which looks like `cloudinary://123:abc@my-cloud`.
+2. Put it in `server/.env` as `CLOUDINARY_URL=...`. The server restarts on its own.
+
+How an image change works:
+
+1. The page asks `POST /api/users/me/upload-signature` for a signed upload.
+2. The browser sends the file straight to Cloudinary. The image never passes
+   through our API, so Vercel's 4.5 MB request limit does not apply. The API
+   secret stays on the server.
+3. `PATCH /api/users/me` with `avatar: "uploaded"`. The server looks the image
+   up on Cloudinary itself, checks it is under 10 MB, and stores its URL. A client
+   cannot point a profile at an arbitrary URL.
+
+**Accepted formats:** JPG, PNG, WebP and AVIF only, checked in the browser
+(`web/src/lib/images.ts`) and again by Cloudinary (`allowed_formats` in the
+signed upload). GIF (heavy animations), HEIC (most browsers cannot show it;
+iPhones send JPEG instead), SVG (can carry scripts) and BMP/TIFF are refused.
+
+**Size:** the browser accepts originals up to 15 MB, then shrinks them before
+upload (longest side 1024 px for avatars, 2560 px for covers, re-encoded as
+WebP, or JPEG on Safari). A typical phone photo leaves the browser at a few
+hundred KB. Cloudinary also caps what it stores at those sizes, even for
+uploads made without our web page.
+
+Each user has one image per kind, at `chillngo/users/<userId>/avatar` and
+`.../cover`. A new upload overwrites the old one, so nothing piles up. The stored
+URL carries the version number and a crop: 400×400 for avatars, 1800×600 for
+covers, format and quality chosen per browser.
+
 ## Sending email
 
 Verification emails go out over SMTP. The template is in
@@ -199,7 +234,7 @@ Deploy the API and the web client as **two Vercel projects from the same repo**.
 1. Import the repo on Vercel and set **Root Directory** to `server`. Vercel
    detects Express and runs `src/index.ts` as a function. No `vercel.json` is needed.
 2. Add the environment variables `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
-   `APP_URL`, `SMTP_USER`, `SMTP_PASS`, and `GOOGLE_CLIENT_ID`. Set both `CORS_ORIGIN` and `APP_URL`
+   `APP_URL`, `SMTP_USER`, `SMTP_PASS`, `GOOGLE_CLIENT_ID`, and `CLOUDINARY_URL`. Set both `CORS_ORIGIN` and `APP_URL`
    to the web project's URL, e.g. `https://chillngo.vercel.app`. The API refuses
    to start on Vercel without `APP_URL` and SMTP settings.
 3. Deploy. Check `https://<api-project>.vercel.app/api/health`.
@@ -231,6 +266,8 @@ src/
   models/User.ts        User schema + toPublicUser()
   routes/auth.ts        register, verify-email, resend-verification, login, me
   routes/admin.ts       back office: users, admins, stats, audit log, settings
+  routes/users.ts       the signed-in user's profile and image uploads
+  lib/cloudinary.ts     signed uploads, upload check, delivery URLs
   lib/permissions.ts    roles, admin modules, who may act on whom
   middleware/staff.ts   loads the signed-in user; role and permission guards
   models/AuditLog.ts    one row per admin action

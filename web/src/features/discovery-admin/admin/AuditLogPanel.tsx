@@ -102,7 +102,6 @@ export function AuditLogPanel() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo người thực hiện hoặc tài khoản bị tác động"
             aria-label="Tìm trong nhật ký"
             className="pl-9"
           />

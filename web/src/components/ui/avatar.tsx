@@ -22,6 +22,9 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       className={cn('aspect-square size-full object-cover', className)}
+      // Google profile photos (lh3.googleusercontent.com) are often refused
+      // when the request carries a referrer.
+      referrerPolicy="no-referrer"
       {...props}
     />
   )

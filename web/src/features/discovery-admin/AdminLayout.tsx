@@ -1,4 +1,4 @@
-import { Home, LogOut, ShieldOff } from 'lucide-react'
+import { LogOut, ShieldOff } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom'
 
@@ -11,7 +11,8 @@ import { useAuthStore } from '@/store'
 
 /**
  * /admin — the admin console. A separate shell from the public site: its own
- * sidebar, no public navbar. Sections the signed-in account may not use are
+ * sidebar, no public navbar. Staff accounts cannot open the public site at all
+ * (see RootLayout); signing out takes them to the login page. Sections the signed-in account may not use are
  * not listed, and their URLs send it back to /admin.
  */
 export function AdminLayout() {
@@ -24,7 +25,7 @@ export function AdminLayout() {
 
   function handleSignOut() {
     signOut()
-    void navigate('/', { replace: true })
+    void navigate('/login', { replace: true })
   }
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -61,13 +62,6 @@ export function AdminLayout() {
               <RoleBadge role={user.role} />
             </div>
           </div>
-          <Link
-            to="/"
-            className="flex items-center gap-3 rounded-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <Home className="size-4" aria-hidden />
-            Về trang ChillnGo
-          </Link>
           <button
             type="button"
             onClick={handleSignOut}
@@ -91,9 +85,6 @@ export function AdminLayout() {
             </Link>
             <div className="flex items-center gap-2">
               <RoleBadge role={user.role} />
-              <Link to="/" aria-label="Về trang ChillnGo" className="grid size-9 place-items-center rounded-full hover:bg-muted">
-                <Home className="size-4" aria-hidden />
-              </Link>
               <button type="button" onClick={handleSignOut} aria-label="Đăng xuất" className="grid size-9 place-items-center rounded-full hover:bg-muted">
                 <LogOut className="size-4" aria-hidden />
               </button>
