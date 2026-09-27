@@ -31,6 +31,16 @@ export function usePostsByAuthor(authorId: string | undefined) {
   })
 }
 
+/** Journeys you wrote yourself, published and drafts (Hành trình của tôi). */
+export function useMyJourneys() {
+  const viewerId = useViewerId()
+  return useQuery({
+    queryKey: qk.post.mine(viewerId),
+    queryFn: postService.listMyJourneys,
+    enabled: Boolean(viewerId),
+  })
+}
+
 /** Every published post — the source list for the merge picker. */
 export function usePublishedPosts(enabled = true) {
   const viewerId = useViewerId()
@@ -164,6 +174,8 @@ export function useCreatePost() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: qk.post.all })
       void queryClient.invalidateQueries({ queryKey: qk.discover.all })
+      // Drafts and published journeys are listed in Your Activity too.
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
     },
   })
 }
@@ -176,6 +188,8 @@ export function useUpdatePost(postId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: qk.post.all })
       void queryClient.invalidateQueries({ queryKey: qk.discover.all })
+      // Drafts and published journeys are listed in Your Activity too.
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
     },
   })
 }

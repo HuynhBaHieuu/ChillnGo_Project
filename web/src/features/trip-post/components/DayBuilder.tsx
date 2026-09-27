@@ -1,4 +1,4 @@
-import { ImagePlus, Plus, Trash2 } from 'lucide-react'
+import { ImagePlus, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import { GlassCard } from '@/components/GlassCard'
@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { dayCostOf } from '@/lib/itinerary'
+import { AddressField } from '@/features/trip-post/components/AddressField'
+import { PlaceField } from '@/features/trip-post/components/PlaceField'
+import { UNPINNED, dayCostOf } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
-import { themeFromText, travelPhoto } from '@/lib/photos'
+import { postService } from '@/services'
 import type { TripDay, TripLocation } from '@/services/types'
 
 interface DayBuilderProps {
@@ -20,17 +22,8 @@ interface DayBuilderProps {
   onRemove: () => void
 }
 
-/**
- * Placeholder for image upload.
- *
- * Real uploads are out of scope this week. Picking a file gives a deterministic
- * stand-in URL derived from the file name, so the payload carries a plausible
- * string and the thumbnail renders — no bytes leave the browser.
- */
-function placeholderUrlFor(fileName: string): string {
-  const seed = fileName.replace(/\.[^.]+$/, '').slice(0, 40) || 'upload'
-  return travelPhoto(seed, { theme: themeFromText(seed) })
-}
+/** Stop photos show at most ~800px wide; 1600 keeps them sharp on retina. */
+const STOP_PHOTO_MAX_SIDE = 1600
 
 export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBuilderProps) {
   function patchDay(patch: Partial<TripDay>) {
@@ -49,12 +42,12 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
     const newLocation: TripLocation = {
       _id: `${day._id}_l${day.locations.length + 1}_${Date.now().toString(36)}`,
       name: '',
+      address: '',
       note: '',
       estCost: 0,
       photoUrl: null,
-      // Centre of Vietnam — a neutral default until a real place picker exists.
-      lng: 106.0,
-      lat: 16.0,
+      // Not on the map until the author picks a place (PlaceField).
+      ...UNPINNED,
     }
     patchDay({ locations: [...day.locations, newLocation] })
   }
@@ -144,6 +137,22 @@ function LocationRow({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
+  /** Upload progress 0–100 while a photo is being sent; null otherwise. */
+  const [uploading, setUploading] = useState<number | null>(null)
+
+  async function uploadPhoto(file: File) {
+    const problem = checkImageFile(file)
+    setPhotoError(problem)
+    if (problem) return
+    setUploading(0)
+    try {
+      onChange({ photoUrl: await postService.uploadJourneyImage(file, setUploading, STOP_PHOTO_MAX_SIDE) })
+    } catch (error) {
+      setPhotoError((error as Error).message)
+    } finally {
+      setUploading(null)
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-border p-4">
@@ -158,11 +167,11 @@ function LocationRow({
               <Label htmlFor={`${location._id}-name`} className="text-xs">
                 Tên địa điểm
               </Label>
-              <Input
+              <PlaceField
                 id={`${location._id}-name`}
-                value={location.name}
-                onChange={(e) => onChange({ name: e.target.value })}
-                aria-label={`Tên địa điểm ${index + 1}`}
+                label={`Tên địa điểm ${index + 1}`}
+                location={location}
+                onChange={onChange}
               />
             </div>
             <div className="space-y-1.5">
@@ -182,6 +191,18 @@ function LocationRow({
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor={`${location._id}-address`} className="text-xs">
+              Địa chỉ
+            </Label>
+            <AddressField
+              id={`${location._id}-address`}
+              label={`Địa chỉ của địa điểm ${index + 1}`}
+              location={location}
+              onChange={onChange}
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor={`${location._id}-note`} className="text-xs">
               Ghi chú
             </Label>
@@ -195,12 +216,24 @@ function LocationRow({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {location.photoUrl && (
-              <img
-                src={location.photoUrl}
-                alt=""
-                className="size-12 rounded-2xl object-cover"
-              />
+            {(location.photoUrl || uploading !== null) && (
+              <a
+                href={location.photoUrl ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Xem ảnh cỡ lớn"
+                className="np-media relative block size-16 shrink-0 overflow-hidden rounded-xl bg-np-well"
+              >
+                {location.photoUrl && (
+                  <img src={location.photoUrl} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
+                )}
+                {uploading !== null && (
+                  <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-np-canopy/70 text-[11px] font-semibold text-np-cream">
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    {uploading}%
+                  </span>
+                )}
+              </a>
             )}
 
             <input
@@ -211,10 +244,7 @@ function LocationRow({
               onChange={(e) => {
                 const file = e.target.files?.[0]
                 e.target.value = ''
-                if (!file) return
-                const problem = checkImageFile(file)
-                setPhotoError(problem)
-                if (!problem) onChange({ photoUrl: placeholderUrlFor(file.name) })
+                if (file) void uploadPhoto(file)
               }}
             />
 
@@ -222,10 +252,11 @@ function LocationRow({
               type="button"
               variant="outline"
               size="sm"
+              disabled={uploading !== null}
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus />
-              {location.photoUrl ? 'Đổi ảnh' : 'Thêm ảnh'}
+              {uploading !== null ? 'Đang tải ảnh…' : location.photoUrl ? 'Đổi ảnh' : 'Thêm ảnh'}
             </Button>
 
             {location.photoUrl && (
@@ -233,6 +264,7 @@ function LocationRow({
                 type="button"
                 variant="ghost"
                 size="sm"
+                disabled={uploading !== null}
                 onClick={() => onChange({ photoUrl: null })}
                 className="text-muted-foreground"
               >
@@ -241,7 +273,7 @@ function LocationRow({
             )}
 
             <span className="text-xs text-muted-foreground">
-              {ACCEPTED_LABEL}, tối đa 15 MB. Upload chưa được nối — ảnh chỉ là placeholder.
+              {ACCEPTED_LABEL}, tối đa 15 MB. Ảnh được tự nén rồi tải lên.
             </span>
             {photoError && (
               <span role="alert" className="w-full text-xs text-destructive">

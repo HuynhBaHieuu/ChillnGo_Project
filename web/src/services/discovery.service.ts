@@ -7,6 +7,7 @@
  */
 
 import { clone, db, delay } from './client'
+import { syncServerPosts } from './serverPosts'
 import { decorate } from './post.service'
 import type {
   DiscoverFilters,
@@ -42,7 +43,7 @@ export async function discoverPosts(
   filters: DiscoverFilters,
   viewerId: ObjectId | null,
 ): Promise<TripPostWithAuthor[]> {
-  await delay()
+  await Promise.all([delay(), syncServerPosts()])
 
   const query = filters.query.trim().toLowerCase()
 

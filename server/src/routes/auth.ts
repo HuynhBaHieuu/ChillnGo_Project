@@ -16,6 +16,7 @@ import { RESEND_COOLDOWN_MS, createVerifyToken, hashToken } from '../lib/verific
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { getSettings } from '../models/Setting.js'
+import { recordAccountEvents } from '../models/AccountEvent.js'
 import { User, toPublicUser } from '../models/User.js'
 import type { UserRecord } from '../models/User.js'
 
@@ -149,6 +150,8 @@ authRouter.post('/register', authLimiter, async (req, res) => {
     throw error
   }
 
+  await recordAccountEvents(user._id, [{ type: 'account_created', details: { via: 'email' } }])
+
   // The account exists either way. If the email fails, the user can ask for
   // another one from the next screen, so this is not an error response.
   let emailSent = true
@@ -232,6 +235,7 @@ authRouter.post('/verify-email', authLimiter, async (req, res) => {
   )
   if (!user) throw new HttpError(400, INVALID_VERIFY_LINK, 'INVALID_VERIFY_TOKEN')
   assertNotLocked(user)
+  await recordAccountEvents(user._id, [{ type: 'email_verified', details: { via: 'email' } }])
 
   await recordLogin(user._id)
   res.json(session(user))

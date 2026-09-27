@@ -4,7 +4,10 @@
  *   GET    /api/checkins?authors=a,b&before=ISO   newest first, 20 at a time (public)
  *   POST   /api/checkins/upload-signature          one signed Cloudinary upload per photo
  *   POST   /api/checkins                           { caption, photos: publicId[], feeling?, location? }
- *   DELETE /api/checkins/:id                       author only; also deletes the photos
+ *   DELETE /api/checkins/:id                       author only; moves it to "Recently Deleted"
+ *   GET    /api/checkins/deleted                   your check-ins in "Recently Deleted"
+ *   POST   /api/checkins/:id/restore               back out of "Recently Deleted"
+ *   DELETE /api/checkins/:id/permanent             delete for good, photos included
  */
 
 import { Router } from 'express'
@@ -14,6 +17,7 @@ import { z } from 'zod'
 import { confirmCheckinPhoto, destroyImages, signCheckinUpload } from '../lib/cloudinary.js'
 import { HttpError } from '../lib/errors.js'
 import { FEELINGS } from '../lib/feelings.js'
+import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { CheckIn } from '../models/CheckIn.js'
@@ -51,6 +55,8 @@ async function withAuthors(items: CheckInDoc[]) {
         ? { name: c.location.name, address: c.location.address, lat: c.location.lat, lng: c.location.lng }
         : null,
       createdAt: c.createdAt.toISOString(),
+      deletedAt: c.deletedAt ? c.deletedAt.toISOString() : null,
+      purgeAt: c.deletedAt ? purgeAt(c.deletedAt).toISOString() : null,
       author: author
         ? { _id: author._id, username: author.username, displayName: author.displayName, avatarUrl: author.avatarUrl }
         : { _id: c.authorId, username: 'deleted', displayName: 'Tài khoản đã xoá', avatarUrl: '' },
@@ -71,7 +77,7 @@ const listSchema = z.object({
 /** GET /api/checkins — anyone may read. `authors` narrows to those accounts (the Newsfeed). */
 checkinsRouter.get('/', async (req, res) => {
   const { authors, before } = listSchema.parse(req.query)
-  const filter: Record<string, unknown> = {}
+  const filter: Record<string, unknown> = { deletedAt: null }
   if (authors) filter.authorId = { $in: authors }
   if (before) filter.createdAt = { $lt: new Date(before) }
 
@@ -124,14 +130,47 @@ checkinsRouter.post('/', requireAuth, loadCurrentUser, writeLimiter, async (req,
   res.status(201).json({ checkin: shown })
 })
 
-/** DELETE /api/checkins/:id — only the author. */
-checkinsRouter.delete('/:id', requireAuth, loadCurrentUser, async (req, res) => {
-  const user = currentUser(res)
-  const checkin = await CheckIn.findById(String(req.params.id)).catch(() => null)
-  if (!checkin) throw new HttpError(404, 'Không tìm thấy check-in.', 'NOT_FOUND')
-  if (checkin.authorId !== user._id) throw new HttpError(403, 'Bạn chỉ xoá được check-in của mình.', 'FORBIDDEN')
+/** A check-in of yours, or 404. `deleted`: whether it must be in "Recently Deleted". */
+async function loadOwn(userId: string, id: string, deleted: boolean) {
+  const checkin = await CheckIn.findById(id).catch(() => null)
+  if (!checkin || checkin.authorId !== userId || Boolean(checkin.deletedAt) !== deleted) {
+    throw new HttpError(404, 'Không tìm thấy check-in.', 'NOT_FOUND')
+  }
+  return checkin
+}
 
+async function destroyCheckIn(checkin: CheckInDoc) {
   await checkin.deleteOne()
   await destroyImages(checkin.photos.map((p) => p.publicId))
+}
+
+/** GET /api/checkins/deleted — yours, newest deletion first. Expired ones are removed first. */
+checkinsRouter.get('/deleted', requireAuth, loadCurrentUser, async (_req, res) => {
+  const user = currentUser(res)
+  const expired = await CheckIn.find({ authorId: user._id, deletedAt: { $ne: null, $lt: restoreCutoff() } })
+  for (const checkin of expired) await destroyCheckIn(checkin)
+
+  const items = await CheckIn.find({ authorId: user._id, deletedAt: { $ne: null } }).sort({ deletedAt: -1 })
+  res.json({ items: await withAuthors(items) })
+})
+
+/** DELETE /api/checkins/:id — only the author. Restorable for lib/retention.ts's window. */
+checkinsRouter.delete('/:id', requireAuth, loadCurrentUser, async (req, res) => {
+  const checkin = await loadOwn(currentUser(res)._id, String(req.params.id), false)
+  checkin.deletedAt = new Date()
+  await checkin.save()
+  res.json({ ok: true })
+})
+
+checkinsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const checkin = await loadOwn(currentUser(res)._id, String(req.params.id), true)
+  checkin.deletedAt = null
+  await checkin.save()
+  res.json({ ok: true })
+})
+
+checkinsRouter.delete('/:id/permanent', requireAuth, loadCurrentUser, async (req, res) => {
+  const checkin = await loadOwn(currentUser(res)._id, String(req.params.id), true)
+  await destroyCheckIn(checkin)
   res.json({ ok: true })
 })

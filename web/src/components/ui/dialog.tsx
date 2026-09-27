@@ -27,7 +27,7 @@ function DialogOverlay({
 }
 
 /**
- * Modals are one of the surfaces the design system puts on `.liquid-glass`, and
+ * Modals sit on a solid `.np-overlay` (styles/np-surfaces.css), and
  * their content enters with `animate-fade-rise`.
  */
 function DialogContent({
@@ -43,8 +43,8 @@ function DialogContent({
           // Centred with inset-0 + margin:auto rather than translate(-50%): the
           // entrance animation sets its own transform, which used to cancel the
           // centring and push every dialog into the bottom-right corner.
-          'liquid-glass animate-fade-rise fixed inset-0 z-50 m-auto grid h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto',
-          'gap-4 rounded-2xl bg-[hsl(var(--background))]/85 p-6 shadow-2xl',
+          'np-overlay animate-fade-rise fixed inset-0 z-50 m-auto grid h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto',
+          'gap-4 rounded-2xl p-6',
           className,
         )}
         {...props}

@@ -1,84 +1,116 @@
 /*
- * ChillnGo design tokens — "Arcade Neon Pop" (designdotmd).
+ * ChillnGo design tokens — "National Park" (designdotmd).
  *
- * Source: web/design.md. A maximalist mobile-game system — thick outlines,
- * squishy radii, one loud accent on a near-white pink ground.
+ * Source: web/design.national-park.md. Park signage: a pine-green ground,
+ * cream type, one canyon-rust accent, flat surfaces with tight corners.
  *
- *   primary    #1A0B3C  deep purple — headlines and body copy
- *   secondary  #8A7CA8  muted purple — borders, captions, metadata
- *   tertiary   #FF3DA5  hot pink — the single interaction colour. Reserve it.
- *   neutral    #FFF0F6  the page foundation
- *   surface    #FFFFFF  cards
+ *   primary    #EFE2C4  cream — headlines and body copy
+ *   secondary  #A89274  trail ochre — borders, captions, metadata
+ *   tertiary   #D37B3A  canyon rust — the single interaction colour. Reserve it.
+ *   neutral    #1C2E20  pine — the page foundation
+ *   surface    #253D2B  lighter pine — cards
  *
  * Brand values stay bare `H S% L%` triplets so Tailwind can apply opacity
  * modifiers (`bg-tertiary/20`).
  *
- * CONTRAST. Three of the spec's own pairings do not clear WCAG AA for
- * body-size text, so each gets a tuned sibling and the spec value is kept for
- * fills and large display type:
+ * CONTRAST. Two of the spec's pairings do not clear WCAG AA for body-size
+ * text, so each gets a tuned sibling and the spec value is kept for fills:
  *
- *   #8A7CA8 on #FFF0F6   3.44:1  →  --secondary-ink  #6A5C8A  5.43:1
- *   #FFFFFF on #FF3DA5   3.25:1  →  ink on pink      #1A0B3C  5.59:1
- *   #FF3DA5 on #FFF0F6   2.95:1  →  --tertiary-ink   #D60072  4.64:1
+ *   #A89274 on #253D2B   3.94:1  →  --secondary-ink  #BBA88A  5.1:1
+ *   #EFE2C4 on #D37B3A   2.45:1  →  ink on rust      #1C2E20  4.58:1
  *
- * The middle one is the important deviation: design.md specifies
- * `button-primary { textColor: on-primary (#FFFFFF) }`, which is 3.25:1 on the
- * pink and unreadable at button sizes. The deep purple is used instead.
+ * The second is a deliberate deviation: design.md specifies
+ * `button-primary { textColor: on-primary (#EFE2C4) }`, unreadable at button
+ * sizes. The pine ground is used as the ink on rust instead.
+ *
+ * `--dark` / `--light` back the `forest` / `sand` Tailwind aliases. Those are
+ * used where a surface must be dark (or light) whatever the theme — the hero,
+ * photo scrims — so they are not tied to ink/ground, which swap between a
+ * light and a dark theme.
  */
 
 :root {
-  /* Typography */
-  /* design.md asks for Luckiest Guy + Fredoka. Neither ships a Vietnamese
-     subset (latin-ext only), so ế ệ ộ ợ ừ ữ would fall back mid-word to a
-     completely different face — the same trap the previous serif pairing hit.
-     Sigmar One and Baloo 2 are the closest chunky/rounded equivalents that do
-     cover Vietnamese, so the whole UI stays in one voice. */
-  --font-display: 'Sigmar One', 'Luckiest Guy', ui-rounded, system-ui, sans-serif;
-  --font-body: 'Baloo 2', 'Fredoka', ui-rounded, system-ui, -apple-system, sans-serif;
+  /* Typography. Both faces ship a Vietnamese subset. */
+  --font-display: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-body: 'Lora', Georgia, 'Times New Roman', serif;
 
   /* Brand */
-  --primary-hue: 258 69% 14%; /* #1A0B3C */
-  --secondary-hue: 259 20% 57%; /* #8A7CA8 */
-  --tertiary: 328 100% 62%; /* #FF3DA5 */
-  --neutral: 336 100% 97%; /* #FFF0F6 */
-  --surface: 0 0% 100%; /* #FFFFFF */
+  --primary-hue: 42 61% 85%; /* #EFE2C4 */
+  --secondary-hue: 35 22% 56%; /* #A89274 */
+  --tertiary: 25 63% 53%; /* #D37B3A */
+  --neutral: 132 24% 14%; /* #1C2E20 */
+  --surface: 135 25% 19%; /* #253D2B */
+
+  --dark: var(--neutral);
+  --light: var(--primary-hue);
 
   /* Contrast-tuned siblings — see the note above. */
-  --secondary-ink: 259 20% 45%; /* #6A5C8A — 5.43:1 on neutral */
-  --tertiary-ink: 328 100% 42%; /* #D60072 — 4.64:1 on neutral */
+  --secondary-ink: 37 28% 64%; /* #BBA88A — 5.1:1 on surface */
+  --tertiary-ink: 25 63% 53%; /* #D37B3A — 4.58:1 on neutral, no tuning needed */
 
   /* Surface */
   --background: var(--neutral);
   --foreground: var(--primary-hue);
 
-  /* Cards are pure white on the pink ground, outlined rather than shadowed. */
   --card: var(--surface);
   --card-foreground: var(--primary-hue);
   --popover: var(--surface);
   --popover-foreground: var(--primary-hue);
 
-  /* Action. The one place tertiary is allowed, with ink on it for 5.59:1. */
+  /* Action. The one place tertiary is allowed, with pine on it for 4.58:1. */
   --primary: var(--tertiary);
-  --primary-foreground: var(--primary-hue);
+  --primary-foreground: var(--neutral);
 
   --secondary: var(--surface);
   --secondary-foreground: var(--primary-hue);
-  --muted: 336 60% 94%;
+  --muted: 134 22% 22%;
   --muted-foreground: var(--secondary-ink);
-  --accent: 336 100% 93%;
+  --accent: 134 22% 25%;
   --accent-foreground: var(--primary-hue);
 
-  --destructive: 356 82% 52%;
+  --destructive: 4 70% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  /* Lines. "Thick outlines" is the system's defining trait, so the border is
-     the full-strength ink rather than a hairline. */
+  /* Lines. Signage is outlined in ochre knocked back into the pine, not in
+     full-strength ink. Solid values so Tailwind's `/opacity` modifiers work. */
   --paper: var(--surface);
-  --border: var(--primary-hue);
-  --input: var(--primary-hue);
+  --border: 60 13% 32%; /* ochre at ~45% over pine */
+  --input: 48 15% 38%; /* ochre at ~60% over pine */
 
-  --ring: var(--tertiary-ink);
+  --ring: var(--tertiary);
 
-  /* Squishy. design.md: sm 10 / md 18 / lg 28. */
-  --radius: 18px;
+  /* design.md: sm 2 / md 4 / lg 6. */
+  --radius: 4px;
+
+  /*
+   * National Park surface system (design.national-park.md, "beta"). Each green
+   * is one elevation step; `well` sits below its parent. Applied by
+   * styles/np-surfaces.css on every public page (`.np-page`).
+   */
+  --np-canopy: 135 24% 10%; /* #131F16 */
+  --np-ground: 138 26% 13%; /* #18291D */
+  --np-surface: 138 26% 15%; /* #1D3123 */
+  --np-card: 138 26% 18%; /* #223A29 */
+  --np-raised: 136 25% 21%; /* #28432F */
+  --np-hover: 134 24% 23%; /* #2D4A34 */
+  --np-well: 140 26% 11%; /* #15241A */
+
+  --np-sage: 106 17% 65%; /* #9DB596 */
+  --np-moss: 96 21% 45%; /* #6E8B5A */
+  --np-teal: 162 35% 62%; /* #7CC0AC — photo actions */
+
+  --np-cream: 42 61% 86%; /* #F1E4C6 — headings, 9.8:1 on card */
+  --np-body: 43 34% 79%; /* #DCD2B8 — running text, 8.2:1 on card */
+  --np-meta: 43 22% 65%; /* #B9AE92 — metadata, 5.6:1 on card */
+
+  --np-beige: 41 55% 81%; /* #E9D8B4 — highlights at low alpha */
+  --np-ochre: 37 47% 60%; /* #C9A46A — radial light */
+
+  --np-primary: 26 67% 55%; /* #D9803E — burnt orange, fill only */
+  --np-primary-hover: 25 75% 59%; /* #E58B49 */
+  --np-primary-press: 25 61% 46%; /* #BF6B2E */
+  --np-on-accent: var(--np-well); /* 5.5:1 on orange, 6.0:1 on coral */
+  --np-social: 7 81% 68%; /* #F07C6C — coral: live and social only */
+
+  --np-shadow: 142 40% 4%; /* #060E09 — shadows are green-black, never grey */
 }

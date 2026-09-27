@@ -1,5 +1,8 @@
+import { MapPin } from 'lucide-react'
+
 import { GlassCard } from '@/components/GlassCard'
-import { dayCostOf } from '@/lib/itinerary'
+import { googleMapsUrl } from '@/lib/geo'
+import { dayCostOf, isPinned } from '@/lib/itinerary'
 import { formatLongDate, formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripDay } from '@/services/types'
@@ -10,8 +13,8 @@ interface DayItineraryProps {
 }
 
 /**
- * One day of a trip: date header, the ordered list of stops with note and
- * estimated cost, and a horizontal photo strip.
+ * One day of a trip: date header, the ordered list of stops with note,
+ * estimated cost and photo, and a horizontal strip of the day's photos.
  */
 export function DayItinerary({ day, className }: DayItineraryProps) {
   return (
@@ -57,10 +60,43 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
                   {location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
                 </span>
               </div>
+              {(location.address || isPinned(location)) && (
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-muted-foreground">
+                  <MapPin className="size-3.5 shrink-0 text-[hsl(var(--np-ochre))]" aria-hidden />
+                  {location.address && <span>{location.address}</span>}
+                  {isPinned(location) && (
+                    <a
+                      href={googleMapsUrl(location.lat, location.lng)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      Chỉ đường
+                    </a>
+                  )}
+                </p>
+              )}
               {location.note && (
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   {location.note}
                 </p>
+              )}
+              {location.photoUrl && (
+                <a
+                  href={location.photoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Xem ảnh ${location.name || `điểm dừng ${index + 1}`} cỡ lớn`}
+                  className="np-media group mt-3 block aspect-[16/10] w-full max-w-md overflow-hidden rounded-xl bg-np-well"
+                >
+                  <img
+                    src={location.photoUrl}
+                    alt={location.name}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none"
+                  />
+                </a>
               )}
             </div>
           </li>

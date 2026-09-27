@@ -1,5 +1,13 @@
 import { ApiError } from '@/services/client'
 
+/** What Cloudinary answers after an upload (the fields this app reads). */
+export interface UploadedImage {
+  public_id?: string
+  secure_url?: string
+  width?: number
+  height?: number
+}
+
 /** A signed upload as returned by our API: post `fields` plus the file to `uploadUrl`. */
 export interface SignedUpload {
   uploadUrl: string
@@ -14,12 +22,12 @@ export function uploadToCloudinary(
   { uploadUrl, fields }: SignedUpload,
   file: File,
   onProgress?: (percent: number) => void,
-): Promise<void> {
+): Promise<UploadedImage> {
   const form = new FormData()
   for (const [key, value] of Object.entries(fields)) form.append(key, value)
   form.append('file', file)
 
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<UploadedImage>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open('POST', uploadUrl)
     xhr.upload.onprogress = (event) => {
@@ -27,7 +35,11 @@ export function uploadToCloudinary(
     }
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve()
+        try {
+          resolve(JSON.parse(xhr.responseText) as UploadedImage)
+        } catch {
+          resolve({})
+        }
         return
       }
       let detail = ''

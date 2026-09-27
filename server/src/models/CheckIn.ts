@@ -35,12 +35,15 @@ const checkInSchema = new Schema(
       },
       default: null,
     },
+    /** Set while the check-in is in "Recently Deleted" (see lib/retention.ts). */
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true, versionKey: false },
 )
 
 checkInSchema.index({ createdAt: -1 })
 checkInSchema.index({ authorId: 1, createdAt: -1 })
+checkInSchema.index({ authorId: 1, deletedAt: 1 })
 // For later "how do people feel here" and per-user recaps.
 checkInSchema.index({ feeling: 1 })
 

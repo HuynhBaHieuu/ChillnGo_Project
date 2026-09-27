@@ -18,10 +18,11 @@ const SHORTCUTS: {
   hint: string
   start: CheckInStart
   icon: LucideIcon
+  /** The chip's tint — see `.np-chip-*` in styles/np-surfaces.css. */
   className: string
   wideOnly?: boolean
 }[] = [
-  { label: 'Ảnh', hint: 'Check-in: ảnh, cảm xúc và địa điểm', start: 'photos', icon: ImagePlus, className: 'text-emerald-600' },
+  { label: 'Ảnh', hint: 'Check-in: ảnh, cảm xúc và địa điểm', start: 'photos', icon: ImagePlus, className: 'np-chip-photo' },
 ]
 
 /**
@@ -37,11 +38,11 @@ export function PostComposer({ user }: { user: User }) {
   const [goingLive, setGoingLive] = useState(false)
 
   return (
-    <GlassCard className="p-3 sm:p-4">
+    <GlassCard className="np-surface p-3 sm:p-4">
       {/* GlassCard wraps its children in a layer of its own, so the row lives here. */}
       <div className="flex items-center gap-3">
         <Link to={`/users/${user._id}`} aria-label="Trang cá nhân của bạn" className="shrink-0">
-          <Avatar className="size-11">
+          <Avatar className="size-11 ring-2 ring-np-beige/15">
             <AvatarImage src={user.avatarUrl} alt="" />
             <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
           </Avatar>
@@ -49,13 +50,13 @@ export function PostComposer({ user }: { user: User }) {
 
         <Link
           to="/posts/new"
-          className="min-w-0 flex-1 truncate rounded-full bg-muted px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5"
+          className="np-well np-prompt min-w-0 flex-1 truncate rounded-full px-4 py-3 text-sm text-np-meta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5"
         >
           <span className="sm:hidden">Bạn vừa đi đâu?</span>
           <span className="hidden sm:inline">{user.displayName} ơi, bạn vừa đi đâu thế?</span>
         </Link>
 
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-2">
           {SHORTCUTS.map(({ label, hint, start, icon: Icon, className, wideOnly }) => (
             <button
               key={label}
@@ -64,12 +65,13 @@ export function PostComposer({ user }: { user: User }) {
               aria-label={hint}
               title={hint}
               className={cn(
-                'items-center gap-2 rounded-full p-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:px-3',
-                wideOnly ? 'hidden sm:flex' : 'flex',
+                'np-chip justify-center max-sm:w-11 max-sm:px-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                className,
+                wideOnly ? 'hidden sm:inline-flex' : 'inline-flex',
               )}
             >
-              <Icon className={cn('size-6', className)} aria-hidden />
-              <span className="hidden lg:inline">{label}</span>
+              <Icon className="size-5" aria-hidden />
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
           <button
@@ -77,10 +79,10 @@ export function PostComposer({ user }: { user: User }) {
             onClick={() => setGoingLive(true)}
             aria-label="Phát trực tiếp"
             title="Phát trực tiếp"
-            className="flex items-center gap-2 rounded-full p-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:px-3"
+            className="np-chip np-chip-live justify-center max-sm:w-11 max-sm:px-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Video className="size-6 text-rose-600" aria-hidden />
-            <span className="hidden lg:inline">Livestream</span>
+            <Video className="size-5" aria-hidden />
+            <span className="hidden sm:inline">Livestream</span>
           </button>
         </div>
       </div>

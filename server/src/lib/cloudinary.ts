@@ -195,6 +195,50 @@ export async function confirmCheckinPhoto(userId: string, publicId: string): Pro
   }
 }
 
+/* ------------------------------------------------------------ journey covers */
+
+/** Journey images (covers and stop photos): many per user, at random public ids under chillngo/posts/<userId>/. */
+const POST_COVER_STORED_LIMIT = 'c_limit,w_2560,h_2560'
+
+export function postCoverFolder(userId: string): string {
+  return `chillngo/posts/${userId}`
+}
+
+/**
+ * One signed upload for a journey image. The browser takes `secure_url` from
+ * Cloudinary's response and saves it as the journey's `coverUrl` or a stop's `photoUrl`.
+ */
+export function signPostCoverUpload(userId: string) {
+  const { cloudName, apiKey, apiSecret } = account()
+  const publicId = `${postCoverFolder(userId)}/${randomBytes(8).toString('hex')}`
+  const params = {
+    timestamp: Math.round(Date.now() / 1000),
+    public_id: publicId,
+    allowed_formats: ALLOWED_FORMATS,
+    transformation: POST_COVER_STORED_LIMIT,
+  }
+  const signature = cloudinary.utils.api_sign_request(params, apiSecret)
+
+  return {
+    publicId,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    fields: { ...params, timestamp: String(params.timestamp), api_key: apiKey, signature },
+  }
+}
+
+/**
+ * The public id of a journey image this user uploaded, read from its URL; null
+ * for any other image (a default travel photo, someone else's upload), which
+ * must not be deleted along with the journey.
+ */
+export function ownPostCoverId(userId: string, url: string): string | null {
+  const marker = `/${postCoverFolder(userId)}/`
+  const at = url.indexOf(marker)
+  if (at === -1) return null
+  const name = url.slice(at + marker.length, at + marker.length + 16)
+  return /^[a-f0-9]{16}$/.test(name) ? `${postCoverFolder(userId)}/${name}` : null
+}
+
 /** Deletes images (e.g. a deleted check-in's photos). Failures are logged, not thrown. */
 export async function destroyImages(publicIds: string[]): Promise<void> {
   if (!env.cloudinary || publicIds.length === 0) return

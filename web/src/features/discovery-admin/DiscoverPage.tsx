@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { LayoutGrid, MapIcon, SearchX, SlidersHorizontal } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
 import { EmptyState } from '@/components/EmptyState'
@@ -12,15 +13,27 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { FilterPanel } from '@/features/discovery-admin/components/FilterPanel'
 import { qk } from '@/lib/queryKeys'
-import { discoveryService } from '@/services'
+import { activityService, discoveryService } from '@/services'
 import type { DiscoverFilters } from '@/services/types'
-import { useUiStore, useViewerId } from '@/store'
+import { useAuthStore, useUiStore, useViewerId } from '@/store'
 
 export function DiscoverPage() {
   const viewerId = useViewerId()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  // ?q= opens Discover already searching (Your Activity → Search History links here).
+  const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<DiscoverFilters>(() => ({
     ...discoveryService.DEFAULT_FILTERS,
+    query: searchParams.get('q')?.slice(0, 120) ?? '',
   }))
+
+  // A search counts once the user stops typing; it goes to their Search History.
+  useEffect(() => {
+    const query = filters.query.trim()
+    if (!isAuthenticated || query.length < 2) return
+    const timer = window.setTimeout(() => activityService.recordSearch('journey', query), 1500)
+    return () => window.clearTimeout(timer)
+  }, [filters.query, isAuthenticated])
 
   const filterSheetOpen = useUiStore((s) => s.filterSheetOpen)
   const setFilterSheetOpen = useUiStore((s) => s.setFilterSheetOpen)
@@ -117,7 +130,7 @@ export function DiscoverPage() {
       <div className="grid gap-10 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
         {/* Desktop filter column */}
         <aside className="hidden lg:sticky lg:top-32 lg:block">
-          <GlassCard className="p-6">{filterPanel}</GlassCard>
+          <GlassCard className="np-surface p-6">{filterPanel}</GlassCard>
         </aside>
 
         <section>

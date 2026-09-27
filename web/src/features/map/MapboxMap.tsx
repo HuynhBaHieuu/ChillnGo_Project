@@ -1,7 +1,8 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl/mapbox'
+import type { MapRef } from 'react-map-gl/mapbox'
 
 import { MAPBOX_TOKEN, boundsOf, routeCoordinates } from '@/features/map/geometry'
 import type { MapPin } from '@/features/map/geometry'
@@ -66,6 +67,21 @@ export default function MapboxMap({
     [pins],
   )
 
+  // initialViewState only applies once: refit when the route changes later
+  // (the editor's live preview gains stops as the author pins them).
+  const mapRef = useRef<MapRef>(null)
+  const boundsKey = bounds ? bounds.flat().join(',') : ''
+  const firstFit = useRef(true)
+  useEffect(() => {
+    if (firstFit.current) {
+      firstFit.current = false
+      return
+    }
+    if (bounds) mapRef.current?.fitBounds(bounds, { padding: 56, duration: 600 })
+    // Keyed on the numbers, not the array identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boundsKey])
+
   if (!bounds || !MAPBOX_TOKEN) return null
 
   return (
@@ -75,6 +91,7 @@ export default function MapboxMap({
       aria-label={label}
     >
       <Map
+        ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
         mapStyle={MAP_STYLE}
         // Place names in Vietnamese where Mapbox has them, local names otherwise.
