@@ -1,0 +1,115 @@
+/*
+ * Light beam button — `<GlassButton tone="beam">` (components/Button.tsx).
+ *
+ * A dark pill with a beam of light running round its edge, adapted from the
+ * LightBeamButton pattern to the National Park palette: a burnt-orange to
+ * beige beam over the pine well, cream label, a soft orange glow.
+ *
+ * No extra markup: ::before is the rotating conic gradient, ::after the fill
+ * that covers all of it except a 2px ring. The angle is a registered custom
+ * property so the browser can animate it (without @property support it steps
+ * instead of gliding, and the button still works).
+ */
+
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --beam-shine {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+.light-beam {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 999px;
+  background: transparent;
+  color: hsl(var(--np-cream));
+  font-weight: 700;
+  /* A faint resting ring, so the edge reads where the beam is not. */
+  box-shadow:
+    inset 0 0 0 1px hsl(var(--np-beige) / 0.14),
+    0 0 22px -6px hsl(var(--np-primary) / 0.45);
+  transition:
+    transform 180ms ease-out,
+    box-shadow 220ms ease-out,
+    --beam-shine 400ms ease-out;
+}
+
+/* The beam. */
+.light-beam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0%,
+    hsl(var(--np-primary)) 38%,
+    hsl(var(--np-beige)) 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  animation: beam-spin 2.8s linear infinite;
+}
+
+/* The fill, with a light that rises from the top on hover. */
+.light-beam::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 50% 0%, hsl(var(--np-primary) / calc(0.1 + var(--beam-shine) * 0.18)) 0%, transparent 65%),
+    hsl(var(--np-well));
+}
+
+.light-beam:hover {
+  --beam-shine: 1;
+  transform: scale(1.02);
+  box-shadow:
+    inset 0 0 0 1px hsl(var(--np-beige) / 0.2),
+    0 0 28px -6px hsl(var(--np-primary) / 0.65);
+}
+
+.light-beam:active {
+  transform: scale(0.98);
+}
+
+.light-beam:focus-visible {
+  outline: 2px solid hsl(var(--np-primary));
+  outline-offset: 3px;
+}
+
+/* Reduced motion: a still beam, a full ring, no scaling. */
+@media (prefers-reduced-motion: reduce) {
+  .light-beam::before {
+    animation: none;
+    --beam-angle: 210deg;
+  }
+
+  .light-beam,
+  .light-beam:hover {
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--np-primary) / 0.45),
+      0 0 22px -6px hsl(var(--np-primary) / 0.45);
+  }
+
+  .light-beam:hover,
+  .light-beam:active {
+    transform: none;
+  }
+}

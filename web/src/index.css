@@ -4,6 +4,8 @@
 @import './styles/livestream.css';
 @import './styles/home.css';
 @import './styles/np-surfaces.css';
+@import './styles/light-beam.css';
+@import './styles/theme-void.css';
 
 @tailwind base;
 @tailwind components;

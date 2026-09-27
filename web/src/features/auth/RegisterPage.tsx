@@ -197,7 +197,7 @@ export function RegisterPage() {
           </p>
         )}
 
-        <GlassButton type="submit" size="lg" tone="sunset" className="w-full" disabled={mutation.isPending}>
+        <GlassButton type="submit" size="lg" tone="beam" className="w-full" disabled={mutation.isPending}>
           {mutation.isPending && <Loader2 className="animate-spin" />}
           Tạo tài khoản
         </GlassButton>

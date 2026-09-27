@@ -8,7 +8,7 @@ interface GlassButtonProps extends React.ComponentProps<'button'> {
   /** Render the child element instead of a `<button>` — for `<Link>` CTAs. */
   asChild?: boolean
   size?: 'sm' | 'md' | 'lg' | 'hero'
-  tone?: 'glass' | 'sunset'
+  tone?: 'glass' | 'sunset' | 'beam'
 }
 
 const SIZES: Record<NonNullable<GlassButtonProps['size']>, string> = {
@@ -30,6 +30,12 @@ const TONES: Record<NonNullable<GlassButtonProps['tone']>, string> = {
     'bg-sunset text-sunset-foreground shadow-lg shadow-forest-ink/30',
     'transition-colors duration-200 hover:bg-sunset/90',
   ].join(' '),
+  /**
+   * A dark pill with a beam of light running round its edge, for the few
+   * entry-point CTAs (hero, "Bắt đầu ngay", sign-in and sign-up). Drawn
+   * entirely by styles/light-beam.css.
+   */
+  beam: 'light-beam rounded-full font-bold',
 }
 
 /**
