@@ -4,6 +4,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { HomePage } from '@/app/landing/home/HomePage'
 import { NotFoundPage } from '@/app/landing/NotFoundPage'
 import { RootLayout } from '@/app/layout/RootLayout'
+import { ActivityPage } from '@/features/activity/ActivityPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
@@ -48,6 +49,15 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <PostEditorPage />
+          </RequireAuth>
+        ),
+      },
+
+      {
+        path: '/activity/:section?',
+        element: (
+          <RequireAuth>
+            <ActivityPage />
           </RequireAuth>
         ),
       },

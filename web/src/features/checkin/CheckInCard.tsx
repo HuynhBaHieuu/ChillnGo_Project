@@ -21,18 +21,18 @@ export function CheckInCard({ checkin, viewerId }: { checkin: CheckIn; viewerId:
   const isMine = viewerId === author._id
 
   return (
-    <GlassCard as="article" className="p-4 sm:p-5">
+    <GlassCard as="article" className="np-checkin p-4 sm:p-5">
       <div className="space-y-4">
         <header className="flex items-start gap-3">
           <Link to={`/users/${author._id}`} className="shrink-0">
-            <Avatar className="size-11">
+            <Avatar className="size-11 ring-2 ring-np-moss/40">
               <AvatarImage src={author.avatarUrl} alt="" />
               <AvatarFallback>{author.displayName.charAt(0)}</AvatarFallback>
             </Avatar>
           </Link>
           <div className="min-w-0 flex-1 text-sm leading-snug">
             <p>
-              <Link to={`/users/${author._id}`} className="font-semibold hover:underline">
+              <Link to={`/users/${author._id}`} className="font-semibold text-np-cream hover:underline">
                 {author.displayName}
               </Link>
               {/* "Minh đang cảm thấy 😌 thư giãn tại 📍 Phố Cổ Hội An" */}
@@ -60,14 +60,14 @@ export function CheckInCard({ checkin, viewerId }: { checkin: CheckIn; viewerId:
                 <span className="text-muted-foreground"> {photos.length > 0 ? 'đã chia sẻ ảnh' : 'đã chia sẻ'}</span>
               )}
             </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
               <time dateTime={checkin.createdAt}>{relativeTime(checkin.createdAt)}</time>
             </p>
           </div>
           {isMine && <DeleteCheckIn id={checkin._id} />}
         </header>
 
-        {checkin.caption && <p className="whitespace-pre-line text-sm leading-relaxed">{checkin.caption}</p>}
+        {checkin.caption && <p className="whitespace-pre-line text-[15px] leading-relaxed">{checkin.caption}</p>}
 
         <PhotoGrid photos={photos} />
 
@@ -89,7 +89,7 @@ function PhotoGrid({ photos }: { photos: CheckIn['photos'] }) {
   return (
     <div
       className={cn(
-        'grid gap-1.5 overflow-hidden rounded-2xl',
+        'np-media grid gap-1.5 overflow-hidden',
         count === 1 ? 'aspect-[16/10] max-h-[30rem] grid-cols-1' : 'h-72 grid-cols-2 sm:h-96',
         count >= 3 && 'grid-rows-2',
       )}
@@ -101,13 +101,13 @@ function PhotoGrid({ photos }: { photos: CheckIn['photos'] }) {
           target="_blank"
           rel="noreferrer"
           aria-label={`Xem ảnh ${i + 1} cỡ lớn`}
-          className={cn('block min-h-0 overflow-hidden bg-muted', count === 3 && i === 0 && 'row-span-2')}
+          className={cn('block min-h-0 overflow-hidden bg-np-canopy', count === 3 && i === 0 && 'row-span-2')}
         >
           <img
             src={photo.url}
             alt=""
             loading="lazy"
-            className="size-full object-cover transition-transform duration-300 hover:scale-[1.02]"
+            className="size-full object-cover transition-transform duration-300 hover:scale-[1.02] motion-reduce:transition-none"
           />
         </a>
       ))}
@@ -124,13 +124,13 @@ function LocationStrip({ location }: { location: NonNullable<CheckIn['location']
       href={googleMapsUrl(location.lat, location.lng)}
       target="_blank"
       rel="noreferrer"
-      className="group block overflow-hidden rounded-2xl border border-foreground/10 bg-muted"
+      className="np-well group block overflow-hidden rounded-[12px] transition-colors hover:border-np-beige/15"
     >
       {map && <img src={map} alt="" loading="lazy" className="aspect-[3/1] w-full object-cover sm:aspect-[6/1]" />}
       <div className="flex items-center gap-3 px-3 py-2.5 text-sm">
-        <MapPin className="size-4 shrink-0 text-orange-500" aria-hidden />
+        <MapPin className="size-4 shrink-0 text-[hsl(var(--np-ochre))]" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{location.name}</p>
+          <p className="truncate font-medium text-np-cream">{location.name}</p>
           {location.address && <p className="truncate text-xs text-muted-foreground">{location.address}</p>}
         </div>
         <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
@@ -164,7 +164,7 @@ function DeleteCheckIn({ id }: { id: string }) {
         title="Xoá check-in"
         description={
           <>
-            Check-in và ảnh của nó sẽ bị xoá vĩnh viễn.
+            Check-in sẽ được chuyển vào mục Đã xoá gần đây (Hoạt động của bạn) và có thể khôi phục trong 30 ngày.
             {remove.isError && <span className="mt-2 block text-destructive">{(remove.error as Error).message}</span>}
           </>
         }

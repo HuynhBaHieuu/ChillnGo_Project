@@ -28,7 +28,7 @@ Optional configuration — copy `.env.example` to `.env.local`:
 | `VITE_GOOGLE_CLIENT_ID` | The "Đăng nhập bằng Google" button and its divider are hidden. Setup steps are in `../server/README.md`. |
 | `VITE_API_URL` | Requests go to `/api` on the same origin. Fine for local dev, where Vite proxies them to the API. Set it to the deployed API URL in production. |
 | `VITE_MAPBOX_TOKEN` | `<MapPreview />` renders a static SVG sketch of the route instead of an interactive map. Everything else works. |
-| `VITE_HERO_VIDEO_URL` | The landing hero falls back to a public sample clip. Replace it with real travel footage. |
+| `VITE_HERO_VIDEO_URL` | With reduced motion on, the landing hero shows a still photo instead of this footage. Otherwise the hero uses the neon tubes background and ignores it. |
 
 Blank values count as unset (see `src/lib/env.ts`), so a copied `.env.example`
 behaves the same as no file at all.
@@ -62,6 +62,7 @@ keeps the API swap contained.
 | Route | Page | Guard |
 | --- | --- | --- |
 | `/` | Home — scroll-driven landing (GSAP + Lenis), see below | — |
+| `/landing-print` | Alternative landing in a print-editorial style (`app/landing/print/`): five pinned stages driven by CSS variables from one scroll handler, own fonts and nav | — |
 | `/feed` | Newsfeed, filtered to who you follow | — |
 | `/discover` | Filters + grid/map toggle, sorted by saves | — |
 | `/posts/:id` | Trip detail, itinerary, map, comments, clone | — |

@@ -8,7 +8,7 @@ const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal
 
-/** Dropdowns (avatar menu, notifications) sit on `.liquid-glass`. */
+/** Dropdowns (avatar menu, notifications) sit on a solid `.np-overlay`. */
 function DropdownMenuContent({
   className,
   sideOffset = 8,
@@ -20,7 +20,10 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          'liquid-glass animate-fade-rise z-50 min-w-[12rem] overflow-hidden rounded-2xl bg-[hsl(var(--background))]/90 p-1.5 text-foreground shadow-2xl',
+          // A quick fade and scale: a menu that takes 0.8s to appear is see-through for most of it.
+          'np-overlay z-50 min-w-[12rem] overflow-hidden rounded-2xl p-1.5 text-foreground',
+          'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150',
+          'motion-reduce:data-[state=open]:animate-none',
           className,
         )}
         {...props}

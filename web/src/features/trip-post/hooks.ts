@@ -164,6 +164,8 @@ export function useCreatePost() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: qk.post.all })
       void queryClient.invalidateQueries({ queryKey: qk.discover.all })
+      // Drafts and published journeys are listed in Your Activity too.
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
     },
   })
 }
@@ -176,6 +178,8 @@ export function useUpdatePost(postId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: qk.post.all })
       void queryClient.invalidateQueries({ queryKey: qk.discover.all })
+      // Drafts and published journeys are listed in Your Activity too.
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
     },
   })
 }

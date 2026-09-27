@@ -57,7 +57,7 @@ export function GlassButton({
   ...props
 }: GlassButtonProps) {
   const classes = cn(
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md',
     'font-medium disabled:pointer-events-none disabled:opacity-50',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
     '[&_svg]:size-4 [&_svg]:shrink-0',
@@ -68,7 +68,7 @@ export function GlassButton({
 
   if (!asChild) {
     return (
-      <button className={classes} {...props}>
+      <button data-tone={tone} className={classes} {...props}>
         <Label>{children}</Label>
       </button>
     )
@@ -83,14 +83,14 @@ export function GlassButton({
   const child = Children.only(children)
   if (!isValidElement<{ children?: React.ReactNode }>(child)) {
     return (
-      <Slot className={classes} {...props}>
+      <Slot data-tone={tone} className={classes} {...props}>
         {child}
       </Slot>
     )
   }
 
   return (
-    <Slot className={classes} {...props}>
+    <Slot data-tone={tone} className={classes} {...props}>
       {cloneElement(child, undefined, <Label>{child.props.children}</Label>)}
     </Slot>
   )

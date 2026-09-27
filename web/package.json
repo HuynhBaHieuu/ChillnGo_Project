@@ -42,6 +42,7 @@
     "react-map-gl": "^8.1.3",
     "react-router-dom": "^7.18.4",
     "tailwind-merge": "^3.7.0",
+    "threejs-components": "^0.0.30",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

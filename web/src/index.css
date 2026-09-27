@@ -3,6 +3,7 @@
 @import './styles/animations.css';
 @import './styles/livestream.css';
 @import './styles/home.css';
+@import './styles/np-surfaces.css';
 
 @tailwind base;
 @tailwind components;

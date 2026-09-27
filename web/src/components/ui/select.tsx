@@ -43,7 +43,7 @@ function SelectContent({
       <SelectPrimitive.Content
         position={position}
         className={cn(
-          'liquid-glass z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl bg-[hsl(var(--background))]/95 text-foreground shadow-2xl',
+          'np-overlay z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl text-foreground',
           position === 'popper' && 'data-[side=bottom]:translate-y-1',
           className,
         )}

@@ -10,8 +10,8 @@ interface DayItineraryProps {
 }
 
 /**
- * One day of a trip: date header, the ordered list of stops with note and
- * estimated cost, and a horizontal photo strip.
+ * One day of a trip: date header, the ordered list of stops with note,
+ * estimated cost and photo, and a horizontal strip of the day's photos.
  */
 export function DayItinerary({ day, className }: DayItineraryProps) {
   return (
@@ -61,6 +61,23 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   {location.note}
                 </p>
+              )}
+              {location.photoUrl && (
+                <a
+                  href={location.photoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Xem ảnh ${location.name || `điểm dừng ${index + 1}`} cỡ lớn`}
+                  className="np-media group mt-3 block aspect-[16/10] w-full max-w-md overflow-hidden rounded-xl bg-np-well"
+                >
+                  <img
+                    src={location.photoUrl}
+                    alt={location.name}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none"
+                  />
+                </a>
               )}
             </div>
           </li>

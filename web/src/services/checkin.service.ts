@@ -23,6 +23,9 @@ export interface CheckIn {
   photos: { url: string; width: number; height: number }[]
   location: Place | null
   createdAt: string
+  /** Set while the check-in is in "Recently Deleted"; `purgeAt` is when it goes for good. */
+  deletedAt?: string | null
+  purgeAt?: string | null
   author: { _id: string; username: string; displayName: string; avatarUrl: string }
 }
 
@@ -69,6 +72,22 @@ export async function createCheckIn(input: NewCheckIn, onProgress?: (percent: nu
   return withDefaultAvatar(checkin)
 }
 
+/** Moves a check-in to "Recently Deleted" (restorable for 30 days). */
 export function deleteCheckIn(id: string): Promise<{ ok: true }> {
   return http(`/api/checkins/${id}`, { method: 'DELETE' })
+}
+
+/** Your check-ins in "Recently Deleted", newest deletion first. */
+export async function listDeletedCheckIns(): Promise<CheckIn[]> {
+  const { items } = await http<{ items: CheckIn[] }>('/api/checkins/deleted')
+  return items.map(withDefaultAvatar)
+}
+
+export function restoreCheckIn(id: string): Promise<{ ok: true }> {
+  return http(`/api/checkins/${id}/restore`, { method: 'POST' })
+}
+
+/** Deletes a check-in and its photos for good. Only from "Recently Deleted". */
+export function deleteCheckInPermanently(id: string): Promise<{ ok: true }> {
+  return http(`/api/checkins/${id}/permanent`, { method: 'DELETE' })
 }

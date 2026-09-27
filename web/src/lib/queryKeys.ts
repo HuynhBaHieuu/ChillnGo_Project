@@ -37,6 +37,21 @@ export const qk = {
     mine: (ownerId: string) => ['itineraries', 'mine', ownerId] as const,
     detail: (id: string) => ['itineraries', 'detail', id] as const,
   },
+  /** Your Activity. Everything is keyed by the signed-in user. */
+  activity: {
+    all: (me: string) => ['activity', me] as const,
+    likes: (me: string) => ['activity', me, 'likes'] as const,
+    journeyComments: (me: string) => ['activity', me, 'journey-comments'] as const,
+    liveComments: (me: string) => ['activity', me, 'live-comments'] as const,
+    checkins: (me: string) => ['activity', me, 'checkins'] as const,
+    published: (me: string) => ['activity', me, 'published'] as const,
+    liveNow: (me: string) => ['activity', me, 'live-now'] as const,
+    streams: (me: string) => ['activity', me, 'streams'] as const,
+    drafts: (me: string) => ['activity', me, 'drafts'] as const,
+    searches: (me: string) => ['activity', me, 'searches'] as const,
+    account: (me: string) => ['activity', me, 'account'] as const,
+    deleted: (me: string) => ['activity', me, 'deleted'] as const,
+  },
   landing: {
     stats: ['landing', 'stats'] as const,
     destinations: ['landing', 'destinations'] as const,

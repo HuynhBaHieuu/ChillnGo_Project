@@ -152,7 +152,7 @@ export function LiveNowPage() {
 function Count({ n }: { n: number }) {
   if (!n) return null
   return (
-    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold leading-5 text-white">
+    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-np-social px-1.5 text-[10px] font-bold leading-5 text-np-ink">
       {n}
     </span>
   )
@@ -172,7 +172,7 @@ function LiveSection({
   return (
     <section aria-labelledby="live-now-heading" className="space-y-5">
       <h2 id="live-now-heading" className="flex items-center gap-2 font-display text-2xl">
-        <Radio className="size-5 text-rose-600" aria-hidden />
+        <Radio className="size-5 text-np-social" aria-hidden />
         Đang phát
       </h2>
 
@@ -187,7 +187,7 @@ function LiveSection({
       ) : streams?.length ? (
         <div className="animate-fade-rise-delay grid gap-6 lg:grid-cols-2">
           {streams.map((stream) => (
-            <LivestreamCard key={stream._id} stream={stream} />
+            <LivestreamCard key={stream._id} stream={stream} featured />
           ))}
         </div>
       ) : (
@@ -235,7 +235,7 @@ function ReplaySection({ authors }: { authors?: string[] }) {
       {past.length > 0 && (
         <div className="grid gap-4">
           {past.map((stream) => (
-            <ReplayCard key={stream._id} stream={stream} showHost />
+            <ReplayCard key={stream._id} stream={stream} showHost featured />
           ))}
         </div>
       )}

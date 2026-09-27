@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { CoverPicker } from '@/features/trip-post/components/CoverPicker'
 import { DayBuilder } from '@/features/trip-post/components/DayBuilder'
 import { TagPicker } from '@/features/trip-post/components/TagPicker'
 import { useCreatePost, usePost, useUpdatePost } from '@/features/trip-post/hooks'
@@ -190,6 +191,12 @@ export function PostEditorPage() {
 
   const totalEstCost = useMemo(() => totalCostOf(form.days), [form.days])
 
+  // The cover a post gets when none is chosen; also the picker's preview.
+  const autoCover = useMemo(
+    () => travelCover(form.title.slice(0, 30) || 'chillngo', themeFromText(form.title)),
+    [form.title],
+  )
+
   function patch(update: Partial<FormState>) {
     setForm((current) => ({ ...current, ...update }))
   }
@@ -220,13 +227,12 @@ export function PostEditorPage() {
   function buildPayload(status: 'draft' | 'published'): TripPostPayload {
     const sorted = [...form.days].sort((a, b) => a.date.localeCompare(b.date))
     const days = form.days.map((day, i) => ({ ...day, dayNumber: i + 1 }))
-    const coverSeed = form.title.slice(0, 30) || 'chillngo'
 
     return {
       authorId: user?._id ?? '',
       title: form.title.trim(),
       summary: form.summary.trim(),
-      coverUrl: form.coverUrl.trim() || travelCover(coverSeed, themeFromText(form.title)),
+      coverUrl: form.coverUrl.trim() || autoCover,
       region: form.region,
       season: form.season,
       startDate: sorted[0]?.date ?? todayIso(),
@@ -244,7 +250,8 @@ export function PostEditorPage() {
     event.preventDefault()
     mutation.mutate(buildPayload(status), {
       onSuccess: (post) => {
-        void navigate(`/posts/${post._id}`)
+        // Drafts live in Your Activity → Journeys; a published journey opens itself.
+        void navigate(post.status === 'draft' ? '/activity/journeys' : `/posts/${post._id}`)
       },
     })
   }
@@ -300,11 +307,12 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="coverUrl">Ảnh bìa (URL)</Label>
-              <Input
-                id="coverUrl"
+              <Label htmlFor="coverUrl">Ảnh bìa</Label>
+              <CoverPicker
                 value={form.coverUrl}
-                onChange={(e) => patch({ coverUrl: e.target.value })}
+                onChange={(coverUrl) => patch({ coverUrl })}
+                fallbackUrl={autoCover}
+                disabled={mutation.isPending}
               />
             </div>
           </GlassCard>
@@ -444,7 +452,7 @@ export function PostEditorPage() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Payload gửi đi được in ra console theo đúng schema <code>TripPost</code>.
+              Bản nháp được lưu vào tài khoản của bạn. Xem lại ở Hoạt động của bạn → Hành trình.
             </p>
           </GlassCard>
         </aside>
