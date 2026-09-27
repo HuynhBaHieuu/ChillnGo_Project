@@ -1,5 +1,8 @@
+import { MapPin } from 'lucide-react'
+
 import { GlassCard } from '@/components/GlassCard'
-import { dayCostOf } from '@/lib/itinerary'
+import { googleMapsUrl } from '@/lib/geo'
+import { dayCostOf, isPinned } from '@/lib/itinerary'
 import { formatLongDate, formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripDay } from '@/services/types'
@@ -57,6 +60,22 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
                   {location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
                 </span>
               </div>
+              {(location.address || isPinned(location)) && (
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-muted-foreground">
+                  <MapPin className="size-3.5 shrink-0 text-[hsl(var(--np-ochre))]" aria-hidden />
+                  {location.address && <span>{location.address}</span>}
+                  {isPinned(location) && (
+                    <a
+                      href={googleMapsUrl(location.lat, location.lng)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      Chỉ đường
+                    </a>
+                  )}
+                </p>
+              )}
               {location.note && (
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   {location.note}

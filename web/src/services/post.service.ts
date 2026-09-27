@@ -318,6 +318,13 @@ export async function addComment(input: {
 
 /* ------------------------------------------------------ journeys (drafts) */
 
+/** GET /api/posts/mine — every journey you wrote (published and drafts), last edited first. */
+export async function listMyJourneys(): Promise<ServerTripPost[]> {
+  const { items } = await http<{ items: ServerTripPost[] }>('/api/posts/mine?status=all')
+  for (const post of items) upsertServerPost(post)
+  return items
+}
+
 /** GET /api/posts/mine?status=draft — your unpublished journeys, last edited first. */
 export async function listDraftJourneys(): Promise<ServerTripPost[]> {
   const { items } = await http<{ items: ServerTripPost[] }>('/api/posts/mine?status=draft')

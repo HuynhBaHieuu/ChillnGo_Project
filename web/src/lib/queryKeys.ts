@@ -16,6 +16,8 @@ export const qk = {
     byAuthor: (authorId: string, viewerId: string | null) =>
       ['posts', 'author', authorId, viewerId] as const,
     published: (viewerId: string | null) => ['posts', 'published', viewerId] as const,
+    /** Journeys the signed-in user wrote. Under `posts`, so saving one refreshes it. */
+    mine: (viewerId: string | null) => ['posts', 'mine', viewerId] as const,
     comments: (postId: string) => ['posts', 'comments', postId] as const,
   },
   discover: {

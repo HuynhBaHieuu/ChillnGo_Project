@@ -6,6 +6,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
 import { GlassCard } from '@/components/GlassCard'
+import { MapPreview } from '@/components/MapPreview'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,7 +32,8 @@ import {
   SEASON_LABELS,
   formatVnd,
 } from '@/lib/format'
-import { totalCostOf } from '@/lib/itinerary'
+import { searchPlaces } from '@/lib/geo'
+import { UNPINNED, isPinned, totalCostOf } from '@/lib/itinerary'
 import { themeFromText, travelCover } from '@/lib/photos'
 import type {
   BudgetLevel,
@@ -70,11 +72,11 @@ function emptyDay(index: number, startDate: string): TripDay {
       {
         _id: `${id}_l1`,
         name: '',
+        address: '',
         note: '',
         estCost: 0,
         photoUrl: null,
-        lng: 106.0,
-        lat: 16.0,
+        ...UNPINNED,
       },
     ],
     photos: [],
@@ -119,8 +121,9 @@ function stateFromPost(post: TripPostWithAuthor): FormState {
  * what the fixtures encode and what `MapPreview` draws.
  */
 function buildRouteGeoJson(days: TripDay[], title: string): RouteGeoJson {
+  // Only stops with a real position: the unpinned placeholder is not a place.
   const coordinates = days.flatMap((day) =>
-    day.locations.map((loc): [number, number] => [loc.lng, loc.lat]),
+    day.locations.filter(isPinned).map((loc): [number, number] => [loc.lng, loc.lat]),
   )
 
   return {
@@ -191,6 +194,11 @@ export function PostEditorPage() {
 
   const totalEstCost = useMemo(() => totalCostOf(form.days), [form.days])
 
+  // Live route preview: the same geometry the saved journey will carry.
+  const routePreview = useMemo(() => buildRouteGeoJson(form.days, form.title), [form.days, form.title])
+  const totalStops = form.days.reduce((n, d) => n + d.locations.length, 0)
+  const pinnedStops = form.days.reduce((n, d) => n + d.locations.filter(isPinned).length, 0)
+
   // The cover a post gets when none is chosen; also the picker's preview.
   const autoCover = useMemo(
     () => travelCover(form.title.slice(0, 30) || 'chillngo', themeFromText(form.title)),
@@ -224,9 +232,9 @@ export function PostEditorPage() {
     }))
   }
 
-  function buildPayload(status: 'draft' | 'published'): TripPostPayload {
-    const sorted = [...form.days].sort((a, b) => a.date.localeCompare(b.date))
-    const days = form.days.map((day, i) => ({ ...day, dayNumber: i + 1 }))
+  function buildPayload(status: 'draft' | 'published', source: TripDay[] = form.days): TripPostPayload {
+    const sorted = [...source].sort((a, b) => a.date.localeCompare(b.date))
+    const days = source.map((day, i) => ({ ...day, dayNumber: i + 1 }))
 
     return {
       authorId: user?._id ?? '',
@@ -246,9 +254,40 @@ export function PostEditorPage() {
     }
   }
 
-  function submit(event: FormEvent, status: 'draft' | 'published') {
+  /** True while unpinned stops are being looked up by name, before saving. */
+  const [pinning, setPinning] = useState(false)
+
+  /**
+   * Stops the author described but never pinned get the first place Mapbox
+   * finds for their address (or, without one, their name), so a typed address
+   * still lands on the map. What they typed is kept. Stops nothing is found
+   * for stay off the map.
+   */
+  async function pinByName(days: TripDay[]): Promise<TripDay[]> {
+    const queryOf = (l: TripDay['locations'][number]) => (l.address?.trim() || l.name).trim()
+    const todo = days.flatMap((d) => d.locations).filter((l) => !isPinned(l) && queryOf(l).length >= 2)
+    if (todo.length === 0) return days
+    const found = new Map<string, { lng: number; lat: number }>()
+    await Promise.all(
+      todo.map(async (loc) => {
+        const [place] = await searchPlaces(queryOf(loc)).catch(() => [])
+        if (place) found.set(loc._id, { lng: place.lng, lat: place.lat })
+      }),
+    )
+    if (found.size === 0) return days
+    return days.map((day) => ({
+      ...day,
+      locations: day.locations.map((loc) => ({ ...loc, ...found.get(loc._id) })),
+    }))
+  }
+
+  async function submit(event: FormEvent, status: 'draft' | 'published') {
     event.preventDefault()
-    mutation.mutate(buildPayload(status), {
+    setPinning(true)
+    const days = await pinByName(form.days).finally(() => setPinning(false))
+    // Show the new pins in the form too, in case saving fails and they try again.
+    if (days !== form.days) setForm((current) => ({ ...current, days }))
+    mutation.mutate(buildPayload(status, days), {
       onSuccess: (post) => {
         // Drafts live in Your Activity → Journeys; a published journey opens itself.
         void navigate(post.status === 'draft' ? '/activity/journeys' : `/posts/${post._id}`)
@@ -277,7 +316,7 @@ export function PostEditorPage() {
       />
 
       <form
-        onSubmit={(e) => submit(e, 'published')}
+        onSubmit={(e) => void submit(e, 'published')}
         className="animate-fade-rise-delay grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"
       >
         <div className="space-y-8">
@@ -312,7 +351,7 @@ export function PostEditorPage() {
                 value={form.coverUrl}
                 onChange={(coverUrl) => patch({ coverUrl })}
                 fallbackUrl={autoCover}
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || pinning}
               />
             </div>
           </GlassCard>
@@ -340,6 +379,21 @@ export function PostEditorPage() {
               />
             ))}
           </section>
+
+          {/* The route as it will appear on the journey, updated as stops are pinned. */}
+          <GlassCard as="section" aria-label="Xem trước bản đồ tuyến" className="space-y-4 p-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display text-2xl">Bản đồ tuyến</h2>
+              <p className="text-sm text-muted-foreground">
+                {pinnedStops}/{totalStops} điểm dừng đã ghim
+              </p>
+            </div>
+            <MapPreview route={routePreview} className="h-72 w-full" label="Xem trước tuyến hành trình" />
+            <p className="text-xs text-muted-foreground">
+              Chỉ những điểm dừng đã ghim mới hiện trên bản đồ. Ghim bằng ô Địa chỉ: chọn gợi ý, dán link Google
+              Maps, hoặc chọn trên bản đồ.
+            </p>
+          </GlassCard>
         </div>
 
         {/* Sidebar */}
@@ -434,9 +488,9 @@ export function PostEditorPage() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || pinning}
               >
-                {mutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
+                {mutation.isPending || pinning ? <Loader2 className="animate-spin" /> : <Save />}
                 {isEdit ? 'Lưu thay đổi' : 'Đăng hành trình'}
               </GlassButton>
 
@@ -444,8 +498,8 @@ export function PostEditorPage() {
                 type="button"
                 variant="ghost"
                 className="w-full"
-                disabled={mutation.isPending}
-                onClick={(e) => submit(e, 'draft')}
+                disabled={mutation.isPending || pinning}
+                onClick={(e) => void submit(e, 'draft')}
               >
                 Lưu nháp
               </Button>

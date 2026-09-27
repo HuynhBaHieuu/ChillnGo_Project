@@ -59,6 +59,8 @@ const imageUrl = z
 const locationSchema = z.object({
   _id: z.string().max(80),
   name: z.string().max(200),
+  /** The stop's address as the author entered or picked it. */
+  address: z.string().trim().max(300).default(''),
   note: z.string().max(2000),
   estCost: z.number().min(0).max(1e12),
   photoUrl: imageUrl.nullable(),

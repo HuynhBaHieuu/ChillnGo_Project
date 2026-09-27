@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { dayCostOf } from '@/lib/itinerary'
+import { AddressField } from '@/features/trip-post/components/AddressField'
+import { PlaceField } from '@/features/trip-post/components/PlaceField'
+import { UNPINNED, dayCostOf } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
 import { postService } from '@/services'
@@ -40,12 +42,12 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
     const newLocation: TripLocation = {
       _id: `${day._id}_l${day.locations.length + 1}_${Date.now().toString(36)}`,
       name: '',
+      address: '',
       note: '',
       estCost: 0,
       photoUrl: null,
-      // Centre of Vietnam — a neutral default until a real place picker exists.
-      lng: 106.0,
-      lat: 16.0,
+      // Not on the map until the author picks a place (PlaceField).
+      ...UNPINNED,
     }
     patchDay({ locations: [...day.locations, newLocation] })
   }
@@ -165,11 +167,11 @@ function LocationRow({
               <Label htmlFor={`${location._id}-name`} className="text-xs">
                 Tên địa điểm
               </Label>
-              <Input
+              <PlaceField
                 id={`${location._id}-name`}
-                value={location.name}
-                onChange={(e) => onChange({ name: e.target.value })}
-                aria-label={`Tên địa điểm ${index + 1}`}
+                label={`Tên địa điểm ${index + 1}`}
+                location={location}
+                onChange={onChange}
               />
             </div>
             <div className="space-y-1.5">
@@ -186,6 +188,18 @@ function LocationRow({
                 aria-label={`Chi phí ước tính cho địa điểm ${index + 1}`}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor={`${location._id}-address`} className="text-xs">
+              Địa chỉ
+            </Label>
+            <AddressField
+              id={`${location._id}-address`}
+              label={`Địa chỉ của địa điểm ${index + 1}`}
+              location={location}
+              onChange={onChange}
+            />
           </div>
 
           <div className="space-y-1.5">

@@ -31,6 +31,16 @@ export function usePostsByAuthor(authorId: string | undefined) {
   })
 }
 
+/** Journeys you wrote yourself, published and drafts (Hành trình của tôi). */
+export function useMyJourneys() {
+  const viewerId = useViewerId()
+  return useQuery({
+    queryKey: qk.post.mine(viewerId),
+    queryFn: postService.listMyJourneys,
+    enabled: Boolean(viewerId),
+  })
+}
+
 /** Every published post — the source list for the merge picker. */
 export function usePublishedPosts(enabled = true) {
   const viewerId = useViewerId()
