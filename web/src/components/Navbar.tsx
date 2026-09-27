@@ -218,7 +218,7 @@ function NavControls() {
           >
             Đăng nhập
           </Link>
-          <GlassButton asChild size="md">
+          <GlassButton asChild size="md" tone="beam">
             <Link to="/register">Bắt đầu ngay</Link>
           </GlassButton>
         </>
@@ -280,7 +280,7 @@ function NavControls() {
               </>
             ) : (
               <>
-                <GlassButton asChild size="lg" className="w-full">
+                <GlassButton asChild size="lg" tone="beam" className="w-full">
                   <Link to="/register" onClick={() => setMobileNavOpen(false)}>
                     Bắt đầu ngay
                   </Link>

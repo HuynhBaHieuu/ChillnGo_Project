@@ -1,0 +1,184 @@
+/*
+ * "Void-canvas agent noir" — an alternative theme, from a design spec of the
+ * system observed on framer.com. Its tokens and rules are summarised below.
+ *
+ * Switched on by <html data-theme="void"> in index.html; remove the attribute
+ * to go back to National Park (styles/theme.css). Everything here is scoped to
+ * that attribute, so both themes live side by side.
+ *
+ *   background   #000000  true black, ~83% of the page
+ *   surface      #111111  panels and cards
+ *   surface-alt  #1E1E1E  raised / hover
+ *   text         #FFFFFF / #999999 (secondary, 6.4:1 on #111) / #666666 (large only)
+ *   accent       #0099FF  the one saturated hue: rules, focus, primary action
+ *   accent-2     #00BB88  status-good, photo actions
+ *
+ * Deviations, and why:
+ *   - GT Walsheim and Input Mono are commercial and have no Vietnamese; the
+ *     nearest free faces that do are Plus Jakarta Sans (display), Inter (body,
+ *     as specified) and JetBrains Mono (labels, figures).
+ *   - White on #0099FF is 3.0:1; labels on the accent are black (7.0:1).
+ *   - Coral stays for live status only: it is a signal, not decoration.
+ */
+
+:root[data-theme='void'] {
+  --font-display: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand */
+  --primary-hue: 0 0% 100%; /* #FFFFFF */
+  --secondary-hue: 0 0% 60%; /* #999999 */
+  --tertiary: 204 100% 50%; /* #0099FF */
+  --neutral: 0 0% 0%; /* #000000 */
+  --surface: 0 0% 7%; /* #111111 */
+  --dark: var(--neutral);
+  --light: var(--primary-hue);
+  --secondary-ink: 0 0% 60%; /* #999999 */
+  --tertiary-ink: 204 100% 60%; /* #33ADFF — accent as text, 7.8:1 on black */
+
+  --background: var(--neutral);
+  --foreground: var(--primary-hue);
+  --card: var(--surface);
+  --card-foreground: var(--primary-hue);
+  --popover: var(--surface);
+  --popover-foreground: var(--primary-hue);
+
+  --primary: var(--tertiary);
+  --primary-foreground: 0 0% 0%;
+  --secondary: var(--surface);
+  --secondary-foreground: var(--primary-hue);
+  --muted: 0 0% 12%; /* #1E1E1E */
+  --muted-foreground: var(--secondary-ink);
+  --accent: 0 0% 15%;
+  --accent-foreground: var(--primary-hue);
+
+  /* Hairlines: #767676 is the spec's line colour; at full strength on every
+     card and field it is loud, so resting lines sit darker and inputs between. */
+  --paper: var(--surface);
+  --border: 0 0% 20%;
+  --input: 0 0% 30%;
+  --ring: var(--tertiary);
+  --radius: 8px;
+
+  /* Surface system (styles/np-surfaces.css), re-pointed at the void palette. */
+  --np-canopy: 0 0% 0%;
+  --np-ground: 0 0% 0%;
+  --np-surface: 0 0% 5%; /* #0D0D0D */
+  --np-card: 0 0% 7%; /* #111111 */
+  --np-raised: 0 0% 12%; /* #1E1E1E */
+  --np-hover: 0 0% 15%;
+  --np-well: 0 0% 3%;
+
+  --np-sage: 0 0% 60%; /* tags and secondary icons go neutral grey */
+  --np-moss: 164 100% 37%; /* #00BB88 */
+  --np-teal: 164 100% 37%;
+
+  --np-cream: 0 0% 100%;
+  --np-body: 0 0% 90%;
+  --np-meta: 0 0% 60%;
+
+  --np-beige: 0 0% 100%; /* highlights: white at low alpha */
+  --np-ochre: 204 100% 60%;
+
+  --np-primary: 204 100% 50%;
+  --np-primary-hover: 204 100% 60%;
+  --np-primary-press: 204 100% 42%;
+  --np-on-accent: 0 0% 0%;
+
+  --np-shadow: 0 0% 0%;
+}
+
+/* ── Type ────────────────────────────────────────────────────────────────── */
+
+/* Display type: medium weight, tight negative tracking, never centred by the theme. */
+:root[data-theme='void'] h1,
+:root[data-theme='void'] h2,
+:root[data-theme='void'] h3,
+:root[data-theme='void'] .np-page h1,
+:root[data-theme='void'] .np-page h2,
+:root[data-theme='void'] .np-page h3 {
+  font-weight: 600;
+  /* Tighter than this and Vietnamese diacritics start to touch. */
+  letter-spacing: -0.025em;
+}
+
+:root[data-theme='void'] .np-page h1 {
+  letter-spacing: -0.035em;
+}
+
+/* The monospace register: labels, figures and status chips read as tool UI. */
+:root[data-theme='void'] .np-page .uppercase,
+:root[data-theme='void'] .np-stat dt,
+:root[data-theme='void'] .np-stat dd,
+:root[data-theme='void'] .np-replay-status,
+:root[data-theme='void'] .tabular-nums {
+  font-family: var(--font-mono);
+}
+
+:root[data-theme='void'] .np-stat dd {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Surfaces ────────────────────────────────────────────────────────────── */
+
+/* Void canvas: no light washes behind the page, only the grain. */
+:root[data-theme='void'] main .np-page::before {
+  background: #000;
+}
+
+:root[data-theme='void'] main .np-page::after {
+  opacity: 0.06;
+}
+
+/* Cards are flat panels with a hairline, not lit objects. */
+:root[data-theme='void'] .np-page .liquid-glass {
+  border-color: hsl(0 0% 100% / 0.08);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+:root[data-theme='void'] .np-page .np-featured.liquid-glass {
+  background: hsl(var(--np-raised));
+  border-color: hsl(var(--np-primary) / 0.35);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
+}
+
+:root[data-theme='void'] .np-page .liquid-glass-interactive:hover {
+  background-color: hsl(var(--np-raised));
+  border-color: hsl(0 0% 100% / 0.14);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.25);
+}
+
+/* Bands around the content (composer, live strip, filters): a shade off black. */
+:root[data-theme='void'] .np-page .np-surface.liquid-glass {
+  background: hsl(0 0% 7% / 0.9);
+  border-color: hsl(0 0% 100% / 0.07);
+}
+
+/* ── Controls ────────────────────────────────────────────────────────────── */
+
+/* Slight corners throughout: 10px buttons, never a full pill (chips excepted). */
+:root[data-theme='void'] .np-page [data-tone='sunset'] {
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+:root[data-theme='void'] .light-beam {
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 1px hsl(0 0% 100% / 0.12),
+    0 0 22px -6px hsl(var(--np-primary) / 0.5);
+}
+
+:root[data-theme='void'] header[data-nav='glass'] {
+  background: rgb(0 0 0 / 0.72);
+  border-color: hsl(0 0% 100% / 0.08);
+  border-radius: 12px;
+}
+
+:root[data-theme='void'] ::selection {
+  background: hsl(204 100% 50%);
+  color: #000;
+}

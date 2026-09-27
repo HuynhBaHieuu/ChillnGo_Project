@@ -237,7 +237,7 @@ export function IntroStage() {
             <GlassButton
               asChild
               size="hero"
-              tone="sunset"
+              tone="beam"
               className="animate-fade-rise-delay-3 mt-[3.429rem]"
             >
               <Link to="/discover">Khám phá ngay</Link>
