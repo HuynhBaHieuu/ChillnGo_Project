@@ -114,6 +114,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel = 'Huỷ',
   destructive = false,
   pending = false,
   onConfirm,
@@ -124,6 +125,8 @@ export function ConfirmDialog({
   title: string
   description: React.ReactNode
   confirmLabel: string
+  /** Nhãn nút huỷ. Mặc định "Huỷ". */
+  cancelLabel?: string
   destructive?: boolean
   pending?: boolean
   onConfirm: () => void
@@ -142,7 +145,7 @@ export function ConfirmDialog({
         {children}
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Huỷ
+            {cancelLabel}
           </Button>
           <Button variant={destructive ? 'destructive' : 'default'} onClick={onConfirm} disabled={pending}>
             {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}

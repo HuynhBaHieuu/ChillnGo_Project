@@ -28,7 +28,7 @@ function SheetOverlay({
 }
 
 const sheetVariants = cva(
-  'liquid-glass fixed z-50 flex flex-col gap-4 bg-[hsl(var(--background))]/90 p-6 shadow-2xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'np-overlay fixed z-50 flex flex-col gap-4 p-6 transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {

@@ -13,8 +13,7 @@
 .liquid-glass {
   position: relative;
   background: hsl(var(--surface));
-  border: 2px solid hsl(var(--border));
-  box-shadow: 4px 4px 0 0 hsl(var(--border));
+  border: 1px solid hsl(var(--border));
 }
 
 /* The rim is gone; nothing needs the ::before layer any more. Call sites still
@@ -36,8 +35,7 @@
 }
 
 .liquid-glass-interactive:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 0 hsl(var(--border));
+  transform: translateY(1px);
 }
 
 /* Reduced motion keeps the colour change and drops the travel. */

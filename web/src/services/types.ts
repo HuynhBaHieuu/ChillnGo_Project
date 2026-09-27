@@ -64,6 +64,8 @@ export interface User {
 export interface TripLocation {
   _id: ObjectId
   name: string
+  /** Street address, as entered, pasted from Google Maps or picked. Absent on older stops. */
+  address?: string
   note: string
   estCost: number
   photoUrl: string | null

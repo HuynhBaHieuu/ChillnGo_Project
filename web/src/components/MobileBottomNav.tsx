@@ -29,7 +29,7 @@ export function MobileBottomNav() {
       aria-label="Điều hướng chính"
       className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
     >
-      <div className="liquid-glass w-full max-w-sm rounded-full">
+      <div data-nav="dock" className="liquid-glass w-full max-w-sm rounded-full">
         <ul className="relative z-[1] flex items-center justify-between px-3 py-2">
           {items.map((item) => (
             <li key={item.label}>

@@ -1,4 +1,15 @@
-import type { TripDay } from '@/services/types'
+import type { TripDay, TripLocation } from '@/services/types'
+
+/**
+ * Where a new stop sits until the author picks a real place: the centre of
+ * Vietnam. It is a placeholder, never a destination, so it is left off maps.
+ */
+export const UNPINNED = { lng: 106, lat: 16 } as const
+
+/** Whether a stop has a real position (picked from search, or found by name). */
+export function isPinned(location: Pick<TripLocation, 'lng' | 'lat'>): boolean {
+  return !(location.lng === UNPINNED.lng && location.lat === UNPINNED.lat)
+}
 
 /**
  * Sum the estimated cost of every location across every day.

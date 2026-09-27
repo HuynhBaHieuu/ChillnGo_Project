@@ -12,7 +12,7 @@ interface AuthCardProps {
 /** Shared shell for /login and /register: centred glass card on the dark theme. */
 export function AuthCard({ title, description, children, footer }: AuthCardProps) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))] px-6 pb-32 pt-32 text-foreground">
+    <div className="np-page flex min-h-screen items-center justify-center bg-[hsl(var(--background))] px-6 pb-32 pt-32 text-foreground">
       <GlassCard className="animate-fade-rise w-full max-w-md p-8 sm:p-10">
         <h1 className="font-display text-4xl leading-tight tracking-tight">{title}</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>

@@ -111,7 +111,7 @@ export function FeedPage() {
       {live.data && live.data.length > 0 && (
         <div className="mb-6 flex flex-col gap-6">
           {live.data.map((stream) => (
-            <LivestreamCard key={stream._id} stream={stream} />
+            <LivestreamCard key={stream._id} stream={stream} featured />
           ))}
         </div>
       )}
@@ -135,7 +135,7 @@ export function FeedPage() {
             item.kind === 'post' ? (
               <TripCard key={`post-${item.post._id}`} post={item.post} />
             ) : item.kind === 'replay' ? (
-              <ReplayCard key={`replay-${item.stream._id}`} stream={item.stream} showHost />
+              <ReplayCard key={`replay-${item.stream._id}`} stream={item.stream} showHost featured />
             ) : (
               <CheckInCard key={`checkin-${item.checkin._id}`} checkin={item.checkin} viewerId={viewerId} />
             ),

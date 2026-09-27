@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/home/config'
@@ -7,14 +7,15 @@ import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
 import { inkColor, mutedInkColor } from '@/app/landing/home/palette'
 import { CharLayers } from '@/app/landing/home/parts/CharLayers'
+import { TubesBackground } from '@/app/landing/home/parts/TubesBackground'
 import { GlassButton } from '@/components/Button'
 import { optionalEnv } from '@/lib/env'
 import { landingPhoto } from '@/lib/photos'
 
 /**
- * The hero backdrop: peaks above a sea of cloud, the sight the whole product is
- * about. Set `VITE_HERO_VIDEO_URL` in `.env.local` to play footage over it
- * instead; the photo then serves as the poster frame.
+ * The hero backdrop is neon tubes that chase the cursor (`TubesBackground`).
+ * With reduced motion it falls back to a still: peaks above a sea of cloud, or
+ * `VITE_HERO_VIDEO_URL` footage over it with the photo as the poster frame.
  */
 const HERO_IMAGE = landingPhoto('saPa', 2400, 1350)
 const HERO_VIDEO_URL = optionalEnv(import.meta.env.VITE_HERO_VIDEO_URL)
@@ -59,6 +60,10 @@ const STATEMENT = [
  */
 export function IntroStage() {
   const ref = useRef<HTMLElement>(null)
+  // Read once: the stage timelines don't re-plan on a live change either.
+  const [reduceMotion] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  )
 
   useGSAP(
     () => {
@@ -173,7 +178,11 @@ export function IntroStage() {
           data-layer="range"
           className="absolute inset-0 scale-[1.12] will-change-transform motion-reduce:scale-100"
         >
-          {HERO_VIDEO_URL ? (
+          {!reduceMotion ? (
+            <div className="size-full bg-forest">
+              <TubesBackground />
+            </div>
+          ) : HERO_VIDEO_URL ? (
             <video
               autoPlay
               loop
@@ -197,7 +206,7 @@ export function IntroStage() {
         {/* A flat scrim, not a gradient blob — it only exists so white type
             stays legible over the photograph. Forest rather than black, so the
             shadows warm towards the palette instead of going grey. */}
-        <div aria-hidden className="absolute inset-0 bg-forest/65" />
+        {reduceMotion && <div aria-hidden className="absolute inset-0 bg-forest/65" />}
 
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 pb-40 pt-32 text-center">
           {/* Layer 2 — the headline, at mid depth. */}

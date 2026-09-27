@@ -129,7 +129,19 @@ function Replay({ stream }: { stream: Livestream }) {
 }
 
 /** The numbers of a stream: length, audience, engagement. */
-export function LiveStats({ stream, compactView = false }: { stream: Livestream; compactView?: boolean }) {
+/**
+ * `featured`: the Newsfeed's replay card — tiles from the National Park surface
+ * system (styles/np-surfaces.css), with the number as the tile's headline.
+ */
+export function LiveStats({
+  stream,
+  compactView = false,
+  featured = false,
+}: {
+  stream: Livestream
+  compactView?: boolean
+  featured?: boolean
+}) {
   const reactions = totalReactions(stream.reactions)
   const stats: { icon: LucideIcon; label: string; value: string }[] = [
     { icon: Clock, label: 'Thời lượng', value: formatDuration(stream.durationSec) },
@@ -138,6 +150,22 @@ export function LiveStats({ stream, compactView = false }: { stream: Livestream;
     { icon: MessageCircle, label: 'Bình luận', value: compact(stream.commentCount) },
     { icon: Sparkles, label: 'Cảm xúc', value: compact(reactions) },
   ]
+
+  if (featured) {
+    return (
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {stats.map((s, i) => (
+          <div key={s.label} className={cn('np-stat flex flex-col justify-between gap-1 px-3 py-2.5', i === 0 && 'col-span-2 sm:col-span-1')}>
+            <dt className="flex items-start gap-1.5 text-xs font-medium leading-snug text-np-meta">
+              <s.icon className={cn('mt-px size-3.5 shrink-0', i === 0 && 'text-np-social')} aria-hidden />
+              <span>{s.label}</span>
+            </dt>
+            <dd className="text-lg leading-tight sm:text-xl">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
 
   return (
     <div className="space-y-3">

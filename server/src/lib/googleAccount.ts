@@ -2,6 +2,7 @@ import { randomInt } from 'node:crypto'
 
 import { HttpError, duplicateKeyField } from './errors.js'
 import type { GoogleProfile } from './google.js'
+import { recordAccountEvents } from '../models/AccountEvent.js'
 import { User } from '../models/User.js'
 
 /**
@@ -29,8 +30,10 @@ export async function findOrCreateGoogleUser(
       emailVerifyTokenHash: undefined,
       emailVerifyExpiresAt: undefined,
     })
+    const verifiedNow = !byEmail.emailVerified
     if (!byEmail.avatarUrl && profile.picture) byEmail.avatarUrl = profile.picture
     await byEmail.save()
+    if (verifiedNow) await recordAccountEvents(byEmail._id, [{ type: 'email_verified', details: { via: 'google' } }])
     return byEmail
   }
 
@@ -43,7 +46,7 @@ export async function findOrCreateGoogleUser(
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const username = await availableUsername(profile.email, attempt > 0)
     try {
-      return await User.create({
+      const created = await User.create({
         username,
         displayName: (profile.name.trim() || profile.email.split('@')[0]).slice(0, 60),
         email: profile.email,
@@ -51,6 +54,8 @@ export async function findOrCreateGoogleUser(
         emailVerified: true,
         avatarUrl: profile.picture ?? '',
       })
+      await recordAccountEvents(created._id, [{ type: 'account_created', details: { via: 'google' } }])
+      return created
     } catch (error) {
       const field = duplicateKeyField(error)
       if (field === 'username') continue

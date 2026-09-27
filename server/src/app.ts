@@ -5,11 +5,14 @@ import { connectDb } from './db.js'
 import { env } from './env.js'
 import { HttpError, errorHandler } from './lib/errors.js'
 import { getSettings } from './models/Setting.js'
+import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
 import { authRouter } from './routes/auth.js'
 import { checkinsRouter } from './routes/checkins.js'
+import { geoRouter } from './routes/geo.js'
 import { livestreamsRouter } from './routes/livestreams.js'
 import { notificationsRouter } from './routes/notifications.js'
+import { postsRouter } from './routes/posts.js'
 import { profilesRouter } from './routes/profiles.js'
 import { usersRouter } from './routes/users.js'
 
@@ -53,6 +56,9 @@ app.use('/api/users', usersRouter)
 app.use('/api/notifications', notificationsRouter)
 app.use('/api/checkins', checkinsRouter)
 app.use('/api/livestreams', livestreamsRouter)
+app.use('/api/posts', postsRouter)
+app.use('/api/activity', activityRouter)
+app.use('/api/geo', geoRouter)
 
 /** Settings every visitor needs: the announcement banner and whether sign-up is open. */
 app.get('/api/settings/public', async (_req, res) => {

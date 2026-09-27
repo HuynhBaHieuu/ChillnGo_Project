@@ -19,12 +19,17 @@ export function TagChip({ tag, onClick, active = false, className }: TagChipProp
   )
 
   if (!onClick) {
-    return <span className={base}>{tag}</span>
+    return (
+      <span data-tag className={base}>
+        {tag}
+      </span>
+    )
   }
 
   return (
     <button
       type="button"
+      data-tag
       onClick={onClick}
       aria-pressed={active}
       className={cn(base, !active && 'hover:border-white/40 hover:text-foreground')}

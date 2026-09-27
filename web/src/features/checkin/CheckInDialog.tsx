@@ -22,7 +22,7 @@ import { canSearchPlaces, getDevicePosition, placeAt, searchPlaces } from '@/lib
 import type { Place } from '@/lib/geo'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
 import { cn } from '@/lib/utils'
-import { checkinService } from '@/services'
+import { activityService, checkinService } from '@/services'
 import { MAX_CHECKIN_PHOTOS } from '@/services/checkin.service'
 import type { User } from '@/services/types'
 
@@ -430,6 +430,8 @@ function PlacePicker({
                     type="button"
                     onClick={() => {
                       onChange(place)
+                      // Your Activity → Search History: the search that found a place.
+                      activityService.recordSearch('place', query)
                       setQuery('')
                       setResults([])
                     }}

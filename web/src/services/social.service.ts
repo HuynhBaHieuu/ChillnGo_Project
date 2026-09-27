@@ -10,6 +10,7 @@
 import { travelAvatar, travelBanner } from '@/lib/photos'
 
 import { assertFound, clone, db, delay, nextId, nowIso } from './client'
+import { syncServerPosts } from './serverPosts'
 import { http } from './http'
 import { decorate } from './post.service'
 import type {
@@ -119,7 +120,7 @@ export async function getBookmarkedPosts(
   userId: ObjectId,
   viewerId: ObjectId | null,
 ): Promise<TripPostWithAuthor[]> {
-  await delay()
+  await Promise.all([delay(), syncServerPosts()])
 
   return db.bookmarks
     .filter((b) => b.userId === userId)

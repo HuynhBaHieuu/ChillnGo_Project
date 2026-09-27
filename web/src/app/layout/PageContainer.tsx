@@ -17,7 +17,7 @@ export function PageContainer({ wide = false, className, children, ...props }: P
   return (
     <div
       className={cn(
-        'min-h-screen bg-[hsl(var(--background))] pb-32 pt-32 text-foreground md:pb-20',
+        'np-page min-h-screen bg-[hsl(var(--background))] pb-32 pt-32 text-foreground md:pb-20',
         className,
       )}
       {...props}

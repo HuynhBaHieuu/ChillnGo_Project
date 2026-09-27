@@ -8,15 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LiveBadge, LiveClock, ViewerCount } from '@/features/livestream/LiveBadge'
 import { LivePreview } from '@/features/livestream/LivePreview'
 import { relativeTime } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import type { Livestream } from '@/services/livestream.service'
 
 /**
  * A stream that is live right now, at the top of the Newsfeed. While the card
  * is on screen it plays a muted, low-quality preview of the host's camera
  * (hidden and uncounted, see LivePreview); until then, and if that fails, a
- * poster made from the host's photo.
+ * poster made from the host's photo. `featured` is the Newsfeed's treatment:
+ * a raised block with a coral rim (styles/np-surfaces.css).
  */
-export function LivestreamCard({ stream }: { stream: Livestream }) {
+export function LivestreamCard({ stream, featured = false }: { stream: Livestream; featured?: boolean }) {
   const href = `/live/${stream._id}`
   const [copied, setCopied] = useState(false)
 
@@ -31,35 +33,43 @@ export function LivestreamCard({ stream }: { stream: Livestream }) {
   }
 
   return (
-    <GlassCard as="article" className="p-4 sm:p-5">
+    <GlassCard as="article" className={cn('p-4 sm:p-5', featured && 'np-featured np-live')}>
       <div className="space-y-4">
         <header className="flex items-start gap-3">
           <Link to={`/users/${stream.host._id}`} className="relative shrink-0">
-            <Avatar className="size-11 ring-2 ring-rose-600 ring-offset-2 ring-offset-card">
+            <Avatar
+              className={cn(
+                'size-11 ring-2 ring-offset-2',
+                featured ? 'ring-np-social ring-offset-np-raised' : 'ring-rose-600 ring-offset-card',
+              )}
+            >
               <AvatarImage src={stream.host.avatarUrl} alt="" />
               <AvatarFallback>{stream.host.displayName.charAt(0)}</AvatarFallback>
             </Avatar>
           </Link>
           <div className="min-w-0 flex-1 text-sm leading-snug">
             <p>
-              <Link to={`/users/${stream.host._id}`} className="font-semibold hover:underline">
+              <Link to={`/users/${stream.host._id}`} className={cn('font-semibold hover:underline', featured && 'text-np-cream')}>
                 {stream.host.displayName}
               </Link>{' '}
               <span className="text-muted-foreground">đang phát trực tiếp</span>
             </p>
-            <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <LiveBadge />
+            <p className={cn('mt-1 flex flex-wrap items-center gap-2 text-muted-foreground', featured ? 'text-[13px]' : 'text-xs')}>
+              <LiveBadge className={featured ? 'np-glow-social bg-np-social text-np-ink' : undefined} />
               <span>Bắt đầu {relativeTime(stream.startedAt)}</span>
             </p>
           </div>
         </header>
 
-        <h3 className="font-display text-xl leading-tight">“{stream.title}”</h3>
+        <h3 className={cn('font-display leading-tight', featured ? 'text-xl sm:text-2xl' : 'text-xl')}>“{stream.title}”</h3>
         {stream.description && <p className="line-clamp-2 text-sm text-muted-foreground">{stream.description}</p>}
 
         <Link
           to={href}
-          className="group relative flex aspect-video items-center justify-center overflow-hidden rounded-2xl border-2 border-foreground bg-foreground"
+          className={cn(
+            'group relative flex aspect-video items-center justify-center overflow-hidden',
+            featured ? 'np-media' : 'rounded-2xl border-2 border-foreground bg-foreground',
+          )}
           aria-label={`Xem livestream ${stream.title}`}
         >
           <img
@@ -68,8 +78,14 @@ export function LivestreamCard({ stream }: { stream: Livestream }) {
             referrerPolicy="no-referrer"
             className="absolute inset-0 size-full scale-110 object-cover opacity-40 blur-2xl"
           />
-          <div className="relative flex flex-col items-center gap-3 text-center text-background">
-            <span className="grid size-16 place-items-center rounded-full bg-rose-600 text-white shadow-lg transition-transform group-hover:scale-105">
+          {featured && <span aria-hidden className="absolute inset-0 bg-np-canopy/45" />}
+          <div className={cn('relative flex flex-col items-center gap-3 text-center', featured ? 'text-np-cream' : 'text-background')}>
+            <span
+              className={cn(
+                'grid size-16 place-items-center rounded-full transition-transform group-hover:scale-105 motion-reduce:transition-none',
+                featured ? 'np-glow-social bg-np-social text-np-ink' : 'bg-rose-600 text-white shadow-lg',
+              )}
+            >
               <Radio className="size-7" aria-hidden />
             </span>
             <span className="text-sm font-semibold">Đang phát trực tiếp · bấm để xem</span>
@@ -79,7 +95,11 @@ export function LivestreamCard({ stream }: { stream: Livestream }) {
             Bấm để xem
           </span>
           <div className="absolute left-3 top-3 flex items-center gap-2 text-white">
-            <LiveClock baseSec={0} baseAt={Date.parse(stream.startedAt)} />
+            <LiveClock
+              baseSec={0}
+              baseAt={Date.parse(stream.startedAt)}
+              className={featured ? 'np-glow-social bg-np-social text-np-ink' : undefined}
+            />
             <ViewerCount count={stream.viewerCount} className="rounded-full bg-black/40 px-2.5 py-1" />
           </div>
         </Link>

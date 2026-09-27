@@ -31,7 +31,7 @@ export function LiveHistory({ userId, isOwn }: { userId: string; isOwn: boolean 
   return (
     <div className="space-y-6">
       {live.data?.map((stream) => (
-        <LivestreamCard key={stream._id} stream={stream} />
+        <LivestreamCard key={stream._id} stream={stream} featured />
       ))}
 
       {history.isPending && (
@@ -67,7 +67,7 @@ export function LiveHistory({ userId, isOwn }: { userId: string; isOwn: boolean 
         <ul className="grid gap-4">
           {past.map((stream) => (
             <li key={stream._id}>
-              <ReplayCard stream={stream} />
+              <ReplayCard stream={stream} featured />
             </li>
           ))}
         </ul>

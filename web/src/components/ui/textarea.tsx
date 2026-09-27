@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (
     <textarea
+      data-field
       className={cn(
         'flex min-h-[80px] w-full rounded-md border border-input bg-white/[0.03] px-3 py-2 text-sm text-foreground transition-colors',
         'placeholder:text-muted-foreground/70',

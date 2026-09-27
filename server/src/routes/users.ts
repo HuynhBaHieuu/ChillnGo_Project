@@ -11,6 +11,8 @@ import { HttpError, duplicateKeyField } from '../lib/errors.js'
 import { displayNameSchema, usernameSchema } from '../lib/schemas.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
+import { recordAccountEvents } from '../models/AccountEvent.js'
+import type { AccountEventType } from '../models/AccountEvent.js'
 import { toPublicUser } from '../models/User.js'
 
 export const usersRouter = Router()
@@ -52,6 +54,21 @@ usersRouter.patch('/me', async (req, res) => {
   const input = profileSchema.parse(req.body)
   const user = currentUser(res)
 
+  // What actually changed, for "Account History". Written after the save succeeds.
+  const events: { type: AccountEventType; details?: Record<string, unknown> }[] = []
+  if (input.displayName !== undefined && input.displayName !== user.displayName) {
+    events.push({ type: 'display_name_changed', details: { from: user.displayName, to: input.displayName } })
+  }
+  if (input.username !== undefined && input.username.toLowerCase() !== user.username) {
+    events.push({ type: 'username_changed', details: { from: user.username, to: input.username.toLowerCase() } })
+  }
+  if (input.bio !== undefined && input.bio !== user.bio) events.push({ type: 'bio_changed' })
+  if (input.location !== undefined && input.location !== user.location) {
+    events.push({ type: 'location_changed', details: { from: user.location, to: input.location } })
+  }
+  if (input.avatar) events.push({ type: input.avatar === 'uploaded' ? 'avatar_changed' : 'avatar_removed' })
+  if (input.cover) events.push({ type: input.cover === 'uploaded' ? 'cover_changed' : 'cover_removed' })
+
   if (input.displayName !== undefined) user.displayName = input.displayName
   if (input.username !== undefined) user.username = input.username
   if (input.bio !== undefined) user.bio = input.bio
@@ -76,5 +93,6 @@ usersRouter.patch('/me', async (req, res) => {
     throw error
   }
 
+  await recordAccountEvents(user._id, events)
   res.json({ user: toPublicUser(user) })
 })

@@ -82,7 +82,7 @@ export function LivestreamPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   // pb-36 on phones keeps the comment box above the fixed bottom navigation.
-  return <div className="min-h-screen bg-[hsl(var(--background))] px-4 pb-36 pt-28 text-foreground sm:px-6 md:pb-16">{children}</div>
+  return <div className="np-page min-h-screen bg-[hsl(var(--background))] px-4 pb-36 pt-28 text-foreground sm:px-6 md:pb-16">{children}</div>
 }
 
 function Notice({ title, text }: { title: string; text: string }) {

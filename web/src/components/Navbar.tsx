@@ -1,4 +1,4 @@
-import { LogOut, Menu, PenSquare, Settings, User as UserIcon } from 'lucide-react'
+import { Activity, LogOut, Menu, PenSquare, Settings, User as UserIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
@@ -46,7 +46,7 @@ export function Navbar() {
 
 function GlassNavbar() {
   return (
-    <header className="liquid-glass fixed inset-x-0 top-0 z-50">
+    <header data-nav="glass" className="liquid-glass fixed inset-x-0 top-0 z-50">
       <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
         <Logo />
         <DesktopLinks linkClassName="text-muted-foreground hover:text-foreground" activeClassName="text-foreground" />
@@ -194,6 +194,12 @@ function NavControls() {
                 <Link to="/posts/new">
                   <PenSquare />
                   Đăng bài mới
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/activity">
+                  <Activity />
+                  Hoạt động của bạn
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

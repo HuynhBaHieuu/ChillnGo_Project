@@ -17,22 +17,42 @@ export default {
            sites keep compiling: `forest` is now the ink, `sand` the ground,
            `sunset` the pink accent. */
         forest: {
-          DEFAULT: 'hsl(var(--primary-hue))',
-          ink: 'hsl(var(--primary-hue))',
+          DEFAULT: 'hsl(var(--dark))',
+          ink: 'hsl(var(--dark))',
         },
         moss: {
           DEFAULT: 'hsl(var(--secondary-hue))',
           bright: 'hsl(var(--secondary-hue))',
           deep: 'hsl(var(--secondary-ink))',
         },
-        sand: 'hsl(var(--neutral))',
+        sand: 'hsl(var(--light))',
         sunset: {
           DEFAULT: 'hsl(var(--tertiary))',
-          foreground: 'hsl(var(--primary-hue))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
         tertiary: {
           DEFAULT: 'hsl(var(--tertiary))',
           ink: 'hsl(var(--tertiary-ink))',
+        },
+
+        /* National Park surface system — see styles/np-surfaces.css. */
+        np: {
+          ground: 'hsl(var(--np-ground) / <alpha-value>)',
+          surface: 'hsl(var(--np-surface) / <alpha-value>)',
+          card: 'hsl(var(--np-card) / <alpha-value>)',
+          raised: 'hsl(var(--np-raised) / <alpha-value>)',
+          hover: 'hsl(var(--np-hover) / <alpha-value>)',
+          well: 'hsl(var(--np-well) / <alpha-value>)',
+          canopy: 'hsl(var(--np-canopy) / <alpha-value>)',
+          sage: 'hsl(var(--np-sage) / <alpha-value>)',
+          moss: 'hsl(var(--np-moss) / <alpha-value>)',
+          teal: 'hsl(var(--np-teal) / <alpha-value>)',
+          cream: 'hsl(var(--np-cream) / <alpha-value>)',
+          body: 'hsl(var(--np-body) / <alpha-value>)',
+          meta: 'hsl(var(--np-meta) / <alpha-value>)',
+          beige: 'hsl(var(--np-beige) / <alpha-value>)',
+          social: 'hsl(var(--np-social) / <alpha-value>)',
+          ink: 'hsl(var(--np-on-accent) / <alpha-value>)',
         },
 
         border: 'hsl(var(--border))',
@@ -70,11 +90,15 @@ export default {
           foreground: 'hsl(var(--card-foreground))',
         },
       },
-      /* design.md: sm 10 / md 18 / lg 28 — squishy on purpose. */
+      /* design.md: sm 2 / md 4 / lg 6 — signage corners. The larger Tailwind
+         steps are pulled in too, so existing `rounded-2xl` cards follow. */
       borderRadius: {
-        lg: '28px',
+        '3xl': '8px',
+        '2xl': '6px',
+        xl: '6px',
+        lg: '6px',
         md: 'var(--radius)',
-        sm: '10px',
+        sm: '2px',
       },
       maxWidth: {
         '7xl': '80rem',
