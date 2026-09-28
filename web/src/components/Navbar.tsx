@@ -1,17 +1,10 @@
-import { Activity, LogOut, Menu, PenSquare, Settings, User as UserIcon } from 'lucide-react'
+import { Menu, PenSquare } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
+import { AccountMenu } from '@/components/AccountMenu'
 import { GlassButton } from '@/components/Button'
+import { PillNav } from '@/components/PillNav'
 import { NotificationBell } from '@/components/NotificationBell'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Sheet,
   SheetContent,
@@ -49,7 +42,7 @@ function GlassNavbar() {
     <header data-nav="glass" className="liquid-glass fixed inset-x-0 top-0 z-50">
       <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
         <Logo />
-        <DesktopLinks linkClassName="text-muted-foreground hover:text-foreground" activeClassName="text-foreground" />
+        <DesktopLinks />
         <NavControls />
       </nav>
     </header>
@@ -76,7 +69,7 @@ function TransparentNavbar() {
           <Logo />
         </div>
         <div className="pointer-events-auto">
-          <DesktopLinks linkClassName="nav-link" activeClassName="nav-link-active" />
+          <DesktopLinks />
         </div>
         <div className="nav-controls pointer-events-auto justify-self-end">
           <NavControls />
@@ -97,29 +90,20 @@ function Logo() {
   )
 }
 
-function DesktopLinks({
-  linkClassName,
-  activeClassName,
-}: {
-  linkClassName: string
-  activeClassName: string
-}) {
+/**
+ * Five text pills are ~590px wide. The home navbar centres them between the
+ * logo and the signed-out controls, which needs ~1100px, so they start at xl;
+ * below that the menu sheet carries the links.
+ */
+function DesktopLinks() {
+  const items = NAV_LINKS.map((link) => ({
+    ...link,
+    end: link.to === '/',
+    badge: link.to === '/live' ? <LiveCount /> : undefined,
+  }))
+
   return (
-    <div className="hidden items-center gap-8 md:flex">
-      {NAV_LINKS.map((link) => (
-        <NavLink
-          key={link.label}
-          to={link.to}
-          end={link.to === '/'}
-          className={({ isActive }) =>
-            cn('flex items-center gap-1.5 text-sm transition-colors', linkClassName, isActive && activeClassName)
-          }
-        >
-          {link.label}
-          {link.to === '/live' && <LiveCount />}
-        </NavLink>
-      ))}
-    </div>
+    <PillNav items={items} className="hidden xl:flex" />
   )
 }
 
@@ -158,57 +142,7 @@ function NavControls() {
         <>
           <NotificationBell />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label="Tài khoản"
-                className="rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <Avatar className="size-10">
-                  <AvatarImage src={user.avatarUrl} alt="" />
-                  <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="normal-case tracking-normal">
-                <span className="block text-sm text-foreground">{user.displayName}</span>
-                <span className="block text-xs">@{user.username}</span>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={`/users/${user._id}`}>
-                  <UserIcon />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/profile/edit">
-                  <Settings />
-                  Chỉnh sửa hồ sơ
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/posts/new">
-                  <PenSquare />
-                  Đăng bài mới
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/activity">
-                  <Activity />
-                  Hoạt động của bạn
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={handleSignOut}>
-                <LogOut />
-                Đăng xuất
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <AccountMenu user={user} onSignOut={handleSignOut} />
         </>
       ) : (
         <>
@@ -230,7 +164,7 @@ function NavControls() {
           <button
             type="button"
             aria-label="Mở menu"
-            className="liquid-glass liquid-glass-interactive flex size-10 items-center justify-center rounded-full text-foreground md:hidden"
+            className="liquid-glass liquid-glass-interactive flex size-10 items-center justify-center rounded-full text-foreground xl:hidden"
           >
             <Menu className="relative z-[1] size-4" />
           </button>
