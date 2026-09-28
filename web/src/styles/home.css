@@ -25,31 +25,28 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* Transparent home navbar. Only the brand and the links are recoloured by
-   theme. The controls (bell, auth CTAs) are not: under Arcade Neon Pop
+/* Transparent home navbar. Only the brand and the login link are recoloured by
+   theme; the route links are a solid pill (components/PillNav) that reads on
+   any section. The controls (bell, auth CTAs) are not: under Arcade Neon Pop
    `.liquid-glass` is already a flat white card with an ink outline, which reads
    on both the footage and the pink ground, so the old solid-fill override for
    light sections is gone. */
 .nav-transparent .nav-brand,
-.nav-transparent .nav-link,
 .nav-controls .nav-login {
   transition: color 300ms ease;
 }
 
-.nav-transparent .nav-brand,
-.nav-transparent .nav-link:hover,
-.nav-transparent .nav-link-active {
+.nav-transparent .nav-brand {
   color: #ffffff;
 }
 
-/* `.nav-login` joins the links here: its own `text-muted-foreground` is moss,
+/* `.nav-login`: its own `text-muted-foreground` is moss,
    which clears AA on the app's solid forest ground but only reaches 3.2:1 over
    the hero photograph.
 
    0.8 rather than 0.7: measured against the brightest patch of cloud the nav
-   row crosses, 0.7 lands at 4.2:1 and 0.8 at 4.9:1. Active and hover states go
-   to full white above, which keeps the hierarchy. */
-.nav-transparent .nav-link,
+   row crosses, 0.7 lands at 4.2:1 and 0.8 at 4.9:1. The brand stays full
+   white above, which keeps the hierarchy. */
 .nav-transparent .nav-login {
   color: rgb(255 255 255 / 0.8);
 }
@@ -58,12 +55,6 @@ html.lenis body {
    rest of the page is set in — deep purple — not `--background`, which under
    this palette is the pink itself and left the links invisible. */
 html[data-nav-theme='light'] .nav-transparent .nav-brand,
-html[data-nav-theme='light'] .nav-transparent .nav-link:hover,
-html[data-nav-theme='light'] .nav-transparent .nav-link-active,
 html[data-nav-theme='light'] .nav-controls .nav-login {
   color: hsl(var(--foreground));
-}
-
-html[data-nav-theme='light'] .nav-transparent .nav-link {
-  color: hsl(var(--foreground) / 0.7);
 }
