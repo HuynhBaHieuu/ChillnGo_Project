@@ -288,3 +288,11 @@ export interface DestinationRow {
   /** The trip's short title, e.g. "Hà Giang Loop 4N3Đ". */
   tripTitle: string
 }
+
+/** A trip photo for the home page gallery, labelled with the trip it came from. */
+export interface MomentPhoto {
+  url: string
+  postId: ObjectId
+  /** The trip's short title, e.g. "Hà Giang Loop 4N3Đ". */
+  tripTitle: string
+}

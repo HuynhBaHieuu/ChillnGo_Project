@@ -53,17 +53,28 @@ export function HomePage() {
     return () => clearNavTheme()
   }, [])
 
-  // Web fonts change text heights, which moves every pin below the hero.
+  /*
+   * Web fonts change text heights, which moves every pin below the hero.
+   *
+   * A background refetch can also change how many rows or cards a stage has
+   * (cached data renders first). That stage then rebuilds its pin after the
+   * stages below it were created, so put the triggers back in page order before
+   * re-measuring — otherwise every pin below it starts in the wrong place.
+   */
+  const rowCount = rows.data?.length
+  const cardCount = featured.data?.length
   useEffect(() => {
     if (!ready) return
     let cancelled = false
     void document.fonts.ready.then(() => {
-      if (!cancelled) ScrollTrigger.refresh()
+      if (cancelled) return
+      ScrollTrigger.sort()
+      ScrollTrigger.refresh()
     })
     return () => {
       cancelled = true
     }
-  }, [ready])
+  }, [ready, rowCount, cardCount])
 
   /*
    * Re-assert the hero's theme once the stages below have been measured.

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 
 import { GlassCard } from '@/components/GlassCard'
 import { TagChipList } from '@/components/TagChip'
+import { TiltCard } from '@/components/TiltCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   BUDGET_LABELS,
+  REGION_LABELS,
   formatCount,
   formatVndShort,
   relativeTime,
@@ -26,11 +28,11 @@ interface TripCardProps {
 export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
   const isGrid = layout === 'grid'
 
-  return (
+  const card = (
     <GlassCard
       as="article"
       interactive
-      className={cn('overflow-hidden', className)}
+      className={cn('overflow-hidden', isGrid && 'h-full', className)}
     >
       <Link
         to={`/posts/${post._id}`}
@@ -122,6 +124,16 @@ export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
         </div>
       </Link>
     </GlassCard>
+  )
+
+  // Only the column card tilts: on the wide feed card the same angle swings
+  // the far edge too far.
+  if (!isGrid) return card
+
+  return (
+    <TiltCard caption={`${REGION_LABELS[post.region]} · Xem hành trình`}>
+      {card}
+    </TiltCard>
   )
 }
 

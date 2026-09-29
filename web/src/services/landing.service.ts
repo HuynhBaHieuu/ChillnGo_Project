@@ -7,7 +7,7 @@
  */
 
 import { clone, db, delay } from './client'
-import type { DestinationRow, LandingStats, TripPost } from './types'
+import type { DestinationRow, LandingStats, MomentPhoto, TripPost } from './types'
 
 function published(): TripPost[] {
   return db.tripPosts.filter((p) => p.status === 'published')
@@ -51,15 +51,19 @@ export async function getDestinationRows(): Promise<DestinationRow[]> {
 }
 
 /**
- * GET /api/landing/moments — trip photos for the home page photo wheel.
+ * GET /api/landing/moments — trip photos for the home page gallery.
  *
- * Taken round-robin across trips so neighbouring photos on the wheel come from
- * different journeys.
+ * Taken round-robin across trips so neighbouring photos in the gallery come
+ * from different journeys.
  */
-export async function getMomentPhotos(limit: number): Promise<string[]> {
+export async function getMomentPhotos(limit: number): Promise<MomentPhoto[]> {
   await delay()
-  const perPost = published().map((p) => p.days.flatMap((d) => d.photos))
-  const out: string[] = []
+  const perPost = published().map((p) =>
+    p.days.flatMap((d) =>
+      d.photos.map((url) => ({ url, postId: p._id, tripTitle: shortTitle(p.title) })),
+    ),
+  )
+  const out: MomentPhoto[] = []
 
   for (let i = 0; out.length < limit; i += 1) {
     let added = false
