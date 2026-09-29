@@ -22,5 +22,14 @@ export const groundColor = () => token('--background', '#fff0f6')
 /** Body ink — the deep purple everything readable is set in. */
 export const inkColor = () => token('--foreground', '#1a0b3c')
 
+/**
+ * The display face's family name, for text drawn on a canvas. Only the first
+ * family: a canvas silently keeps its 10px sans-serif default when it cannot
+ * parse a `font` string, so the fewer names in it, the less can go wrong.
+ */
+export const displayFontFamily = () =>
+  getComputedStyle(document.documentElement).getPropertyValue('--font-display').split(',')[0].trim() ||
+  'sans-serif'
+
 /** Muted ink, for type that has not lit up yet. */
 export const mutedInkColor = () => token('--secondary-ink', '#6a5c8a')

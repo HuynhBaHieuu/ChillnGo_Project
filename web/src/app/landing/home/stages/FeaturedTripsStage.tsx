@@ -113,7 +113,9 @@ export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
         )
       })
     },
-    { scope: ref, dependencies: [cards.length] },
+    // revertOnUpdate: see DestinationsStage — a new card count must replace the
+    // pin, not add a second one.
+    { scope: ref, dependencies: [cards.length], revertOnUpdate: true },
   )
 
   return (

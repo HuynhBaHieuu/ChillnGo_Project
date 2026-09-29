@@ -4,24 +4,31 @@ import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength } from '@/app/landing/home/c
 import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
-import { groundColor, inkColor } from '@/app/landing/home/palette'
+import { displayFontFamily, groundColor, inkColor } from '@/app/landing/home/palette'
 import { CompassMark } from '@/app/landing/home/parts/CompassMark'
+import { CurvedGallery } from '@/app/landing/home/parts/curvedGallery'
 import { Dome } from '@/app/landing/home/parts/Dome'
 import { addDome } from '@/app/landing/home/parts/domeTween'
-import { MomentsRing } from '@/app/landing/home/parts/MomentsRing'
 import { cn } from '@/lib/utils'
-import type { DestinationRow } from '@/services/types'
+import type { DestinationRow, MomentPhoto } from '@/services/types'
 
 const ROW_H = 28
 const formatLat = (lat: number) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`
 const formatLng = (lng: number) => `${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`
+
+/**
+ * Gallery travel, in card widths: from 1.5 to −3.5, so five photos pass the
+ * centre left to right — the direction the old photo wheel turned.
+ */
+const GALLERY_FROM = 1.5
+const GALLERY_TO = -3.5
 
 /** Lens radius: coordinates part around a circle this wide at the scanner. */
 const lensRadius = (desktop: boolean) => (desktop ? Math.max(88, 0.046 * window.innerWidth) : 56)
 
 /**
  * Stage D — every stop of every trip as a coordinate list, a circle reveal, and
- * the photo wheel.
+ * a curved WebGL gallery of trip photos (parts/curvedGallery).
  *
  * The coordinate list scrolls through a fixed scanner line at mid-screen. Rows
  * are drawn twice: the base copy, and a ground-coloured copy inside a stationary wrapper
@@ -38,20 +45,24 @@ const lensRadius = (desktop: boolean) => (desktop ? Math.max(88, 0.046 * window.
  *   L → L+0.3        compass turns 45° and swells
  *   L+0.2 → L+1.5    paper circle opens from the mark to cover the screen (power3.in)
  *                    while the mark scales 16× through the camera
- *   L+0.9 → L+3.5    photos fade in; the wheel turns −30° → 100°
- *   L+1.5 → L+3.5    progress arc draws
- *   L+2.6 → L+3.2    the paper darkens to forest
- *   L+3.1 → L+3.5    photos fade; paper dome rises
+ *   L+0.9 → L+3.5    gallery fades in; five photos pass the centre
+ *   L+2.6 → L+3.2    the paper darkens to the page ground
+ *   L+3.1 → L+3.5    gallery fades; paper dome rises
+ *
+ * The gallery renders only between L+0.8 and L+3.5, and not at all under
+ * reduced motion (where the stage is a static list).
  */
 export function DestinationsStage({
   rows,
   photos,
 }: {
   rows: DestinationRow[]
-  photos: string[]
+  photos: MomentPhoto[]
 }) {
   const headerRef = useRef<HTMLElement>(null)
   const ref = useRef<HTMLDivElement>(null)
+  // Rebuild the gallery when the photos change, not on every refetch's new array.
+  const photoKey = photos.map((p) => p.url).join('|')
 
   useGSAP(
     () => {
@@ -70,8 +81,17 @@ export function DestinationsStage({
 
         const revealAt = L + u(0.2)
         const revealDur = u(1.3)
+        const galleryAt = L + u(0.9)
+        const galleryDur = u(2.6)
         const darkenAt = L + u(2.6)
         const domeAt = L + u(3.1)
+
+        const gallery = new CurvedGallery(q('[data-gallery]')[0], {
+          items: photos.map((p) => ({ image: p.url, text: p.tripTitle })),
+          bend: desktop ? 3 : 1.5,
+          textColor: inkColor(),
+          fontFamily: displayFontFamily(),
+        })
 
         // Header: blurs away as it scrolls up to the pin.
         gsap.fromTo(
@@ -117,7 +137,14 @@ export function DestinationsStage({
           // paper dome that closes it. Only the hero photograph is dark, so the
           // nav no longer changes hands anywhere below it.
           setNavTheme('light')
-          if (tl.time() > L + u(0.2)) return // list has left; skip the per-row work
+
+          const time = tl.time()
+          const travel = gsap.utils.clamp(0, 1, (time - galleryAt) / galleryDur)
+          gallery.scrollTo(GALLERY_FROM + (GALLERY_TO - GALLERY_FROM) * travel)
+          if (time > galleryAt - u(0.1) && time < domeAt + u(0.4)) gallery.play()
+          else gallery.pause()
+
+          if (time > L + u(0.2)) return // list has left; skip the per-row work
 
           const y = gsap.getProperty(baseList, 'y') as number
           const mid = window.innerHeight / 2
@@ -188,13 +215,10 @@ export function DestinationsStage({
         )
         tl.to(q('[data-reveal-mark]'), { opacity: 0, duration: revealDur * 0.15 }, revealAt + revealDur * 0.85)
 
-        // Photo wheel.
-        tl.fromTo(q('[data-ring]'), { opacity: 0 }, { opacity: 1, duration: u(0.6) }, L + u(0.9))
-        tl.fromTo(q('[data-wheel]'), { rotation: -30 }, { rotation: 100, duration: u(2.6) }, L + u(0.9))
-        tl.fromTo(q('[data-arc]'), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: u(2.0) }, L + u(1.5))
+        // Gallery. Its travel is set per frame in perFrame.
+        tl.fromTo(q('[data-gallery]'), { opacity: 0 }, { opacity: 1, duration: u(0.6) }, galleryAt)
         tl.to(q('[data-reveal]'), { backgroundColor: groundColor(), duration: u(0.6) }, darkenAt)
-        tl.to(q('[data-arc]'), { stroke: inkColor(), duration: u(0.6) }, darkenAt)
-        tl.to(q('[data-ring]'), { opacity: 0, duration: u(0.4) }, domeAt)
+        tl.to(q('[data-gallery]'), { opacity: 0, duration: u(0.4) }, domeAt)
         addDome(tl, q('[data-dome]')[0], domeAt, u(0.4))
         tl.set({}, {}, total)
 
@@ -210,12 +234,16 @@ export function DestinationsStage({
         })
 
         return () => {
+          gallery.destroy()
           gsap.set([...baseRows, ...hiRows], { clearProps: 'filter,opacity' })
           gsap.set(q('[data-lat],[data-lng]'), { clearProps: 'transform' })
         }
       })
     },
-    { scope: ref, dependencies: [rows.length] },
+    // revertOnUpdate: without it useGSAP only reverts on unmount, so a refetch
+    // that changes the row count (cached data first, then fresh) would pin
+    // this section a second time on top of the first pin.
+    { scope: ref, dependencies: [rows.length, photoKey], revertOnUpdate: true },
   )
 
   return (
@@ -288,13 +316,13 @@ export function DestinationsStage({
           <CompassMark data-mark className="absolute left-1/2 top-1/2 -ml-3 -mt-3 size-6 text-background" />
         </div>
 
-        {/* The circle that opens into the photo wheel */}
+        {/* The circle that opens into the gallery (a WebGL canvas, added in useGSAP) */}
         <div
           data-reveal
           className="absolute inset-0 bg-paper motion-reduce:hidden"
           style={{ clipPath: 'circle(0px at 50% 50%)' }}
         >
-          <MomentsRing photos={photos} />
+          <div data-gallery className="absolute inset-0 opacity-0" />
         </div>
         <CompassMark
           data-reveal-mark
