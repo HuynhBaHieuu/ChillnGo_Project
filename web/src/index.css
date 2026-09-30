@@ -70,3 +70,41 @@
     display: none;
   }
 }
+
+/*
+ * The site's neon cursor (public/cursors), lit up over anything clickable.
+ * Outside @layer and after the utilities on purpose: it has to win over
+ * preflight's `cursor: pointer` and the `cursor-pointer` utility. Text fields
+ * keep the I-beam and `disabled:cursor-not-allowed` still applies.
+ */
+*,
+*::before,
+*::after {
+  cursor: url('/cursors/neon.svg') 3 2, auto;
+}
+
+a[href],
+button,
+[role='button'],
+[role='tab'],
+[role='menuitem'],
+[role='option'],
+[role='checkbox'],
+[role='switch'],
+label[for],
+select,
+summary,
+input[type='checkbox'],
+input[type='radio'],
+input[type='submit'],
+input[type='button'],
+input[type='file'],
+.cursor-pointer {
+  cursor: url('/cursors/neon-pointer.svg') 3 2, pointer;
+}
+
+input:not([type='checkbox'], [type='radio'], [type='submit'], [type='button'], [type='file'], [type='range']),
+textarea,
+[contenteditable='true'] {
+  cursor: text;
+}

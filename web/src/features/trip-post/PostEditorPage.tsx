@@ -50,7 +50,8 @@ import { useAuthStore } from '@/store'
 interface FormState {
   title: string
   summary: string
-  coverUrl: string
+  /** The author's photos, up to 10; the first is the cover. Empty: the automatic cover. */
+  coverImages: string[]
   region: Region
   season: Season
   budgetLevel: BudgetLevel
@@ -92,7 +93,7 @@ function initialState(): FormState {
   return {
     title: '',
     summary: '',
-    coverUrl: '',
+    coverImages: [],
     region: 'north',
     season: 'autumn',
     budgetLevel: 'medium',
@@ -105,7 +106,8 @@ function stateFromPost(post: TripPostWithAuthor): FormState {
   return {
     title: post.title,
     summary: post.summary,
-    coverUrl: post.coverUrl,
+    // Journeys from before multi-photo covers only have `coverUrl`.
+    coverImages: post.coverImages?.length ? post.coverImages : post.coverUrl ? [post.coverUrl] : [],
     region: post.region,
     season: post.season,
     budgetLevel: post.budgetLevel,
@@ -240,7 +242,8 @@ export function PostEditorPage() {
       authorId: user?._id ?? '',
       title: form.title.trim(),
       summary: form.summary.trim(),
-      coverUrl: form.coverUrl.trim() || autoCover,
+      coverUrl: form.coverImages[0] ?? autoCover,
+      coverImages: form.coverImages,
       region: form.region,
       season: form.season,
       startDate: sorted[0]?.date ?? todayIso(),
@@ -348,8 +351,8 @@ export function PostEditorPage() {
             <div className="space-y-2">
               <Label htmlFor="coverUrl">Ảnh bìa</Label>
               <CoverPicker
-                value={form.coverUrl}
-                onChange={(coverUrl) => patch({ coverUrl })}
+                value={form.coverImages}
+                onChange={(coverImages) => patch({ coverImages })}
                 fallbackUrl={autoCover}
                 disabled={mutation.isPending || pinning}
               />

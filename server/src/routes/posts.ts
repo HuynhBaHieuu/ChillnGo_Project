@@ -48,6 +48,9 @@ const REGIONS = ['north', 'central', 'south', 'islands', 'overseas'] as const
 const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const
 const BUDGETS = ['low', 'medium', 'high'] as const
 
+/** Photos an author can attach to a journey's header; the first is the cover. */
+const MAX_COVER_IMAGES = 10
+
 const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày không hợp lệ')
 /** An https image address, or empty for "use the automatic cover". No data: URLs. */
 const imageUrl = z
@@ -99,6 +102,10 @@ const payloadSchema = z
     title: z.string().trim().max(150, 'Tiêu đề tối đa 150 ký tự'),
     summary: z.string().trim().max(1000, 'Tóm tắt tối đa 1000 ký tự'),
     coverUrl: imageUrl,
+    coverImages: z
+      .array(imageUrl.refine((v) => v !== '', 'Ảnh không hợp lệ'))
+      .max(MAX_COVER_IMAGES, `Tối đa ${MAX_COVER_IMAGES} ảnh`)
+      .default([]),
     region: z.enum(REGIONS, 'Khu vực không hợp lệ'),
     season: z.enum(SEASONS, 'Mùa không hợp lệ'),
     startDate: dateOnly,
@@ -123,6 +130,7 @@ function toView(post: TripPostDocument) {
     title: post.title,
     summary: post.summary,
     coverUrl: post.coverUrl,
+    coverImages: post.coverImages,
     region: post.region,
     season: post.season,
     startDate: post.startDate,
@@ -184,11 +192,12 @@ async function loadOwn(userId: string, id: string, deleted: boolean): Promise<Tr
 
 type DayShape = { locations?: { photoUrl?: string | null }[]; photos?: string[] }
 
-/** Every image a journey shows: its cover, each stop's photo and each day's photos. */
-function imagesOf(post: { coverUrl: string; days: unknown[] }): string[] {
+/** Every image a journey shows: its cover photos, each stop's photo and each day's photos. */
+function imagesOf(post: { coverUrl: string; coverImages?: string[]; days: unknown[] }): string[] {
   const days = post.days as DayShape[]
   const urls = [
     post.coverUrl,
+    ...(post.coverImages ?? []),
     ...days.flatMap((d) => (d.locations ?? []).map((l) => l.photoUrl ?? '')),
     ...days.flatMap((d) => d.photos ?? []),
   ]
@@ -207,7 +216,7 @@ async function releaseImages(userId: string, urls: string[]) {
     if (!id) continue
     const stillUsed = await TripPost.exists({
       authorId: userId,
-      $or: [{ coverUrl: url }, { 'days.locations.photoUrl': url }, { 'days.photos': url }],
+      $or: [{ coverUrl: url }, { coverImages: url }, { 'days.locations.photoUrl': url }, { 'days.photos': url }],
     })
     if (!stillUsed) doomed.push(id)
   }
@@ -325,6 +334,7 @@ postsRouter.post('/:id/duplicate', requireAuth, loadCurrentUser, writeLimiter, a
     summary: source.summary,
     // Shared with the source; releaseImages() keeps it while either journey uses it.
     coverUrl: source.coverUrl,
+    coverImages: source.coverImages,
     region: source.region,
     season: source.season,
     startDate: source.startDate,

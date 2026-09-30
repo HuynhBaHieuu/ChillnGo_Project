@@ -5,9 +5,9 @@ import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/ho
 import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { setNavTheme } from '@/app/landing/home/navTheme'
-import { inkColor, mutedInkColor } from '@/app/landing/home/palette'
 import { CharLayers } from '@/app/landing/home/parts/CharLayers'
 import { TubesBackground } from '@/app/landing/home/parts/TubesBackground'
+import STATEMENT_PHOTO from '@/assets/images/photo-1705736466837-14d8b6fb571c.avif'
 import { GlassButton } from '@/components/Button'
 import { optionalEnv } from '@/lib/env'
 import { landingPhoto } from '@/lib/photos'
@@ -27,10 +27,9 @@ const STATEMENT = [
 ]
 
 /*
- * The statement lights up from a muted purple to the full ink — see
- * `../palette`. It used to light up to white, which was right when the ground
- * closing over the hero was forest; under Arcade Neon Pop that ground is the
- * pink `--background`, and white on it was unreadable.
+ * The statement sits on a darkened photograph, so it lights up from a faint
+ * white to full white rather than to the theme's ink: whatever the theme's
+ * ground is, the photo covers it.
  */
 
 /**
@@ -50,9 +49,11 @@ const STATEMENT = [
  *   0.00–1.50  headline rises 22vh, copy rises 34vh
  *   0.25–0.90  copy fades, then the headline behind it
  *   0.45–1.50  the forest ground closes over the photograph
+ *   0.45–1.75  the statement's photo grows from a card to the full screen
  *   0.90–2.10  statement drifts in from "distance" (scale 0.82 → 1)
+ *   0.90–2.10  the photo darkens, so the statement reads over it
  *   2.10–3.50  statement lights up character by character
- *   3.50–4.00  statement leaves
+ *   3.50–4.00  statement and its photo leave
  *
  * The load-in uses the design system's CSS fade-rise classes on *inner*
  * wrappers, and scroll tweens target the *outer* wrappers, so the two never
@@ -79,12 +80,15 @@ export function IntroStage() {
         // Phones show a taller slice of the photo, so the copy has further to
         // travel before it is off screen.
         const lift = desktop ? 1 : 1.25
-        // The navbar follows the ground under it: white over the footage, ink
-        // once the pink has closed over it. Switched at 85% of the ground's
-        // fade rather than at its end, so the links are never white on pink.
-        const lightFrom = u(0.45 + 1.05 * 0.85)
-        const tint = mutedInkColor()
-        const lit = inkColor()
+        // The navbar follows what is under it: white over the footage and the
+        // statement's photo, ink once the photo has faded to the ground.
+        // Switched at 85% of that fade, so the links are never white on the
+        // ground.
+        const lightFrom = u(3.5 + 0.5 * 0.85)
+        // The statement is always set over the darkened photo, so it lights up
+        // to white whatever the theme's ink is.
+        const tint = 'rgba(255, 255, 255, 0.3)'
+        const lit = '#ffffff'
 
         gsap.from(q('[data-layer="range"]'), {
           opacity: 0,
@@ -110,6 +114,23 @@ export function IntroStage() {
         tl.to(q('[data-layer="lede"]'), { opacity: 0, duration: u(0.4), ease: 'power3.out' }, u(0.25))
         tl.to(lines, { opacity: 0, duration: u(0.45), ease: 'power3.out' }, u(0.55))
         tl.fromTo(q('[data-ground]'), { opacity: 0 }, { opacity: 1, duration: u(1.05) }, u(0.45))
+
+        // Scroll to scale: the photo rises in as a card and grows to fill the
+        // screen, arriving a little after the statement starts drifting in.
+        const photo = q('[data-statement-photo]')
+        tl.fromTo(photo, { opacity: 0 }, { opacity: 1, duration: u(0.3) }, u(0.45))
+        tl.fromTo(
+          photo,
+          { scale: desktop ? 0.42 : 0.7, y: vh(12) },
+          { scale: 1, y: 0, ease: 'power2.inOut', duration: u(1.3) },
+          u(0.45),
+        )
+        tl.fromTo(
+          q('[data-statement-scrim]'),
+          { opacity: 0.25 },
+          { opacity: 1, duration: u(1.2) },
+          u(0.9),
+        )
 
         /*
          * Statement approaches, lights up, leaves.
@@ -143,6 +164,7 @@ export function IntroStage() {
           },
           u(3.5),
         )
+        tl.to(photo, { opacity: 0, duration: u(0.5), immediateRender: false }, u(3.5))
 
         // Pad to the exact length so 1 unit of timeline = 100vh of scroll.
         tl.set({}, {}, u(UNITS.intro))
@@ -258,10 +280,21 @@ export function IntroStage() {
           invisible at `opacity-0`, it still took every click aimed at the hero
           beneath it, the CTA included. It holds no interactive content of its
           own, so it never needs the pointer. */}
-      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6 motion-reduce:static motion-reduce:py-32">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6 motion-reduce:relative motion-reduce:inset-auto motion-reduce:py-32">
+        {/* The statement's backdrop. Rounded while it is still a card; once it
+            fills the screen the corners are off the edges. */}
+        <div
+          data-statement-photo
+          aria-hidden
+          className="absolute inset-0 overflow-hidden rounded-[2rem] opacity-0 will-change-transform motion-reduce:rounded-none motion-reduce:opacity-100"
+        >
+          <img src={STATEMENT_PHOTO} alt="" loading="lazy" className="size-full object-cover" />
+          <div data-statement-scrim className="absolute inset-0 bg-black/60" />
+        </div>
+
         <div
           data-statement
-          className="max-w-4xl space-y-8 text-center opacity-0 will-change-transform motion-reduce:opacity-100"
+          className="relative max-w-4xl space-y-8 text-center text-white opacity-0 will-change-transform motion-reduce:opacity-100 [&_[data-dim]]:text-white/25"
         >
           {STATEMENT.map((line) => (
             <CharLayers

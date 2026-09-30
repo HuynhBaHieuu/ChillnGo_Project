@@ -17,6 +17,8 @@ const tripPostSchema = new Schema(
     title: { type: String, default: '' },
     summary: { type: String, default: '' },
     coverUrl: { type: String, default: '' },
+    /** The author's own photos of the journey, up to 10; the first is `coverUrl`. */
+    coverImages: { type: [String], default: [] },
     region: { type: String, required: true },
     season: { type: String, required: true },
     startDate: { type: String, required: true },
