@@ -8,6 +8,7 @@ import { MapPreview } from '@/components/MapPreview'
 import { TagChip } from '@/components/TagChip'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { DimensionalSwitchSlider } from '@/components/ui/dimensional-switch-slider'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CloneDialog } from '@/features/itinerary-clone/components/CloneDialog'
 import { CommentSection } from '@/features/trip-post/components/CommentSection'
@@ -112,12 +113,8 @@ export function PostDetailPage() {
           </div>
         </header>
 
-        {/* Cover */}
-        <img
-          src={post.coverUrl}
-          alt=""
-          className="animate-fade-rise-delay mt-10 aspect-[21/9] w-full rounded-2xl object-cover"
-        />
+        {/* Cover, and the author's other photos */}
+        <PostGallery coverUrl={post.coverUrl} images={post.coverImages ?? []} />
 
         {/* Key facts */}
         <dl className="animate-fade-rise-delay mt-8 grid gap-4 sm:grid-cols-3">
@@ -179,6 +176,20 @@ export function PostDetailPage() {
 
       <CloneDialog post={post} open={cloneOpen} onOpenChange={setCloneOpen} />
     </PageContainer>
+  )
+}
+
+function PostGallery({ coverUrl, images }: { coverUrl: string; images: string[] }) {
+  const photos = images.length ? images : [coverUrl]
+  return (
+    <DimensionalSwitchSlider
+      // A new set of photos starts again from the first.
+      key={photos.join('|')}
+      items={photos.map((image) => ({ image }))}
+      label="Ảnh của hành trình"
+      className="animate-fade-rise-delay mt-10"
+      stageClassName="aspect-[16/10] w-full rounded-2xl sm:aspect-[21/9]"
+    />
   )
 }
 

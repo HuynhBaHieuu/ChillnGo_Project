@@ -106,6 +106,8 @@ export interface TripPost {
   title: string
   summary: string
   coverUrl: string
+  /** The author's own photos, up to 10; the first is `coverUrl`. Absent on older journeys. */
+  coverImages?: string[]
   region: Region
   season: Season
   startDate: DateOnly
@@ -243,6 +245,7 @@ export interface TripPostPayload {
   title: string
   summary: string
   coverUrl: string
+  coverImages: string[]
   region: Region
   season: Season
   startDate: DateOnly
