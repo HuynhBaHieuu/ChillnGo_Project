@@ -1,5 +1,6 @@
 import { optionalEnv } from '@/lib/env'
-import type { RouteGeoJson } from '@/services/types'
+import { isPinned } from '@/lib/itinerary'
+import type { RouteGeoJson, TripDay } from '@/services/types'
 
 export interface MapPin {
   id: string
@@ -8,6 +9,39 @@ export interface MapPin {
   label: string
   /** Extra data carried through to the clustered source (e.g. bookmark count). */
   weight?: number
+}
+
+/** One stop of a trip, placed on the map with its day and its place in that day. */
+export interface MapStop {
+  id: string
+  lng: number
+  lat: number
+  name: string
+  /** 1-based day number. */
+  day: number
+  /** 1-based position among the day's stops that are on the map. */
+  order: number
+}
+
+/** Every stop that has a real position, day by day, in itinerary order. */
+export function stopsOfDays(days: TripDay[]): MapStop[] {
+  return days.flatMap((day, d) =>
+    day.locations.filter(isPinned).map((loc, i) => ({
+      id: loc._id,
+      lng: loc.lng,
+      lat: loc.lat,
+      name: loc.name,
+      day: d + 1,
+      order: i + 1,
+    })),
+  )
+}
+
+/** Marker and route colour per day, picked to stand out on the street map. */
+const DAY_COLORS = ['#D60072', '#2563EB', '#059669', '#D97706', '#7C3AED', '#0891B2', '#DC2626', '#4D7C0F']
+
+export function dayColor(day: number): string {
+  return DAY_COLORS[(day - 1) % DAY_COLORS.length]
 }
 
 export type Bounds = [[number, number], [number, number]]

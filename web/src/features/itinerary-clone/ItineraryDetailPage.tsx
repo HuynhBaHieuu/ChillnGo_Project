@@ -36,7 +36,6 @@ import { moveItem, totalCostOf } from '@/lib/itinerary'
 import type {
   ClonedItinerary,
   ItineraryStatus,
-  RouteGeoJson,
   TripDay,
 } from '@/services/types'
 
@@ -77,25 +76,6 @@ export function ItineraryDetailPage() {
 
   /** Recalculated from the local day list, so it updates as items move. */
   const liveTotal = useMemo(() => totalCostOf(days), [days])
-
-  const route = useMemo<RouteGeoJson>(
-    () => ({
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'LineString',
-            coordinates: days.flatMap((day) =>
-              day.locations.map((loc): [number, number] => [loc.lng, loc.lat]),
-            ),
-          },
-          properties: { dayCount: days.length },
-        },
-      ],
-    }),
-    [days],
-  )
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -252,7 +232,7 @@ export function ItineraryDetailPage() {
           <div>
             <h2 className="font-display text-2xl">Bản đồ tuyến</h2>
             <MapPreview
-              route={route}
+              days={days}
               className="mt-4 h-72 w-full"
               label={`Bản đồ tuyến đường của ${itinerary.title}`}
             />

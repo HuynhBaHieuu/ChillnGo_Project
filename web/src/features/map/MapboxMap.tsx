@@ -1,11 +1,12 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl/mapbox'
 import type { MapRef } from 'react-map-gl/mapbox'
 
-import { MAPBOX_TOKEN, boundsOf, routeCoordinates } from '@/features/map/geometry'
-import type { MapPin } from '@/features/map/geometry'
+import { MAPBOX_TOKEN, boundsOf, dayColor, routeCoordinates } from '@/features/map/geometry'
+import type { MapPin, MapStop } from '@/features/map/geometry'
 import { cn } from '@/lib/utils'
 import type { RouteGeoJson } from '@/services/types'
 
@@ -24,6 +25,7 @@ const OUTLINE = '#FFFFFF'
 interface MapboxMapProps {
   route?: RouteGeoJson
   pins: MapPin[]
+  stops: MapStop[]
   cluster: boolean
   className?: string
   label: string
@@ -39,10 +41,16 @@ interface MapboxMapProps {
  * The geometry is always mock data shipped with the post. No Directions API
  * call is made; the "route" is a straight polyline through the stops in order,
  * which is what the fixtures encode.
+ *
+ * With `stops`, every stop is marked in its day's colour and numbered within
+ * that day. Picking a day — its chip, or any of its stops — draws that day's
+ * route from its first stop to its last and frames it; clicking the map
+ * elsewhere, or "Tất cả", goes back to every stop.
  */
 export default function MapboxMap({
   route,
   pins,
+  stops,
   cluster,
   className,
   label,
@@ -51,8 +59,37 @@ export default function MapboxMap({
 
   const bounds = useMemo(
     () =>
-      boundsOf([...routeCoords, ...pins.map((p): [number, number] => [p.lng, p.lat])]),
-    [routeCoords, pins],
+      boundsOf([
+        ...routeCoords,
+        ...pins.map((p): [number, number] => [p.lng, p.lat]),
+        ...stops.map((s): [number, number] => [s.lng, s.lat]),
+      ]),
+    [routeCoords, pins, stops],
+  )
+
+  // The day whose route is shown; null shows every stop and no route.
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const stopDays = useMemo(() => [...new Set(stops.map((s) => s.day))], [stops])
+  // A day can vanish while picked (the itinerary editor deletes days).
+  const activeDay = selectedDay !== null && stopDays.includes(selectedDay) ? selectedDay : null
+  const dayStops = useMemo(() => stops.filter((s) => s.day === activeDay), [stops, activeDay])
+
+  const dayRoute = useMemo(
+    () => ({
+      type: 'Feature' as const,
+      geometry: {
+        type: 'LineString' as const,
+        coordinates: dayStops.map((s): [number, number] => [s.lng, s.lat]),
+      },
+      properties: {},
+    }),
+    [dayStops],
+  )
+
+  // Framed on the picked day, or on everything.
+  const viewBounds = useMemo(
+    () => (dayStops.length ? boundsOf(dayStops.map((s): [number, number] => [s.lng, s.lat])) : bounds),
+    [dayStops, bounds],
   )
 
   const pinCollection = useMemo(
@@ -70,14 +107,14 @@ export default function MapboxMap({
   // initialViewState only applies once: refit when the route changes later
   // (the editor's live preview gains stops as the author pins them).
   const mapRef = useRef<MapRef>(null)
-  const boundsKey = bounds ? bounds.flat().join(',') : ''
+  const boundsKey = viewBounds ? viewBounds.flat().join(',') : ''
   const firstFit = useRef(true)
   useEffect(() => {
     if (firstFit.current) {
       firstFit.current = false
       return
     }
-    if (bounds) mapRef.current?.fitBounds(bounds, { padding: 56, duration: 600 })
+    if (viewBounds) mapRef.current?.fitBounds(viewBounds, { padding: 56, duration: 600 })
     // Keyed on the numbers, not the array identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boundsKey])
@@ -87,7 +124,8 @@ export default function MapboxMap({
   return (
     <div
       className={cn('relative overflow-hidden rounded-2xl bg-muted', className)}
-      role="img"
+      // Stop markers and day chips are buttons, which an image role would hide.
+      role={stops.length ? 'group' : 'img'}
       aria-label={label}
     >
       <Map
@@ -99,6 +137,7 @@ export default function MapboxMap({
         initialViewState={{ bounds, fitBoundsOptions: { padding: 56 } }}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
+        onClick={stops.length ? () => setSelectedDay(null) : undefined}
       >
         <NavigationControl position="top-right" showCompass={false} />
 
@@ -164,6 +203,57 @@ export default function MapboxMap({
           </Source>
         )}
 
+        {activeDay !== null && dayStops.length > 1 && (
+          <Source id="day-route" type="geojson" data={dayRoute}>
+            <Layer
+              id="day-route-casing"
+              type="line"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 7 }}
+            />
+            <Layer
+              id="day-route-line"
+              type="line"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': dayColor(activeDay), 'line-width': 3.5 }}
+            />
+          </Source>
+        )}
+
+        {stops.map((stop) => {
+          const dimmed = activeDay !== null && stop.day !== activeDay
+          return (
+            <Marker
+              key={stop.id}
+              longitude={stop.lng}
+              latitude={stop.lat}
+              anchor="center"
+              // The picked day's stops sit above the others.
+              style={{ zIndex: stop.day === activeDay ? 2 : 1 }}
+            >
+              <button
+                type="button"
+                onClick={(event) => {
+                  // Not a click on the map, which would clear the pick.
+                  event.stopPropagation()
+                  setSelectedDay(stop.day)
+                }}
+                title={`Ngày ${stop.day} · ${stop.order}. ${stop.name || 'Điểm dừng'}`}
+                aria-label={`Ngày ${stop.day}, điểm ${stop.order}: ${stop.name || 'Điểm dừng'}. Xem đường đi ngày ${stop.day}`}
+                aria-pressed={stop.day === activeDay}
+                className={cn(
+                  'flex size-7 cursor-pointer items-center justify-center rounded-full border-2 border-white text-[11px] font-semibold text-white shadow-md transition-[opacity,transform] hover:scale-110',
+                  stop.day === activeDay && 'scale-110',
+                  dimmed && 'opacity-35',
+                )}
+                style={{ backgroundColor: dayColor(stop.day) }}
+              >
+                {stop.order}
+              </button>
+            </Marker>
+          )
+        })}
+
         {/* Un-clustered route stops get numbered markers. */}
         {!cluster &&
           routeCoords.map(([lng, lat], i) => (
@@ -174,6 +264,52 @@ export default function MapboxMap({
             </Marker>
           ))}
       </Map>
+
+      {stopDays.length > 0 && (
+        <div className="absolute inset-x-2 top-2 z-10 mr-12 flex gap-1.5 overflow-x-auto pb-1">
+          <DayChip active={activeDay === null} onClick={() => setSelectedDay(null)}>
+            Tất cả
+          </DayChip>
+          {stopDays.map((day) => (
+            <DayChip key={day} active={activeDay === day} color={dayColor(day)} onClick={() => setSelectedDay(day)}>
+              Ngày {day}
+            </DayChip>
+          ))}
+        </div>
+      )}
+
+      {stopDays.length > 0 && activeDay === null && (
+        <p className="pointer-events-none absolute inset-x-0 bottom-2 z-10 mx-auto w-fit rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-neutral-700 shadow">
+          Chọn một ngày hoặc một điểm để xem đường đi
+        </p>
+      )}
     </div>
+  )
+}
+
+function DayChip({
+  active,
+  color,
+  onClick,
+  children,
+}: {
+  active: boolean
+  color?: string
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shadow transition-colors',
+        active ? 'bg-neutral-900 text-white' : 'bg-white/95 text-neutral-800 hover:bg-white',
+      )}
+    >
+      {color && <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />}
+      {children}
+    </button>
   )
 }

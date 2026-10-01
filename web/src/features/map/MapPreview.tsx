@@ -1,9 +1,9 @@
 import { Suspense, lazy, useMemo } from 'react'
 
-import { MAPBOX_TOKEN, boundsOf, routeCoordinates } from '@/features/map/geometry'
+import { MAPBOX_TOKEN, boundsOf, routeCoordinates, stopsOfDays } from '@/features/map/geometry'
 import type { MapPin } from '@/features/map/geometry'
 import { StaticRouteFallback } from '@/features/map/StaticRouteFallback'
-import type { RouteGeoJson } from '@/services/types'
+import type { RouteGeoJson, TripDay } from '@/services/types'
 
 export type { MapPin }
 
@@ -16,6 +16,12 @@ interface MapPreviewProps {
   /** Individual points to mark. Rendered clustered when `cluster` is set. */
   pins?: MapPin[]
   cluster?: boolean
+  /**
+   * A trip's days. Every stop is marked, coloured by day, and a day's route is
+   * only drawn once the reader picks that day: with many stops, every route at
+   * once is a tangle. Use instead of `route`.
+   */
+  days?: TripDay[]
   className?: string
   /** Accessible description of what the map is showing. */
   label?: string
@@ -32,21 +38,26 @@ export function MapPreview({
   route,
   pins = [],
   cluster = false,
+  days,
   className,
   label = 'Bản đồ hành trình',
 }: MapPreviewProps) {
+  const stops = useMemo(() => (days ? stopsOfDays(days) : []), [days])
   const allCoords = useMemo<[number, number][]>(
     () => [
       ...routeCoordinates(route),
       ...pins.map((p): [number, number] => [p.lng, p.lat]),
+      ...stops.map((s): [number, number] => [s.lng, s.lat]),
     ],
-    [route, pins],
+    [route, pins, stops],
   )
+  // Stops alone are not a route, so the sketch does not join them up.
+  const connect = !days
 
   const canRenderMap = Boolean(MAPBOX_TOKEN) && boundsOf(allCoords) !== null
 
   if (!canRenderMap) {
-    return <StaticRouteFallback coords={allCoords} className={className} label={label} />
+    return <StaticRouteFallback coords={allCoords} connect={connect} className={className} label={label} />
   }
 
   return (
@@ -54,6 +65,7 @@ export function MapPreview({
       fallback={
         <StaticRouteFallback
           coords={allCoords}
+          connect={connect}
           className={className}
           label={label}
           reason="loading"
@@ -63,6 +75,7 @@ export function MapPreview({
       <MapboxMap
         route={route}
         pins={pins}
+        stops={stops}
         cluster={cluster}
         className={className}
         label={label}
