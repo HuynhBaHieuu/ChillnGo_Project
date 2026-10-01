@@ -70,3 +70,7 @@ app.use((_req, res) => {
 })
 
 app.use(errorHandler)
+
+// Vercel looks for src/app.ts before src/index.ts and runs its default export
+// as the function, so this file is the entry point there.
+export default app
