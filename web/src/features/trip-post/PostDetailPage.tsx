@@ -148,13 +148,14 @@ export function PostDetailPage() {
           <aside className="min-w-0 lg:sticky lg:top-32">
             <h2 className="font-display text-3xl">Bản đồ tuyến</h2>
             <MapPreview
-              route={post.routeGeoJson}
+              days={post.days}
               className="mt-6 h-[28rem] w-full"
               label={`Bản đồ tuyến đường của ${post.title}`}
             />
             <p className="mt-3 text-xs text-muted-foreground">
-              Tuyến nối các điểm dừng theo thứ tự trong lịch trình. Chưa dùng dữ liệu
-              chỉ đường thật.
+              Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc
+              một điểm để xem đường đi của ngày đó (nối thẳng, chưa dùng dữ liệu chỉ đường
+              thật).
             </p>
           </aside>
         </div>

@@ -11,11 +11,14 @@ import { cn } from '@/lib/utils'
  */
 export function StaticRouteFallback({
   coords,
+  connect = true,
   className,
   label,
   reason = 'no-token',
 }: {
   coords: [number, number][]
+  /** Join the points in order; off when they are separate stops, not a route. */
+  connect?: boolean
   className?: string
   label: string
   reason?: 'no-token' | 'loading'
@@ -54,15 +57,17 @@ export function StaticRouteFallback({
             className="size-full flex-1"
             aria-hidden
           >
-            <polyline
-              points={points.map((p) => `${p.x},${p.y}`).join(' ')}
-              fill="none"
-              stroke="rgba(255,255,255,0.35)"
-              strokeWidth={0.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
+            {connect && (
+              <polyline
+                points={points.map((p) => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth={0.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             {points.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={0.9} fill="#ffffff" vectorEffect="non-scaling-stroke" />
             ))}
