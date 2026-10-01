@@ -195,9 +195,6 @@ export function PostEditorPage() {
   const mutation = isEdit ? updatePost : createPost
 
   const totalEstCost = useMemo(() => totalCostOf(form.days), [form.days])
-
-  // Live route preview: the same geometry the saved journey will carry.
-  const routePreview = useMemo(() => buildRouteGeoJson(form.days, form.title), [form.days, form.title])
   const totalStops = form.days.reduce((n, d) => n + d.locations.length, 0)
   const pinnedStops = form.days.reduce((n, d) => n + d.locations.filter(isPinned).length, 0)
 
@@ -391,10 +388,11 @@ export function PostEditorPage() {
                 {pinnedStops}/{totalStops} điểm dừng đã ghim
               </p>
             </div>
-            <MapPreview route={routePreview} className="h-72 w-full" label="Xem trước tuyến hành trình" />
+            {/* Drawn as the journey page will show it, each leg by how it was travelled. */}
+            <MapPreview days={form.days} className="h-72 w-full" label="Xem trước tuyến hành trình" />
             <p className="text-xs text-muted-foreground">
               Chỉ những điểm dừng đã ghim mới hiện trên bản đồ. Ghim bằng ô Địa chỉ: chọn gợi ý, dán link Google
-              Maps, hoặc chọn trên bản đồ.
+              Maps, hoặc chọn trên bản đồ. Chọn một ngày để xem đường đi.
             </p>
           </GlassCard>
         </div>

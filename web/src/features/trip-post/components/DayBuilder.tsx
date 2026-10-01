@@ -1,4 +1,4 @@
-import { ImagePlus, Loader2, Plus, Trash2 } from 'lucide-react'
+import { Car, ImagePlus, Loader2, Plane, Plus, Ship, Trash2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import { GlassCard } from '@/components/GlassCard'
@@ -11,8 +11,9 @@ import { PlaceField } from '@/features/trip-post/components/PlaceField'
 import { UNPINNED, dayCostOf } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
+import { cn } from '@/lib/utils'
 import { postService } from '@/services'
-import type { TripDay, TripLocation } from '@/services/types'
+import type { TravelMode, TripDay, TripLocation } from '@/services/types'
 
 interface DayBuilderProps {
   day: TripDay
@@ -162,6 +163,15 @@ function LocationRow({
         </span>
 
         <div className="min-w-0 flex-1 space-y-3">
+          {/* The day's first stop is where it starts: there is no leg to it. */}
+          {index > 0 && (
+            <TravelModePicker
+              value={location.travelMode ?? 'road'}
+              stopNumber={index + 1}
+              onChange={(travelMode) => onChange({ travelMode })}
+            />
+          )}
+
           <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
             <div className="space-y-1.5">
               <Label htmlFor={`${location._id}-name`} className="text-xs">
@@ -296,6 +306,46 @@ function LocationRow({
           </Button>
         )}
       </div>
+    </div>
+  )
+}
+
+const TRAVEL_MODES: { mode: TravelMode; label: string; Icon: typeof Car }[] = [
+  { mode: 'road', label: 'Đường bộ', Icon: Car },
+  { mode: 'flight', label: 'Máy bay', Icon: Plane },
+  { mode: 'water', label: 'Tàu, phà, ca nô', Icon: Ship },
+]
+
+/** How the traveller got from the previous stop to this one; sets how the map draws the leg. */
+function TravelModePicker({
+  value,
+  stopNumber,
+  onChange,
+}: {
+  value: TravelMode
+  stopNumber: number
+  onChange: (mode: TravelMode) => void
+}) {
+  return (
+    <div role="group" aria-label={`Phương tiện đến địa điểm ${stopNumber}`} className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-muted-foreground">Đến đây bằng</span>
+      {TRAVEL_MODES.map(({ mode, label, Icon }) => (
+        <button
+          key={mode}
+          type="button"
+          aria-pressed={value === mode}
+          onClick={() => onChange(mode)}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+            value === mode
+              ? 'border-foreground bg-foreground text-background'
+              : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
+          )}
+        >
+          <Icon className="size-3.5" aria-hidden />
+          {label}
+        </button>
+      ))}
     </div>
   )
 }

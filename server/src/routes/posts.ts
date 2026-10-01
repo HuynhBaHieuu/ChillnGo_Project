@@ -69,6 +69,8 @@ const locationSchema = z.object({
   photoUrl: imageUrl.nullable(),
   lng: z.number().min(-180).max(180),
   lat: z.number().min(-90).max(90),
+  /** How the stop was reached from the previous one. Absent on older stops, read as road. */
+  travelMode: z.enum(['road', 'flight', 'water']).optional(),
 })
 
 const daySchema = z.object({
