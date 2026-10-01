@@ -1,9 +1,9 @@
 /**
  * Entry point.
  *
- * Locally this starts an HTTP server. On Vercel, the default export is picked
- * up as the Express app and runs as a Vercel Function, so no listen() call is
- * made there.
+ * Locally this starts an HTTP server. On Vercel, src/app.ts is the entry point
+ * instead (its default export runs as a Vercel Function), so no listen() call
+ * is made there.
  */
 
 import { app } from './app.js'

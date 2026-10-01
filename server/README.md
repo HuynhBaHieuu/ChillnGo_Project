@@ -373,7 +373,7 @@ Deploy the API and the web client as **two Vercel projects from the same repo**.
 **API project**
 
 1. Import the repo on Vercel and set **Root Directory** to `server`. Vercel
-   detects Express and runs `src/index.ts` as a function. No `vercel.json` is needed.
+   detects Express and runs the default export of `src/app.ts` as a function. No `vercel.json` is needed.
 2. Add the environment variables `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
    `APP_URL`, `SMTP_USER`, `SMTP_PASS`, `GOOGLE_CLIENT_ID`, `CLOUDINARY_URL`, and the
    three `LIVEKIT_*` variables (plus the `RECORDING_*` ones to offer replays). Set both `CORS_ORIGIN` and `APP_URL`
