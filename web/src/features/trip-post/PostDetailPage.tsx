@@ -154,8 +154,8 @@ export function PostDetailPage() {
             />
             <p className="mt-3 text-xs text-muted-foreground">
               Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc
-              một điểm để xem đường đi của ngày đó (nối thẳng, chưa dùng dữ liệu chỉ đường
-              thật).
+              một điểm để xem đường đi của ngày đó: đường bộ theo đường thật, nét đứt là
+              máy bay hoặc tàu, phà.
             </p>
           </aside>
         </div>

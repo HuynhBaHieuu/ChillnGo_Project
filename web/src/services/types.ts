@@ -60,6 +60,12 @@ export interface User {
 
 /* -------------------------------------------------------------- TripPost */
 
+/**
+ * How a traveller reached a stop from the one before it. `road` follows real
+ * roads on the map; `flight` and `water` are drawn as dashed arcs.
+ */
+export type TravelMode = 'road' | 'flight' | 'water'
+
 /** One stop within a day. `lng`/`lat` feed the map layer. */
 export interface TripLocation {
   _id: ObjectId
@@ -71,6 +77,8 @@ export interface TripLocation {
   photoUrl: string | null
   lng: number
   lat: number
+  /** How this stop was reached from the previous one in its day. Absent means `road`. */
+  travelMode?: TravelMode
 }
 
 export interface TripDay {

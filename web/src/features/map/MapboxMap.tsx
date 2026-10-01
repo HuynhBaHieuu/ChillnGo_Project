@@ -1,12 +1,15 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+import { Plane, Ship } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
 import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl/mapbox'
 import type { MapRef } from 'react-map-gl/mapbox'
 
+import { PillTabs } from '@/components/PillNav'
 import { MAPBOX_TOKEN, boundsOf, dayColor, routeCoordinates } from '@/features/map/geometry'
 import type { MapPin, MapStop } from '@/features/map/geometry'
+import { arcOf, legsOf, useRoadPaths } from '@/features/map/legs'
+import type { ArcLeg } from '@/features/map/legs'
 import { cn } from '@/lib/utils'
 import type { RouteGeoJson } from '@/services/types'
 
@@ -38,14 +41,14 @@ interface MapboxMapProps {
  * loads it lazily — so the ~700 kB Mapbox bundle never lands on a page that
  * does not show a map.
  *
- * The geometry is always mock data shipped with the post. No Directions API
- * call is made; the "route" is a straight polyline through the stops in order,
- * which is what the fixtures encode.
+ * A `route` is drawn as given: a straight polyline through the stops in order.
  *
  * With `stops`, every stop is marked in its day's colour and numbered within
  * that day. Picking a day — its chip, or any of its stops — draws that day's
  * route from its first stop to its last and frames it; clicking the map
- * elsewhere, or "Tất cả", goes back to every stop.
+ * elsewhere, or "Tất cả", goes back to every stop. Each leg is drawn the way
+ * it was travelled (see legs.ts): road legs follow the real roads, flights and
+ * boats are dashed arcs with a plane or boat on them.
  */
 export default function MapboxMap({
   route,
@@ -74,22 +77,22 @@ export default function MapboxMap({
   const activeDay = selectedDay !== null && stopDays.includes(selectedDay) ? selectedDay : null
   const dayStops = useMemo(() => stops.filter((s) => s.day === activeDay), [stops, activeDay])
 
-  const dayRoute = useMemo(
-    () => ({
-      type: 'Feature' as const,
-      geometry: {
-        type: 'LineString' as const,
-        coordinates: dayStops.map((s): [number, number] => [s.lng, s.lat]),
-      },
-      properties: {},
-    }),
+  // The picked day's legs: roads along the real roads, flights and boats as arcs.
+  const roadPaths = useRoadPaths(dayStops)
+  const arcs = useMemo(
+    () => legsOf(dayStops).flatMap((leg) => (leg.mode === 'road' ? [] : [arcOf({ ...leg, mode: leg.mode })])),
     [dayStops],
   )
+  const roadData = useMemo(() => lines(roadPaths.map((coordinates) => ({ coordinates }))), [roadPaths])
+  const arcData = useMemo(() => lines(arcs), [arcs])
 
-  // Framed on the picked day, or on everything.
+  // Framed on the picked day (arcs included, they bow outside the stops), or on everything.
   const viewBounds = useMemo(
-    () => (dayStops.length ? boundsOf(dayStops.map((s): [number, number] => [s.lng, s.lat])) : bounds),
-    [dayStops, bounds],
+    () =>
+      dayStops.length
+        ? boundsOf([...dayStops.map((s): [number, number] => [s.lng, s.lat]), ...arcs.flatMap((a) => a.coordinates)])
+        : bounds,
+    [dayStops, arcs, bounds],
   )
 
   const pinCollection = useMemo(
@@ -203,22 +206,43 @@ export default function MapboxMap({
           </Source>
         )}
 
-        {activeDay !== null && dayStops.length > 1 && (
-          <Source id="day-route" type="geojson" data={dayRoute}>
+        {activeDay !== null && roadPaths.length > 0 && (
+          <Source id="day-road" type="geojson" data={roadData}>
             <Layer
-              id="day-route-casing"
+              id="day-road-casing"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 7 }}
             />
             <Layer
-              id="day-route-line"
+              id="day-road-line"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{ 'line-color': dayColor(activeDay), 'line-width': 3.5 }}
             />
           </Source>
         )}
+
+        {activeDay !== null && arcs.length > 0 && (
+          <Source id="day-arcs" type="geojson" data={arcData}>
+            <Layer
+              id="day-arcs-casing"
+              type="line"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 6 }}
+            />
+            <Layer
+              id="day-arcs-line"
+              type="line"
+              // Butt caps: round ones swell each dash into a blob.
+              layout={{ 'line-cap': 'butt', 'line-join': 'round' }}
+              paint={{ 'line-color': dayColor(activeDay), 'line-width': 3, 'line-dasharray': [2, 1.5] }}
+            />
+          </Source>
+        )}
+
+        {activeDay !== null &&
+          arcs.map((arc) => <ArcIcon key={`${arc.icon.lng},${arc.icon.lat}`} arc={arc} color={dayColor(activeDay)} />)}
 
         {stops.map((stop) => {
           const dimmed = activeDay !== null && stop.day !== activeDay
@@ -266,15 +290,22 @@ export default function MapboxMap({
       </Map>
 
       {stopDays.length > 0 && (
-        <div className="absolute inset-x-2 top-2 z-10 mr-12 flex gap-1.5 overflow-x-auto pb-1">
-          <DayChip active={activeDay === null} onClick={() => setSelectedDay(null)}>
-            Tất cả
-          </DayChip>
-          {stopDays.map((day) => (
-            <DayChip key={day} active={activeDay === day} color={dayColor(day)} onClick={() => setSelectedDay(day)}>
-              Ngày {day}
-            </DayChip>
-          ))}
+        // The navbar's pills; 0 stands for "every day". Clear of the zoom buttons on the right.
+        <div className="absolute left-2 right-12 top-2 z-10 flex">
+          <PillTabs
+            label="Chọn ngày để xem đường đi"
+            value={activeDay ?? 0}
+            onChange={(day) => setSelectedDay(day || null)}
+            items={[
+              { value: 0, label: 'Tất cả' },
+              ...stopDays.map((day) => ({
+                value: day,
+                label: `Ngày ${day}`,
+                leading: <span className="size-2 rounded-full" style={{ backgroundColor: dayColor(day) }} aria-hidden />,
+              })),
+            ]}
+            className="max-w-full shadow-md"
+          />
         </div>
       )}
 
@@ -287,29 +318,39 @@ export default function MapboxMap({
   )
 }
 
-function DayChip({
-  active,
-  color,
-  onClick,
-  children,
-}: {
-  active: boolean
-  color?: string
-  onClick: () => void
-  children: ReactNode
-}) {
+/** GeoJSON lines for a Source, one per path. */
+function lines(paths: { coordinates: [number, number][] }[]) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: paths.map(({ coordinates }) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates },
+      properties: {},
+    })),
+  }
+}
+
+/** The plane or boat riding a flight or water leg. The plane points along its course. */
+function ArcIcon({ arc, color }: { arc: ArcLeg; color: string }) {
+  const flight = arc.mode === 'flight'
+  const Icon = flight ? Plane : Ship
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold shadow transition-colors',
-        active ? 'bg-neutral-900 text-white' : 'bg-white/95 text-neutral-800 hover:bg-white',
-      )}
+    <Marker
+      longitude={arc.icon.lng}
+      latitude={arc.icon.lat}
+      anchor="center"
+      // Lucide's plane points north-east (45°); turning with the map keeps it on course.
+      rotation={flight ? arc.icon.heading - 45 : 0}
+      rotationAlignment={flight ? 'map' : 'viewport'}
+      style={{ zIndex: 0 }}
     >
-      {color && <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />}
-      {children}
-    </button>
+      <span
+        title={flight ? 'Máy bay' : 'Tàu, phà, ca nô'}
+        className="flex size-7 items-center justify-center rounded-full border-2 bg-white shadow-md"
+        style={{ borderColor: color, color }}
+      >
+        <Icon className="size-4" fill={flight ? color : 'none'} strokeWidth={flight ? 1.5 : 2} aria-hidden />
+      </span>
+    </Marker>
   )
 }
