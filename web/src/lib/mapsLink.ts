@@ -19,6 +19,8 @@ export interface ResolvedPlace {
   address: string
   /** The place's own name, when the link carried one (Google's /place/<name>/). */
   name?: string
+  /** Mapbox categories, when the place came from search (see `Place.types`). */
+  types?: string[]
 }
 
 function inRange(lat: number, lng: number): boolean {
@@ -95,7 +97,7 @@ async function addressAt(lat: number, lng: number): Promise<string> {
 async function lookUp(text: string): Promise<ResolvedPlace> {
   const [place] = await searchPlaces(text)
   if (!place) throw new Error('Không tìm thấy địa chỉ này. Hãy thử dán link Google Maps hoặc chọn trên bản đồ.')
-  return { lat: place.lat, lng: place.lng, address: [place.name, place.address].filter(Boolean).join(', ') }
+  return { lat: place.lat, lng: place.lng, address: [place.name, place.address].filter(Boolean).join(', '), types: place.types }
 }
 
 /**

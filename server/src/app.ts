@@ -24,6 +24,9 @@ app.set('trust proxy', 1)
 app.disable('x-powered-by')
 
 app.use(cors({ origin: env.corsOrigins }))
+// A saved journey carries each road leg's route (a long drive is tens of kB),
+// so its body may be larger. Parsed here first, the general parser skips it.
+app.use('/api/posts', express.json({ limit: '3mb' }))
 app.use(express.json({ limit: '100kb' }))
 
 app.get('/api/health', (_req, res) => {

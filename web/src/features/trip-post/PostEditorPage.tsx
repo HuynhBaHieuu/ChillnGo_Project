@@ -32,6 +32,7 @@ import {
   SEASON_LABELS,
   formatVnd,
 } from '@/lib/format'
+import { withLegRoutes } from '@/features/map/legs'
 import { searchPlaces } from '@/lib/geo'
 import { UNPINNED, isPinned, totalCostOf } from '@/lib/itinerary'
 import { themeFromText, travelCover } from '@/lib/photos'
@@ -254,7 +255,7 @@ export function PostEditorPage() {
     }
   }
 
-  /** True while unpinned stops are being looked up by name, before saving. */
+  /** True while stops are being pinned by name and road legs routed, before saving. */
   const [pinning, setPinning] = useState(false)
 
   /**
@@ -284,7 +285,10 @@ export function PostEditorPage() {
   async function submit(event: FormEvent, status: 'draft' | 'published') {
     event.preventDefault()
     setPinning(true)
-    const days = await pinByName(form.days).finally(() => setPinning(false))
+    // Road legs carry their route, so viewers need no Directions call; only changed legs are fetched.
+    const days = await pinByName(form.days)
+      .then(withLegRoutes)
+      .finally(() => setPinning(false))
     // Show the new pins in the form too, in case saving fails and they try again.
     if (days !== form.days) setForm((current) => ({ ...current, days }))
     mutation.mutate(buildPayload(status, days), {

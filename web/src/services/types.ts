@@ -61,10 +61,26 @@ export interface User {
 /* -------------------------------------------------------------- TripPost */
 
 /**
- * How a traveller reached a stop from the one before it. `road` follows real
- * roads on the map; `flight` and `water` are drawn as dashed arcs.
+ * How a traveller reached a stop from the one before it, and the only thing
+ * that decides how the map draws that leg: the first three follow real roads,
+ * `flight` and `ferry` are dashed arcs. See lib/travel.ts.
  */
-export type TravelMode = 'road' | 'flight' | 'water'
+export type TravelMode = 'driving' | 'walking' | 'transit' | 'flight' | 'ferry'
+
+/**
+ * A road leg's route as drawn when the journey was saved, so viewers need no
+ * Directions call. `key` names the leg it was drawn for (`legKey`); a leg that
+ * no longer matches it is drawn afresh.
+ */
+export interface LegRoute {
+  key: string
+  /** Mapbox polyline6. */
+  polyline: string
+  /** Seconds, as Mapbox Directions estimated. */
+  duration: number
+  /** Metres along the road. */
+  distance: number
+}
 
 /** One stop within a day. `lng`/`lat` feed the map layer. */
 export interface TripLocation {
@@ -77,8 +93,12 @@ export interface TripLocation {
   photoUrl: string | null
   lng: number
   lat: number
-  /** How this stop was reached from the previous one in its day. Absent means `road`. */
+  /** How this stop was reached from the previous one in its day. Absent on older stops: driving (`modeOf`). */
   travelMode?: TravelMode
+  /** Place categories from search (e.g. "airport"), which `suggestMode` reads. */
+  placeTypes?: string[]
+  /** The road route into this stop, cached when the journey was saved. */
+  legRoute?: LegRoute
 }
 
 export interface TripDay {

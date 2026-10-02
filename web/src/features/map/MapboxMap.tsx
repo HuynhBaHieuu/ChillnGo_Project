@@ -1,15 +1,16 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-import { Plane, Ship } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Map, { Layer, Marker, NavigationControl, Source } from 'react-map-gl/mapbox'
-import type { MapRef } from 'react-map-gl/mapbox'
+import Map, { Layer, Marker, NavigationControl, Popup, Source } from 'react-map-gl/mapbox'
+import type { MapMouseEvent, MapRef } from 'react-map-gl/mapbox'
 
 import { PillTabs } from '@/components/PillNav'
 import { MAPBOX_TOKEN, boundsOf, dayColor, routeCoordinates } from '@/features/map/geometry'
 import type { MapPin, MapStop } from '@/features/map/geometry'
-import { arcOf, legsOf, useRoadPaths } from '@/features/map/legs'
-import type { ArcLeg } from '@/features/map/legs'
+import { useDrawnSegments } from '@/features/map/legs'
+import type { DrawnSegment } from '@/features/map/legs'
+import { MODE_ICON } from '@/features/map/modeIcons'
+import { MODE_LABEL, formatDistance, formatDuration } from '@/lib/travel'
 import { cn } from '@/lib/utils'
 import type { RouteGeoJson } from '@/services/types'
 
@@ -48,7 +49,8 @@ interface MapboxMapProps {
  * route from its first stop to its last and frames it; clicking the map
  * elsewhere, or "Tất cả", goes back to every stop. Each leg is drawn the way
  * it was travelled (see legs.ts): road legs follow the real roads, flights and
- * boats are dashed arcs with a plane or boat on them.
+ * boats are dashed arcs with a plane or boat on them. Tapping a leg labels it
+ * with how it was travelled and how long it took.
  */
 export default function MapboxMap({
   route,
@@ -77,22 +79,35 @@ export default function MapboxMap({
   const activeDay = selectedDay !== null && stopDays.includes(selectedDay) ? selectedDay : null
   const dayStops = useMemo(() => stops.filter((s) => s.day === activeDay), [stops, activeDay])
 
-  // The picked day's legs: roads along the real roads, flights and boats as arcs.
-  const roadPaths = useRoadPaths(dayStops)
-  const arcs = useMemo(
-    () => legsOf(dayStops).flatMap((leg) => (leg.mode === 'road' ? [] : [arcOf({ ...leg, mode: leg.mode })])),
-    [dayStops],
-  )
-  const roadData = useMemo(() => lines(roadPaths.map((coordinates) => ({ coordinates }))), [roadPaths])
-  const arcData = useMemo(() => lines(arcs), [arcs])
+  // The picked day's legs, each drawn by its mode (legs.ts).
+  const segments = useDrawnSegments(dayStops)
+  const solidData = useMemo(() => lines(segments, false), [segments])
+  const dashedData = useMemo(() => lines(segments, true), [segments])
+
+  // The leg whose label is open, and where it was tapped. Closed when the day changes.
+  const [picked, setPicked] = useState<{ day: number; index: number; lng: number; lat: number } | null>(null)
+  const pickedSegment = picked && picked.day === activeDay ? segments[picked.index] : undefined
+
+  function onMapClick(event: MapMouseEvent) {
+    const index = (event.features?.[0] as { properties?: { index?: unknown } | null } | undefined)?.properties?.index
+    if (activeDay !== null && typeof index === 'number') {
+      setPicked({ day: activeDay, index, lng: event.lngLat.lng, lat: event.lngLat.lat })
+      return
+    }
+    setPicked(null)
+    if (stops.length) setSelectedDay(null)
+  }
 
   // Framed on the picked day (arcs included, they bow outside the stops), or on everything.
   const viewBounds = useMemo(
     () =>
       dayStops.length
-        ? boundsOf([...dayStops.map((s): [number, number] => [s.lng, s.lat]), ...arcs.flatMap((a) => a.coordinates)])
+        ? boundsOf([
+            ...dayStops.map((s): [number, number] => [s.lng, s.lat]),
+            ...segments.filter((s) => s.dashed).flatMap((s) => s.coordinates),
+          ])
         : bounds,
-    [dayStops, arcs, bounds],
+    [dayStops, segments, bounds],
   )
 
   const pinCollection = useMemo(
@@ -140,7 +155,9 @@ export default function MapboxMap({
         initialViewState={{ bounds, fitBoundsOptions: { padding: 56 } }}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
-        onClick={stops.length ? () => setSelectedDay(null) : undefined}
+        // Taps on a leg (the wide, invisible hit lines) open its label.
+        interactiveLayerIds={activeDay !== null ? ['day-solid-hit', 'day-dashed-hit'] : undefined}
+        onClick={onMapClick}
       >
         <NavigationControl position="top-right" showCompass={false} />
 
@@ -206,43 +223,71 @@ export default function MapboxMap({
           </Source>
         )}
 
-        {activeDay !== null && roadPaths.length > 0 && (
-          <Source id="day-road" type="geojson" data={roadData}>
+        {/* Road legs: solid, along the roads. */}
+        {activeDay !== null && solidData.features.length > 0 && (
+          <Source id="day-solid" type="geojson" data={solidData}>
             <Layer
-              id="day-road-casing"
+              id="day-solid-casing"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 7 }}
             />
             <Layer
-              id="day-road-line"
+              id="day-solid-line"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{ 'line-color': dayColor(activeDay), 'line-width': 3.5 }}
             />
+            <Layer id="day-solid-hit" type="line" paint={{ 'line-color': OUTLINE, 'line-opacity': 0, 'line-width': 18 }} />
           </Source>
         )}
 
-        {activeDay !== null && arcs.length > 0 && (
-          <Source id="day-arcs" type="geojson" data={arcData}>
+        {/* Flights and boats: dashed arcs. */}
+        {activeDay !== null && dashedData.features.length > 0 && (
+          <Source id="day-dashed" type="geojson" data={dashedData}>
             <Layer
-              id="day-arcs-casing"
+              id="day-dashed-casing"
               type="line"
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{ 'line-color': OUTLINE, 'line-opacity': 0.9, 'line-width': 6 }}
             />
             <Layer
-              id="day-arcs-line"
+              id="day-dashed-line"
               type="line"
               // Butt caps: round ones swell each dash into a blob.
               layout={{ 'line-cap': 'butt', 'line-join': 'round' }}
               paint={{ 'line-color': dayColor(activeDay), 'line-width': 3, 'line-dasharray': [2, 1.5] }}
             />
+            <Layer id="day-dashed-hit" type="line" paint={{ 'line-color': OUTLINE, 'line-opacity': 0, 'line-width': 18 }} />
           </Source>
         )}
 
         {activeDay !== null &&
-          arcs.map((arc) => <ArcIcon key={`${arc.icon.lng},${arc.icon.lat}`} arc={arc} color={dayColor(activeDay)} />)}
+          segments.map(
+            (segment, index) =>
+              segment.icon && (
+                <ModeIcon
+                  key={index}
+                  segment={segment}
+                  color={dayColor(activeDay)}
+                  onClick={() => setPicked({ day: activeDay, index, lng: segment.icon!.lng, lat: segment.icon!.lat })}
+                />
+              ),
+          )}
+
+        {picked && pickedSegment && (
+          <Popup
+            longitude={picked.lng}
+            latitude={picked.lat}
+            anchor="bottom"
+            offset={14}
+            closeButton={false}
+            closeOnClick={false}
+            maxWidth="16rem"
+          >
+            <SegmentLabel segment={pickedSegment} />
+          </Popup>
+        )}
 
         {stops.map((stop) => {
           const dimmed = activeDay !== null && stop.day !== activeDay
@@ -318,39 +363,76 @@ export default function MapboxMap({
   )
 }
 
-/** GeoJSON lines for a Source, one per path. */
-function lines(paths: { coordinates: [number, number][] }[]) {
+/** GeoJSON lines for a Source: the dashed legs or the solid ones, each tagged with its index for taps. */
+function lines(segments: DrawnSegment[], dashed: boolean) {
   return {
     type: 'FeatureCollection' as const,
-    features: paths.map(({ coordinates }) => ({
-      type: 'Feature' as const,
-      geometry: { type: 'LineString' as const, coordinates },
-      properties: {},
-    })),
+    features: segments.flatMap((segment, index) =>
+      segment.dashed === dashed
+        ? [
+            {
+              type: 'Feature' as const,
+              geometry: { type: 'LineString' as const, coordinates: segment.coordinates },
+              properties: { index },
+            },
+          ]
+        : [],
+    ),
   }
 }
 
-/** The plane or boat riding a flight or water leg. The plane points along its course. */
-function ArcIcon({ arc, color }: { arc: ArcLeg; color: string }) {
-  const flight = arc.mode === 'flight'
-  const Icon = flight ? Plane : Ship
+/** The plane or boat riding a flight or ferry leg; tapping it opens the leg's label. The plane points along its course. */
+function ModeIcon({ segment, color, onClick }: { segment: DrawnSegment; color: string; onClick: () => void }) {
+  if (!segment.icon) return null
+  const flight = segment.mode === 'flight'
+  const Icon = MODE_ICON[segment.mode]
   return (
     <Marker
-      longitude={arc.icon.lng}
-      latitude={arc.icon.lat}
+      longitude={segment.icon.lng}
+      latitude={segment.icon.lat}
       anchor="center"
       // Lucide's plane points north-east (45°); turning with the map keeps it on course.
-      rotation={flight ? arc.icon.heading - 45 : 0}
+      rotation={flight ? segment.icon.heading - 45 : 0}
       rotationAlignment={flight ? 'map' : 'viewport'}
       style={{ zIndex: 0 }}
     >
-      <span
-        title={flight ? 'Máy bay' : 'Tàu, phà, ca nô'}
-        className="flex size-7 items-center justify-center rounded-full border-2 bg-white shadow-md"
+      <button
+        type="button"
+        onClick={(event) => {
+          // Not a click on the map, which would close the label.
+          event.stopPropagation()
+          onClick()
+        }}
+        aria-label={`${MODE_LABEL[segment.mode]}: xem thời gian`}
+        className="flex size-7 cursor-pointer items-center justify-center rounded-full border-2 bg-white shadow-md"
         style={{ borderColor: color, color }}
       >
         <Icon className="size-4" fill={flight ? color : 'none'} strokeWidth={flight ? 1.5 : 2} aria-hidden />
-      </span>
+      </button>
     </Marker>
+  )
+}
+
+/**
+ * What a tapped leg says: how it was travelled and roughly how long it took.
+ * Road legs add the distance Directions measured; flights and boats show an
+ * estimated time and no distance, since no route was measured for them.
+ */
+function SegmentLabel({ segment }: { segment: DrawnSegment }) {
+  const Icon = MODE_ICON[segment.mode]
+  const time =
+    segment.duration === null
+      ? null
+      : `${segment.estimated ? 'khoảng ' : ''}${formatDuration(segment.duration, segment.estimated)}${segment.estimated ? ' (ước tính)' : ''}`
+  return (
+    <div className="flex items-start gap-2 text-neutral-800">
+      <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <div className="text-xs leading-snug">
+        <p className="font-semibold">{MODE_LABEL[segment.mode]}</p>
+        {time && <p>{time}</p>}
+        {segment.distance !== null && <p className="text-neutral-500">{formatDistance(segment.distance)}</p>}
+        {segment.duration === null && <p className="text-neutral-500">Chưa có dữ liệu thời gian</p>}
+      </div>
+    </div>
   )
 }

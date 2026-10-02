@@ -1,5 +1,5 @@
-import { Car, ImagePlus, Loader2, Plane, Plus, Ship, Trash2 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { ImagePlus, Loader2, Plus, Trash2 } from 'lucide-react'
+import { Fragment, useRef, useState } from 'react'
 
 import { GlassCard } from '@/components/GlassCard'
 import { Button } from '@/components/ui/button'
@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { AddressField } from '@/features/trip-post/components/AddressField'
+import { MODE_ICON } from '@/features/map/modeIcons'
 import { PlaceField } from '@/features/trip-post/components/PlaceField'
-import { UNPINNED, dayCostOf } from '@/lib/itinerary'
+import { UNPINNED, dayCostOf, isPinned } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
+import { MODE_LABEL, TRAVEL_MODES, modeOf, suggestMode } from '@/lib/travel'
 import { cn } from '@/lib/utils'
 import { postService } from '@/services'
 import type { TravelMode, TripDay, TripLocation } from '@/services/types'
@@ -32,11 +34,9 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
   }
 
   function patchLocation(locationId: string, patch: Partial<TripLocation>) {
-    patchDay({
-      locations: day.locations.map((loc) =>
-        loc._id === locationId ? { ...loc, ...patch } : loc,
-      ),
-    })
+    const locations = day.locations.map((loc) => (loc._id === locationId ? { ...loc, ...patch } : loc))
+    // A stop placed or moved: prefill the legs into and out of it.
+    patchDay({ locations: 'lng' in patch ? suggestLegs(locations, locationId) : locations })
   }
 
   function addLocation() {
@@ -99,14 +99,24 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
       {/* Locations */}
       <div className="mt-6 space-y-4">
         {day.locations.map((location, locIndex) => (
-          <LocationRow
-            key={location._id}
-            location={location}
-            index={locIndex}
-            canRemove={day.locations.length > 1}
-            onChange={(patch) => patchLocation(location._id, patch)}
-            onRemove={() => removeLocation(location._id)}
-          />
+          <Fragment key={location._id}>
+            {/* The leg from the previous stop; the day's first stop has none. */}
+            {locIndex > 0 && (
+              <LegPicker
+                value={modeOf(location)}
+                from={locIndex}
+                to={locIndex + 1}
+                onChange={(travelMode) => patchLocation(location._id, { travelMode })}
+              />
+            )}
+            <LocationRow
+              location={location}
+              index={locIndex}
+              canRemove={day.locations.length > 1}
+              onChange={(patch) => patchLocation(location._id, patch)}
+              onRemove={() => removeLocation(location._id)}
+            />
+          </Fragment>
         ))}
       </div>
 
@@ -163,15 +173,6 @@ function LocationRow({
         </span>
 
         <div className="min-w-0 flex-1 space-y-3">
-          {/* The day's first stop is where it starts: there is no leg to it. */}
-          {index > 0 && (
-            <TravelModePicker
-              value={location.travelMode ?? 'road'}
-              stopNumber={index + 1}
-              onChange={(travelMode) => onChange({ travelMode })}
-            />
-          )}
-
           <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
             <div className="space-y-1.5">
               <Label htmlFor={`${location._id}-name`} className="text-xs">
@@ -310,42 +311,69 @@ function LocationRow({
   )
 }
 
-const TRAVEL_MODES: { mode: TravelMode; label: string; Icon: typeof Car }[] = [
-  { mode: 'road', label: 'Đường bộ', Icon: Car },
-  { mode: 'flight', label: 'Máy bay', Icon: Plane },
-  { mode: 'water', label: 'Tàu, phà, ca nô', Icon: Ship },
-]
+/**
+ * Prefills the legs into and out of a stop that was just placed, from
+ * `suggestMode`, where the author has not set a mode. Only a default: a mode
+ * already set is never changed. Legs join stops that are on the map.
+ */
+function suggestLegs(locations: TripLocation[], placedId: string): TripLocation[] {
+  const pinned = locations.filter(isPinned)
+  const at = pinned.findIndex((loc) => loc._id === placedId)
+  if (at < 0) return locations
 
-/** How the traveller got from the previous stop to this one; sets how the map draws the leg. */
-function TravelModePicker({
+  const suggested = new Map<string, TravelMode>()
+  for (const i of [at, at + 1]) {
+    const [from, to] = [pinned[i - 1], pinned[i]]
+    if (from && to && to.travelMode === undefined) suggested.set(to._id, suggestMode(from, to))
+  }
+  return locations.map((loc) => {
+    const travelMode = suggested.get(loc._id)
+    return travelMode ? { ...loc, travelMode } : loc
+  })
+}
+
+/** How the traveller went from one stop to the next. Changing it redraws that leg on the map. */
+function LegPicker({
   value,
-  stopNumber,
+  from,
+  to,
   onChange,
 }: {
   value: TravelMode
-  stopNumber: number
+  from: number
+  to: number
   onChange: (mode: TravelMode) => void
 }) {
   return (
-    <div role="group" aria-label={`Phương tiện đến địa điểm ${stopNumber}`} className="flex flex-wrap items-center gap-2">
-      <span className="text-xs text-muted-foreground">Đến đây bằng</span>
-      {TRAVEL_MODES.map(({ mode, label, Icon }) => (
-        <button
-          key={mode}
-          type="button"
-          aria-pressed={value === mode}
-          onClick={() => onChange(mode)}
-          className={cn(
-            'flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-            value === mode
-              ? 'border-foreground bg-foreground text-background'
-              : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
-          )}
-        >
-          <Icon className="size-3.5" aria-hidden />
-          {label}
-        </button>
-      ))}
+    <div className="flex items-center gap-3 pl-[1.6875rem]">
+      {/* The dashed thread joining the two stops' numbers. */}
+      <span aria-hidden className="h-10 border-l border-dashed border-border" />
+      <div
+        role="group"
+        aria-label={`Phương tiện từ điểm ${from} đến điểm ${to}`}
+        className="flex items-center gap-0.5 rounded-full border border-border p-0.5"
+      >
+        {TRAVEL_MODES.map((mode) => {
+          const Icon = MODE_ICON[mode]
+          return (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={value === mode}
+              aria-label={MODE_LABEL[mode]}
+              title={MODE_LABEL[mode]}
+              onClick={() => onChange(mode)}
+              className={cn(
+                'flex size-8 items-center justify-center rounded-full transition-colors',
+                value === mode ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <Icon className="size-4" aria-hidden />
+            </button>
+          )
+        })}
+      </div>
+      <span className="text-xs text-muted-foreground">{MODE_LABEL[value]}</span>
     </div>
   )
 }

@@ -51,6 +51,7 @@ function PickerBody({
         ? [place.name, place.address].filter(Boolean).join(', ')
         : `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`,
       name: place?.name,
+      types: place?.types,
     })
   }
 
