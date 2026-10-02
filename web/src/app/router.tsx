@@ -12,6 +12,7 @@ import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage'
 import { ADMIN_SECTIONS } from '@/features/discovery-admin/admin/sections'
 import { AdminIndex, AdminLayout, AdminSectionPage } from '@/features/discovery-admin/AdminLayout'
 import { DiscoverPage } from '@/features/discovery-admin/DiscoverPage'
+import { InterestPage } from '@/features/discovery-admin/InterestPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
 import { EditProfilePage } from '@/features/social/EditProfilePage'
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
 
       { path: '/feed', element: <FeedPage /> },
       { path: '/discover', element: <DiscoverPage /> },
+      { path: '/discover/interest/:tag', element: <InterestPage /> },
 
       { path: '/posts/:id', element: <PostDetailPage /> },
       {

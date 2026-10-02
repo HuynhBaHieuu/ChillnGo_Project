@@ -18,11 +18,19 @@ interface DiscoverCardProps {
    * landscape photo with the title centred underneath and nothing else.
    */
   variant?: 'square' | 'wide'
+  /** Position in a ranked list, set large under the photo. */
+  rank?: number
   className?: string
 }
 
 /** A photo-first trip card: cover with a save button, then title and numbers. */
-export function DiscoverCard({ post, chip, variant = 'square', className }: DiscoverCardProps) {
+export function DiscoverCard({
+  post,
+  chip,
+  variant = 'square',
+  rank,
+  className,
+}: DiscoverCardProps) {
   const isWide = variant === 'wide'
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const navigate = useNavigate()
@@ -64,6 +72,9 @@ export function DiscoverCard({ post, chip, variant = 'square', className }: Disc
           </h3>
         ) : (
           <div className="pt-3">
+            {rank !== undefined && (
+              <p className="mb-2 font-display text-4xl font-bold leading-none">{rank}</p>
+            )}
             {chip && (
               <span className="mb-2 inline-block rounded-md bg-white/[0.06] px-2 py-0.5 text-xs text-muted-foreground">
                 {chip}

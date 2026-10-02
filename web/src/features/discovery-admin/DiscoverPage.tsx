@@ -14,13 +14,11 @@ import {
 } from '@/features/discovery-admin/components/DiscoverCard'
 import { DiscoverHero } from '@/features/discovery-admin/components/DiscoverHero'
 import { DiscoverSection } from '@/features/discovery-admin/components/DiscoverSection'
-import {
-  InterestGrid,
-  type InterestTile,
-} from '@/features/discovery-admin/components/InterestGrid'
+import { InterestGrid } from '@/features/discovery-admin/components/InterestGrid'
 import { PhotoTile } from '@/features/discovery-admin/components/PhotoTile'
 import { ShareTripBanner } from '@/features/discovery-admin/components/ShareTripBanner'
 import { TripOfTheYearBanner } from '@/features/discovery-admin/components/TripOfTheYearBanner'
+import { pickInterestTiles } from '@/features/discovery-admin/interests'
 import { REGIONS, REGION_LABELS, SEASON_LABELS } from '@/lib/format'
 import { qk } from '@/lib/queryKeys'
 import { activityService, discoveryService } from '@/services'
@@ -42,12 +40,19 @@ const MIN_ROW = 2
 export function DiscoverPage() {
   const viewerId = useViewerId()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  // ?q= opens Discover already searching (Your Activity → Search History links here).
+  // ?q= opens Discover already searching (Your Activity → Search History links
+  // here); ?region= and ?tag= arrive from an interest page's region tiles.
   const [searchParams] = useSearchParams()
-  const [filters, setFilters] = useState<DiscoverFilters>(() => ({
-    ...discoveryService.DEFAULT_FILTERS,
-    query: searchParams.get('q')?.slice(0, 120) ?? '',
-  }))
+  const [filters, setFilters] = useState<DiscoverFilters>(() => {
+    const region = searchParams.get('region')
+    const tag = searchParams.get('tag')
+    return {
+      ...discoveryService.DEFAULT_FILTERS,
+      query: searchParams.get('q')?.slice(0, 120) ?? '',
+      region: REGIONS.includes(region as Region) ? (region as Region) : 'all',
+      tags: tag ? [tag.slice(0, 60)] : [],
+    }
+  })
 
   // A search counts once the user stops typing; it goes to their Search History.
   useEffect(() => {
@@ -87,31 +92,7 @@ export function DiscoverPage() {
     }
   }, [allPosts, season])
 
-  /**
-   * The four most-used tags. Each is pictured by the trip that lists it
-   * earliest among its own tags (so "ẩm thực" isn't shown with a beach),
-   * the most saved winning ties; a cover is used at most once.
-   */
-  const interests = useMemo<InterestTile[]>(() => {
-    const posts = allPosts ?? []
-    const counts = new Map<string, number>()
-    for (const post of posts) {
-      for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
-    }
-    const used = new Set<string>()
-    const tiles: InterestTile[] = []
-    for (const [tag] of [...counts].sort((a, b) => b[1] - a[1])) {
-      // `allPosts` is sorted by saves, so the stable sort keeps that as the tiebreak.
-      const post = posts
-        .filter((p) => p.tags.includes(tag) && !used.has(p.coverUrl))
-        .sort((x, y) => x.tags.indexOf(tag) - y.tags.indexOf(tag))[0]
-      if (!post) continue
-      used.add(post.coverUrl)
-      tiles.push({ tag, image: post.coverUrl })
-      if (tiles.length === 4) break
-    }
-    return tiles
-  }, [allPosts])
+  const interests = useMemo(() => pickInterestTiles(allPosts ?? [], 4), [allPosts])
 
   /** One tile per region that has trips, pictured by its most-saved one. */
   const regions = useMemo(
@@ -135,11 +116,6 @@ export function DiscoverPage() {
   function patch(update: Partial<DiscoverFilters>, scroll = false) {
     scrollOnUpdate.current = scroll
     setFilters((prev) => ({ ...prev, ...update }))
-  }
-
-  function pickInterest(tag: string) {
-    const only = filters.tags.length === 1 && filters.tags[0] === tag
-    patch({ tags: only ? [] : [tag] }, true)
   }
 
   function pickRegion(region: Region) {
@@ -214,8 +190,6 @@ export function DiscoverPage() {
       {interests.length === 4 && (
         <InterestGrid
           tiles={interests}
-          activeTags={filters.tags}
-          onSelect={pickInterest}
           className="animate-fade-rise-delay mt-20"
         />
       )}
