@@ -24,3 +24,6 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Playwright MCP snapshots, logs and screenshots
+.playwright-mcp/
