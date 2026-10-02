@@ -6,6 +6,8 @@
  * the filtering moves into Mongo, with no change to the calling component.
  */
 
+import { foldText } from '@/lib/format'
+
 import { clone, db, delay } from './client'
 import { syncServerPosts } from './serverPosts'
 import { decorate } from './post.service'
@@ -45,7 +47,10 @@ export async function discoverPosts(
 ): Promise<TripPostWithAuthor[]> {
   await Promise.all([delay(), syncServerPosts()])
 
-  const query = filters.query.trim().toLowerCase()
+  // Accent-insensitive, like the search box's suggestions, so a query that
+  // suggests a trip also finds it here.
+  const query = foldText(filters.query.trim())
+  const has = (text: string) => foldText(text).includes(query)
 
   return db.tripPosts
     .filter((p) => p.status === 'published')
@@ -63,9 +68,10 @@ export async function discoverPosts(
     .filter(
       (p) =>
         query === '' ||
-        p.title.toLowerCase().includes(query) ||
-        p.summary.toLowerCase().includes(query) ||
-        p.tags.some((t) => t.toLowerCase().includes(query)),
+        has(p.title) ||
+        has(p.summary) ||
+        p.tags.some(has) ||
+        p.days.some((d) => d.locations.some((l) => has(l.name))),
     )
     .sort((a, b) => b.bookmarkCount - a.bookmarkCount)
     .map((p) => decorate(p, viewerId))
