@@ -47,6 +47,9 @@ const writeLimiter = rateLimit({
 const REGIONS = ['north', 'central', 'south', 'islands', 'overseas'] as const
 const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const
 const BUDGETS = ['low', 'medium', 'high'] as const
+/** How a leg was travelled (TravelMode in the web app). The first three follow roads. */
+const TRAVEL_MODES = ['driving', 'walking', 'transit', 'flight', 'ferry'] as const
+const ROAD_MODES = new Set<string>(['driving', 'walking', 'transit'])
 
 /** Photos an author can attach to a journey's header; the first is the cover. */
 const MAX_COVER_IMAGES = 10
@@ -69,16 +72,61 @@ const locationSchema = z.object({
   photoUrl: imageUrl.nullable(),
   lng: z.number().min(-180).max(180),
   lat: z.number().min(-90).max(90),
-  /** How the stop was reached from the previous one. Absent on older stops, read as road. */
-  travelMode: z.enum(['road', 'flight', 'water']).optional(),
+  /** How the stop was reached from the day's previous stop. Absent on older stops, read as driving. */
+  travelMode: z.enum(TRAVEL_MODES).optional(),
+  /** Place categories from search (e.g. "airport"); the editor suggests a travel mode from them. */
+  placeTypes: z.array(z.string().trim().max(60)).max(12).optional(),
+  /** The road route into this stop, cached so viewers need no Directions call. */
+  legRoute: z
+    .object({
+      key: z.string().max(200),
+      /** Mapbox polyline6. */
+      polyline: z.string().max(200_000),
+      duration: z.number().min(0).max(1e7),
+      distance: z.number().min(0).max(1e8),
+    })
+    .optional(),
 })
+
+type LocationInput = z.infer<typeof locationSchema>
+
+/** Where a new stop sits until the author places it (UNPINNED in web/src/lib/itinerary.ts): not on the map. */
+const isPinned = (loc: LocationInput) => !(loc.lng === 106 && loc.lat === 16)
+
+/** The road leg from a to b, as `legKey` in web/src/lib/travel.ts names it. */
+function legKey(a: LocationInput, b: LocationInput, mode: (typeof TRAVEL_MODES)[number]): string {
+  const at = (l: LocationInput) => `${l.lng.toFixed(5)},${l.lat.toFixed(5)}`
+  return `${mode === 'walking' ? 'walking' : 'driving'}:${at(a)};${at(b)}`
+}
+
+function withoutLegRoute({ legRoute: _dropped, ...loc }: LocationInput): LocationInput {
+  return loc
+}
+
+/**
+ * Keeps a stop's cached road route only while it still describes the leg into
+ * it: a road mode, from the same previous stop, to the same place. A moved
+ * stop or a changed mode leaves that leg without one, and the web app draws
+ * and caches it afresh; every other leg keeps its route.
+ */
+function keepCurrentLegRoutes(locations: LocationInput[]): LocationInput[] {
+  let previous: LocationInput | null = null
+  return locations.map((loc) => {
+    if (!isPinned(loc)) return withoutLegRoute(loc)
+    const from = previous
+    previous = loc
+    const mode = loc.travelMode ?? 'driving'
+    const current = from && ROAD_MODES.has(mode) && loc.legRoute?.key === legKey(from, loc, mode)
+    return current ? loc : withoutLegRoute(loc)
+  })
+}
 
 const daySchema = z.object({
   _id: z.string().max(80),
   dayNumber: z.number().int().min(1).max(60),
   date: dateOnly,
   title: z.string().max(200),
-  locations: z.array(locationSchema).max(30),
+  locations: z.array(locationSchema).max(30).transform(keepCurrentLegRoutes),
   photos: z.array(imageUrl).max(20),
 })
 
@@ -192,7 +240,19 @@ async function loadOwn(userId: string, id: string, deleted: boolean): Promise<Tr
   return post
 }
 
-type DayShape = { locations?: { photoUrl?: string | null }[]; photos?: string[] }
+type DayShape = { locations?: { photoUrl?: string | null; legRoute?: unknown }[]; photos?: string[] }
+
+/** For lists: without the cached road routes, which only the journey's own map needs. */
+function toListView(post: TripPostDocument) {
+  const view = toView(post)
+  return {
+    ...view,
+    days: (view.days as DayShape[]).map((day) => ({
+      ...day,
+      locations: (day.locations ?? []).map(({ legRoute: _dropped, ...loc }) => loc),
+    })),
+  }
+}
 
 /** Every image a journey shows: its cover photos, each stop's photo and each day's photos. */
 function imagesOf(post: { coverUrl: string; coverImages?: string[]; days: unknown[] }): string[] {
@@ -246,7 +306,7 @@ postsRouter.get('/', async (req, res) => {
   const filter: Record<string, unknown> = { status: 'published', deletedAt: null }
   if (author) filter.authorId = author
   const posts = await TripPost.find(filter).sort({ createdAt: -1 }).limit(200)
-  res.json({ items: posts.map(toView), authors: await authorsOf(posts) })
+  res.json({ items: posts.map(toListView), authors: await authorsOf(posts) })
 })
 
 const mineSchema = z.object({ status: z.enum(['draft', 'published', 'all']).catch('all') })
@@ -256,14 +316,14 @@ postsRouter.get('/mine', requireAuth, loadCurrentUser, async (req, res) => {
   const filter: Record<string, unknown> = { authorId: currentUser(res)._id, deletedAt: null }
   if (status !== 'all') filter.status = status
   const posts = await TripPost.find(filter).sort({ updatedAt: -1 }).limit(200)
-  res.json({ items: posts.map(toView) })
+  res.json({ items: posts.map(toListView) })
 })
 
 postsRouter.get('/deleted', requireAuth, loadCurrentUser, async (_req, res) => {
   const userId = currentUser(res)._id
   await purgeExpired(userId)
   const posts = await TripPost.find({ authorId: userId, deletedAt: { $ne: null } }).sort({ deletedAt: -1 })
-  res.json({ items: posts.map(toView) })
+  res.json({ items: posts.map(toListView) })
 })
 
 postsRouter.get('/:id', optionalAuth, async (req, res) => {

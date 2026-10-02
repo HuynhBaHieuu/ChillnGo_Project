@@ -11,6 +11,8 @@ export interface Place {
   address: string
   lat: number
   lng: number
+  /** Mapbox categories (e.g. "airport", "ferry"), which suggest how a leg was travelled. */
+  types?: string[]
 }
 
 export const canSearchPlaces = Boolean(MAPBOX_TOKEN)
@@ -24,13 +26,20 @@ const SEARCH = 'https://api.mapbox.com/search/searchbox/v1'
 
 interface Feature {
   geometry: { coordinates: [number, number] }
-  properties: { name: string; full_address?: string; place_formatted?: string }
+  properties: {
+    name: string
+    full_address?: string
+    place_formatted?: string
+    poi_category_ids?: string[]
+    maki?: string
+  }
 }
 
 function toPlace(feature: Feature): Place {
-  const { name, place_formatted, full_address } = feature.properties
+  const { name, place_formatted, full_address, poi_category_ids = [], maki } = feature.properties
   const [lng, lat] = feature.geometry.coordinates
-  return { name, address: place_formatted || full_address || '', lat, lng }
+  const types = [...new Set([...poi_category_ids, ...(maki ? [maki] : [])])]
+  return { name, address: place_formatted || full_address || '', lat, lng, types }
 }
 
 /** Mapbox often lists the same place several times: keep the first of each name + address. */

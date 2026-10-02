@@ -56,6 +56,7 @@ export function PlaceField({ id, label, location, onChange }: PlaceFieldProps) {
       address: [place.name, place.address].filter(Boolean).join(', '),
       lng: place.lng,
       lat: place.lat,
+      placeTypes: place.types ?? [],
     })
     setQuery(null)
     setResults([])

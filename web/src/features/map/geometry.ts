@@ -1,6 +1,7 @@
 import { optionalEnv } from '@/lib/env'
 import { isPinned } from '@/lib/itinerary'
-import type { RouteGeoJson, TravelMode, TripDay } from '@/services/types'
+import { modeOf } from '@/lib/travel'
+import type { LegRoute, RouteGeoJson, TravelMode, TripDay } from '@/services/types'
 
 export interface MapPin {
   id: string
@@ -23,6 +24,8 @@ export interface MapStop {
   order: number
   /** How this stop was reached from the previous one in its day. */
   mode: TravelMode
+  /** The road route into this stop, if one was cached when the journey was saved. */
+  legRoute?: LegRoute
 }
 
 /** Every stop that has a real position, day by day, in itinerary order. */
@@ -35,7 +38,8 @@ export function stopsOfDays(days: TripDay[]): MapStop[] {
       name: loc.name,
       day: d + 1,
       order: i + 1,
-      mode: loc.travelMode ?? 'road',
+      mode: modeOf(loc),
+      legRoute: loc.legRoute,
     })),
   )
 }

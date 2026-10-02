@@ -1,34 +1,235 @@
 /**
- * The legs of a day's route, drawn the way each one was travelled.
+ * The legs of a day's route, each drawn the way it was travelled. The leg's
+ * mode is the only thing that decides how (`drawSegment`):
  *
- * - `road`: the real driving route, from the Mapbox Directions API, like a GPS.
- * - `flight`: the great circle between the two airports, bowed a little so a
- *   short domestic hop still reads as a flight, with a plane at its middle.
- * - `water`: a gentle curve between the two piers, with a boat at its middle.
+ * - driving, walking, transit: the real route from Mapbox Directions, a solid
+ *   line along the roads. Saved journeys carry it (`legRoute`), so viewing one
+ *   makes no Directions call; a leg without it is fetched once per session.
+ * - flight: the great circle between the airports, bowed a little so a short
+ *   domestic hop still reads as a flight, dashed, with a plane at its middle.
+ * - ferry: a gentle curve between the piers, dashed, with a boat at its middle.
+ *
+ * Flights and boats never call Directions, whatever road may join their ends.
  */
 
 import { useEffect, useMemo, useState } from 'react'
 
 import { MAPBOX_TOKEN } from '@/features/map/geometry'
 import type { MapStop } from '@/features/map/geometry'
-import type { TravelMode } from '@/services/types'
+import { isPinned } from '@/lib/itinerary'
+import { estimatedSeconds, isRoadMode, legKey, modeOf } from '@/lib/travel'
+import type { LegRoute, TravelMode, TripDay, TripLocation } from '@/services/types'
 
 type LngLat = [number, number]
 
-export interface Leg {
+/** One leg: from a stop to the next one in the same day. */
+export interface Segment {
   from: MapStop
   to: MapStop
   mode: TravelMode
+  /** `legKey`: which cached road route belongs to this leg. */
+  key: string
+  /** The route saved with the journey, when it still matches the leg. */
+  cached?: LegRoute
 }
 
-/** Each pair of consecutive stops, with how the second one was reached. */
-export function legsOf(stops: MapStop[]): Leg[] {
-  return stops.slice(1).map((to, i) => ({ from: stops[i], to, mode: to.mode }))
+/** Each pair of consecutive stops (all from one day), with how the second was reached. */
+export function segmentsOf(stops: MapStop[]): Segment[] {
+  return stops.slice(1).map((to, i) => {
+    const from = stops[i]
+    const key = legKey(from, to, to.mode)
+    return { from, to, mode: to.mode, key, cached: to.legRoute?.key === key ? to.legRoute : undefined }
+  })
 }
 
-const pointOf = (stop: MapStop): LngLat => [stop.lng, stop.lat]
+/** A leg ready for the map. */
+export interface DrawnSegment {
+  mode: TravelMode
+  coordinates: LngLat[]
+  dashed: boolean
+  /** The plane or boat at the middle; heading in degrees clockwise from north. */
+  icon?: { lng: number; lat: number; heading: number }
+  /** Seconds: Directions' estimate on roads, a rough one for flights and boats. Null until known. */
+  duration: number | null
+  /** True for flights and boats, whose time is worked out from distance alone. */
+  estimated: boolean
+  /** Metres along the road. Null for flights and boats: no route was measured. */
+  distance: number | null
+}
 
-/* ----------------------------------------------------- Flight and water arcs */
+/**
+ * How a leg is drawn, decided by its mode and nothing else. A road leg whose
+ * route has not arrived yet is a straight line until it does.
+ */
+export function drawSegment(seg: Segment, route: LegRoute | undefined = seg.cached ?? routes.get(seg.key)): DrawnSegment {
+  const [a, b]: LngLat[] = [
+    [seg.from.lng, seg.from.lat],
+    [seg.to.lng, seg.to.lat],
+  ]
+  switch (seg.mode) {
+    case 'flight':
+      return arc(seg, 'flight', bow(greatCircle(a, b, 64), 0.15))
+    case 'ferry':
+      return arc(seg, 'ferry', bow(straight(a, b, 32), 0.08))
+    case 'driving':
+    case 'walking':
+    case 'transit':
+      return {
+        mode: seg.mode,
+        coordinates: route ? decodePolyline(route.polyline) : [a, b],
+        dashed: false,
+        duration: route?.duration ?? null,
+        estimated: false,
+        distance: route?.distance ?? null,
+      }
+  }
+}
+
+/** A flight or boat leg along `merc` (Mercator), with its icon placed and pointed at the middle. */
+function arc(seg: Segment, mode: 'flight' | 'ferry', merc: LngLat[]): DrawnSegment {
+  const i = Math.floor((merc.length - 1) / 2)
+  const [p, q] = [merc[i], merc[i + 1] ?? merc[i]]
+  const [lng, lat] = unproject([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2])
+  return {
+    mode,
+    coordinates: merc.map(unproject),
+    dashed: true,
+    icon: { lng, lat, heading: Math.atan2(q[0] - p[0], q[1] - p[1]) / RAD },
+    duration: estimatedSeconds(mode, seg.from, seg.to),
+    estimated: true,
+    distance: null,
+  }
+}
+
+/**
+ * The legs among `stops`, drawn. Road legs with no saved route are fetched
+ * (each once per session) and redrawn when their route arrives.
+ */
+export function useDrawnSegments(stops: MapStop[]): DrawnSegment[] {
+  const segments = useMemo(() => segmentsOf(stops), [stops])
+  const [arrived, setArrived] = useState(0)
+
+  const missingKey = segments
+    .filter((s) => isRoadMode(s.mode) && !s.cached && !routes.has(s.key))
+    .map((s) => s.key)
+    .join('|')
+
+  useEffect(() => {
+    if (!missingKey) return
+    let current = true
+    const missing = segments.filter((s) => isRoadMode(s.mode) && !s.cached && !routes.has(s.key))
+    void Promise.all(missing.map((s) => fetchRoute(s.key))).then(() => {
+      if (current) setArrived((n) => n + 1)
+    })
+    return () => {
+      current = false
+    }
+    // Keyed on the legs still missing a route, not on the array identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missingKey])
+
+  // `arrived` redraws once fetched routes are in the cache.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => segments.map((s) => drawSegment(s)), [segments, arrived])
+}
+
+/* ------------------------------------------------------------- Road routes */
+
+/** Routes fetched this session, by leg key. */
+const routes = new Map<string, LegRoute>()
+const pending = new Map<string, Promise<LegRoute | null>>()
+
+/**
+ * The road route for a leg key, from Mapbox Directions. Null when there is
+ * none (an island with no road, a failed request): the leg stays a straight
+ * line, and a later view tries again.
+ */
+function fetchRoute(key: string): Promise<LegRoute | null> {
+  const known = routes.get(key)
+  if (known) return Promise.resolve(known)
+  const inFlight = pending.get(key)
+  if (inFlight) return inFlight
+
+  const [profile, coordinates] = key.split(':')
+  const url =
+    `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}` +
+    `?geometries=polyline6&overview=full&access_token=${MAPBOX_TOKEN}`
+
+  const request = fetch(url)
+    .then((response) => (response.ok ? response.json() : null))
+    .then((data: { code?: string; routes?: { geometry: string; duration: number; distance: number }[] } | null) => {
+      const best = data?.code === 'Ok' ? data.routes?.[0] : undefined
+      if (!best) return null
+      const route: LegRoute = { key, polyline: best.geometry, duration: best.duration, distance: best.distance }
+      routes.set(key, route)
+      return route
+    })
+    .catch(() => null)
+    .finally(() => pending.delete(key))
+
+  pending.set(key, request)
+  return request
+}
+
+/**
+ * The days with each road leg's route attached, for saving: a route still
+ * matching its leg is kept, a changed leg (moved stop, new mode) is fetched
+ * afresh, and flights, boats and day starts carry none. The server drops any
+ * route that does not match its leg, so a stale one is never stored.
+ */
+export async function withLegRoutes(days: TripDay[]): Promise<TripDay[]> {
+  const withoutRoute = ({ legRoute: _dropped, ...loc }: TripLocation): TripLocation => loc
+
+  return Promise.all(
+    days.map(async (day) => {
+      let previous: TripLocation | null = null
+      const locations = await Promise.all(
+        day.locations.map(async (loc) => {
+          if (!isPinned(loc)) return withoutRoute(loc)
+          const from = previous
+          previous = loc
+          const mode = modeOf(loc)
+          if (!from || !isRoadMode(mode)) return withoutRoute(loc)
+          const key = legKey(from, loc, mode)
+          if (loc.legRoute?.key === key) return loc
+          const route = await fetchRoute(key)
+          return route ? { ...loc, legRoute: route } : withoutRoute(loc)
+        }),
+      )
+      return { ...day, locations }
+    }),
+  )
+}
+
+/** Google's encoded polyline format, at Mapbox's polyline6 precision, to [lng, lat] pairs. */
+function decodePolyline(encoded: string, precision = 6): LngLat[] {
+  const factor = 10 ** precision
+  const points: LngLat[] = []
+  let index = 0
+  let lat = 0
+  let lng = 0
+
+  const next = () => {
+    let result = 0
+    let shift = 0
+    let byte: number
+    do {
+      byte = encoded.charCodeAt(index++) - 63
+      result |= (byte & 0x1f) << shift
+      shift += 5
+    } while (byte >= 0x20)
+    return result & 1 ? ~(result >> 1) : result >> 1
+  }
+
+  while (index < encoded.length) {
+    lat += next()
+    lng += next()
+    points.push([lng / factor, lat / factor])
+  }
+  return points
+}
+
+/* ----------------------------------------------------- Flight and boat arcs */
 
 const RAD = Math.PI / 180
 
@@ -96,119 +297,4 @@ function bow(path: LngLat[], amount: number): LngLat[] {
     const lift = Math.sin((Math.PI * i) / (merc.length - 1)) * amount * length
     return [x + nx * lift, y + ny * lift]
   })
-}
-
-export interface ArcLeg {
-  mode: 'flight' | 'water'
-  coordinates: LngLat[]
-  /** Where the plane or boat sits, and its heading in degrees clockwise from north. */
-  icon: { lng: number; lat: number; heading: number }
-}
-
-export function arcOf(leg: Leg & { mode: 'flight' | 'water' }): ArcLeg {
-  const [a, b] = [pointOf(leg.from), pointOf(leg.to)]
-  const merc = leg.mode === 'flight' ? bow(greatCircle(a, b, 64), 0.15) : bow(straight(a, b, 32), 0.08)
-
-  // Heading at the middle, from the two points either side of it.
-  const i = Math.floor((merc.length - 1) / 2)
-  const [p, q] = [merc[i], merc[i + 1] ?? merc[i]]
-  const [lng, lat] = unproject([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2])
-
-  return {
-    mode: leg.mode,
-    coordinates: merc.map(unproject),
-    icon: { lng, lat, heading: Math.atan2(q[0] - p[0], q[1] - p[1]) / RAD },
-  }
-}
-
-/* ---------------------------------------------------------------- Road legs */
-
-/** The Directions API takes at most 25 waypoints per request. */
-const MAX_WAYPOINTS = 25
-
-const coordsKey = (points: LngLat[]) => points.map(([lng, lat]) => `${lng.toFixed(5)},${lat.toFixed(5)}`).join(';')
-
-/** Every route asked for this session, so picking a day again draws it at once. */
-const routeCache = new Map<string, Promise<LngLat[]>>()
-
-async function drivingRoute(points: LngLat[]): Promise<LngLat[]> {
-  const url =
-    `https://api.mapbox.com/directions/v5/mapbox/driving/${coordsKey(points)}` +
-    `?geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`
-  const response = await fetch(url)
-  if (!response.ok) throw new Error(`Directions ${response.status}`)
-  const data = (await response.json()) as { code: string; routes?: { geometry: { coordinates: LngLat[] } }[] }
-  const coordinates = data.routes?.[0]?.geometry.coordinates
-  if (data.code !== 'Ok' || !coordinates?.length) throw new Error(`Directions ${data.code}`)
-  return coordinates
-}
-
-/**
- * The road route through `points` in order. A stretch with no road between
- * (an island with no ferry, a failed request) falls back to a straight line.
- */
-function roadPath(points: LngLat[]): Promise<LngLat[]> {
-  const key = coordsKey(points)
-  const cached = routeCache.get(key)
-  if (cached) return cached
-
-  // Chunks share their end points so the pieces join up.
-  const chunks: LngLat[][] = []
-  for (let i = 0; i < points.length - 1; i += MAX_WAYPOINTS - 1) {
-    chunks.push(points.slice(i, i + MAX_WAYPOINTS))
-  }
-
-  let failed = false
-  const route = Promise.all(
-    chunks.map((chunk) =>
-      drivingRoute(chunk).catch(() => {
-        failed = true
-        return chunk
-      }),
-    ),
-  ).then((pieces) => {
-    // Do not keep a fallback: a network blip should not stick for the session.
-    if (failed) routeCache.delete(key)
-    return pieces.flatMap((piece, i) => (i === 0 ? piece : piece.slice(1)))
-  })
-
-  routeCache.set(key, route)
-  return route
-}
-
-/** Runs of consecutive road legs, each as the stops it passes, in order. */
-function roadRuns(stops: MapStop[]): LngLat[][] {
-  const runs: MapStop[][] = []
-  for (const leg of legsOf(stops)) {
-    if (leg.mode !== 'road') continue
-    const run = runs.at(-1)
-    if (run && run.at(-1) === leg.from) run.push(leg.to)
-    else runs.push([leg.from, leg.to])
-  }
-  return runs.map((run) => run.map(pointOf))
-}
-
-/**
- * The road legs among `stops`, following real roads once the Directions API
- * answers, and as straight lines until then.
- */
-export function useRoadPaths(stops: MapStop[]): LngLat[][] {
-  const runs = useMemo(() => roadRuns(stops), [stops])
-  const key = runs.map(coordsKey).join('|')
-  const [loaded, setLoaded] = useState<{ key: string; paths: LngLat[][] } | null>(null)
-
-  useEffect(() => {
-    if (runs.length === 0) return
-    let current = true
-    void Promise.all(runs.map(roadPath)).then((paths) => {
-      if (current) setLoaded({ key, paths })
-    })
-    return () => {
-      current = false
-    }
-    // Keyed on the coordinates, not the array identity.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key])
-
-  return loaded?.key === key ? loaded.paths : runs
 }

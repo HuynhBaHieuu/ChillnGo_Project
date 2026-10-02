@@ -63,6 +63,8 @@ export function AddressField({ id, label, location, onChange }: AddressFieldProp
       address: place.address,
       lat: place.lat,
       lng: place.lng,
+      // A moved stop drops the old place's categories: they would suggest the wrong mode.
+      placeTypes: place.types ?? [],
       // Fill the name from the place when the author has not written one.
       ...(!location.name.trim() && place.name ? { name: place.name } : {}),
     })
@@ -84,7 +86,13 @@ export function AddressField({ id, label, location, onChange }: AddressFieldProp
   }
 
   function pickSuggestion(place: Place) {
-    apply({ lat: place.lat, lng: place.lng, address: [place.name, place.address].filter(Boolean).join(', '), name: place.name })
+    apply({
+      lat: place.lat,
+      lng: place.lng,
+      address: [place.name, place.address].filter(Boolean).join(', '),
+      name: place.name,
+      types: place.types,
+    })
   }
 
   return (
