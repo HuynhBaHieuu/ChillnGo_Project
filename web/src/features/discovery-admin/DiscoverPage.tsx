@@ -163,10 +163,12 @@ export function DiscoverPage() {
   return (
     <PageContainer>
       <DiscoverHero
+        posts={allPosts ?? []}
         query={filters.query}
         region={filters.region}
         onSearch={(query) => patch({ query })}
         onRegionChange={(region) => patch({ region })}
+        onPickTag={(tag) => patch({ query: '', tags: [tag] })}
       />
 
       <div ref={resultsRef} className="scroll-mt-32" />

@@ -59,6 +59,19 @@ export function formatDateRange(start: string, end: string): string {
   return `${format(from, 'd MMM', { locale: vi })} – ${format(to, 'd MMM, yyyy', { locale: vi })}`
 }
 
+/**
+ * Lower-case and drop Vietnamese diacritics for search matching, so "ha giang"
+ * finds "Hà Giang" and "da lat" finds "Đà Lạt" — most people type without them.
+ */
+export function foldText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+}
+
 /* ------------------------------------------------- enum display mappings */
 
 export const BUDGET_LABELS: Record<BudgetLevel, string> = {
