@@ -55,6 +55,8 @@ const livestreamSchema = new Schema(
       key: { type: String, default: null },
       durationSec: { type: Number, default: 0 },
     },
+    /** The replay's cover picture, chosen by the host once the replay is ready. Empty: none chosen. */
+    thumbnailUrl: { type: String, default: '' },
   },
   { timestamps: true, versionKey: false },
 )

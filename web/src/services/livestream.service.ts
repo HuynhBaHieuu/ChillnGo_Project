@@ -3,6 +3,9 @@
  * through LiveKit; see features/livestream/useLiveRoom.ts.
  */
 
+import { uploadToCloudinary } from '@/lib/cloudinaryUpload'
+import type { SignedUpload } from '@/lib/cloudinaryUpload'
+import { prepareImageForUpload } from '@/lib/images'
 import { travelAvatar } from '@/lib/photos'
 
 import { apiUrl, http } from './http'
@@ -41,6 +44,8 @@ export interface Livestream {
   recording: { status: RecordingStatus; url: string | null; durationSec: number }
   /** Live and being recorded: viewers can rewind (see getDvrPlaylist). */
   dvr: boolean
+  /** The replay's cover, chosen by the host. Empty: none (cards fall back to the host's photo). */
+  thumbnailUrl: string
   host: LiveAuthor
   /** Only from getLivestream: the host removed the signed-in user from this stream. */
   blockedMe?: boolean
@@ -185,4 +190,25 @@ export function sendReaction(id: string, kind: ReactionKind, count: number): Pro
 /** Host only: removes a viewer from the stream for good, and their comments with them. */
 export function blockViewer(id: string, userId: string): Promise<{ ok: true; removedComments: number }> {
   return http(`/api/livestreams/${id}/block`, { method: 'POST', body: { userId } })
+}
+
+/** Longest side of a replay cover sent to Cloudinary; delivered at 1280×720. */
+const THUMBNAIL_MAX_SIDE = 1920
+
+/**
+ * Host only, once the replay is ready: uploads `image` (a captured frame or a
+ * chosen photo) straight to Cloudinary and makes it the replay's cover.
+ * Answers with the cover's new address. `onProgress` gets 0–100.
+ */
+export async function setThumbnail(id: string, image: File, onProgress?: (percent: number) => void): Promise<string> {
+  const file = await prepareImageForUpload(image, THUMBNAIL_MAX_SIDE)
+  const signature = await http<SignedUpload>(`/api/livestreams/${id}/thumbnail-signature`, { method: 'POST' })
+  await uploadToCloudinary(signature, file, onProgress)
+  const { thumbnailUrl } = await http<{ thumbnailUrl: string }>(`/api/livestreams/${id}/thumbnail`, { method: 'PUT' })
+  return thumbnailUrl
+}
+
+/** Host only: removes the replay's cover. */
+export async function removeThumbnail(id: string): Promise<void> {
+  await http(`/api/livestreams/${id}/thumbnail`, { method: 'DELETE' })
 }

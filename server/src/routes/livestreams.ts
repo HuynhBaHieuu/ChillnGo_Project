@@ -17,6 +17,9 @@
  *   DELETE /api/livestreams/:id/comments/:cid    the host, or the comment's author
  *   POST   /api/livestreams/:id/reactions        { kind, count } → counted, then shown to everyone
  *   POST   /api/livestreams/:id/block            { userId } host only: removes a viewer for good
+ *   POST   /api/livestreams/:id/thumbnail-signature  host only, replay ready: a signed cover upload
+ *   PUT    /api/livestreams/:id/thumbnail        host only: use the cover just uploaded
+ *   DELETE /api/livestreams/:id/thumbnail        host only: back to no cover
  *   POST   /api/livestreams/webhook              LiveKit events (signed)
  *
  * The host is always the signed-in user; nothing in a request body can name a
@@ -30,6 +33,7 @@ import { rateLimit } from 'express-rate-limit'
 import { isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
+import { confirmLiveThumbnail, removeLiveThumbnail, signLiveThumbnailUpload } from '../lib/cloudinary.js'
 import { HttpError } from '../lib/errors.js'
 import {
   broadcast,
@@ -105,12 +109,26 @@ function toView(stream: LivestreamDocument, host: Author) {
     dvr: stream.status === 'live' && stream.recording?.status === 'recording' && Boolean(stream.recording.egressId),
     recording: {
       status: stream.recording?.status ?? 'none',
-      // Filled in by GET /:id only, as a signed link for a viewer who may watch.
+      // Filled in by withReplayLink, as a signed link for a viewer who may watch.
       url: null as string | null,
       durationSec: stream.recording?.durationSec ?? 0,
     },
+    thumbnailUrl: stream.thumbnailUrl ?? '',
     host,
   }
+}
+
+/**
+ * toView plus the signed replay link, for streams this viewer may see (the
+ * caller has checked the audience). Lists need it too: a card without a
+ * chosen cover shows the replay's first frame.
+ */
+async function withReplayLink(stream: LivestreamDocument, host: Author) {
+  const view = toView(stream, host)
+  if (stream.recording?.status === 'ready' && stream.recording.key) {
+    view.recording.url = await replayLink(stream.recording.key)
+  }
+  return view
 }
 
 async function endStream(stream: LivestreamDocument, reason: 'host' | 'host_left'): Promise<void> {
@@ -274,7 +292,7 @@ livestreamsRouter.get('/history', optionalAuth, async (req, res) => {
 
   const author = (await authorsById([host])).get(host) ?? unknownAuthor(host)
   res.json({
-    items: streams.map((s) => toView(s, author)),
+    items: await Promise.all(streams.map((s) => withReplayLink(s, author))),
     nextBefore: streams.length === 12 ? streams[11].startedAt.toISOString() : null,
   })
 })
@@ -302,7 +320,7 @@ livestreamsRouter.get('/replays', optionalAuth, async (req, res) => {
 
   const hosts = await authorsById(streams.map((s) => s.hostId))
   res.json({
-    items: streams.map((s) => toView(s, hosts.get(s.hostId) ?? unknownAuthor(s.hostId))),
+    items: await Promise.all(streams.map((s) => withReplayLink(s, hosts.get(s.hostId) ?? unknownAuthor(s.hostId)))),
     nextBefore: streams.length === 12 ? streams[11].startedAt.toISOString() : null,
   })
 })
@@ -415,11 +433,8 @@ livestreamsRouter.get('/:id', optionalAuth, async (req, res) => {
   const stream = await loadVisible(req, res)
   await reconcile(stream)
   const host = (await authorsById([stream.hostId])).get(stream.hostId) ?? unknownAuthor(stream.hostId)
-  const view = toView(stream, host)
   // loadVisible already checked the audience: this viewer may watch the replay.
-  if (stream.recording?.status === 'ready' && stream.recording.key) {
-    view.recording.url = await replayLink(stream.recording.key)
-  }
+  const view = await withReplayLink(stream, host)
   res.json({ livestream: view, blocked: isBlocked(stream, res.locals.userId as string | undefined) })
 })
 
@@ -631,6 +646,44 @@ livestreamsRouter.post('/:id/block', requireAuth, loadCurrentUser, async (req, r
     await removeUser(stream.roomName, userId)
   }
   res.json({ ok: true, removedComments: theirs.length })
+})
+
+/**
+ * Loads a stream whose replay cover the signed-in user may change: theirs,
+ * with the replay ready.
+ */
+async function loadForThumbnail(req: Request, res: Response): Promise<LivestreamDocument> {
+  const stream = await loadVisible(req, res)
+  if (stream.hostId !== currentUser(res)._id) throw new HttpError(403, 'Chỉ người phát mới đổi được ảnh bìa.', 'FORBIDDEN')
+  if (stream.recording?.status !== 'ready') {
+    throw new HttpError(409, 'Chỉ chọn được ảnh bìa khi đã có video xem lại.', 'REPLAY_NOT_READY')
+  }
+  return stream
+}
+
+const thumbnailLimiter = perUser(15 * 60 * 1000, 30, 'Bạn đổi ảnh bìa quá nhiều lần. Vui lòng đợi vài phút.')
+
+/** POST /api/livestreams/:id/thumbnail-signature → { uploadUrl, fields }: the browser posts the image to Cloudinary. */
+livestreamsRouter.post('/:id/thumbnail-signature', requireAuth, loadCurrentUser, thumbnailLimiter, async (req, res) => {
+  const stream = await loadForThumbnail(req, res)
+  res.json(signLiveThumbnailUpload(stream.hostId, String(stream._id)))
+})
+
+/** PUT /api/livestreams/:id/thumbnail — use the image just uploaded. → { thumbnailUrl } */
+livestreamsRouter.put('/:id/thumbnail', requireAuth, loadCurrentUser, async (req, res) => {
+  const stream = await loadForThumbnail(req, res)
+  stream.thumbnailUrl = await confirmLiveThumbnail(stream.hostId, String(stream._id))
+  await stream.save()
+  res.json({ thumbnailUrl: stream.thumbnailUrl })
+})
+
+/** DELETE /api/livestreams/:id/thumbnail → { thumbnailUrl: '' } */
+livestreamsRouter.delete('/:id/thumbnail', requireAuth, loadCurrentUser, async (req, res) => {
+  const stream = await loadForThumbnail(req, res)
+  await removeLiveThumbnail(stream.hostId, String(stream._id))
+  stream.thumbnailUrl = ''
+  await stream.save()
+  res.json({ thumbnailUrl: stream.thumbnailUrl })
 })
 
 /**
