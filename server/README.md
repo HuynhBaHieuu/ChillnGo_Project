@@ -303,6 +303,9 @@ include.
 | `DELETE /api/livestreams/:id/comments/:commentId` | host, or the author | removed for everyone |
 | `POST /api/livestreams/:id/reactions` `{ kind, count }` | signed in | `{ total }`, shown to everyone |
 | `POST /api/livestreams/:id/block` `{ userId }` | host only | removes that viewer for good |
+| `POST /api/livestreams/:id/thumbnail-signature` | host only, replay ready | `{ uploadUrl, fields }`: a signed Cloudinary upload for the replay's cover; `409 REPLAY_NOT_READY` otherwise |
+| `PUT /api/livestreams/:id/thumbnail` | host only, replay ready | uses the cover just uploaded → `{ thumbnailUrl }` |
+| `DELETE /api/livestreams/:id/thumbnail` | host only, replay ready | removes the cover → `{ thumbnailUrl: '' }` |
 
 ## Follows and notifications
 

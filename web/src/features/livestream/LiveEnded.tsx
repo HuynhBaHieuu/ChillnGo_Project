@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { Clock, Eye, Film, Loader2, MessageCircle, Sparkles, Users } from 'lucide-react'
+import { Clock, Eye, Film, ImageIcon, Loader2, MessageCircle, Sparkles, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LiveComments } from '@/features/livestream/LiveComments'
+import { openingFrame } from '@/features/livestream/frames'
 import { REACTIONS, compact, formatDuration, formatStart, totalReactions } from '@/features/livestream/live-format'
+import { ThumbnailPicker } from '@/features/livestream/ThumbnailPicker'
 import { FollowButton } from '@/features/social/components/FollowButton'
 import { cn } from '@/lib/utils'
 import { livestreamService } from '@/services'
@@ -22,6 +25,7 @@ import { useAuthStore } from '@/store'
 export function LiveEnded({ initial }: { initial: Livestream }) {
   const me = useAuthStore((s) => s.user)
   const isHost = me?._id === initial.host._id
+  const [pickingThumbnail, setPickingThumbnail] = useState(false)
 
   // Until the recording is ready (or has failed), look again every 15 seconds.
   const { data: stream = initial } = useQuery({
@@ -74,6 +78,12 @@ export function LiveEnded({ initial }: { initial: Livestream }) {
           <LiveStats stream={stream} />
           {isHost && (
             <div className="flex flex-wrap gap-2 pt-1">
+              {stream.recording.status === 'ready' && stream.recording.url && (
+                <GlassButton size="sm" onClick={() => setPickingThumbnail(true)}>
+                  <ImageIcon aria-hidden />
+                  {stream.thumbnailUrl ? 'Đổi ảnh bìa' : 'Chọn ảnh bìa'}
+                </GlassButton>
+              )}
               <GlassButton asChild tone="sunset" size="sm">
                 <Link to={`/users/${stream.host._id}?tab=live`}>Các buổi phát của tôi</Link>
               </GlassButton>
@@ -93,18 +103,41 @@ export function LiveEnded({ initial }: { initial: Livestream }) {
         hostId={stream.host._id}
         className="h-[26rem] lg:h-[calc(100vh-9rem)] lg:max-h-[46rem]"
       />
+
+      {isHost && <ThumbnailPicker stream={stream} open={pickingThumbnail} onOpenChange={setPickingThumbnail} />}
     </div>
   )
 }
 
 function Replay({ stream }: { stream: Livestream }) {
   const { status, url } = stream.recording
+  // No cover chosen: the opening picture (frames.ts) stands in, rather than the black first frame.
+  const [opening, setOpening] = useState<string | null>(null)
+  const needsOpening = status === 'ready' && Boolean(url) && !stream.thumbnailUrl
+  useEffect(() => {
+    if (!needsOpening || !url) return
+    let cancelled = false
+    void openingFrame(url).then((src) => {
+      if (!cancelled) setOpening(src)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [needsOpening, url])
   const frame = 'relative aspect-video overflow-hidden rounded-2xl border-2 border-foreground bg-foreground shadow-[4px_4px_0_hsl(var(--foreground))]'
 
   if (status === 'ready' && url) {
     return (
       <div className={frame}>
-        <video src={url} controls playsInline preload="metadata" className="size-full object-contain" aria-label={`Xem lại: ${stream.title}`} />
+        <video
+          src={url}
+          poster={stream.thumbnailUrl || opening || undefined}
+          controls
+          playsInline
+          preload="metadata"
+          className="size-full object-contain"
+          aria-label={`Xem lại: ${stream.title}`}
+        />
       </div>
     )
   }
