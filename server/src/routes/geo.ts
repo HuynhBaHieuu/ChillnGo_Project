@@ -16,6 +16,7 @@ import { z } from 'zod'
 
 import { HttpError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/requireAuth.js'
+import { loadCurrentUser } from '../middleware/staff.js'
 
 export const geoRouter = Router()
 
@@ -44,7 +45,7 @@ const querySchema = z.object({
   url: z.string().trim().min(1, 'Thiếu link').max(2000, 'Link quá dài').url('Link không hợp lệ'),
 })
 
-geoRouter.get('/resolve-maps-link', requireAuth, limiter, async (req, res) => {
+geoRouter.get('/resolve-maps-link', requireAuth, loadCurrentUser, limiter, async (req, res) => {
   const { url } = querySchema.parse(req.query)
   let current = new URL(url)
 

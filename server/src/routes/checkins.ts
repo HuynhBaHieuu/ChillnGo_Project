@@ -164,6 +164,11 @@ checkinsRouter.delete('/:id', requireAuth, loadCurrentUser, async (req, res) => 
 
 checkinsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const checkin = await loadOwn(currentUser(res)._id, String(req.params.id), true)
+  // Past the window it is gone, even when the clean-up has not run yet.
+  if (checkin.deletedAt && checkin.deletedAt < restoreCutoff()) {
+    await destroyCheckIn(checkin)
+    throw new HttpError(410, 'Check-in này đã quá hạn khôi phục và đã bị xoá vĩnh viễn.', 'RESTORE_EXPIRED')
+  }
   checkin.deletedAt = null
   await checkin.save()
   res.json({ ok: true })

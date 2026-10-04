@@ -62,7 +62,7 @@ activityRouter.post('/search-history', searchLimiter, async (req, res) => {
   const row = await SearchHistory.findOneAndUpdate(
     { userId, type, query },
     { $set: { searchedAt: new Date() } },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   ).lean()
 
   // Keep only the newest SEARCH_HISTORY_LIMIT rows.

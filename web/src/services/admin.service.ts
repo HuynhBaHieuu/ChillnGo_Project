@@ -97,10 +97,6 @@ export function resetPassword(id: string): Promise<{ message: string }> {
   return http(`/api/admin/users/${id}/reset-password`, { method: 'POST' })
 }
 
-export function deleteUser(id: string): Promise<{ ok: true }> {
-  return http(`/api/admin/users/${id}`, { method: 'DELETE' })
-}
-
 export function createAdmin(input: {
   displayName: string
   username: string

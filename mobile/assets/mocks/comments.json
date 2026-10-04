@@ -1,0 +1,128 @@
+[
+  {
+    "_id": "c_001",
+    "postId": "p_001",
+    "authorId": "u_001",
+    "parentId": null,
+    "content": "Cung này mình đi tháng 3 thì sương mù dày quá, không thấy gì ở Mã Pí Lèng. Tháng 10 có đỡ hơn không bạn?",
+    "likeCount": 42,
+    "createdAt": "2025-10-23T01:12:00.000Z"
+  },
+  {
+    "_id": "c_002",
+    "postId": "p_001",
+    "authorId": "u_002",
+    "parentId": "c_001",
+    "content": "Tháng 10 trời trong hơn hẳn. Mình đi 6h sáng, sương còn đọng dưới hẻm nhưng đỉnh đèo đã nắng.",
+    "likeCount": 88,
+    "createdAt": "2025-10-23T02:40:00.000Z"
+  },
+  {
+    "_id": "c_003",
+    "postId": "p_001",
+    "authorId": "u_005",
+    "parentId": "c_001",
+    "content": "Mình xác nhận thêm: tránh tháng 2–3, mùa nồm ẩm đường trơn rất nguy hiểm.",
+    "likeCount": 31,
+    "createdAt": "2025-10-23T03:05:00.000Z"
+  },
+  {
+    "_id": "c_004",
+    "postId": "p_001",
+    "authorId": "u_003",
+    "parentId": null,
+    "content": "Đã clone lịch trình này, bỏ ngày 4 và thêm một đêm ở Đồng Văn. Cảm ơn bạn đã ghi giá chi tiết!",
+    "likeCount": 15,
+    "createdAt": "2025-10-24T08:20:00.000Z"
+  },
+  {
+    "_id": "c_005",
+    "postId": "p_002",
+    "authorId": "u_002",
+    "parentId": null,
+    "content": "Đọc xong chỉ muốn đặt vé ngay. Cái ý “không chạy show” là thứ mình thiếu ở mọi chuyến đi.",
+    "likeCount": 120,
+    "createdAt": "2025-12-09T14:02:00.000Z"
+  },
+  {
+    "_id": "c_006",
+    "postId": "p_002",
+    "authorId": "u_004",
+    "parentId": "c_005",
+    "content": "Thử đi solo một lần xem, khác hẳn. Mình để trống hẳn buổi chiều ngày 2 là có chủ ý.",
+    "likeCount": 64,
+    "createdAt": "2025-12-09T15:30:00.000Z"
+  },
+  {
+    "_id": "c_007",
+    "postId": "p_002",
+    "authorId": "u_001",
+    "parentId": null,
+    "content": "Quán An Café cuối tuần đông không bạn? Mình đi thứ 7.",
+    "likeCount": 8,
+    "createdAt": "2025-12-10T02:15:00.000Z"
+  },
+  {
+    "_id": "c_008",
+    "postId": "p_003",
+    "authorId": "u_001",
+    "parentId": null,
+    "content": "Giá tour 4 đảo bạn ghi đã bao gồm ăn trưa chưa?",
+    "likeCount": 12,
+    "createdAt": "2025-06-21T03:44:00.000Z"
+  },
+  {
+    "_id": "c_009",
+    "postId": "p_003",
+    "authorId": "u_003",
+    "parentId": "c_008",
+    "content": "Đã bao gồm bữa trưa trên thuyền và đồ lặn. Riêng cáp treo Hòn Thơm tính riêng.",
+    "likeCount": 27,
+    "createdAt": "2025-06-21T05:10:00.000Z"
+  },
+  {
+    "_id": "c_010",
+    "postId": "p_004",
+    "authorId": "u_005",
+    "parentId": null,
+    "content": "Bà Nà mình thấy không đáng tiền bằng một ngày ở Cù Lao Chàm.",
+    "likeCount": 53,
+    "createdAt": "2025-03-28T09:00:00.000Z"
+  },
+  {
+    "_id": "c_011",
+    "postId": "p_004",
+    "authorId": "u_002",
+    "parentId": "c_010",
+    "content": "Công bằng đó. Mình để ngày 4 là tùy chọn chính vì lý do này.",
+    "likeCount": 21,
+    "createdAt": "2025-03-28T10:12:00.000Z"
+  },
+  {
+    "_id": "c_012",
+    "postId": "p_005",
+    "authorId": "u_003",
+    "parentId": null,
+    "content": "Vé cáp treo giờ lên 850k rồi bạn ơi, cập nhật giúp nhé.",
+    "likeCount": 9,
+    "createdAt": "2025-01-16T04:20:00.000Z"
+  },
+  {
+    "_id": "c_013",
+    "postId": "p_006",
+    "authorId": "u_004",
+    "parentId": null,
+    "content": "Hang Múa leo 500 bậc nhưng rất đáng. Đi giày thể thao thật.",
+    "likeCount": 17,
+    "createdAt": "2025-04-23T01:00:00.000Z"
+  },
+  {
+    "_id": "c_014",
+    "postId": "p_007",
+    "authorId": "u_001",
+    "parentId": null,
+    "content": "Thuê ô tô tự lái ở Phù Cát có cần đặt cọc nhiều không bạn?",
+    "likeCount": 6,
+    "createdAt": "2025-07-12T02:30:00.000Z"
+  }
+]

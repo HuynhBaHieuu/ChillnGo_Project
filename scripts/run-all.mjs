@@ -7,7 +7,9 @@
  *   npm run typecheck  typecheck every app that has a "typecheck" script
  *
  * An app joins automatically as soon as its folder has a package.json with the
- * script in it, so mobile/ starts with everything else once it is set up.
+ * script in it. mobile/ is a Flutter app: scripts/mobile.mjs runs its part of
+ * dev (on a phone or emulator), setup (flutter pub get) and typecheck
+ * (flutter analyze). Its APK is built in mobile/ with `flutter build apk`.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -16,13 +18,18 @@ import { fileURLToPath } from 'node:url'
 
 import concurrently from 'concurrently'
 
+import { findFlutter } from './mobile.mjs'
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
-/** Every app folder, in start order, with the colour of its log prefix. */
+/**
+ * Every app folder, in start order, with the colour of its log prefix.
+ * `flutter` lists the scripts a Flutter app takes part in.
+ */
 const APPS = [
   { name: 'server', color: 'yellow' },
   { name: 'web', color: 'cyan' },
-  { name: 'mobile', color: 'magenta' },
+  { name: 'mobile', color: 'magenta', flutter: ['dev', 'install', 'typecheck'] },
 ]
 
 const script = process.argv[2]
@@ -42,6 +49,20 @@ const skipped = []
 
 for (const app of APPS) {
   const dir = path.join(ROOT, app.name)
+
+  if (app.flutter) {
+    if (!app.flutter.includes(script)) {
+      skipped.push(`${app.name} (no "${script}" step)`)
+    } else if (!findFlutter()) {
+      // The other apps still run on a computer without Flutter.
+      skipped.push(`${app.name} (Flutter not found, see mobile/README.md)`)
+    } else {
+      const command = `node "${path.join(ROOT, 'scripts', 'mobile.mjs')}" ${script}`
+      commands.push({ name: app.name, command, cwd: dir, prefixColor: app.color })
+    }
+    continue
+  }
+
   const pkg = readPackage(dir)
 
   if (!pkg) {
@@ -72,11 +93,16 @@ if (commands.length === 0) {
   process.exit(0)
 }
 
+// What is typed in this terminal goes to the mobile app, so `r` + Enter
+// hot-reloads it as in a plain `flutter run`.
+const mobileListens = script === 'dev' && commands.some((command) => command.name === 'mobile')
+
 const { result } = concurrently(commands, {
   prefix: 'name',
   // One app crashing (say, the server without its .env) must not take the
   // others down during development.
   killOthersOn: [],
+  ...(mobileListens ? { handleInput: true, defaultInputTarget: 'mobile' } : {}),
 })
 
 result.then(

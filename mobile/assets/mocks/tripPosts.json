@@ -1,0 +1,1764 @@
+[
+  {
+    "_id": "p_001",
+    "authorId": "u_002",
+    "title": "Hà Giang Loop 4N3Đ — cung đường đá và mây",
+    "summary": "Bốn ngày ôm cua trên cao nguyên đá Đồng Văn: Mã Pí Lèng lúc sương chưa tan, chợ phiên Quản Bạ và hai đêm ngủ homestay người Mông. Đây là lịch trình mình đã chạy thật, không phải bản đẹp trên giấy.",
+    "coverUrl": "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "north",
+    "season": "autumn",
+    "startDate": "2025-10-16",
+    "endDate": "2025-10-19",
+    "days": [
+      {
+        "_id": "p_001_d1",
+        "dayNumber": 1,
+        "date": "2025-10-16",
+        "title": "Hà Nội → Hà Giang → Quản Bạ",
+        "locations": [
+          {
+            "_id": "p_001_l1",
+            "name": "Bến xe Mỹ Đình",
+            "note": "Xe giường nằm 21h đêm trước, sáng tới nơi vừa kịp ăn sáng.",
+            "estCost": 320000,
+            "photoUrl": "https://images.unsplash.com/photo-1516546453174-5e1098a4b4af?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.7772,
+            "lat": 21.0281
+          },
+          {
+            "_id": "p_001_l2",
+            "name": "Thuê xe máy TP. Hà Giang",
+            "note": "Xe số côn tay, kiểm tra phanh kỹ trước khi đi. Giá theo ngày.",
+            "estCost": 200000,
+            "photoUrl": "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.0002,
+            "lat": 22.8233
+          },
+          {
+            "_id": "p_001_l3",
+            "name": "Cổng trời Quản Bạ",
+            "note": "Dừng 30 phút, nhìn xuống thị trấn Tam Sơn. Chiều muộn ánh sáng đẹp nhất.",
+            "estCost": 30000,
+            "photoUrl": "https://images.unsplash.com/photo-1540611025311-01df3cef54b5?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.9836,
+            "lat": 23.0812
+          },
+          {
+            "_id": "p_001_l4",
+            "name": "Homestay Tam Sơn",
+            "note": "Phòng dorm sạch, có bếp lửa. Đặt trước cuối tuần.",
+            "estCost": 250000,
+            "photoUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.979,
+            "lat": 23.0755
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_001_d2",
+        "dayNumber": 2,
+        "date": "2025-10-17",
+        "title": "Quản Bạ → Yên Minh → Đồng Văn",
+        "locations": [
+          {
+            "_id": "p_001_l5",
+            "name": "Rừng thông Yên Minh",
+            "note": "Đoạn đường mát nhất cả cung. Nghỉ chân uống nước.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.156,
+            "lat": 23.106
+          },
+          {
+            "_id": "p_001_l6",
+            "name": "Dốc chữ M — DènVán",
+            "note": "Cua gấp liên tục, đi chậm. Điểm ngắm toàn cao nguyên đá.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.264,
+            "lat": 23.218
+          },
+          {
+            "_id": "p_001_l7",
+            "name": "Dinh thự họ Vương",
+            "note": "Vé vào cửa, nên thuê hướng dẫn 20 phút để hiểu kết cấu nhà.",
+            "estCost": 30000,
+            "photoUrl": "https://images.unsplash.com/photo-1542931287-023b922fa89b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.3197,
+            "lat": 23.2632
+          },
+          {
+            "_id": "p_001_l8",
+            "name": "Phố cổ Đồng Văn",
+            "note": "Ăn thắng cố và uống trà ấm ở quán góc phố. Ngủ lại đây.",
+            "estCost": 400000,
+            "photoUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.362,
+            "lat": 23.279
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1496545672447-f699b503d270?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_001_d3",
+        "dayNumber": 3,
+        "date": "2025-10-18",
+        "title": "Mã Pí Lèng → Mèo Vạc",
+        "locations": [
+          {
+            "_id": "p_001_l9",
+            "name": "Đèo Mã Pí Lèng",
+            "note": "Đi sớm 6h để sương còn đọng dưới hẻm Tu Sản. Đoạn đẹp nhất Việt Nam.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.42,
+            "lat": 23.243
+          },
+          {
+            "_id": "p_001_l10",
+            "name": "Thuyền hẻm Tu Sản",
+            "note": "Tour thuyền 1 tiếng trên sông Nho Quế. Mua vé tại bến.",
+            "estCost": 120000,
+            "photoUrl": "https://images.unsplash.com/photo-1504457047772-27faf1c00561?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.434,
+            "lat": 23.229
+          },
+          {
+            "_id": "p_001_l11",
+            "name": "Chợ Mèo Vạc",
+            "note": "Chỉ họp chủ nhật. Nếu trùng lịch thì đừng bỏ.",
+            "estCost": 150000,
+            "photoUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.411,
+            "lat": 23.158
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_001_d4",
+        "dayNumber": 4,
+        "date": "2025-10-19",
+        "title": "Mèo Vạc → Hà Giang → Hà Nội",
+        "locations": [
+          {
+            "_id": "p_001_l12",
+            "name": "Đèo Mậu Duệ",
+            "note": "Đường về ít xe, chạy thoáng. Đổ xăng đầy trước khi xuất phát.",
+            "estCost": 90000,
+            "photoUrl": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.21,
+            "lat": 23.04
+          },
+          {
+            "_id": "p_001_l13",
+            "name": "Trả xe + xe đêm về Hà Nội",
+            "note": "Kiểm tra xe cùng chủ, chụp ảnh odo trước khi trả.",
+            "estCost": 320000,
+            "photoUrl": "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.0002,
+            "lat": 22.8233
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "núi",
+      "xe máy",
+      "trekking",
+      "văn hóa"
+    ],
+    "budgetLevel": "medium",
+    "totalEstCost": 1910000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                105.7772,
+                21.0281
+              ],
+              [
+                105.0002,
+                22.8233
+              ],
+              [
+                104.9836,
+                23.0812
+              ],
+              [
+                104.979,
+                23.0755
+              ],
+              [
+                105.156,
+                23.106
+              ],
+              [
+                105.264,
+                23.218
+              ],
+              [
+                105.3197,
+                23.2632
+              ],
+              [
+                105.362,
+                23.279
+              ],
+              [
+                105.42,
+                23.243
+              ],
+              [
+                105.434,
+                23.229
+              ],
+              [
+                105.411,
+                23.158
+              ],
+              [
+                105.21,
+                23.04
+              ],
+              [
+                105.0002,
+                22.8233
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_001",
+            "title": "Hà Giang Loop 4N3Đ — cung đường đá và mây",
+            "dayCount": 4
+          }
+        }
+      ]
+    },
+    "likeCount": 1842,
+    "commentCount": 4,
+    "bookmarkCount": 964,
+    "cloneCount": 317,
+    "status": "published",
+    "createdAt": "2025-10-22T13:20:00.000Z",
+    "updatedAt": "2025-10-23T02:10:00.000Z"
+  },
+  {
+    "_id": "p_002",
+    "authorId": "u_004",
+    "title": "Đà Lạt chữa lành 3N2Đ — không check-in, chỉ thở",
+    "summary": "Một lịch trình cố tình đi chậm: ba quán cà phê, một buổi sáng săn mây và tuyệt đối không chạy show. Phù hợp cho người đi một mình.",
+    "coverUrl": "https://images.unsplash.com/photo-1517760444937-f6397edcbbcd?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "central",
+    "season": "winter",
+    "startDate": "2025-12-05",
+    "endDate": "2025-12-07",
+    "days": [
+      {
+        "_id": "p_002_d1",
+        "dayNumber": 1,
+        "date": "2025-12-05",
+        "title": "Nhận phòng và đi bộ quanh hồ",
+        "locations": [
+          {
+            "_id": "p_002_l1",
+            "name": "Ga Đà Lạt",
+            "note": "Ga tàu cổ nhất Đông Dương. Vé tàu ngắn đi Trại Mát nếu còn sớm.",
+            "estCost": 50000,
+            "photoUrl": "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.4551,
+            "lat": 11.9465
+          },
+          {
+            "_id": "p_002_l2",
+            "name": "An Café",
+            "note": "Quán nhỏ trên dốc, ngồi ban công nhìn xuống thung lũng.",
+            "estCost": 60000,
+            "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.4402,
+            "lat": 11.94
+          },
+          {
+            "_id": "p_002_l3",
+            "name": "Hồ Xuân Hương lúc hoàng hôn",
+            "note": "Đi bộ trọn vòng mất khoảng 70 phút. Mang áo khoác.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.4419,
+            "lat": 11.9404
+          },
+          {
+            "_id": "p_002_l4",
+            "name": "Lẩu gà lá é Tao Ngộ",
+            "note": "Phần nhỏ đủ cho hai người. Đông từ 18h.",
+            "estCost": 180000,
+            "photoUrl": "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.4365,
+            "lat": 11.9448
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_002_d2",
+        "dayNumber": 2,
+        "date": "2025-12-06",
+        "title": "Săn mây Cầu Đất và buổi chiều không làm gì",
+        "locations": [
+          {
+            "_id": "p_002_l5",
+            "name": "Đồi chè Cầu Đất",
+            "note": "Xuất phát 4h30 sáng. Trời trong thì biển mây kéo tới 7h.",
+            "estCost": 50000,
+            "photoUrl": "https://images.unsplash.com/photo-1573790387438-4da905039392?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.533,
+            "lat": 11.821
+          },
+          {
+            "_id": "p_002_l6",
+            "name": "Nhà máy trà Cầu Đất",
+            "note": "Uống trà nóng ngay sau khi xuống đồi, miễn phí nếm thử.",
+            "estCost": 40000,
+            "photoUrl": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.5347,
+            "lat": 11.8235
+          },
+          {
+            "_id": "p_002_l7",
+            "name": "Tiệm sách Phương Nam",
+            "note": "Buổi chiều ngồi đây đọc hết một cuốn. Không ai giục.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.438,
+            "lat": 11.943
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_002_d3",
+        "dayNumber": 3,
+        "date": "2025-12-07",
+        "title": "Chợ sáng và về",
+        "locations": [
+          {
+            "_id": "p_002_l8",
+            "name": "Chợ Đà Lạt buổi sáng",
+            "note": "Mua hồng treo gió và atisô khô làm quà. Mặc cả nhẹ.",
+            "estCost": 250000,
+            "photoUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.4372,
+            "lat": 11.9424
+          },
+          {
+            "_id": "p_002_l9",
+            "name": "Bánh mì xíu mại Hòa",
+            "note": "Ăn sáng trước khi ra sân bay Liên Khương.",
+            "estCost": 35000,
+            "photoUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.439,
+            "lat": 11.9412
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "chill",
+      "cà phê",
+      "săn mây",
+      "solo"
+    ],
+    "budgetLevel": "low",
+    "totalEstCost": 665000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                108.4551,
+                11.9465
+              ],
+              [
+                108.4402,
+                11.94
+              ],
+              [
+                108.4419,
+                11.9404
+              ],
+              [
+                108.4365,
+                11.9448
+              ],
+              [
+                108.533,
+                11.821
+              ],
+              [
+                108.5347,
+                11.8235
+              ],
+              [
+                108.438,
+                11.943
+              ],
+              [
+                108.4372,
+                11.9424
+              ],
+              [
+                108.439,
+                11.9412
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_002",
+            "title": "Đà Lạt chữa lành 3N2Đ — không check-in, chỉ thở",
+            "dayCount": 3
+          }
+        }
+      ]
+    },
+    "likeCount": 2604,
+    "commentCount": 3,
+    "bookmarkCount": 1411,
+    "cloneCount": 488,
+    "status": "published",
+    "createdAt": "2025-12-09T08:45:00.000Z",
+    "updatedAt": "2025-12-09T08:45:00.000Z"
+  },
+  {
+    "_id": "p_003",
+    "authorId": "u_003",
+    "title": "Phú Quốc 5N4Đ — lặn biển, Hòn Thơm và hải sản",
+    "summary": "Năm ngày chia đôi: hai ngày Nam đảo cho lặn ngắm san hô, ba ngày Bắc đảo cho rừng và biển vắng. Có chi tiết giá tour và giá ăn.",
+    "coverUrl": "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "islands",
+    "season": "summer",
+    "startDate": "2025-06-12",
+    "endDate": "2025-06-16",
+    "days": [
+      {
+        "_id": "p_003_d1",
+        "dayNumber": 1,
+        "date": "2025-06-12",
+        "title": "Đến đảo, nhận phòng Dương Đông",
+        "locations": [
+          {
+            "_id": "p_003_l1",
+            "name": "Sân bay Phú Quốc",
+            "note": "Taxi về Dương Đông khoảng 25 phút.",
+            "estCost": 250000,
+            "photoUrl": "https://images.unsplash.com/photo-1516546453174-5e1098a4b4af?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.9931,
+            "lat": 10.1698
+          },
+          {
+            "_id": "p_003_l2",
+            "name": "Resort Bãi Trường",
+            "note": "4 đêm, phòng hướng biển. Giá dưới đây là tổng cả kỳ.",
+            "estCost": 6800000,
+            "photoUrl": "https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.964,
+            "lat": 10.193
+          },
+          {
+            "_id": "p_003_l3",
+            "name": "Chợ đêm Dương Đông",
+            "note": "Chọn quán có bể sống, hỏi giá trước khi cân.",
+            "estCost": 700000,
+            "photoUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.96,
+            "lat": 10.217
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1573790387438-4da905039392?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_003_d2",
+        "dayNumber": 2,
+        "date": "2025-06-13",
+        "title": "Tour 4 đảo Nam — lặn ngắm san hô",
+        "locations": [
+          {
+            "_id": "p_003_l4",
+            "name": "Cảng An Thới",
+            "note": "Tập trung 8h. Mang kem chống nắng loại cho biển.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.014,
+            "lat": 10.033
+          },
+          {
+            "_id": "p_003_l5",
+            "name": "Hòn Móng Tay",
+            "note": "Điểm lặn tốt nhất trong tour, nước trong nhìn rõ đáy.",
+            "estCost": 850000,
+            "photoUrl": "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.025,
+            "lat": 10.045
+          },
+          {
+            "_id": "p_003_l6",
+            "name": "Hòn Thơm — cáp treo",
+            "note": "Cáp treo vượt biển dài nhất thế giới, đi chiều muộn đỡ nắng.",
+            "estCost": 500000,
+            "photoUrl": "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.021,
+            "lat": 9.984
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_003_d3",
+        "dayNumber": 3,
+        "date": "2025-06-14",
+        "title": "Bắc đảo: rừng nguyên sinh và bãi vắng",
+        "locations": [
+          {
+            "_id": "p_003_l7",
+            "name": "Vườn quốc gia Phú Quốc",
+            "note": "Thuê xe máy tự đi, đường đẹp và vắng.",
+            "estCost": 180000,
+            "photoUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.933,
+            "lat": 10.39
+          },
+          {
+            "_id": "p_003_l8",
+            "name": "Bãi Vũng Bầu",
+            "note": "Bãi cát trắng, gần như không có dịch vụ. Mang sẵn nước.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.879,
+            "lat": 10.33
+          },
+          {
+            "_id": "p_003_l9",
+            "name": "Làng chài Rạch Vẹm",
+            "note": "Ăn trưa hải sản ngay trên nhà sàn gỗ.",
+            "estCost": 600000,
+            "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.908,
+            "lat": 10.346
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_003_d4",
+        "dayNumber": 4,
+        "date": "2025-06-15",
+        "title": "Ngày nghỉ ở resort",
+        "locations": [
+          {
+            "_id": "p_003_l10",
+            "name": "Bãi Sao",
+            "note": "Đi sớm trước 9h để bãi còn vắng người.",
+            "estCost": 100000,
+            "photoUrl": "https://images.unsplash.com/photo-1509233725247-49e657c54213?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.029,
+            "lat": 10.043
+          },
+          {
+            "_id": "p_003_l11",
+            "name": "Sunset Sanato",
+            "note": "Ngắm hoàng hôn, giá là vé vào cộng một đồ uống.",
+            "estCost": 300000,
+            "photoUrl": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.972,
+            "lat": 10.152
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_003_d5",
+        "dayNumber": 5,
+        "date": "2025-06-16",
+        "title": "Mua quà và bay về",
+        "locations": [
+          {
+            "_id": "p_003_l12",
+            "name": "Nhà thùng nước mắm Khải Hoàn",
+            "note": "Mua nước mắm 40 độ, nhớ ký gửi chứ không xách tay.",
+            "estCost": 400000,
+            "photoUrl": "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.958,
+            "lat": 10.212
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "biển",
+      "lặn biển",
+      "resort",
+      "ẩm thực"
+    ],
+    "budgetLevel": "high",
+    "totalEstCost": 10680000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                103.9931,
+                10.1698
+              ],
+              [
+                103.964,
+                10.193
+              ],
+              [
+                103.96,
+                10.217
+              ],
+              [
+                104.014,
+                10.033
+              ],
+              [
+                104.025,
+                10.045
+              ],
+              [
+                104.021,
+                9.984
+              ],
+              [
+                103.933,
+                10.39
+              ],
+              [
+                103.879,
+                10.33
+              ],
+              [
+                103.908,
+                10.346
+              ],
+              [
+                104.029,
+                10.043
+              ],
+              [
+                103.972,
+                10.152
+              ],
+              [
+                103.958,
+                10.212
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_003",
+            "title": "Phú Quốc 5N4Đ — lặn biển, Hòn Thơm và hải sản",
+            "dayCount": 5
+          }
+        }
+      ]
+    },
+    "likeCount": 1320,
+    "commentCount": 2,
+    "bookmarkCount": 1876,
+    "cloneCount": 402,
+    "status": "published",
+    "createdAt": "2025-06-20T10:30:00.000Z",
+    "updatedAt": "2025-06-21T04:00:00.000Z"
+  },
+  {
+    "_id": "p_004",
+    "authorId": "u_002",
+    "title": "Hội An – Đà Nẵng 4N3Đ cho người mê ăn",
+    "summary": "Lịch trình xây quanh bữa ăn: cao lầu buổi sáng, bánh mì Phượng giữa trưa, hải sản Mỹ Khê buổi tối. Có thêm Bà Nà cho ai muốn đổi gió.",
+    "coverUrl": "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "central",
+    "season": "spring",
+    "startDate": "2025-03-20",
+    "endDate": "2025-03-23",
+    "days": [
+      {
+        "_id": "p_004_d1",
+        "dayNumber": 1,
+        "date": "2025-03-20",
+        "title": "Đà Nẵng — biển Mỹ Khê",
+        "locations": [
+          {
+            "_id": "p_004_l1",
+            "name": "Bãi biển Mỹ Khê",
+            "note": "Tắm chiều, sóng nhẹ, có ghế cho thuê.",
+            "estCost": 50000,
+            "photoUrl": "https://images.unsplash.com/photo-1573790387438-4da905039392?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.247,
+            "lat": 16.06
+          },
+          {
+            "_id": "p_004_l2",
+            "name": "Cầu Rồng",
+            "note": "Cuối tuần 21h có phun lửa. Đứng bờ đông để ít đông hơn.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.227,
+            "lat": 16.0614
+          },
+          {
+            "_id": "p_004_l3",
+            "name": "Hải sản Bé Mặn",
+            "note": "Gọi theo lạng, đừng gọi combo. Đặt bàn trước.",
+            "estCost": 550000,
+            "photoUrl": "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.244,
+            "lat": 16.057
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1533050487297-09b450131914?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_004_d2",
+        "dayNumber": 2,
+        "date": "2025-03-21",
+        "title": "Chuyển qua Hội An",
+        "locations": [
+          {
+            "_id": "p_004_l4",
+            "name": "Ngũ Hành Sơn",
+            "note": "Đi thang máy lên, đi bộ xuống. Giày đế bám.",
+            "estCost": 55000,
+            "photoUrl": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.263,
+            "lat": 16.003
+          },
+          {
+            "_id": "p_004_l5",
+            "name": "Phố cổ Hội An",
+            "note": "Vé tham quan gồm 5 điểm. Đèn lồng sáng từ 18h30.",
+            "estCost": 120000,
+            "photoUrl": "https://images.unsplash.com/photo-1542931287-023b922fa89b?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.328,
+            "lat": 15.8801
+          },
+          {
+            "_id": "p_004_l6",
+            "name": "Bánh mì Phượng",
+            "note": "Xếp hàng 10 phút là bình thường. Gọi thập cẩm.",
+            "estCost": 35000,
+            "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.3308,
+            "lat": 15.879
+          },
+          {
+            "_id": "p_004_l7",
+            "name": "Homestay vườn Cẩm Thanh",
+            "note": "Cách phố cổ 10 phút xe đạp, yên hơn hẳn.",
+            "estCost": 700000,
+            "photoUrl": "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.356,
+            "lat": 15.87
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_004_d3",
+        "dayNumber": 3,
+        "date": "2025-03-22",
+        "title": "Rừng dừa và làng rau",
+        "locations": [
+          {
+            "_id": "p_004_l8",
+            "name": "Rừng dừa Bảy Mẫu",
+            "note": "Thuyền thúng, giá trọn gói cho 2 người.",
+            "estCost": 200000,
+            "photoUrl": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.36,
+            "lat": 15.879
+          },
+          {
+            "_id": "p_004_l9",
+            "name": "Làng rau Trà Quế",
+            "note": "Học trồng rau và ăn bánh xèo tại vườn.",
+            "estCost": 250000,
+            "photoUrl": "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.335,
+            "lat": 15.9
+          },
+          {
+            "_id": "p_004_l10",
+            "name": "Cao lầu Thanh",
+            "note": "Bát cao lầu đúng vị nhất mình ăn ở Hội An.",
+            "estCost": 40000,
+            "photoUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 108.327,
+            "lat": 15.881
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1512553353614-82a7370096dc?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_004_d4",
+        "dayNumber": 4,
+        "date": "2025-03-23",
+        "title": "Bà Nà hoặc nghỉ — rồi bay",
+        "locations": [
+          {
+            "_id": "p_004_l11",
+            "name": "Bà Nà Hills",
+            "note": "Vé cáp treo trọn gói. Đi sớm nhất có thể để tránh đông.",
+            "estCost": 900000,
+            "photoUrl": "https://images.unsplash.com/photo-1555921015-5532091f6026?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 107.996,
+            "lat": 15.995
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "ẩm thực",
+      "phố cổ",
+      "biển",
+      "gia đình"
+    ],
+    "budgetLevel": "medium",
+    "totalEstCost": 2900000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                108.247,
+                16.06
+              ],
+              [
+                108.227,
+                16.0614
+              ],
+              [
+                108.244,
+                16.057
+              ],
+              [
+                108.263,
+                16.003
+              ],
+              [
+                108.328,
+                15.8801
+              ],
+              [
+                108.3308,
+                15.879
+              ],
+              [
+                108.356,
+                15.87
+              ],
+              [
+                108.36,
+                15.879
+              ],
+              [
+                108.335,
+                15.9
+              ],
+              [
+                108.327,
+                15.881
+              ],
+              [
+                107.996,
+                15.995
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_004",
+            "title": "Hội An – Đà Nẵng 4N3Đ cho người mê ăn",
+            "dayCount": 4
+          }
+        }
+      ]
+    },
+    "likeCount": 983,
+    "commentCount": 2,
+    "bookmarkCount": 742,
+    "cloneCount": 196,
+    "status": "published",
+    "createdAt": "2025-03-27T07:15:00.000Z",
+    "updatedAt": "2025-03-27T07:15:00.000Z"
+  },
+  {
+    "_id": "p_005",
+    "authorId": "u_005",
+    "title": "Sa Pa 3N2Đ — săn mây Fansipan và bản Cát Cát",
+    "summary": "Cung ngắn cuối tuần giá mềm: một ngày trekking bản, một ngày lên đỉnh. Ghi rõ giờ tàu và giá vé cáp treo.",
+    "coverUrl": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "north",
+    "season": "winter",
+    "startDate": "2025-01-10",
+    "endDate": "2025-01-12",
+    "days": [
+      {
+        "_id": "p_005_d1",
+        "dayNumber": 1,
+        "date": "2025-01-10",
+        "title": "Lên Sa Pa, đi bản Cát Cát",
+        "locations": [
+          {
+            "_id": "p_005_l1",
+            "name": "Xe limousine Hà Nội → Sa Pa",
+            "note": "Chuyến 6h sáng, 5 tiếng. Đặt trước 2 ngày.",
+            "estCost": 350000,
+            "photoUrl": "https://images.unsplash.com/photo-1570366583862-f91883984fde?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.8342,
+            "lat": 21.0278
+          },
+          {
+            "_id": "p_005_l2",
+            "name": "Bản Cát Cát",
+            "note": "Đi bộ xuống dốc, lên bằng xe ôm nếu mệt.",
+            "estCost": 150000,
+            "photoUrl": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.833,
+            "lat": 22.326
+          },
+          {
+            "_id": "p_005_l3",
+            "name": "Nhà thờ đá Sa Pa",
+            "note": "Chợ đêm ngay trước nhà thờ, ăn đồ nướng.",
+            "estCost": 120000,
+            "photoUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.844,
+            "lat": 22.338
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_005_d2",
+        "dayNumber": 2,
+        "date": "2025-01-11",
+        "title": "Fansipan",
+        "locations": [
+          {
+            "_id": "p_005_l4",
+            "name": "Ga cáp treo Fansipan",
+            "note": "Vé khứ hồi. Trời mùa đông dễ có băng trên đỉnh.",
+            "estCost": 800000,
+            "photoUrl": "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.823,
+            "lat": 22.317
+          },
+          {
+            "_id": "p_005_l5",
+            "name": "Đỉnh Fansipan",
+            "note": "Mang áo ấm thật dày, trên đỉnh lạnh hơn dưới 10 độ.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.776,
+            "lat": 22.303
+          },
+          {
+            "_id": "p_005_l6",
+            "name": "Lẩu cá hồi Sa Pa",
+            "note": "Ăn tối ấm người sau khi xuống núi.",
+            "estCost": 300000,
+            "photoUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.842,
+            "lat": 22.335
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1480497490787-505ec076689f?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_005_d3",
+        "dayNumber": 3,
+        "date": "2025-01-12",
+        "title": "Đèo Ô Quy Hồ và về",
+        "locations": [
+          {
+            "_id": "p_005_l7",
+            "name": "Đèo Ô Quy Hồ",
+            "note": "Điểm ngắm biển mây đẹp nhất nếu dậy trước 6h.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1509233725247-49e657c54213?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.773,
+            "lat": 22.354
+          },
+          {
+            "_id": "p_005_l8",
+            "name": "Xe về Hà Nội",
+            "note": "Chuyến 14h, về tới nơi khoảng 19h.",
+            "estCost": 350000,
+            "photoUrl": "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 103.844,
+            "lat": 22.338
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "núi",
+      "săn mây",
+      "trekking",
+      "tiết kiệm"
+    ],
+    "budgetLevel": "low",
+    "totalEstCost": 2070000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                105.8342,
+                21.0278
+              ],
+              [
+                103.833,
+                22.326
+              ],
+              [
+                103.844,
+                22.338
+              ],
+              [
+                103.823,
+                22.317
+              ],
+              [
+                103.776,
+                22.303
+              ],
+              [
+                103.842,
+                22.335
+              ],
+              [
+                103.773,
+                22.354
+              ],
+              [
+                103.844,
+                22.338
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_005",
+            "title": "Sa Pa 3N2Đ — săn mây Fansipan và bản Cát Cát",
+            "dayCount": 3
+          }
+        }
+      ]
+    },
+    "likeCount": 764,
+    "commentCount": 1,
+    "bookmarkCount": 1098,
+    "cloneCount": 254,
+    "status": "published",
+    "createdAt": "2025-01-15T12:00:00.000Z",
+    "updatedAt": "2025-01-15T12:00:00.000Z"
+  },
+  {
+    "_id": "p_006",
+    "authorId": "u_001",
+    "title": "Ninh Bình 2N1Đ — Tràng An, Tam Cốc và Hang Múa",
+    "summary": "Cuối tuần ngắn ngay cạnh Hà Nội. Đi xe máy 2 tiếng, chèo thuyền buổi sáng, leo Hang Múa lúc hoàng hôn.",
+    "coverUrl": "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "north",
+    "season": "spring",
+    "startDate": "2025-04-19",
+    "endDate": "2025-04-20",
+    "days": [
+      {
+        "_id": "p_006_d1",
+        "dayNumber": 1,
+        "date": "2025-04-19",
+        "title": "Tràng An và Hang Múa",
+        "locations": [
+          {
+            "_id": "p_006_l1",
+            "name": "Bến thuyền Tràng An",
+            "note": "Chọn tuyến 1 nếu đi lần đầu. 3 tiếng chèo.",
+            "estCost": 250000,
+            "photoUrl": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.917,
+            "lat": 20.253
+          },
+          {
+            "_id": "p_006_l2",
+            "name": "Cơm cháy dê núi",
+            "note": "Ăn trưa gần bến, phần hai người.",
+            "estCost": 300000,
+            "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.925,
+            "lat": 20.256
+          },
+          {
+            "_id": "p_006_l3",
+            "name": "Hang Múa",
+            "note": "500 bậc lên đỉnh. Đi 16h30 để kịp hoàng hôn.",
+            "estCost": 100000,
+            "photoUrl": "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.943,
+            "lat": 20.228
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_006_d2",
+        "dayNumber": 2,
+        "date": "2025-04-20",
+        "title": "Tam Cốc và đường về",
+        "locations": [
+          {
+            "_id": "p_006_l4",
+            "name": "Tam Cốc — Bích Động",
+            "note": "Mùa lúa chín tháng 5–6 là đẹp nhất.",
+            "estCost": 200000,
+            "photoUrl": "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 105.935,
+            "lat": 20.217
+          },
+          {
+            "_id": "p_006_l5",
+            "name": "Nhà thờ đá Phát Diệm",
+            "note": "Kiến trúc đá độc nhất miền Bắc, vào cửa miễn phí.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1512553353614-82a7370096dc?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 106.093,
+            "lat": 20.087
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "thiên nhiên",
+      "chèo thuyền",
+      "di sản",
+      "tiết kiệm"
+    ],
+    "budgetLevel": "low",
+    "totalEstCost": 850000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                105.917,
+                20.253
+              ],
+              [
+                105.925,
+                20.256
+              ],
+              [
+                105.943,
+                20.228
+              ],
+              [
+                105.935,
+                20.217
+              ],
+              [
+                106.093,
+                20.087
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_006",
+            "title": "Ninh Bình 2N1Đ — Tràng An, Tam Cốc và Hang Múa",
+            "dayCount": 2
+          }
+        }
+      ]
+    },
+    "likeCount": 531,
+    "commentCount": 1,
+    "bookmarkCount": 488,
+    "cloneCount": 131,
+    "status": "published",
+    "createdAt": "2025-04-22T06:00:00.000Z",
+    "updatedAt": "2025-04-22T06:00:00.000Z"
+  },
+  {
+    "_id": "p_007",
+    "authorId": "u_003",
+    "title": "Quy Nhơn – Phú Yên 4N3Đ bằng ô tô",
+    "summary": "Road trip dọc biển miền Trung: Kỳ Co, Eo Gió, Gềnh Đá Đĩa và bãi Xép. Ghi lại quãng đường và giờ chạy từng chặng.",
+    "coverUrl": "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "central",
+    "season": "summer",
+    "startDate": "2025-07-03",
+    "endDate": "2025-07-06",
+    "days": [
+      {
+        "_id": "p_007_d1",
+        "dayNumber": 1,
+        "date": "2025-07-03",
+        "title": "Đến Quy Nhơn",
+        "locations": [
+          {
+            "_id": "p_007_l1",
+            "name": "Sân bay Phù Cát",
+            "note": "Thuê ô tô tự lái ngay tại sân bay, giá theo ngày.",
+            "estCost": 900000,
+            "photoUrl": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.042,
+            "lat": 13.955
+          },
+          {
+            "_id": "p_007_l2",
+            "name": "Eo Gió",
+            "note": "Hoàng hôn đẹp, đi bộ hết vành cung mất 40 phút.",
+            "estCost": 25000,
+            "photoUrl": "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.335,
+            "lat": 13.83
+          },
+          {
+            "_id": "p_007_l3",
+            "name": "Bún chả cá Quy Nhơn",
+            "note": "Món phải ăn ở đây. Quán mở tới khuya.",
+            "estCost": 60000,
+            "photoUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.221,
+            "lat": 13.776
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_007_d2",
+        "dayNumber": 2,
+        "date": "2025-07-04",
+        "title": "Kỳ Co — bãi biển Maldives Việt Nam",
+        "locations": [
+          {
+            "_id": "p_007_l4",
+            "name": "Bến cano Nhơn Lý",
+            "note": "Cano ra Kỳ Co 15 phút, khứ hồi.",
+            "estCost": 200000,
+            "photoUrl": "https://images.unsplash.com/photo-1516546453174-5e1098a4b4af?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.312,
+            "lat": 13.84
+          },
+          {
+            "_id": "p_007_l5",
+            "name": "Bãi Kỳ Co",
+            "note": "Nước xanh ngọc, có dịch vụ ăn trưa tại bãi.",
+            "estCost": 350000,
+            "photoUrl": "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.327,
+            "lat": 13.852
+          },
+          {
+            "_id": "p_007_l6",
+            "name": "Tháp Đôi",
+            "note": "Kiến trúc Chăm ngay trong thành phố.",
+            "estCost": 20000,
+            "photoUrl": "https://images.unsplash.com/photo-1512553353614-82a7370096dc?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.218,
+            "lat": 13.783
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1509233725247-49e657c54213?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1573790387438-4da905039392?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_007_d3",
+        "dayNumber": 3,
+        "date": "2025-07-05",
+        "title": "Chạy vào Phú Yên",
+        "locations": [
+          {
+            "_id": "p_007_l7",
+            "name": "Gềnh Đá Đĩa",
+            "note": "Đá bazan xếp lục giác. Đi sáng sớm tránh nắng.",
+            "estCost": 25000,
+            "photoUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.287,
+            "lat": 13.454
+          },
+          {
+            "_id": "p_007_l8",
+            "name": "Bãi Xép",
+            "note": "Bãi vắng, không dịch vụ. Mang đồ ăn theo.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1541544537156-7627a7a4aa1c?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.33,
+            "lat": 13.39
+          },
+          {
+            "_id": "p_007_l9",
+            "name": "Khách sạn Tuy Hòa",
+            "note": "Ngủ một đêm ở trung tâm cho tiện ăn.",
+            "estCost": 600000,
+            "photoUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.318,
+            "lat": 13.095
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1570789210967-2cac24afeb00?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_007_d4",
+        "dayNumber": 4,
+        "date": "2025-07-06",
+        "title": "Mũi Điện và về",
+        "locations": [
+          {
+            "_id": "p_007_l10",
+            "name": "Mũi Điện — hải đăng Đại Lãnh",
+            "note": "Điểm đón bình minh sớm nhất đất liền Việt Nam.",
+            "estCost": 20000,
+            "photoUrl": "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.452,
+            "lat": 12.89
+          },
+          {
+            "_id": "p_007_l11",
+            "name": "Trả xe tại Phù Cát",
+            "note": "Chạy ngược 2 tiếng rưỡi, trừ thừa giờ bay.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 109.042,
+            "lat": 13.955
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "biển",
+      "road trip",
+      "ẩm thực",
+      "nhóm bạn"
+    ],
+    "budgetLevel": "medium",
+    "totalEstCost": 2200000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                109.042,
+                13.955
+              ],
+              [
+                109.335,
+                13.83
+              ],
+              [
+                109.221,
+                13.776
+              ],
+              [
+                109.312,
+                13.84
+              ],
+              [
+                109.327,
+                13.852
+              ],
+              [
+                109.218,
+                13.783
+              ],
+              [
+                109.287,
+                13.454
+              ],
+              [
+                109.33,
+                13.39
+              ],
+              [
+                109.318,
+                13.095
+              ],
+              [
+                109.452,
+                12.89
+              ],
+              [
+                109.042,
+                13.955
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_007",
+            "title": "Quy Nhơn – Phú Yên 4N3Đ bằng ô tô",
+            "dayCount": 4
+          }
+        }
+      ]
+    },
+    "likeCount": 612,
+    "commentCount": 1,
+    "bookmarkCount": 655,
+    "cloneCount": 143,
+    "status": "published",
+    "createdAt": "2025-07-11T09:25:00.000Z",
+    "updatedAt": "2025-07-11T09:25:00.000Z"
+  },
+  {
+    "_id": "p_008",
+    "authorId": "u_005",
+    "title": "Mộc Châu mùa hoa mận 3N2Đ",
+    "summary": "Đi đúng tuần hoa mận nở trắng đồi. Cắm trại một đêm ở đồi chè trái tim.",
+    "coverUrl": "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "north",
+    "season": "spring",
+    "startDate": "2026-02-06",
+    "endDate": "2026-02-08",
+    "days": [
+      {
+        "_id": "p_008_d1",
+        "dayNumber": 1,
+        "date": "2026-02-06",
+        "title": "Hà Nội → Mộc Châu",
+        "locations": [
+          {
+            "_id": "p_008_l1",
+            "name": "Thị trấn Nông trường",
+            "note": "Nhận phòng, thuê xe máy ngay tại nhà nghỉ.",
+            "estCost": 400000,
+            "photoUrl": "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.687,
+            "lat": 20.84
+          },
+          {
+            "_id": "p_008_l2",
+            "name": "Thung lũng mận Nà Ka",
+            "note": "Hoa nở rộ cuối tháng 1 đến giữa tháng 2.",
+            "estCost": 30000,
+            "photoUrl": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.646,
+            "lat": 20.862
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_008_d2",
+        "dayNumber": 2,
+        "date": "2026-02-07",
+        "title": "Đồi chè và thác Dải Yếm",
+        "locations": [
+          {
+            "_id": "p_008_l3",
+            "name": "Đồi chè trái tim",
+            "note": "Cắm trại đêm, xin phép chủ đồi trước.",
+            "estCost": 100000,
+            "photoUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.663,
+            "lat": 20.833
+          },
+          {
+            "_id": "p_008_l4",
+            "name": "Thác Dải Yếm",
+            "note": "Mùa khô nước ít, mùa hè đẹp hơn.",
+            "estCost": 20000,
+            "photoUrl": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.624,
+            "lat": 20.818
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      },
+      {
+        "_id": "p_008_d3",
+        "dayNumber": 3,
+        "date": "2026-02-08",
+        "title": "Cầu kính và về",
+        "locations": [
+          {
+            "_id": "p_008_l5",
+            "name": "Cầu kính Bạch Long",
+            "note": "Vé vào khá cao, đi sớm để không phải xếp hàng.",
+            "estCost": 600000,
+            "photoUrl": "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 104.633,
+            "lat": 20.81
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "núi",
+      "hoa",
+      "cắm trại"
+    ],
+    "budgetLevel": "low",
+    "totalEstCost": 1150000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                104.687,
+                20.84
+              ],
+              [
+                104.646,
+                20.862
+              ],
+              [
+                104.663,
+                20.833
+              ],
+              [
+                104.624,
+                20.818
+              ],
+              [
+                104.633,
+                20.81
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_008",
+            "title": "Mộc Châu mùa hoa mận 3N2Đ",
+            "dayCount": 3
+          }
+        }
+      ]
+    },
+    "likeCount": 0,
+    "commentCount": 0,
+    "bookmarkCount": 0,
+    "cloneCount": 0,
+    "status": "pending",
+    "createdAt": "2026-02-12T05:30:00.000Z",
+    "updatedAt": "2026-02-12T05:30:00.000Z"
+  },
+  {
+    "_id": "p_009",
+    "authorId": "u_001",
+    "title": "Cát Bà 2N1Đ (bản nháp)",
+    "summary": "Đang viết dở — còn thiếu phần chi phí tàu ra vịnh Lan Hạ.",
+    "coverUrl": "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1600&h=1000&q=75",
+    "region": "islands",
+    "season": "summer",
+    "startDate": "2026-05-16",
+    "endDate": "2026-05-17",
+    "days": [
+      {
+        "_id": "p_009_d1",
+        "dayNumber": 1,
+        "date": "2026-05-16",
+        "title": "Ra đảo",
+        "locations": [
+          {
+            "_id": "p_009_l1",
+            "name": "Cảng Gót",
+            "note": "Phà ra đảo, mang theo xe máy được.",
+            "estCost": 120000,
+            "photoUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 106.98,
+            "lat": 20.81
+          },
+          {
+            "_id": "p_009_l2",
+            "name": "Bãi Cát Cò",
+            "note": "Bãi nhỏ yên tĩnh, nước trong.",
+            "estCost": 0,
+            "photoUrl": "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=900&h=700&q=75",
+            "lng": 107.047,
+            "lat": 20.72
+          }
+        ],
+        "photos": [
+          "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=900&h=700&q=75",
+          "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=900&h=700&q=75"
+        ]
+      }
+    ],
+    "tags": [
+      "biển",
+      "kayak"
+    ],
+    "budgetLevel": "medium",
+    "totalEstCost": 120000,
+    "routeGeoJson": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                106.98,
+                20.81
+              ],
+              [
+                107.047,
+                20.72
+              ]
+            ]
+          },
+          "properties": {
+            "postId": "p_009",
+            "title": "Cát Bà 2N1Đ (bản nháp)",
+            "dayCount": 1
+          }
+        }
+      ]
+    },
+    "likeCount": 0,
+    "commentCount": 0,
+    "bookmarkCount": 0,
+    "cloneCount": 0,
+    "status": "draft",
+    "createdAt": "2026-05-02T14:40:00.000Z",
+    "updatedAt": "2026-05-03T01:12:00.000Z"
+  }
+]

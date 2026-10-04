@@ -83,9 +83,8 @@ Admin routes, under `/api/admin`, need a staff account; the permission is in bra
 | --- | --- |
 | `GET /stats` | [stats] |
 | `GET /users?q&role&status&page` | [users]; admins only see role `user` |
-| `POST /users/:id/lock` `{ reason }`, `POST /users/:id/unlock` | [users] |
+| `POST /users/:id/lock` `{ reason }`, `POST /users/:id/unlock` | [users]. Locking bans the account: sign-in is refused, the stream it is hosting ends, and it leaves other accounts' follower / following counts. Unlocking puts the counts back. Accounts are never deleted. |
 | `POST /users/:id/reset-password` | [users] |
-| `DELETE /users/:id` | Super Admin |
 | `PATCH /users/:id/role` `{ role, permissions? }` | Super Admin |
 | `POST /admins` `{ displayName, username, email, password, permissions }` | Super Admin |
 | `PATCH /admins/:id/permissions` `{ permissions }` | Super Admin |
@@ -115,6 +114,11 @@ Rules enforced by the API:
   and take the same time, so the API does not reveal which emails exist.
 - **Brute force:** 20 failed attempts per IP per 15 minutes, then `429`. On
   Vercel this counter is per function instance, so it is not a hard global limit.
+- **Recently Deleted:** a deleted journey or check-in can be restored for 30
+  days. After that, a restore returns `410` with code `RESTORE_EXPIRED` and the
+  item is deleted for good.
+- **Locked accounts:** every signed-in route, including the
+  notifications the apps poll, answers `401`, which signs the app out.
 
 ## Super Admin and admins
 
@@ -357,6 +361,10 @@ For a custom sender domain, use a provider such as Brevo or Resend and set
 
 The client ID is public and safe to ship to the browser. There is no client
 secret in this flow.
+
+The mobile app asks Google for a token addressed to this same Web client, so
+`GOOGLE_CLIENT_ID` stays a single value. It also needs an Android OAuth client
+for its package name and signing key: see [`mobile/README.md`](../mobile/README.md#google-sign-in).
 
 ## Setting up MongoDB Atlas
 

@@ -8,9 +8,9 @@ own plans with one tap.
 
 | Folder | What it is | Status |
 | --- | --- | --- |
-| [`web/`](./web) | React + Vite + TypeScript client | **Built.** Auth uses the API; other data is still mock fixtures. |
-| [`server/`](./server) | Node + Express + MongoDB Atlas API | **Auth done** (register, login, current user). Other endpoints not started. |
-| [`mobile/`](./mobile) | React Native client | Placeholder. Comes after the API. |
+| [`web/`](./web) | React + Vite + TypeScript client | **Built.** Accounts, journeys, check-ins, follows, notifications and livestreams use the API. Seed journeys, likes, comments, bookmarks and cloned itineraries are still mock fixtures. |
+| [`server/`](./server) | Node + Express + MongoDB Atlas API | **Running.** Auth, profiles and follows, journeys, check-ins, livestreams, notifications, Your Activity and the admin back office. Likes, comments, bookmarks and itineraries not started. |
+| [`mobile/`](./mobile) | Flutter app (Android, iOS) | **Built.** Every web screen, laid out for phones. Same API and the same mock fixtures as the web. Open it in Android Studio. |
 
 Start with [`web/README.md`](./web/README.md).
 
@@ -34,20 +34,28 @@ Everything runs from this folder.
 
 ```bash
 npm install          # root tooling
-npm run setup        # npm install inside server/, web/ and mobile/
-npm run dev          # starts every app at once, logs prefixed [server] [web] [mobile]
+npm run setup        # npm install in server/ and web/, flutter pub get in mobile/
+npm run dev          # starts all three at once, logs prefixed [server] [web] [mobile]
 ```
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Starts every app that has a `dev` script. Ctrl+C stops them all. |
-| `npm run setup` | Runs `npm install` in every app that has a `package.json`. |
+| `npm run dev` | Starts the server, the web app and the mobile app. Ctrl+C stops them all. |
+| `npm run setup` | Runs `npm install` in server/ and web/, and `flutter pub get` in mobile/. |
 | `npm run build` | Builds every app that has a `build` script. |
-| `npm run typecheck` | Type-checks every app that has a `typecheck` script. |
+| `npm run typecheck` | Type-checks server/ and web/, and runs `flutter analyze` in mobile/. |
 
 The server needs `server/.env` before it can reach the database; see
 [`server/README.md`](./server/README.md). If the server fails, the web app keeps running.
 
 An app joins these commands automatically once its folder has a
-`package.json` with the matching script. That is how `mobile/` will start
-alongside the others. The list of app folders lives in `scripts/run-all.mjs`.
+`package.json` with the matching script. The list of app folders lives in
+`scripts/run-all.mjs`.
+
+The mobile app is Flutter, so `scripts/mobile.mjs` runs its part. In `npm run dev`
+it uses an Android phone connected over USB, or an emulator that is already
+open, or else opens the first emulator of Android Studio's Device Manager and
+waits for it. Type `r` then Enter in the terminal to hot-reload the app. A
+computer without Flutter skips mobile and runs the other two. The emulator stays
+open after Ctrl+C, so the next start is quick. Details, and what to do on a
+16 GB computer, are in [`mobile/README.md`](./mobile/README.md#running-it-with-npm-run-dev).

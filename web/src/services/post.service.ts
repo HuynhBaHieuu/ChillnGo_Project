@@ -42,11 +42,34 @@ export type { ServerTripPost } from './serverPosts'
 
 /* ------------------------------------------------------------- internals */
 
+/**
+ * Stands in for an author who is not in `db` (a fixture id with no account behind it),
+ * so one missing person does not break the feed or a comment list.
+ */
+function deletedUser(id: ObjectId): User {
+  return {
+    _id: id,
+    username: 'deleted',
+    displayName: 'Tài khoản đã xoá',
+    email: '',
+    avatarUrl: '',
+    coverUrl: '',
+    bio: '',
+    location: '',
+    followerCount: 0,
+    followingCount: 0,
+    postCount: 0,
+    role: 'user',
+    createdAt: new Date(0).toISOString(),
+  }
+}
+
+function userOrPlaceholder(id: ObjectId): User {
+  return db.users.find((u) => u._id === id) ?? deletedUser(id)
+}
+
 function authorOf(post: TripPost): User {
-  return assertFound(
-    db.users.find((u) => u._id === post.authorId),
-    `Không tìm thấy tác giả của bài viết ${post._id}`,
-  )
+  return userOrPlaceholder(post.authorId)
 }
 
 /**
@@ -76,8 +99,13 @@ function byNewest(a: { createdAt: string }, b: { createdAt: string }): number {
 /**
  * GET /api/feed — published posts by the people `viewerId` follows, newest
  * first. The viewer's own posts are included so a new post shows up right away.
+ * `followingIds` (socialService.getFollowingIds) adds the follows stored by the
+ * API, which `db.follows` does not know about.
  */
-export async function getFeed(viewerId: ObjectId | null): Promise<TripPostWithAuthor[]> {
+export async function getFeed(
+  viewerId: ObjectId | null,
+  followingIds: ObjectId[] = [],
+): Promise<TripPostWithAuthor[]> {
   await Promise.all([delay(), syncServerPosts()])
 
   if (!viewerId) {
@@ -87,13 +115,14 @@ export async function getFeed(viewerId: ObjectId | null): Promise<TripPostWithAu
       .map((p) => decorate(p, null))
   }
 
-  const followingIds = new Set(
-    db.follows.filter((f) => f.followerId === viewerId).map((f) => f.followingId),
-  )
-  followingIds.add(viewerId)
+  const authors = new Set([
+    ...db.follows.filter((f) => f.followerId === viewerId).map((f) => f.followingId),
+    ...followingIds,
+    viewerId,
+  ])
 
   return db.tripPosts
-    .filter((p) => p.status === 'published' && followingIds.has(p.authorId))
+    .filter((p) => p.status === 'published' && authors.has(p.authorId))
     .sort(byNewest)
     .map((p) => decorate(p, viewerId))
 }
@@ -265,11 +294,7 @@ export async function getComments(postId: ObjectId): Promise<CommentThread[]> {
   await delay()
 
   const forPost = db.comments.filter((c) => c.postId === postId)
-  const authorFor = (c: Comment): User =>
-    assertFound(
-      db.users.find((u) => u._id === c.authorId),
-      `Không tìm thấy tác giả bình luận ${c._id}`,
-    )
+  const authorFor = (c: Comment): User => userOrPlaceholder(c.authorId)
 
   const roots = forPost
     .filter((c) => c.parentId === null)

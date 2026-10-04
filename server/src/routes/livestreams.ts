@@ -150,6 +150,20 @@ async function endStream(stream: LivestreamDocument, reason: 'host' | 'host_left
   await closeRoom(stream.roomName)
 }
 
+/**
+ * Ends every stream this host still has open: their account was just banned
+ * (POST /api/admin/users/:id/lock), so viewers are sent away and the room
+ * closes. The replay is kept, as for any ended stream.
+ */
+export async function endStreamsOf(hostId: string): Promise<void> {
+  const live = await Livestream.find({ hostId, status: 'live' })
+  for (const stream of live) {
+    // LiveKit being unreachable must not block the ban: the stream is marked
+    // ended anyway, and LiveKit closes an empty room by itself.
+    await endStream(stream, 'host').catch((error: unknown) => console.error(`Could not end livestream ${String(stream._id)}:`, error))
+  }
+}
+
 function applyRecordingState(stream: LivestreamDocument, state: RecordingState): void {
   if (state.state === 'ready' && stream.recording?.status !== 'ready') {
     stream.set({ 'recording.status': 'ready', 'recording.durationSec': state.durationSec })
@@ -275,8 +289,15 @@ livestreamsRouter.get('/', optionalAuth, async (req, res) => {
   res.json({ items: live.map((s) => toView(s, hosts.get(s.hostId) ?? unknownAuthor(s.hostId))) })
 })
 
+/**
+ * Any account id: real accounts have ObjectId hex strings, the demo accounts
+ * the clients show from their fixtures have ids such as "u_001". Rejecting
+ * those made their profile's Livestream tab fail with a 400.
+ */
+const accountId = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Người dùng không hợp lệ')
+
 const historySchema = z.object({
-  host: z.string().refine(isValidObjectId, 'Người dùng không hợp lệ'),
+  host: accountId,
   before: z.iso.datetime().optional().catch(undefined),
 })
 
@@ -618,7 +639,11 @@ livestreamsRouter.post('/:id/reactions', requireAuth, loadCurrentUser, reactionL
   const user = currentUser(res)
   if (isBlocked(stream, user._id)) throw BLOCKED()
 
-  const updated = await Livestream.findByIdAndUpdate(stream._id, { $inc: { [`reactions.${kind}`]: count } }, { new: true })
+  const updated = await Livestream.findByIdAndUpdate(
+    stream._id,
+    { $inc: { [`reactions.${kind}`]: count } },
+    { returnDocument: 'after' },
+  )
   await broadcast(stream.roomName, { type: 'reaction', kind, count, userId: user._id })
   res.json({ total: updated?.reactions?.[kind] ?? count })
 })

@@ -1,10 +1,11 @@
 import { Loader2, Plus, Save } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
+import { EmptyState } from '@/components/EmptyState'
 import { GlassCard } from '@/components/GlassCard'
 import { MapPreview } from '@/components/MapPreview'
 import { Button } from '@/components/ui/button'
@@ -145,7 +146,7 @@ export function PostEditorPage() {
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
 
-  const { data: existingPost, isPending: isLoadingPost } = usePost(id)
+  const { data: existingPost, isPending: isLoadingPost, error: postError } = usePost(id)
   const [form, setForm] = useState<FormState>(initialState)
 
   /**
@@ -308,6 +309,30 @@ export function PostEditorPage() {
             <Skeleton key={i} className="h-64 w-full rounded-2xl" />
           ))}
         </div>
+      </PageContainer>
+    )
+  }
+
+  // Only the author edits a journey. Someone else's, or one that did not load,
+  // never opens in the editor, where saving would overwrite it.
+  if (isEdit && (!existingPost || existingPost.authorId !== user?._id)) {
+    return (
+      <PageContainer>
+        <EmptyState
+          title={existingPost ? 'Bạn không thể sửa hành trình này' : 'Không tìm thấy hành trình'}
+          description={
+            existingPost
+              ? 'Chỉ tác giả mới chỉnh sửa được hành trình của mình.'
+              : ((postError as Error | null)?.message ?? 'Bài viết có thể đã bị xoá.')
+          }
+          action={
+            <Button asChild variant="outline">
+              <Link to={existingPost ? `/posts/${existingPost._id}` : '/discover'}>
+                {existingPost ? 'Xem hành trình' : 'Quay lại Khám phá'}
+              </Link>
+            </Button>
+          }
+        />
       </PageContainer>
     )
   }

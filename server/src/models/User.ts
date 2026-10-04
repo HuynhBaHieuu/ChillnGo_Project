@@ -79,5 +79,16 @@ export function toPublicUser(user: UserRecord) {
   }
 }
 
+/** The per-account counters kept on the user record. */
+export type UserCounter = 'followerCount' | 'followingCount' | 'postCount'
+
+/** Adds `delta` to a counter of these accounts, never letting it go below zero. */
+export async function adjustCount(userIds: string | string[], field: UserCounter, delta: number): Promise<void> {
+  const ids = Array.isArray(userIds) ? userIds : [userIds]
+  if (ids.length === 0 || delta === 0) return
+  await User.updateMany({ _id: { $in: ids } }, { $inc: { [field]: delta } })
+  await User.updateMany({ _id: { $in: ids }, [field]: { $lt: 0 } }, { $set: { [field]: 0 } })
+}
+
 /** A loaded user document (the result of `User.findById` and friends). */
 export type UserDocument = InstanceType<typeof User>

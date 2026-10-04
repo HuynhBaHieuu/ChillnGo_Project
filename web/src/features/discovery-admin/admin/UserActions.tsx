@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { KeyRound, Lock, MoreHorizontal, ShieldCheck, ShieldMinus, Trash2, Unlock } from 'lucide-react'
+import { KeyRound, Lock, MoreHorizontal, ShieldCheck, ShieldMinus, Unlock } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -22,7 +22,7 @@ import { PermissionsDialog } from './PermissionsDialog'
 import { ConfirmDialog, canManage } from './shared'
 import type { Notice } from './shared'
 
-type DialogKind = 'lock' | 'unlock' | 'reset' | 'delete' | 'promote' | 'demote' | 'permissions'
+type DialogKind = 'lock' | 'unlock' | 'reset' | 'promote' | 'demote' | 'permissions'
 
 interface UserActionsProps {
   actor: User
@@ -50,9 +50,6 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
           return `Đã mở khoá ${name}.`
         case 'reset':
           return (await adminService.resetPassword(target._id)).message
-        case 'delete':
-          await adminService.deleteUser(target._id)
-          return `Đã xoá tài khoản ${name}.`
         case 'promote':
           await adminService.setRole(target._id, 'admin', input.permissions ?? [])
           return `${name} giờ là Admin.`
@@ -130,11 +127,6 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
                   </DropdownMenuItem>
                 </>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => setDialog('delete')} className="text-destructive">
-                <Trash2 />
-                Xoá tài khoản
-              </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>
@@ -147,7 +139,9 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
         description={
           <>
             <strong className="text-foreground">{name}</strong> sẽ không đăng nhập được, và phiên đang
-            mở sẽ bị đăng xuất ở lần tải trang tiếp theo.
+            mở sẽ bị đăng xuất ở lần tải trang tiếp theo. Buổi livestream đang phát (nếu có) sẽ kết thúc,
+            và tài khoản không còn được tính vào số người theo dõi / đang theo dõi của người khác cho tới
+            khi được mở khoá.
           </>
         }
         confirmLabel="Khoá tài khoản"
@@ -170,7 +164,7 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
         open={dialog === 'unlock'}
         onOpenChange={close}
         title="Mở khoá tài khoản"
-        description={<>{name} sẽ đăng nhập lại được bình thường.</>}
+        description={<>{name} sẽ đăng nhập lại được bình thường, và các lượt theo dõi được tính lại như cũ.</>}
         confirmLabel="Mở khoá"
         pending={mutation.isPending}
         onConfirm={() => run('unlock')}
@@ -190,22 +184,6 @@ export function UserActions({ actor, target, onNotice }: UserActionsProps) {
         confirmLabel="Đặt lại và gửi email"
         pending={mutation.isPending}
         onConfirm={() => run('reset')}
-      />
-
-      <ConfirmDialog
-        open={dialog === 'delete'}
-        onOpenChange={close}
-        title="Xoá tài khoản vĩnh viễn"
-        description={
-          <>
-            Tài khoản <strong className="text-foreground">{name}</strong> sẽ bị xoá khỏi cơ sở dữ liệu. Việc
-            này không hoàn tác được. Nếu chỉ muốn chặn đăng nhập, hãy khoá tài khoản.
-          </>
-        }
-        confirmLabel="Xoá vĩnh viễn"
-        destructive
-        pending={mutation.isPending}
-        onConfirm={() => run('delete')}
       />
 
       <ConfirmDialog

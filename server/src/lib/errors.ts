@@ -44,6 +44,12 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     return
   }
 
+  // A body over the parser's limit (express.json({ limit })): the client's fault, not a server error.
+  if ((error as { type?: string }).type === 'entity.too.large') {
+    res.status(413).json({ message: 'Dữ liệu gửi lên quá lớn. Hãy rút gọn nội dung rồi thử lại.', code: 'PAYLOAD_TOO_LARGE' })
+    return
+  }
+
   console.error(error)
   res.status(500).json({ message: 'Máy chủ gặp lỗi. Vui lòng thử lại sau.' })
 }

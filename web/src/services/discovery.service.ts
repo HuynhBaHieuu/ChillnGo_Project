@@ -24,7 +24,8 @@ export const DEFAULT_FILTERS: DiscoverFilters = {
   tags: [],
   budgetLevels: [],
   minCost: 0,
-  maxCost: 15_000_000,
+  // No upper limit: a cap here silently hid every journey that cost more.
+  maxCost: Number.MAX_SAFE_INTEGER,
   query: '',
 }
 

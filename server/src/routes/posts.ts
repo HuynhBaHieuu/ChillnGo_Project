@@ -423,6 +423,11 @@ postsRouter.delete('/:id', requireAuth, loadCurrentUser, writeLimiter, async (re
 postsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const user = currentUser(res)
   const post = await loadOwn(user._id, String(req.params.id), true)
+  // Past the window it is gone, even when the clean-up has not run yet.
+  if (post.deletedAt && post.deletedAt < restoreCutoff()) {
+    await destroyPost(post)
+    throw new HttpError(410, 'Hành trình này đã quá hạn khôi phục và đã bị xoá vĩnh viễn.', 'RESTORE_EXPIRED')
+  }
   post.deletedAt = null
   await post.save()
   if (post.status === 'published') await adjustPostCount(user._id, 1)

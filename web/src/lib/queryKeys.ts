@@ -37,7 +37,7 @@ export const qk = {
   itinerary: {
     all: ['itineraries'] as const,
     mine: (ownerId: string) => ['itineraries', 'mine', ownerId] as const,
-    detail: (id: string) => ['itineraries', 'detail', id] as const,
+    detail: (id: string, viewerId: string | null) => ['itineraries', 'detail', id, viewerId] as const,
   },
   /** Your Activity. Everything is keyed by the signed-in user. */
   activity: {
