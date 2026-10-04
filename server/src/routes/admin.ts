@@ -30,9 +30,11 @@ import {
   requireSuperAdmin,
 } from '../middleware/staff.js'
 import { AuditLog } from '../models/AuditLog.js'
+import { countFollowsOf } from '../models/Follow.js'
 import { getSettings, Setting } from '../models/Setting.js'
 import { User } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
+import { endStreamsOf } from './livestreams.js'
 
 export const adminRouter = Router()
 adminRouter.use(requireAuth, loadCurrentUser, requireStaff)
@@ -192,26 +194,40 @@ const lockSchema = z.object({
   reason: z.string().trim().max(200, 'Lý do tối đa 200 ký tự').optional().default(''),
 })
 
-/** POST /api/admin/users/:id/lock { reason } */
+/**
+ * POST /api/admin/users/:id/lock { reason } — bans the account. Accounts are
+ * never deleted: a ban is undone with /unlock.
+ *
+ * On top of refusing sign-in, a ban ends the stream they are hosting and takes
+ * them out of other accounts' follower / following counts. Locking an account
+ * that is already locked only changes the reason.
+ */
 adminRouter.post('/users/:id/lock', requirePermission('users'), async (req, res) => {
   const actor = currentUser(res)
   const { reason } = lockSchema.parse(req.body ?? {})
   const target = await loadManageableTarget(req, actor)
+  const wasActive = target.status === 'active'
 
-  target.set({ status: 'locked', lockedReason: reason, lockedAt: new Date() })
+  target.set({ status: 'locked', lockedReason: reason, ...(wasActive ? { lockedAt: new Date() } : {}) })
   await target.save()
+  if (wasActive) {
+    await endStreamsOf(target._id)
+    await countFollowsOf(target._id, false)
+  }
   await audit(req, actor, 'user.lock', { id: target._id, label: label(target) }, { reason })
 
   res.json({ user: toAdminView(target) })
 })
 
-/** POST /api/admin/users/:id/unlock */
+/** POST /api/admin/users/:id/unlock — lifts the ban; their follows count again. */
 adminRouter.post('/users/:id/unlock', requirePermission('users'), async (req, res) => {
   const actor = currentUser(res)
   const target = await loadManageableTarget(req, actor)
+  const wasLocked = target.status === 'locked'
 
   target.set({ status: 'active', lockedReason: '', lockedAt: undefined })
   await target.save()
+  if (wasLocked) await countFollowsOf(target._id, true)
   await audit(req, actor, 'user.unlock', { id: target._id, label: label(target) })
 
   res.json({ user: toAdminView(target) })
@@ -252,20 +268,6 @@ adminRouter.post('/users/:id/reset-password', requirePermission('users'), async 
   }
 
   res.json({ message: `Đã gửi mật khẩu tạm thời tới ${target.email}.` })
-})
-
-/** DELETE /api/admin/users/:id — superadmin only. */
-adminRouter.delete('/users/:id', requireSuperAdmin, async (req, res) => {
-  const actor = currentUser(res)
-  const target = await loadManageableTarget(req, actor)
-
-  await target.deleteOne()
-  await audit(req, actor, 'user.delete', { id: target._id, label: label(target) }, {
-    email: target.email,
-    role: target.role,
-  })
-
-  res.json({ ok: true })
 })
 
 /* ----------------------------------------------------------------- admins */

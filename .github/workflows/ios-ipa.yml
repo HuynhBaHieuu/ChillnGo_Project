@@ -1,0 +1,64 @@
+# Builds the iPhone app (mobile/) on GitHub's macOS machines, for teammates
+# who only have Windows. The result is an unsigned ChillnGo.ipa: download it
+# from the run's "Artifacts", then install it with Sideloadly (or AltStore),
+# which signs it with your own Apple ID. See mobile/README.md, "iPhone without a Mac".
+#
+# Run it by hand: GitHub > Actions > "iOS app (.ipa)" > Run workflow. It is not
+# run on every push, because macOS minutes are limited on private repositories.
+
+name: iOS app (.ipa)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Optional settings, from the repository's Actions secrets. Any that are
+      # missing stay empty: the app then uses its defaults (see mobile/.env.example).
+      - name: Write mobile/.env
+        env:
+          API_URL: ${{ secrets.MOBILE_API_URL }}
+          WEB_URL: ${{ secrets.MOBILE_WEB_URL }}
+          MAPBOX_TOKEN: ${{ secrets.MOBILE_MAPBOX_TOKEN }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.MOBILE_GOOGLE_WEB_CLIENT_ID }}
+          GOOGLE_IOS_CLIENT_ID: ${{ secrets.MOBILE_GOOGLE_IOS_CLIENT_ID }}
+        run: |
+          {
+            echo "API_URL=$API_URL"
+            echo "WEB_URL=$WEB_URL"
+            echo "MAPBOX_TOKEN=$MAPBOX_TOKEN"
+            echo "GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
+            echo "GOOGLE_IOS_CLIENT_ID=$GOOGLE_IOS_CLIENT_ID"
+          } > .env
+
+      # Unsigned: Sideloadly or AltStore signs it with the installer's Apple ID.
+      - run: flutter build ios --release --no-codesign --dart-define-from-file=.env
+
+      - name: Package ChillnGo.ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry ChillnGo.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ChillnGo-ios
+          path: mobile/ChillnGo.ipa
+          retention-days: 14

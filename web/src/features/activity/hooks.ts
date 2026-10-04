@@ -148,7 +148,8 @@ export function useDeletedAction<T>(action: (id: string) => Promise<T>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: action,
-    onSuccess: () => {
+    // Also after an error: a restore past its window (410) deletes the item for good.
+    onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: qk.activity.all(me) })
       void queryClient.invalidateQueries({ queryKey: qk.post.all })
       void queryClient.invalidateQueries({ queryKey: qk.discover.all })

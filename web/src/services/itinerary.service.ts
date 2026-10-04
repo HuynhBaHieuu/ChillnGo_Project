@@ -7,7 +7,7 @@
  * conflict resolution when merging two posts) land with the Express API.
  */
 
-import { assertFound, clone, db, delay, nextId, nowIso } from './client'
+import { ApiError, assertFound, clone, db, delay, nextId, nowIso } from './client'
 import { totalCostOf } from '@/lib/itinerary'
 import type {
   ClonedItinerary,
@@ -49,15 +49,22 @@ export async function getMyItineraries(ownerId: ObjectId): Promise<ClonedItinera
     .map((it) => clone(it))
 }
 
+/**
+ * One of `ownerId`'s itineraries. Someone else's answers "not found", as the
+ * API will: an itinerary is private to the person who cloned it.
+ */
+function ownItinerary(id: ObjectId, ownerId: ObjectId): ClonedItinerary {
+  const itinerary = db.clonedItineraries.find((it) => it._id === id)
+  if (!itinerary || itinerary.ownerId !== ownerId) {
+    throw new ApiError(`Không tìm thấy lịch trình ${id}`, 404)
+  }
+  return itinerary
+}
+
 /** GET /api/itineraries/:id */
-export async function getItineraryById(id: ObjectId): Promise<ClonedItinerary> {
+export async function getItineraryById(id: ObjectId, ownerId: ObjectId): Promise<ClonedItinerary> {
   await delay()
-  return clone(
-    assertFound(
-      db.clonedItineraries.find((it) => it._id === id),
-      `Không tìm thấy lịch trình ${id}`,
-    ),
-  )
+  return clone(ownItinerary(id, ownerId))
 }
 
 /**
@@ -113,13 +120,11 @@ export async function clonePost(input: {
 export async function reorderItineraryDays(
   id: ObjectId,
   orderedDayIds: ObjectId[],
+  ownerId: ObjectId,
 ): Promise<ClonedItinerary> {
   await delay()
 
-  const itinerary = assertFound(
-    db.clonedItineraries.find((it) => it._id === id),
-    `Không tìm thấy lịch trình ${id}`,
-  )
+  const itinerary = ownItinerary(id, ownerId)
 
   const byId = new Map(itinerary.days.map((d) => [d._id, d]))
   const reordered = orderedDayIds
@@ -150,14 +155,12 @@ export async function reorderItineraryDays(
  */
 export async function mergeIntoItinerary(input: {
   itineraryId: ObjectId
+  ownerId: ObjectId
   selections: { postId: ObjectId; dayIds: ObjectId[] }[]
 }): Promise<ClonedItinerary> {
   await delay()
 
-  const itinerary = assertFound(
-    db.clonedItineraries.find((it) => it._id === input.itineraryId),
-    `Không tìm thấy lịch trình ${input.itineraryId}`,
-  )
+  const itinerary = ownItinerary(input.itineraryId, input.ownerId)
 
   const incoming: TripDay[] = []
   for (const selection of input.selections) {
@@ -195,13 +198,11 @@ export async function mergeIntoItinerary(input: {
 export async function removeItineraryDay(
   id: ObjectId,
   dayId: ObjectId,
+  ownerId: ObjectId,
 ): Promise<ClonedItinerary> {
   await delay()
 
-  const itinerary = assertFound(
-    db.clonedItineraries.find((it) => it._id === id),
-    `Không tìm thấy lịch trình ${id}`,
-  )
+  const itinerary = ownItinerary(id, ownerId)
 
   itinerary.days = itinerary.days
     .filter((d) => d._id !== dayId)

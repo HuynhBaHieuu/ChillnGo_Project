@@ -1,15 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { qk } from '@/lib/queryKeys'
-import { postService } from '@/services'
+import { postService, socialService } from '@/services'
 import type { TripPostPayload, TripPostWithAuthor } from '@/services/types'
 import { useViewerId } from '@/store'
 
 export function useFeed() {
   const viewerId = useViewerId()
+  // Who you follow, including follows stored by the API. Same query as the
+  // Newsfeed's check-ins and the Live page, so the cache is shared.
+  const following = useQuery({
+    queryKey: ['following', viewerId],
+    queryFn: () => socialService.getFollowingIds(viewerId as string),
+    enabled: Boolean(viewerId),
+  })
+  const followingIds = following.data ?? []
   return useQuery({
-    queryKey: qk.post.feed(viewerId),
-    queryFn: () => postService.getFeed(viewerId),
+    queryKey: [...qk.post.feed(viewerId), followingIds.join(',')],
+    queryFn: () => postService.getFeed(viewerId, followingIds),
+    // If the API cannot say, still show what this session knows.
+    enabled: !viewerId || following.isSuccess || following.isError,
   })
 }
 

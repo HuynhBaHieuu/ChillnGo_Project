@@ -18,7 +18,7 @@ import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { Follow, followingIdsOf, follows } from '../models/Follow.js'
 import { notify } from '../models/Notification.js'
-import { User } from '../models/User.js'
+import { User, adjustCount } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
 
 export const profilesRouter = Router()
@@ -51,7 +51,7 @@ async function loadMember(id: string): Promise<UserDocument> {
   return user
 }
 
-profilesRouter.get('/me/following', requireAuth, async (_req, res) => {
+profilesRouter.get('/me/following', requireAuth, loadCurrentUser, async (_req, res) => {
   res.json({ ids: await followingIdsOf(res.locals.userId as string) })
 })
 
@@ -96,13 +96,12 @@ profilesRouter.post('/:id/follow', requireAuth, loadCurrentUser, followLimiter, 
     }
   }
 
+  // Counters never go below zero, whatever happened before they were kept.
   const step = following ? 1 : -1
-  const [updated] = await Promise.all([
-    User.findByIdAndUpdate(target._id, { $inc: { followerCount: step } }, { new: true }),
-    User.updateOne({ _id: me._id }, { $inc: { followingCount: step } }),
-  ])
+  await Promise.all([adjustCount(target._id, 'followerCount', step), adjustCount(me._id, 'followingCount', step)])
+  const updated = await User.findById(target._id).select('followerCount').lean()
   if (following) {
     await notify([target._id], { type: 'follow', actorId: me._id, message: 'đã bắt đầu theo dõi bạn' })
   }
-  res.json({ following, followerCount: Math.max(0, updated?.followerCount ?? 0) })
+  res.json({ following, followerCount: updated?.followerCount ?? 0 })
 })

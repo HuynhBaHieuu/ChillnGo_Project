@@ -8,11 +8,13 @@
 import { Router } from 'express'
 
 import { requireAuth } from '../middleware/requireAuth.js'
+import { loadCurrentUser } from '../middleware/staff.js'
 import { Notification } from '../models/Notification.js'
 import { User } from '../models/User.js'
 
 export const notificationsRouter = Router()
-notificationsRouter.use(requireAuth)
+// A deleted or locked account gets 401 here too (the app polls this), which signs it out.
+notificationsRouter.use(requireAuth, loadCurrentUser)
 
 notificationsRouter.get('/', async (_req, res) => {
   const userId = res.locals.userId as string

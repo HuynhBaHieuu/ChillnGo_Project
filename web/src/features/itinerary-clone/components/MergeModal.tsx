@@ -23,9 +23,17 @@ interface MergeModalProps {
 }
 
 /**
+ * A selected day: post and day together, because a duplicated journey keeps
+ * its days' ids, so a day id alone can match a day in two posts.
+ */
+function dayKey(postId: string, dayId: string): string {
+  return `${postId}::${dayId}`
+}
+
+/**
  * Multi-select picker for merging days from other posts into this itinerary.
  *
- * Selection is tracked as a flat `Set` of day ids and regrouped by post on
+ * Selection is tracked as a flat `Set` of day keys and regrouped by post on
  * submit, which is the shape `mergeIntoItinerary` expects.
  */
 export function MergeModal({
@@ -52,11 +60,11 @@ export function MergeModal({
     )
   }, [posts, query])
 
-  function toggleDay(dayId: string) {
+  function toggleDay(key: string) {
     setSelectedDayIds((current) => {
       const next = new Set(current)
-      if (next.has(dayId)) next.delete(dayId)
-      else next.add(dayId)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
   }
@@ -64,8 +72,7 @@ export function MergeModal({
   const selectedCost = useMemo(() => {
     if (!posts) return 0
     return posts
-      .flatMap((p) => p.days)
-      .filter((d) => selectedDayIds.has(d._id))
+      .flatMap((p) => p.days.filter((d) => selectedDayIds.has(dayKey(p._id, d._id))))
       .reduce((sum, d) => sum + dayCostOf(d), 0)
   }, [posts, selectedDayIds])
 
@@ -75,7 +82,7 @@ export function MergeModal({
     const selections = posts
       .map((post) => ({
         postId: post._id,
-        dayIds: post.days.filter((d) => selectedDayIds.has(d._id)).map((d) => d._id),
+        dayIds: post.days.filter((d) => selectedDayIds.has(dayKey(post._id, d._id))).map((d) => d._id),
       }))
       .filter((selection) => selection.dayIds.length > 0)
 
@@ -139,7 +146,7 @@ export function MergeModal({
           {filtered.map((post) => {
             const isExpanded = expandedPostId === post._id
             const selectedInPost = post.days.filter((d) =>
-              selectedDayIds.has(d._id),
+              selectedDayIds.has(dayKey(post._id, d._id)),
             ).length
 
             return (
@@ -181,8 +188,8 @@ export function MergeModal({
                       <li key={day._id}>
                         <label className="flex cursor-pointer items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-white/5">
                           <Checkbox
-                            checked={selectedDayIds.has(day._id)}
-                            onCheckedChange={() => toggleDay(day._id)}
+                            checked={selectedDayIds.has(dayKey(post._id, day._id))}
+                            onCheckedChange={() => toggleDay(dayKey(post._id, day._id))}
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm">

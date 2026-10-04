@@ -24,13 +24,15 @@ export async function findOrCreateGoogleUser(
 
   const byEmail = await User.findOne({ email: profile.email })
   if (byEmail) {
+    // Read before set(): afterwards emailVerified is always true, and the
+    // "email verified" event of Your Activity was never recorded.
+    const verifiedNow = !byEmail.emailVerified
     byEmail.set({
       googleId: profile.sub,
       emailVerified: true,
       emailVerifyTokenHash: undefined,
       emailVerifyExpiresAt: undefined,
     })
-    const verifiedNow = !byEmail.emailVerified
     if (!byEmail.avatarUrl && profile.picture) byEmail.avatarUrl = profile.picture
     await byEmail.save()
     if (verifiedNow) await recordAccountEvents(byEmail._id, [{ type: 'email_verified', details: { via: 'google' } }])
