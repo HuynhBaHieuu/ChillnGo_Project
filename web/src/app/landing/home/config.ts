@@ -1,13 +1,10 @@
 /**
  * Timing constants for the home page scroll experience.
  *
- * Pinned timelines are authored in **units**, where 1 unit = 100vh of scroll.
- * The unit lengths below were derived from the reference recording at
- * VH_PER_SECOND vh of scroll per second of footage; change that ratio and every
- * pin stretches or shrinks together.
+ * Only two stages pin (the intro and the destinations); everything else scrolls
+ * in flow. Pinned timelines are authored in **units**, where 1 unit = 100vh of
+ * scroll.
  */
-
-export const VH_PER_SECOND = 50
 
 /** Catch-up smoothing for scrubbed timelines. Kept low because Lenis already smooths. */
 export const SCRUB = 0.6
@@ -16,15 +13,10 @@ export const SCRUB = 0.6
 export const MOBILE_PIN_FACTOR = 0.7
 
 export const UNITS = {
-  /** Hero parallax, then the statement. 4.0 after the two were overlapped. */
-  intro: 4.0,
-  stats: 1.5,
-  /** How-it-works: 0.4 units per item plus 0.4 for entry and exit. */
-  howItWorks: (items: number) => items * 0.4 + 0.4,
-  /** Destinations list travel: 0.033 units per row, never under 1.2. */
-  destinationList: (rows: number) => Math.max(1.2, rows * 0.033),
-  /** Circle reveal + photo wheel + dome, after the list. */
-  destinationTail: 3.5,
+  /** Hero leaves, the statement photo grows to full screen, the statement reads, both leave. */
+  intro: 2.6,
+  /** Compass opens into the gallery, five photos pass, the gallery leaves. */
+  destinationTail: 2.6,
 } as const
 
 /** Pin length in pixels for a timeline of `units`, evaluated at refresh time. */

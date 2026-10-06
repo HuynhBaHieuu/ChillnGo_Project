@@ -4,8 +4,7 @@ import { Link } from 'react-router-dom'
 import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/home/config'
 import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
-import { setNavTheme } from '@/app/landing/home/navTheme'
-import { CharLayers } from '@/app/landing/home/parts/CharLayers'
+import { Magnetic } from '@/app/landing/home/parts/Magnetic'
 import { TubesBackground } from '@/app/landing/home/parts/TubesBackground'
 import STATEMENT_PHOTO from '@/assets/images/photo-1705736466837-14d8b6fb571c.avif'
 import { GlassButton } from '@/components/Button'
@@ -20,44 +19,30 @@ import { landingPhoto } from '@/lib/photos'
 const HERO_IMAGE = landingPhoto('saPa', 2400, 1350)
 const HERO_VIDEO_URL = optionalEnv(import.meta.env.VITE_HERO_VIDEO_URL)
 
-const STATEMENT = [
-  'ChillnGo là mạng xã hội của những chuyến đi có thật.',
-  'Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.',
-  'Thấy hợp ý? Clone về làm của bạn chỉ với một chạm.',
-]
-
-/*
- * The statement sits on a darkened photograph, so it lights up from a faint
- * white to full white rather than to the theme's ink: whatever the theme's
- * ground is, the photo covers it.
- */
+const STATEMENT =
+  'ChillnGo là mạng xã hội của những chuyến đi có thật. Thấy hợp ý? Clone về làm của bạn chỉ với một chạm.'
 
 /**
- * Stage A — the landing hero and the mission statement, on one pin.
+ * Stage A — the landing hero and the mission statement, on one pin (1 of the
+ * page's 2).
  *
- * They share a pin because the statement starts materialising while the hero is
- * still flying apart; two separate pins could not overlap like that.
- *
- * The hero leaves as a parallax: three layers travelling at three speeds, which
- * is what reads as depth. The range is furthest from the reader and moves
- * least; the copy is nearest and clears first. Nothing here animates anything
- * but transform and opacity — no blur, which the compositor cannot cheat and
- * which turns a 4K photograph into a slideshow on a mid-range laptop.
+ * On load the headline's words rise out of masks. On scroll the hero leaves in
+ * layers, then the statement's photo grows from a card to the full screen, the
+ * statement's words rise and light up, and both leave. Only transform, opacity
+ * and the photo's corner radius animate.
  *
  * Scroll (1 unit = 100vh):
- *   0.00–1.50  range drifts up 4vh and swells 1.12 → 1.18
- *   0.00–1.50  headline rises 22vh, copy rises 34vh
- *   0.25–0.90  copy fades, then the headline behind it
- *   0.45–1.50  the forest ground closes over the photograph
- *   0.45–1.75  the statement's photo grows from a card to the full screen
- *   0.90–2.10  statement drifts in from "distance" (scale 0.82 → 1)
- *   0.90–2.10  the photo darkens, so the statement reads over it
- *   2.10–3.50  statement lights up character by character
- *   3.50–4.00  statement and its photo leave
+ *   0.00–0.45  copy lifts and fades
+ *   0.15–0.75  headline lifts and fades
+ *   0.00–0.90  tubes recede
+ *   0.30–1.40  photo grows from a card to the full screen
+ *   1.00–1.50  statement words rise out of their masks
+ *   1.45–2.15  statement lights up word by word
+ *   2.25–2.60  statement and photo leave
  *
- * The load-in uses the design system's CSS fade-rise classes on *inner*
- * wrappers, and scroll tweens target the *outer* wrappers, so the two never
- * fight over the same element's transform.
+ * The copy's load-in uses CSS fade-rise classes on *inner* elements and the
+ * scroll tweens target the *outer* layers, so the two never fight over one
+ * element's transform.
  */
 export function IntroStage() {
   const ref = useRef<HTMLElement>(null)
@@ -77,94 +62,48 @@ export function IntroStage() {
 
         const f = desktop ? 1 : MOBILE_PIN_FACTOR
         const u = (n: number) => n * f
-        // Phones show a taller slice of the photo, so the copy has further to
-        // travel before it is off screen.
+        // Phones show a taller slice of the hero, so the copy travels further.
         const lift = desktop ? 1 : 1.25
-        // The navbar follows what is under it: white over the footage and the
-        // statement's photo, ink once the photo has faded to the ground.
-        // Switched at 85% of that fade, so the links are never white on the
-        // ground.
-        const lightFrom = u(3.5 + 0.5 * 0.85)
-        // The statement is always set over the darkened photo, so it lights up
-        // to white whatever the theme's ink is.
-        const tint = 'rgba(255, 255, 255, 0.3)'
-        const lit = '#ffffff'
 
-        gsap.from(q('[data-layer="range"]'), {
-          opacity: 0,
-          duration: 1.2,
-          ease: 'power3.out',
+        // Words only (no lines), so the split does not depend on the webfont
+        // having loaded.
+        const title = SplitText.create(q('[data-hero-title]'), {
+          type: 'words',
+          mask: 'words',
+          wordsClass: 'split',
         })
+        gsap.from(title.words, { yPercent: 110, duration: 1.2, ease: 'expo.out', stagger: 0.07, delay: 0.15 })
+        gsap.from(q('[data-layer="range"]'), { opacity: 0, duration: 1.2, ease: 'power3.out' })
 
-        const split = SplitText.create(q('[data-chars]'), { type: 'words,chars', tag: 'span' })
-        const lines = q('[data-line]')
         const statement = q('[data-statement]')
-
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          onUpdate: () => setNavTheme(tl.time() >= lightFrom ? 'light' : 'dark'),
-        })
-
-        // Hero leaves as three layers at three speeds.
-        tl.to(q('[data-layer="range"]'), { y: vh(-4), scale: 1.18, duration: u(1.5) }, 0)
-        tl.to(q('[data-layer="headline"]'), { y: vh(-22 * lift), duration: u(1.5) }, 0)
-        tl.to(q('[data-layer="lede"]'), { y: vh(-34 * lift), duration: u(1.5) }, 0)
-
-        // The copy goes first, so the headline is alone for a beat.
-        tl.to(q('[data-layer="lede"]'), { opacity: 0, duration: u(0.4), ease: 'power3.out' }, u(0.25))
-        tl.to(lines, { opacity: 0, duration: u(0.45), ease: 'power3.out' }, u(0.55))
-        tl.fromTo(q('[data-ground]'), { opacity: 0 }, { opacity: 1, duration: u(1.05) }, u(0.45))
-
-        // Scroll to scale: the photo rises in as a card and grows to fill the
-        // screen, arriving a little after the statement starts drifting in.
+        const words = SplitText.create(statement, { type: 'words', mask: 'words', wordsClass: 'split' }).words
         const photo = q('[data-statement-photo]')
-        tl.fromTo(photo, { opacity: 0 }, { opacity: 1, duration: u(0.3) }, u(0.45))
+        gsap.set(statement, { autoAlpha: 1 })
+        gsap.set(words, { opacity: 0.25 })
+
+        const tl = gsap.timeline({ defaults: { ease: 'none' } })
+
+        tl.to(q('[data-layer="lede"]'), { y: vh(-14 * lift), autoAlpha: 0, ease: 'power2.in', duration: u(0.45) }, 0)
+        tl.to(q('[data-layer="headline"]'), { y: vh(-10 * lift), autoAlpha: 0, ease: 'power2.in', duration: u(0.6) }, u(0.15))
+        // Scale on the layer, fade on its child: the load-in above owns the layer's
+        // opacity, and a scrubbed tween on that same property would record the
+        // load-in's starting 0 and hold the tubes invisible.
+        tl.to(q('[data-layer="range"]'), { scale: 1.2, ease: 'power1.in', duration: u(0.9) }, 0)
+        tl.to(q('[data-layer="range"] > *'), { autoAlpha: 0.25, ease: 'power1.in', duration: u(0.9) }, 0)
+
         tl.fromTo(
           photo,
-          { scale: desktop ? 0.42 : 0.7, y: vh(12) },
-          { scale: 1, y: 0, ease: 'power2.inOut', duration: u(1.3) },
-          u(0.45),
+          { autoAlpha: 0, scale: desktop ? 0.45 : 0.7, y: vh(14), borderRadius: 32 },
+          { autoAlpha: 1, scale: 1, y: 0, borderRadius: 0, ease: 'power3.inOut', duration: u(1.1) },
+          u(0.3),
         )
-        tl.fromTo(
-          q('[data-statement-scrim]'),
-          { opacity: 0.25 },
-          { opacity: 1, duration: u(1.2) },
-          u(0.9),
-        )
+        tl.fromTo(q('[data-statement-photo] img'), { scale: 1.25 }, { scale: 1, ease: 'power3.out', duration: u(1.3) }, u(0.3))
 
-        /*
-         * Statement approaches, lights up, leaves.
-         *
-         * It starts at 0.90, while the headline is still fading out at 1.00.
-         * Held until 1.20, as it was, the pin spent a fifth of a unit — about
-         * 190px of scroll — showing nothing but the ground closing over an
-         * empty photograph.
-         */
-        tl.fromTo(
-          statement,
-          { opacity: 0, scale: 0.82, y: vh(8) },
-          { opacity: 1, scale: 1, y: 0, ease: 'power3.out', duration: u(1.2) },
-          u(0.9),
-        )
-        tl.fromTo(
-          split.chars,
-          { opacity: 0, color: tint },
-          { opacity: 1, color: lit, duration: u(0.08), stagger: { amount: u(1.32) } },
-          u(2.1),
-        )
-        tl.to(
-          statement,
-          {
-            opacity: 0,
-            scale: 1.06,
-            y: vh(-6),
-            ease: 'power3.out',
-            duration: u(0.5),
-            immediateRender: false,
-          },
-          u(3.5),
-        )
-        tl.to(photo, { opacity: 0, duration: u(0.5), immediateRender: false }, u(3.5))
+        tl.from(words, { yPercent: 110, ease: 'expo.out', duration: u(0.5), stagger: { amount: u(0.35) } }, u(1.0))
+        tl.to(words, { opacity: 1, ease: 'power1.out', duration: u(0.12), stagger: { amount: u(0.7) } }, u(1.45))
+
+        tl.to(statement, { y: vh(-6), autoAlpha: 0, ease: 'power2.in', duration: u(0.35) }, u(2.25))
+        tl.to(photo, { autoAlpha: 0, scale: 1.04, ease: 'power2.in', duration: u(0.35) }, u(2.25))
 
         // Pad to the exact length so 1 unit of timeline = 100vh of scroll.
         tl.set({}, {}, u(UNITS.intro))
@@ -179,131 +118,86 @@ export function IntroStage() {
           invalidateOnRefresh: true,
           animation: tl,
         })
-
-        return () => split.revert()
       })
     },
     { scope: ref },
   )
 
   return (
-    <section
-      ref={ref}
-      data-reduce-theme="dark"
-      className="relative overflow-hidden bg-background text-foreground"
-    >
+    <section ref={ref} className="relative overflow-hidden bg-background text-foreground">
       {/* Hero */}
       <div className="relative h-screen">
-        {/* Layer 1 — the range. It starts oversized so that drifting up during
-            the parallax never walks an edge into frame. */}
-        <div
-          data-layer="range"
-          className="absolute inset-0 scale-[1.12] will-change-transform motion-reduce:scale-100"
-        >
+        {/* Layer 1 — the backdrop, furthest from the reader. */}
+        <div data-layer="range" className="absolute inset-0 will-change-transform">
           {!reduceMotion ? (
             <div className="size-full bg-forest">
               <TubesBackground />
             </div>
           ) : HERO_VIDEO_URL ? (
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              poster={HERO_IMAGE}
-              className="size-full object-cover"
-            >
+            <video autoPlay loop muted playsInline poster={HERO_IMAGE} className="size-full object-cover">
               <source src={HERO_VIDEO_URL} type="video/mp4" />
             </video>
           ) : (
-            <img
-              src={HERO_IMAGE}
-              alt=""
-              fetchPriority="high"
-              className="size-full object-cover"
-            />
+            <img src={HERO_IMAGE} alt="" fetchPriority="high" className="size-full object-cover" />
           )}
         </div>
 
-        {/* A flat scrim, not a gradient blob — it only exists so white type
-            stays legible over the photograph. Forest rather than black, so the
-            shadows warm towards the palette instead of going grey. */}
+        {/* A flat scrim, only so white type stays legible over the photograph. */}
         {reduceMotion && <div aria-hidden className="absolute inset-0 bg-forest/65" />}
 
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 pb-40 pt-32 text-center">
-          {/* Layer 2 — the headline, at mid depth. */}
+          {/* Layer 2 — the headline. */}
           <div data-layer="headline" className="will-change-transform">
-            <h1 className="max-w-5xl font-display text-5xl leading-[0.95] tracking-[-2.46px] text-sand sm:text-7xl md:text-8xl">
-              <span data-line="1" className="block">
-                <span className="animate-fade-rise block">
-                  Review &amp; <em className="not-italic text-sand/80">Clone</em>
-                </span>
-              </span>
-              <span data-line="2" className="block">
-                <span className="animate-fade-rise-delay block">
-                  <em className="not-italic text-sand/80">Your Journey</em>
-                </span>
-              </span>
+            <h1
+              data-hero-title
+              className="max-w-5xl font-display text-5xl leading-[0.95] tracking-[-2.46px] text-sand sm:text-7xl md:text-8xl"
+            >
+              Review &amp; <span className="text-sand/75">Clone</span>
+              <br />
+              <span className="text-sand/75">Your Journey</span>
             </h1>
           </div>
 
-          {/* Layer 3 — the copy, nearest the reader, so it travels furthest. */}
+          {/* Layer 3 — the copy, nearest the reader. */}
           <div data-layer="lede" className="flex flex-col items-center will-change-transform">
             <p className="animate-fade-rise-delay-2 mt-8 max-w-2xl text-base leading-relaxed text-sand sm:text-lg">
-              ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ — từng ngày,
-              từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Clone nó về
-              làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn
-              phải dựng lịch trình từ con số không.
+              ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng,
+              từng khoản chi. Thấy một hành trình hợp ý? Clone nó về làm của mình chỉ với một chạm,
+              rồi sửa theo cách bạn muốn đi.
             </p>
 
-            <GlassButton
-              asChild
-              size="hero"
-              tone="beam"
-              className="animate-fade-rise-delay-3 mt-[3.429rem]"
-            >
-              <Link to="/discover">Khám phá ngay</Link>
-            </GlassButton>
+            <Magnetic className="mt-[3.429rem]">
+              <GlassButton asChild size="hero" tone="beam" className="animate-fade-rise-delay-3">
+                <Link to="/discover">Khám phá ngay</Link>
+              </GlassButton>
+            </Magnetic>
           </div>
         </div>
       </div>
 
-      <div
-        data-ground
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-[5] bg-background opacity-0"
-      />
-
       {/* Statement — layered over the hero while animated, in flow otherwise.
-
-          `pointer-events-none` because it covers the whole viewport at z-10:
-          invisible at `opacity-0`, it still took every click aimed at the hero
-          beneath it, the CTA included. It holds no interactive content of its
-          own, so it never needs the pointer. */}
+          `pointer-events-none`: it covers the whole viewport and holds nothing
+          interactive, so it must never take clicks aimed at the hero. */}
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6 motion-reduce:relative motion-reduce:inset-auto motion-reduce:py-32">
-        {/* The statement's backdrop. Rounded while it is still a card; once it
-            fills the screen the corners are off the edges. */}
         <div
           data-statement-photo
           aria-hidden
           className="absolute inset-0 overflow-hidden rounded-[2rem] opacity-0 will-change-transform motion-reduce:rounded-none motion-reduce:opacity-100"
         >
-          <img src={STATEMENT_PHOTO} alt="" loading="lazy" className="size-full object-cover" />
-          <div data-statement-scrim className="absolute inset-0 bg-black/60" />
+          <img
+            src={STATEMENT_PHOTO}
+            alt=""
+            loading="lazy"
+            className="size-full object-cover brightness-[0.62] contrast-[1.1] saturate-[0.9]"
+          />
         </div>
 
-        <div
+        <p
           data-statement
-          className="relative max-w-4xl space-y-8 text-center text-white opacity-0 will-change-transform motion-reduce:opacity-100 [&_[data-dim]]:text-white/25"
+          className="relative max-w-[20ch] text-center font-display text-[clamp(1.9rem,4.4vw,3.6rem)] leading-[1.1] tracking-tight text-white opacity-0 motion-reduce:opacity-100"
         >
-          {STATEMENT.map((line) => (
-            <CharLayers
-              key={line}
-              text={line}
-              className="font-display text-[clamp(1.75rem,3.4vw,3.25rem)] leading-[1.1] tracking-tight"
-            />
-          ))}
-        </div>
+          {STATEMENT}
+        </p>
       </div>
     </section>
   )

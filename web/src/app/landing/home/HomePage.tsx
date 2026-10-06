@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useLayoutEffect } from 'react'
 
-import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
+import { ScrollTrigger } from '@/app/landing/home/gsap'
 import { clearNavTheme, setNavTheme } from '@/app/landing/home/navTheme'
-import type { NavTheme } from '@/app/landing/home/navTheme'
 import { SmoothScroll } from '@/app/landing/home/SmoothScroll'
 import { DestinationsStage } from '@/app/landing/home/stages/DestinationsStage'
 import { FeaturedTripsStage } from '@/app/landing/home/stages/FeaturedTripsStage'
 import { HomeFooter } from '@/app/landing/home/stages/HomeFooter'
 import { HowItWorksStage } from '@/app/landing/home/stages/HowItWorksStage'
 import { IntroStage } from '@/app/landing/home/stages/IntroStage'
+import { PlacesMarquee } from '@/app/landing/home/stages/PlacesMarquee'
 import { StatsStage } from '@/app/landing/home/stages/StatsStage'
 import { qk } from '@/lib/queryKeys'
 import { discoveryService, landingService } from '@/services'
@@ -18,12 +18,13 @@ import { useViewerId } from '@/store'
 const MOMENT_PHOTOS = 14
 
 /**
- * The home page: six scroll-driven stages on a Lenis-smoothed page.
+ * The home page: scroll-driven stages on a Lenis-smoothed page. Only two of
+ * them pin (the intro and the destinations); the rest scroll in flow.
  *
  * The hero needs no data, so it renders immediately. Every stage below it waits
- * for its data before mounting: pinned sections measure their own content when
- * their ScrollTrigger is created, and measuring a loading placeholder would put
- * every pin after it in the wrong place.
+ * for its data before mounting: the destinations pin measures its own content
+ * when its ScrollTrigger is created, and measuring a loading placeholder would
+ * put it in the wrong place.
  */
 export function HomePage() {
   const viewerId = useViewerId()
@@ -47,19 +48,19 @@ export function HomePage() {
 
   const ready = Boolean(stats.data && rows.data && photos.data && featured.data)
 
-  // The page opens on dark footage; hand the nav back to its default on leave.
+  // Every stage sits on the dark ground; hand the nav back to its default on leave.
   useLayoutEffect(() => {
     setNavTheme('dark')
     return () => clearNavTheme()
   }, [])
 
   /*
-   * Web fonts change text heights, which moves every pin below the hero.
+   * Web fonts change text heights, which moves every trigger below the hero.
    *
-   * A background refetch can also change how many rows or cards a stage has
-   * (cached data renders first). That stage then rebuilds its pin after the
-   * stages below it were created, so put the triggers back in page order before
-   * re-measuring — otherwise every pin below it starts in the wrong place.
+   * A background refetch can also change how many stops or cards a stage has
+   * (cached data renders first). That stage then rebuilds its triggers after
+   * the stages below it were created, so put the triggers back in page order
+   * before re-measuring.
    */
   const rowCount = rows.data?.length
   const cardCount = featured.data?.length
@@ -76,55 +77,19 @@ export function HomePage() {
     }
   }, [ready, rowCount, cardCount])
 
-  /*
-   * Re-assert the hero's theme once the stages below have been measured.
-   *
-   * Each stage announces its theme from `onUpdate`, and ScrollTrigger also
-   * fires `onUpdate` while it measures — for stages far off-screen too. The
-   * stages only mount once their data arrives, so the last one measured (the
-   * footer, on paper) wins, and the navbar can sit over the dark hero wearing
-   * the light theme until the first scroll moves it.
-   */
-  useEffect(() => {
-    if (!ready) return
-    const settle = () => {
-      if (window.scrollY < 4) setNavTheme('dark')
-    }
-    settle()
-    ScrollTrigger.addEventListener('refresh', settle)
-    return () => ScrollTrigger.removeEventListener('refresh', settle)
-  }, [ready])
-
-  // With reduced motion there are no stage timelines to drive the nav theme,
-  // so each section sets it plainly as it passes under the navbar.
-  useGSAP(
-    () => {
-      if (!ready) return
-      const mm = gsap.matchMedia()
-      mm.add(MEDIA.reduce, () => {
-        document.querySelectorAll<HTMLElement>('[data-reduce-theme]').forEach((section) => {
-          ScrollTrigger.create({
-            trigger: section,
-            start: 'top 44px',
-            end: 'bottom 44px',
-            onToggle: (self) => {
-              if (self.isActive) setNavTheme(section.dataset.reduceTheme as NavTheme)
-            },
-          })
-        })
-      })
-    },
-    { dependencies: [ready] },
-  )
-
   return (
     <SmoothScroll>
-      <div className="bg-background text-foreground">
+      <div aria-hidden className="home-grain" />
+      {/* overflow-x-clip: stages that slide sideways can overhang the viewport by a
+          sub-pixel, enough for a horizontal scrollbar. `clip`, unlike `hidden`, does
+          not create a scroll container, so sticky and pinned elements keep working. */}
+      <div className="overflow-x-clip bg-background text-foreground">
         <IntroStage />
 
         {ready && stats.data && rows.data && photos.data && featured.data ? (
           <>
             <StatsStage stats={stats.data} />
+            <PlacesMarquee rows={rows.data} />
             <HowItWorksStage />
             <DestinationsStage rows={rows.data} photos={photos.data} />
             <FeaturedTripsStage posts={featured.data} />
