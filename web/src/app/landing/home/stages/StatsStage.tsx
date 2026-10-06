@@ -1,30 +1,23 @@
 import { useRef } from 'react'
-import type * as React from 'react'
 
-import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength, vh } from '@/app/landing/home/config'
-import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
+import { SCRUB, vw } from '@/app/landing/home/config'
+import { MEDIA, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
-import { setNavTheme } from '@/app/landing/home/navTheme'
-import { inkColor, mutedInkColor } from '@/app/landing/home/palette'
-import { CharLayers } from '@/app/landing/home/parts/CharLayers'
-import { Dome } from '@/app/landing/home/parts/Dome'
-import { addDome } from '@/app/landing/home/parts/domeTween'
+import { slideInWords } from '@/app/landing/home/parts/slideInWords'
+import { cn } from '@/lib/utils'
 import type { LandingStats } from '@/services/types'
 
 const formatNumber = new Intl.NumberFormat('vi-VN').format
 
-/** Circle diameter: 11vw, never under 140px. */
-const diameter = () => Math.max(0.11 * window.innerWidth, 140)
-
 /**
- * Stage B — four stat circles, then the dome into the first light section.
+ * Stage B — four figures, in flow (no pin). Everything follows the scroll
+ * position, so it plays forward and back with the reader:
  *
- * Scroll (1 unit = 100vh):
- *   0.00–0.25  first circle grows in
- *   0.15–0.55  the stacked circles slide out to their places (2×2 on phones)
- *   0.20–0.45  label lights up
- *   0.35–0.70  numbers count up from zero
- *   0.80–1.50  paper dome rises; nav turns light once it covers the top
+ *   heading     words slide in sideways (slideInWords)
+ *   columns     glide in from the right, each from further than the last
+ *   rules       draw left to right above each figure
+ *   figures     count up from zero with the scroll
+ *   on the way out the heading and the grid drift apart sideways
  */
 export function StatsStage({ stats }: { stats: LandingStats }) {
   const ref = useRef<HTMLElement>(null)
@@ -42,142 +35,78 @@ export function StatsStage({ stats }: { stats: LandingStats }) {
       const mm = gsap.matchMedia()
 
       mm.add(MEDIA, (context) => {
-        const { desktop, reduce } = context.conditions as MediaConditions
+        const { reduce } = context.conditions as MediaConditions
         if (reduce) return
 
-        const f = desktop ? 1 : MOBILE_PIN_FACTOR
-        const u = (n: number) => n * f
-        const total = u(UNITS.stats)
-        // The stage sits on the pink ground, so type lights up to the ink.
-        const tint = mutedInkColor()
-        const lit = inkColor()
+        slideInWords(q('[data-heading]')[0])
 
-        const circles = q<HTMLElement>('[data-circle]')
         const counts = q<HTMLElement>('[data-count]')
-        const split = SplitText.create(q('[data-chars]'), { type: 'words,chars', tag: 'span' })
-
         counts.forEach((el) => (el.textContent = '0'))
 
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          onUpdate: () => setNavTheme('light'),
+        const enter = gsap.timeline({
+          defaults: { ease: 'power3.out' },
+          scrollTrigger: { trigger: q('[data-grid]')[0], start: 'top 92%', end: 'top 40%', scrub: SCRUB },
         })
-
-        tl.fromTo(
-          circles[0],
-          { scale: 0.6, opacity: 0 },
-          { scale: 1, opacity: 1, ease: 'power2.out', duration: u(0.25) },
-          0,
-        )
-        tl.fromTo(
-          circles.slice(1),
-          { opacity: 0 },
-          { opacity: 1, stagger: u(0.05), duration: u(0.2) },
-          u(0.15),
-        )
-        tl.fromTo(
-          circles,
-          { x: 0, y: 0 },
-          {
-            x: (i: number) =>
-              desktop ? (i - 1.5) * 0.92 * diameter() : ((i % 2) - 0.5) * 1.05 * diameter(),
-            y: (i: number) => (desktop ? 0 : Math.floor(i / 2) * 1.05 * diameter()),
-            ease: 'power3.out',
-            duration: u(0.4),
-          },
-          u(0.15),
-        )
-        tl.fromTo(
-          split.chars,
-          { opacity: 0, color: tint },
-          { opacity: 1, color: lit, duration: u(0.05), stagger: { amount: u(0.2) } },
-          u(0.2),
-        )
-
+        enter
+          .fromTo(q('[data-stat]'), { x: (i: number) => 160 + i * 70, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08 }, 0)
+          .fromTo(q('[data-rule]'), { scaleX: 0 }, { scaleX: 1, duration: 0.6, stagger: 0.08, ease: 'power2.inOut' }, 0.1)
         counts.forEach((el, i) => {
           const counter = { value: 0 }
-          tl.to(
+          enter.to(
             counter,
             {
               value: items[i].value,
-              ease: 'power1.out',
-              duration: u(0.35),
+              duration: 0.6,
+              ease: 'power2.out',
               onUpdate: () => {
                 el.textContent = formatNumber(Math.round(counter.value))
               },
             },
-            u(0.35),
+            0.12 + i * 0.08,
           )
         })
-        tl.fromTo(
-          counts,
-          { color: tint },
-          { color: lit, duration: u(0.35) },
-          u(0.35),
-        )
 
-        addDome(tl, q('[data-dome]')[0], u(0.8), u(0.7))
-        tl.to(q('[data-group]'), { y: vh(-6), opacity: 0, duration: u(0.3) }, u(1.1))
-        tl.set({}, {}, total)
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: { trigger: ref.current, start: 'center center', end: 'bottom top', scrub: true, invalidateOnRefresh: true },
+          })
+          .to(q('[data-heading]'), { x: vw(6) }, 0)
+          .to(q('[data-grid]'), { x: vw(-5) }, 0)
 
-        ScrollTrigger.create({
-          trigger: ref.current,
-          start: 'top top',
-          end: pinLength(total),
-          pin: true,
-          scrub: SCRUB,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          animation: tl,
-        })
-
-        return () => {
-          split.revert()
-          counts.forEach((el, i) => (el.textContent = formatNumber(items[i].value)))
-        }
+        return () => counts.forEach((el, i) => (el.textContent = formatNumber(items[i].value)))
       })
     },
-    { scope: ref },
+    // react-query keeps the same object while the numbers are unchanged.
+    { scope: ref, dependencies: [stats], revertOnUpdate: true },
   )
 
   return (
     <section
       ref={ref}
-      data-reduce-theme="light"
-      className="relative h-screen overflow-hidden bg-background text-foreground motion-reduce:h-auto motion-reduce:py-32"
-      style={{ '--d': 'max(11vw, 140px)' } as React.CSSProperties}
+      className="relative mx-auto max-w-7xl overflow-x-clip bg-background px-6 py-[22vh] text-foreground md:px-14"
     >
-      <div
-        data-group
-        className="flex h-full flex-col items-center justify-center gap-12 px-6"
+      <h2
+        data-heading
+        className="max-w-[16ch] font-display text-[clamp(2rem,4.6vw,3.8rem)] font-bold leading-[1.02] tracking-[-0.035em]"
       >
-        <CharLayers
-          text="Được kể lại từ những chuyến đi thật"
-          className="text-xs font-medium uppercase tracking-[0.3em]"
-        />
+        Được kể lại từ những chuyến đi thật
+      </h2>
 
-        <div className="relative h-[calc(var(--d)*2.1)] w-full md:h-[var(--d)] motion-reduce:flex motion-reduce:h-auto motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-4">
-          {items.map((item) => (
-            <div
-              key={item.label}
-              data-circle
-              className="absolute left-1/2 top-0 ml-[calc(var(--d)*-0.5)] flex size-[var(--d)] flex-col items-center justify-center rounded-full border border-foreground/25 motion-reduce:static motion-reduce:ml-0"
+      <div data-grid className="mt-[10vh] grid grid-cols-2 gap-8 md:grid-cols-4">
+        {items.map((item, i) => (
+          <div key={item.label} data-stat className={cn('relative pt-[22px]', i % 2 === 1 && 'mt-16')}>
+            <span data-rule aria-hidden className="absolute inset-x-0 top-0 h-px origin-left bg-border" />
+            <span
+              data-count
+              className="block font-display text-[clamp(2.6rem,5.6vw,5rem)] font-bold leading-none tracking-[-0.04em]"
             >
-              <span
-                data-count
-                className="font-display text-[clamp(1.75rem,3vw,3rem)] leading-none tabular-nums"
-              >
-                {formatNumber(item.value)}
-              </span>
-              <span className="mt-2 text-[10px] uppercase tracking-[0.2em] text-foreground/60">
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </div>
+              {formatNumber(item.value)}
+            </span>
+            <span className="mt-2.5 block text-[15px] text-muted-foreground">{item.label}</span>
+          </div>
+        ))}
       </div>
-
-      <Dome tone="paper" />
     </section>
   )
 }

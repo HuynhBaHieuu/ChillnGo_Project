@@ -16,9 +16,6 @@ function token(name: string, fallback: string): string {
   return value ? `hsl(${value})` : fallback
 }
 
-/** The page ground. */
-export const groundColor = () => token('--background', '#fff0f6')
-
 /** Body ink — the deep purple everything readable is set in. */
 export const inkColor = () => token('--foreground', '#1a0b3c')
 
@@ -30,6 +27,3 @@ export const inkColor = () => token('--foreground', '#1a0b3c')
 export const displayFontFamily = () =>
   getComputedStyle(document.documentElement).getPropertyValue('--font-display').split(',')[0].trim() ||
   'sans-serif'
-
-/** Muted ink, for type that has not lit up yet. */
-export const mutedInkColor = () => token('--secondary-ink', '#6a5c8a')

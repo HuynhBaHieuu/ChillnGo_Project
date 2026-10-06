@@ -1,42 +1,57 @@
 import { useRef } from 'react'
 
-import { MOBILE_PIN_FACTOR, SCRUB, UNITS, pinLength } from '@/app/landing/home/config'
 import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
-import { setNavTheme } from '@/app/landing/home/navTheme'
-import { Dome } from '@/app/landing/home/parts/Dome'
-import { addDome } from '@/app/landing/home/parts/domeTween'
-import { cn } from '@/lib/utils'
-
-/** Every item here is a feature that actually exists in the app. */
-const FEATURES = [
-  { title: 'Khám phá hành trình', desc: 'Lịch trình thật, lọc theo vùng, mùa và ngân sách.' },
-  { title: 'Xem từng ngày', desc: 'Mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.' },
-  { title: 'Clone một chạm', desc: 'Biến chuyến đi của người khác thành bản nháp của bạn.' },
-  { title: 'Sắp xếp lại ngày', desc: 'Kéo thả để đổi thứ tự — ngày tháng tự cập nhật theo.' },
-  { title: 'Ghép nhiều chuyến', desc: 'Lấy những ngày hay nhất từ nhiều bài, gộp vào một lịch trình.' },
-  { title: 'Chia sẻ lại', desc: 'Đi xong, đăng hành trình của bạn cho người đi sau.' },
-]
-
-/** Band geometry, as fractions of the viewport height. */
-const BAND_TOP = 0.36
-const ITEM_H = 0.28
+import { slideInWords } from '@/app/landing/home/parts/slideInWords'
+import { landingPhoto } from '@/lib/photos'
 
 /**
- * Stage C — the feature list sliding through a fixed forest band.
+ * The three things you do on ChillnGo, in order. Every line is a feature that
+ * actually exists in the app.
+ */
+const STEPS = [
+  {
+    name: 'Khám phá',
+    title: 'Khám phá hành trình thật',
+    photo: landingPhoto('haLong', 1200, 900),
+    points: [
+      ['Lọc theo vùng, mùa và ngân sách', ' để ra đúng kiểu chuyến bạn muốn.'],
+      ['Xem từng ngày:', ' mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.'],
+    ],
+  },
+  {
+    name: 'Clone',
+    title: 'Clone về và sửa theo ý bạn',
+    photo: landingPhoto('mountainRoad', 1200, 900),
+    points: [
+      ['Clone một chạm', ' biến chuyến đi của người khác thành bản nháp của bạn.'],
+      ['Kéo thả để đổi thứ tự ngày,', ' ngày tháng tự cập nhật theo.'],
+      ['Ghép nhiều chuyến:', ' lấy những ngày hay nhất từ nhiều bài.'],
+    ],
+  },
+  {
+    name: 'Chia sẻ',
+    title: 'Đi xong, chia sẻ lại',
+    photo: landingPhoto('beach', 1200, 900),
+    points: [['Đăng hành trình của bạn', ' cho người đi sau tham khảo và clone tiếp.']],
+  },
+] as const
+
+/** Height of one index row plus the gap below it, in px (h-[52px] + gap-1.5). */
+const INDEX_STEP = 58
+
+/**
+ * Stage C — how it works, in flow (no pin).
  *
- * The list is rendered twice and both copies move together. The base copy is
- * faint ink; the second copy is the ground colour and sits inside a *stationary*
- * wrapper clipped to the band, so text flips exactly where it crosses the band —
- * even an item half in, half out.
+ * Desktop: the heading and a three-step index stay put (CSS sticky) on the
+ * left while the steps scroll past on the right. Each step's photo opens out
+ * of a smaller rounded window as it rises (clip-path, scrubbed) while the
+ * picture inside settles from a slight zoom; its copy rises in once it reaches
+ * the middle. The index lights the step under the middle of the screen and
+ * its marker slides to it.
  *
- * Scroll (1 unit = 100vh, N = 6 items → 2.8 units):
- *   0.0–0.3        band grows up from its bottom edge
- *   0.0–end        list travels from 30vh below the band to 20vh past its last item
- *   end−0.5→−0.2   band collapses toward its top edge
- *   end−0.6→end    forest dome rises; nav turns dark once it covers the top
- * Per frame: items above the band blur (0→5px over 30vh). When the item in the
- * band changes, its description crossfades (time-based, 0.2s out / 0.35s in).
+ * Photos keep their own colours: only a little exposure comes off so they sit
+ * on the black ground.
  */
 export function HowItWorksStage() {
   const ref = useRef<HTMLElement>(null)
@@ -47,102 +62,54 @@ export function HowItWorksStage() {
       const mm = gsap.matchMedia()
 
       mm.add(MEDIA, (context) => {
-        const { desktop, reduce } = context.conditions as MediaConditions
+        const { reduce } = context.conditions as MediaConditions
         if (reduce) return
 
-        const f = desktop ? 1 : MOBILE_PIN_FACTOR
-        const u = (n: number) => n * f
-        const n = FEATURES.length
-        const total = u(UNITS.howItWorks(n))
-        const domeAt = total - u(0.6)
+        slideInWords(q('[data-heading]')[0])
 
-        const band = q('[data-band]')[0]
-        const lists = q('[data-list]')
-        const baseList = lists[0]
-        const items = Array.from(baseList.querySelectorAll<HTMLElement>('[data-item]'))
-        const descs = q('[data-desc]')
+        const indexItems = q('[data-index-item]')
+        const marker = gsap.quickTo(q('[data-index-marker]'), 'y', { duration: 0.7, ease: 'expo.out' })
 
-        const setBlur = items.map((el) => gsap.quickSetter(el, 'filter'))
-        const setOpacity = items.map((el) => gsap.quickSetter(el, 'opacity'))
-        const lastBlur = items.map(() => -1)
-        let active = -1
+        q('[data-step]').forEach((step, i) => {
+          const frame = step.querySelector('[data-frame]')
+          const picture = step.querySelector('[data-frame] img')
 
-        const showDescription = (next: number) => {
-          if (next === active) return
-          if (active >= 0) {
-            gsap.to(descs[active], { opacity: 0, y: -8, duration: 0.2, ease: 'power1.in', overwrite: true })
-          }
-          if (next >= 0) {
-            gsap.fromTo(
-              descs[next],
-              { opacity: 0, y: 8 },
-              { opacity: 1, y: 0, duration: 0.35, delay: 0.05, ease: 'power2.out', overwrite: true },
-            )
-          }
-          active = next
-        }
-
-        const perFrame = () => {
-          const h = window.innerHeight * ITEM_H
-          const bandTop = window.innerHeight * BAND_TOP
-          const fade = window.innerHeight * 0.3
-          const y = gsap.getProperty(baseList, 'y') as number
-
-          items.forEach((_, i) => {
-            const center = bandTop + y + i * h + h / 2
-            const t = center < bandTop ? Math.min((bandTop - center) / fade, 1) : 0
-            const blur = Math.round(t * 50) / 10
-            if (blur !== lastBlur[i]) {
-              setBlur[i](`blur(${blur}px)`)
-              setOpacity[i](1 - 0.4 * t)
-              lastBlur[i] = blur
-            }
+          gsap.fromTo(
+            frame,
+            { clipPath: 'inset(16% 14% 16% 14% round 28px)' },
+            {
+              clipPath: 'inset(0% 0% 0% 0% round 16px)',
+              ease: 'none',
+              scrollTrigger: { trigger: frame, start: 'top 92%', end: 'top 35%', scrub: true },
+            },
+          )
+          gsap.fromTo(
+            picture,
+            { scale: 1.3, yPercent: -6 },
+            { scale: 1, yPercent: 6, ease: 'none', scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: true } },
+          )
+          gsap.from(step.querySelectorAll('[data-copy]'), {
+            y: 28,
+            autoAlpha: 0,
+            duration: 0.9,
+            ease: 'expo.out',
+            stagger: 0.08,
+            scrollTrigger: { trigger: step, start: 'top 60%', toggleActions: 'play none none reverse' },
           })
 
-          // The item whose slot is currently inside the band, if any.
-          const slot = -y / h
-          showDescription(slot > -0.5 && slot < n - 0.5 ? Math.round(slot) : -1)
-
-          setNavTheme('light')
-        }
-
-        const tl = gsap.timeline({ defaults: { ease: 'none' }, onUpdate: perFrame })
-
-        tl.fromTo(
-          band,
-          { scaleY: 0, transformOrigin: '50% 100%' },
-          { scaleY: 1, ease: 'power2.out', duration: u(0.3) },
-          0,
-        )
-        tl.fromTo(
-          lists,
-          { y: () => window.innerHeight * 0.3 },
-          {
-            y: () => -((n - 1) * window.innerHeight * ITEM_H + window.innerHeight * 0.2),
-            duration: total,
-          },
-          0,
-        )
-        tl.set(band, { transformOrigin: '50% 0%' }, total - u(0.5))
-        tl.to(band, { scaleY: 0, ease: 'power2.in', duration: u(0.3) }, total - u(0.5))
-        addDome(tl, q('[data-dome]')[0], domeAt, u(0.6))
-        tl.set({}, {}, total)
-
-        ScrollTrigger.create({
-          trigger: ref.current,
-          start: 'top top',
-          end: pinLength(total),
-          pin: true,
-          scrub: SCRUB,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          animation: tl,
+          ScrollTrigger.create({
+            trigger: step,
+            start: 'top center',
+            end: 'bottom center',
+            onToggle: (self) => {
+              if (!self.isActive) return
+              indexItems.forEach((item, j) => (item.dataset.active = String(j === i)))
+              marker(i * INDEX_STEP)
+            },
+          })
         })
 
-        return () => {
-          gsap.set(descs, { clearProps: 'all' })
-          gsap.set(items, { clearProps: 'filter,opacity' })
-        }
+        return () => indexItems.forEach((item, j) => (item.dataset.active = String(j === 0)))
       })
     },
     { scope: ref },
@@ -151,82 +118,74 @@ export function HowItWorksStage() {
   return (
     <section
       ref={ref}
-      data-reduce-theme="light"
-      className="relative h-screen overflow-hidden bg-paper text-foreground motion-reduce:h-auto motion-reduce:py-24"
+      className="relative mx-auto grid max-w-7xl grid-cols-1 gap-[clamp(24px,6vw,96px)] bg-background px-6 py-[18vh] text-foreground md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:px-14"
     >
-      <div
-        data-band
-        aria-hidden
-        className="absolute inset-x-0 top-[36vh] h-[28vh] bg-foreground motion-reduce:hidden"
-        style={{ transform: 'scaleY(0)' }}
-      />
+      <div className="grid gap-7 self-start md:sticky md:top-[22vh]">
+        <h2
+          data-heading
+          className="font-display text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em]"
+        >
+          Cách ChillnGo hoạt động
+        </h2>
 
-      {/* Section label. Outside [data-list] so it holds its place while the
-          list travels past it. */}
-      <p className="absolute left-6 top-[29vh] text-[11px] font-medium uppercase tracking-[0.3em] text-foreground/60 md:left-[27vw] motion-reduce:static motion-reduce:mb-8 motion-reduce:px-6">
-        Cách ChillnGo hoạt động
-      </p>
-
-      {/* Base list — faint ink. */}
-      <div data-list className="absolute inset-x-0 top-[36vh] motion-reduce:static">
-        <FeatureList tone="base" />
-      </div>
-
-      {/* Highlighted copy, clipped to the band by a wrapper that does not move. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 motion-reduce:hidden"
-        style={{ clipPath: `inset(${BAND_TOP * 100}vh 0 ${(1 - BAND_TOP - ITEM_H) * 100}vh 0)` }}
-      >
-        <div data-list className="absolute inset-x-0 top-[36vh]">
-          <FeatureList tone="highlight" />
+        <div aria-hidden className="relative hidden pl-[18px] md:block motion-reduce:hidden">
+          <span className="absolute inset-y-0 left-0 w-px bg-border" />
+          <span
+            data-index-marker
+            className="absolute left-0 top-0 h-[52px] w-px bg-primary will-change-transform"
+          />
+          <ol className="grid gap-1.5">
+            {STEPS.map((step, i) => (
+              <li
+                key={step.name}
+                data-index-item
+                data-active={i === 0}
+                className="flex h-[52px] items-center gap-3.5 font-display text-[clamp(1.2rem,2vw,1.6rem)] font-semibold tracking-[-0.02em] text-foreground/30 transition-colors duration-500 data-[active=true]:text-foreground"
+              >
+                <small className="font-mono text-xs font-normal text-muted-foreground">0{i + 1}</small>
+                {step.name}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
 
-      {/* Descriptions, inside the band on the left. */}
-      <div className="pointer-events-none absolute left-[2.5vw] top-[36vh] hidden h-[28vh] w-[20vw] items-center md:flex motion-reduce:hidden">
-        {FEATURES.map((feature) => (
-          <p
-            key={feature.title}
-            data-desc
-            className="absolute max-w-xl text-base text-background opacity-0"
+      <div>
+        {STEPS.map((step) => (
+          <article
+            key={step.name}
+            data-step
+            className="grid content-center gap-[22px] py-[6vh] md:min-h-[92vh] md:py-0"
           >
-            {feature.desc}
-          </p>
+            <div data-frame className="relative aspect-[4/3] overflow-hidden rounded-2xl will-change-[clip-path]">
+              <img
+                src={step.photo}
+                alt=""
+                loading="lazy"
+                className="absolute inset-x-0 -top-[8%] h-[116%] w-full object-cover brightness-[0.82] contrast-[1.06] will-change-transform"
+              />
+            </div>
+            <h3
+              data-copy
+              className="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-bold leading-[1.1] tracking-[-0.03em]"
+            >
+              {step.title}
+            </h3>
+            <ul className="grid max-w-[52ch] gap-2.5">
+              {step.points.map(([lead, rest]) => (
+                <li
+                  key={lead}
+                  data-copy
+                  className="relative pl-[18px] text-muted-foreground before:absolute before:left-0 before:top-[0.72em] before:h-px before:w-2 before:bg-primary"
+                >
+                  <b className="font-medium text-foreground">{lead}</b>
+                  {rest}
+                </li>
+              ))}
+            </ul>
+          </article>
         ))}
       </div>
-
-      <Dome tone="ground" />
     </section>
-  )
-}
-
-function FeatureList({ tone }: { tone: 'base' | 'highlight' }) {
-  return (
-    <ul>
-      {FEATURES.map((feature) => (
-        <li
-          key={feature.title}
-          data-item
-          className="flex h-[28vh] flex-col justify-center pl-6 pr-6 md:pl-[27vw] motion-reduce:h-auto motion-reduce:py-5"
-        >
-          <h3
-            className={cn(
-              'font-display text-[clamp(2rem,min(5.5vw,11vh),8rem)] leading-[1.05]',
-              tone === 'base'
-                ? 'text-foreground/15 motion-reduce:text-foreground'
-                : 'text-background',
-            )}
-          >
-            {feature.title}
-          </h3>
-          {tone === 'base' && (
-            <p className="mt-2 hidden text-sm text-foreground/70 motion-reduce:block">
-              {feature.desc}
-            </p>
-          )}
-        </li>
-      ))}
-    </ul>
   )
 }
