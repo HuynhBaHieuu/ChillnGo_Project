@@ -340,6 +340,12 @@ const LANDING_IDS = {
   quyNhon: '1573790387438-4da905039392',
   /** Shopfront signs over a wet street at night. */
   hoiAn: '1508009603885-50cf7c579365',
+  /** Limestone islands and boats on a still bay. */
+  haLong: '1528127269322-539801943592',
+  /** A road winding down a green valley under low cloud. */
+  mountainRoad: '1470071459604-3b5ec3a7fe05',
+  /** Waves running up a wide beach at sunset. */
+  beach: '1507525428034-b723cf961d3e',
 } as const
 
 export type LandingPhoto = keyof typeof LANDING_IDS
