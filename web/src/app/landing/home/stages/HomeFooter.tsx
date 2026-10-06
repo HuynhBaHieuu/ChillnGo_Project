@@ -1,11 +1,12 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 
-import { SCRUB, vh } from '@/app/landing/home/config'
-import { MEDIA, gsap, useGSAP } from '@/app/landing/home/gsap'
+import { SCRUB } from '@/app/landing/home/config'
+import { MEDIA, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
-import { setNavTheme } from '@/app/landing/home/navTheme'
 import { scrollToTop } from '@/app/landing/home/lenis'
+import { Magnetic } from '@/app/landing/home/parts/Magnetic'
+import { slideInWords } from '@/app/landing/home/parts/slideInWords'
 import { useAuthStore } from '@/store'
 
 const LINKS = [
@@ -18,18 +19,15 @@ const LINKS = [
 /**
  * Stage F — footer.
  *
- * Scroll:
- *   wordmark   y 20vh → 0 while the footer rises (parallax), scrub true
- *   CTA circle scale 0.6 → 1, opacity 0 → 1 from 'top 90%' to 'top 55%'
- * Hover (time-based): the circle swells to 1.06 and the footer dims slightly
- * behind it — 0.4s power3.out in, 0.3s power2.inOut out. The scroll tween and
- * the hover tween sit on different elements so they never overwrite each other.
+ * The heading slides in with the scroll; the big wordmark rises letter by
+ * letter out of masks as the page runs out (scrubbed); the CTA leans toward
+ * the cursor (Magnetic).
  */
 export function HomeFooter() {
   const ref = useRef<HTMLElement>(null)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
-  const { contextSafe } = useGSAP(
+  useGSAP(
     () => {
       const q = gsap.utils.selector(ref)
       const mm = gsap.matchMedia()
@@ -38,118 +36,61 @@ export function HomeFooter() {
         const { reduce } = context.conditions as MediaConditions
         if (reduce) return
 
-        gsap.fromTo(
-          q('[data-wordmark]'),
-          { y: vh(20) },
-          {
-            y: 0,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: ref.current,
-              start: 'top bottom',
-              end: 'bottom bottom',
-              scrub: true,
-              invalidateOnRefresh: true,
-              onUpdate: () => setNavTheme('light'),
-            },
-          },
-        )
+        slideInWords(q('[data-heading]')[0])
 
-        gsap.fromTo(
-          q('[data-cta-wrap]'),
-          { scale: 0.6, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: q('[data-cta-wrap]')[0],
-              start: 'top 90%',
-              end: 'top 55%',
-              scrub: SCRUB,
-            },
-          },
-        )
+        const mark = SplitText.create(q('[data-wordmark]'), { type: 'chars', mask: 'chars', charsClass: 'split' })
+        gsap.from(mark.chars, {
+          yPercent: 100,
+          ease: 'power3.out',
+          stagger: 0.04,
+          scrollTrigger: { trigger: ref.current, start: 'top 70%', end: 'bottom bottom', scrub: SCRUB },
+        })
       })
     },
     { scope: ref },
   )
 
-  const enter = contextSafe(() => {
-    gsap.to('[data-cta]', { scale: 1.06, duration: 0.4, ease: 'power3.out', overwrite: 'auto' })
-    gsap.to('[data-dim]', { opacity: 0.06, duration: 0.4, ease: 'power3.out', overwrite: 'auto' })
-  })
-
-  const leave = contextSafe(() => {
-    gsap.to('[data-cta]', { scale: 1, duration: 0.3, ease: 'power2.inOut', overwrite: 'auto' })
-    gsap.to('[data-dim]', { opacity: 0, duration: 0.3, ease: 'power2.inOut', overwrite: 'auto' })
-  })
-
   return (
-    <footer
-      ref={ref}
-      data-reduce-theme="light"
-      className="relative overflow-hidden bg-paper text-foreground"
-    >
-      <div data-dim aria-hidden className="pointer-events-none absolute inset-0 bg-black opacity-0" />
-
-      <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-[5.714rem] pt-[6.857rem] text-center">
-        {/* The wordmark is sized from its own width, not guessed at.
-            "ChillnGo" sets 5.391em wide in Sigmar One, so `26vw` asked for a
-            word 140vw across: the footer's `overflow-hidden` then cut the C and
-            the o off at the screen edges. Dividing by that ratio makes the
-            declared number mean what it says — the word spans 92vw, with the
-            remainder left as a gutter. Recompute the divisor if the display
-            face ever changes. */}
-        <p
-          data-wordmark
-          aria-hidden
-          className="max-w-none select-none whitespace-nowrap font-display text-[calc(92vw/5.391)] text-foreground/10"
+    <footer ref={ref} className="relative overflow-hidden border-t border-border bg-background text-foreground">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-8 px-6 pt-[16vh] md:px-14">
+        <h2
+          data-heading
+          className="max-w-[14ch] font-display text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.035em]"
         >
-          ChillnGo
-        </p>
-
-        <nav
-          aria-label="Liên kết cuối trang"
-          className="mt-5 flex flex-wrap justify-center gap-x-[1.4286rem] gap-y-[0.571rem] text-sm text-muted-foreground"
-        >
-          {LINKS.map((link) => (
-            <Link key={link.to} to={link.to} className=" text-sm">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div data-cta-wrap className="mt-14">
+          Chuyến tiếp theo bắt đầu từ đây
+        </h2>
+        <Magnetic>
           <Link
-            data-cta
             to={isAuthenticated ? '/posts/new' : '/register'}
-            onMouseEnter={enter}
-            onMouseLeave={leave}
-            onFocus={enter}
-            onBlur={leave}
-            className="grid size-[max(12vw,160px)] place-items-center rounded-full bg-foreground px-6 text-center text-sm uppercase leading-snug tracking-[0.02em] text-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            className="inline-grid place-items-center rounded-full bg-foreground px-9 py-[18px] font-display text-[15px] font-bold tracking-[-0.01em] text-background transition-transform active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
           >
             {isAuthenticated ? 'Đăng hành trình' : 'Bắt đầu ngay'}
           </Link>
-        </div>
-
-        <p className="mt-8 max-w-xl text-sm text-muted-foreground">
-          Chia sẻ hành trình thật. Clone lịch trình chỉ với một chạm.
-        </p>
+        </Magnetic>
       </div>
 
-      <div className="relative bg-background text-muted-foreground">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 pb-28 pt-[1.4286rem] text-sm md:pb-[1.4286rem]">
-          <span>© 2026 ChillnGo</span>
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className=" text-sm"
-          >
+      {/* Sized from its own width: "ChillnGo" sets about 5.6em wide in the
+          display face, so this spans ~92vw. Recompute if the face changes. */}
+      <p
+        data-wordmark
+        aria-hidden
+        className="mt-[12vh] select-none whitespace-nowrap text-center font-display text-[calc(92vw/5.6)] font-extrabold leading-[0.9] tracking-[-0.05em] text-foreground/10"
+      >
+        ChillnGo
+      </p>
+
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 pb-28 pt-10 text-sm text-muted-foreground md:px-14 md:pb-10">
+        <span>© 2026 ChillnGo</span>
+        <nav aria-label="Liên kết cuối trang" className="flex flex-wrap gap-x-[1.4286rem] gap-y-2">
+          {LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className="transition-colors hover:text-foreground">
+              {link.label}
+            </Link>
+          ))}
+          <button type="button" onClick={scrollToTop} className="transition-colors hover:text-foreground">
             Về đầu trang ↑
           </button>
-        </div>
+        </nav>
       </div>
     </footer>
   )

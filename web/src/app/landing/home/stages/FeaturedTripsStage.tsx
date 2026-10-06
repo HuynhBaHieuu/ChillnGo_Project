@@ -1,53 +1,39 @@
 import { useRef } from 'react'
-import type * as React from 'react'
 import { Link } from 'react-router-dom'
 
-import { MOBILE_PIN_FACTOR, SCRUB, pinLength, vh } from '@/app/landing/home/config'
 import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
-import { setNavTheme } from '@/app/landing/home/navTheme'
 import { ArrowPill } from '@/app/landing/home/parts/ArrowPill'
+import { slideInWords } from '@/app/landing/home/parts/slideInWords'
+import { TiltCard } from '@/components/TiltCard'
 import { REGION_LABELS, tripLengthLabel } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
 
-/**
- * Where each card flies. `x` is the left edge in vw (desktop / mobile), `start`
- * is when it enters, in timeline units. Large cards travel the same distance
- * in less time than small ones, which reads as depth.
- */
-const CARDS = [
-  { x: 3, mx: 4, size: 'L', above: false, start: 0 },
-  { x: 64, mx: 52, size: 'S', above: true, start: 0.35 },
-  { x: 22, mx: 8, size: 'S', above: false, start: 0.77 },
-  { x: 47, mx: 50, size: 'L', above: true, start: 1.05 },
-  { x: 80, mx: 6, size: 'S', above: false, start: 1.4 },
-  { x: 8, mx: 54, size: 'L', above: true, start: 1.82 },
-  { x: 70, mx: 10, size: 'L', above: false, start: 2.17 },
-  { x: 38, mx: 48, size: 'S', above: true, start: 2.52 },
-] as const
-
-const DURATION = { S: 1.58, L: 1.33 } as const
-const WIDTH = {
-  S: { desktop: 'max(9vw, 120px)', mobile: '34vw' },
-  L: { desktop: 'max(12vw, 160px)', mobile: '42vw' },
-} as const
-
 const shortTitle = (title: string) => title.split(' — ')[0]
 
 /**
- * Stage E — the most-saved trips flying past a pinned title.
+ * Where each card sits in the off-beat grid (desktop): a tall lead card, two
+ * beside it (the second dropped a little), and a wide one under those.
+ */
+const SLOTS = [
+  { cell: 'col-span-2 md:col-span-1 md:row-span-2', frame: 'min-h-[300px] md:h-full md:min-h-[420px]' },
+  { cell: '', frame: 'aspect-[4/5]' },
+  { cell: 'md:mt-[72px]', frame: 'aspect-[4/5]' },
+  { cell: 'col-span-2', frame: 'aspect-[16/8]' },
+] as const
+
+/**
+ * Stage E — the most-saved trips, in flow (no pin).
  *
- * Scroll (1 unit = 100vh): each card travels 110vh → −40vh over 1.58 units
- * (small) or 1.33 (large), entering at its `start`; over the last 15% of its
- * trip it blurs to 6px and dims to 0.5. Cards marked `above` pass in front of
- * the title. The pin lasts until the last card is out — about 4.1 units.
- *
- * After the pin, the title blurs away over the next 60vh of scroll.
+ * The heading slides in with the scroll. Cards arrive together as a batch
+ * when they reach the screen (and drop back if you scroll above them), then
+ * tilt toward the cursor (TiltCard). Covers keep their own colours, dimmed a
+ * little at rest and lifted on hover.
  */
 export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
   const ref = useRef<HTMLElement>(null)
-  const cards = posts.slice(0, CARDS.length)
+  const cards = posts.slice(0, SLOTS.length)
 
   useGSAP(
     () => {
@@ -55,149 +41,60 @@ export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
       const mm = gsap.matchMedia()
 
       mm.add(MEDIA, (context) => {
-        const { desktop, reduce } = context.conditions as MediaConditions
+        const { reduce } = context.conditions as MediaConditions
         if (reduce) return
 
-        const f = desktop ? 1 : MOBILE_PIN_FACTOR
-        const u = (n: number) => n * f
+        slideInWords(q('[data-heading]')[0])
 
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          onUpdate: () => setNavTheme('light'),
+        const cells = q('[data-cell]')
+        const hidden = { autoAlpha: 0, y: 70, rotationX: -12, transformPerspective: 1100 }
+        gsap.set(cells, hidden)
+        ScrollTrigger.batch(cells, {
+          start: 'top 88%',
+          onEnter: (batch) =>
+            gsap.to(batch, { autoAlpha: 1, y: 0, rotationX: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, overwrite: true }),
+          onLeaveBack: (batch) => gsap.to(batch, { ...hidden, duration: 0.5, ease: 'power2.in', overwrite: true }),
         })
-
-        q('[data-card]').forEach((card, i) => {
-          const layout = CARDS[i]
-          const duration = u(DURATION[layout.size])
-          const start = u(layout.start)
-
-          tl.fromTo(card, { y: vh(110) }, { y: vh(-40), duration }, start)
-          tl.fromTo(
-            card,
-            { filter: 'blur(0px)', opacity: 1 },
-            { filter: 'blur(6px)', opacity: 0.5, duration: duration * 0.15, immediateRender: false },
-            start + duration * 0.85,
-          )
-        })
-
-        tl.fromTo(q('[data-dots]'), { rotation: 0 }, { rotation: 60, duration: tl.duration() }, 0)
-
-        const pin = ScrollTrigger.create({
-          trigger: ref.current,
-          start: 'top top',
-          end: pinLength(tl.duration()),
-          pin: true,
-          scrub: SCRUB,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          animation: tl,
-        })
-
-        // The title leaves once the pin lets go. Anchored to the pin's own end,
-        // because a trigger on the pinned element itself would be measured from
-        // before the pin spacing.
-        gsap.fromTo(
-          q('[data-block]'),
-          { filter: 'blur(0px)', opacity: 1 },
-          {
-            filter: 'blur(6px)',
-            opacity: 0.2,
-            ease: 'none',
-            scrollTrigger: {
-              start: () => pin.end,
-              end: () => pin.end + window.innerHeight * 0.6,
-              scrub: SCRUB,
-              invalidateOnRefresh: true,
-            },
-          },
-        )
       })
     },
-    // revertOnUpdate: see DestinationsStage — a new card count must replace the
-    // pin, not add a second one.
+    // revertOnUpdate: a new card count must rebuild the batch, not add a second one.
     { scope: ref, dependencies: [cards.length], revertOnUpdate: true },
   )
 
   return (
-    <section
-      ref={ref}
-      data-reduce-theme="light"
-      className="relative h-screen overflow-hidden bg-paper text-foreground motion-reduce:h-auto motion-reduce:py-24"
-    >
-      <svg
-        data-dots
-        aria-hidden
-        viewBox="0 0 100 100"
-        className="absolute left-1/2 top-1/2 -ml-[17vw] -mt-[17vw] size-[34vw] motion-reduce:hidden"
-      >
-        <circle
-          cx="50"
-          cy="50"
-          r="49.5"
-          fill="none"
-          className="stroke-foreground/20"
-          strokeDasharray="0.4 2.2"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-
-      <div
-        data-block
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center motion-reduce:static"
-      >
-        <p className="text-sm text-muted-foreground">
-          Hành trình nổi bật
-        </p>
-        <h2 className="mt-5 font-display text-4xl tracking-tight">
+    <section ref={ref} className="relative mx-auto max-w-7xl bg-background px-6 py-[18vh] text-foreground md:px-14">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <h2
+          data-heading
+          className="max-w-[14ch] font-display text-[clamp(2rem,4.6vw,3.8rem)] font-bold leading-[1.02] tracking-[-0.035em]"
+        >
           Được lưu nhiều nhất
         </h2>
-        <p className="mt-5 max-w-xl text-base text-muted-foreground">
-          Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi clone về làm của bạn.
-        </p>
-        <div className="mt-8">
-          <ArrowPill to="/discover">Xem tất cả</ArrowPill>
-        </div>
+        <ArrowPill to="/discover">Xem tất cả</ArrowPill>
       </div>
 
-      <div className="absolute inset-0 motion-reduce:static motion-reduce:mt-16 motion-reduce:grid motion-reduce:grid-cols-2 motion-reduce:gap-6 motion-reduce:px-6 md:motion-reduce:grid-cols-4">
-        {cards.map((post, i) => {
-          const layout = CARDS[i]
-          return (
-            <Link
-              key={post._id}
-              data-card
-              to={`/posts/${post._id}`}
-              className={cn(
-                'group absolute top-0 left-[var(--x-m)] block w-[var(--w-m)] md:left-[var(--x-d)] md:w-[var(--w-d)] motion-reduce:static motion-reduce:w-auto',
-                layout.above ? 'z-20' : 'z-0',
-              )}
-              style={
-                {
-                  '--x-d': `${layout.x}vw`,
-                  '--x-m': `${layout.mx}vw`,
-                  '--w-d': WIDTH[layout.size].desktop,
-                  '--w-m': WIDTH[layout.size].mobile,
-                } as React.CSSProperties
-              }
-            >
-              <div className="aspect-[5/7] overflow-hidden bg-background/10">
-                <img
-                  src={post.coverUrl}
-                  alt=""
-                  loading="lazy"
-                  className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                />
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {REGION_LABELS[post.region]} · {tripLengthLabel(post.days.length)}
-              </p>
-              <p className="mt-1 line-clamp-2 font-display text-[1rem]">
-                {shortTitle(post.title)}
-              </p>
-            </Link>
-          )
-        })}
+      <div className="mt-[8vh] grid grid-cols-2 gap-6 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        {cards.map((post, i) => (
+          <div key={post._id} data-cell className={cn('self-start', SLOTS[i].cell, i === 0 && 'md:self-stretch')}>
+            <TiltCard rotateAmplitude={6} scaleOnHover={1.02} className="h-full">
+              <Link to={`/posts/${post._id}`} className="group grid h-full grid-rows-[1fr_auto_auto] gap-2.5">
+                <div className={cn('relative overflow-hidden rounded-2xl', SLOTS[i].frame)}>
+                  <img
+                    src={post.coverUrl}
+                    alt=""
+                    loading="lazy"
+                    className="absolute inset-0 size-full object-cover brightness-[0.8] contrast-[1.06] transition-[filter,transform] duration-700 group-hover:scale-[1.03] group-hover:brightness-100"
+                  />
+                  <span aria-hidden className="absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-white/10 transition-shadow duration-500 group-hover:ring-primary/70" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {REGION_LABELS[post.region]} · {tripLengthLabel(post.days.length)}
+                </p>
+                <p className="font-display text-lg font-semibold leading-snug tracking-[-0.02em]">{shortTitle(post.title)}</p>
+              </Link>
+            </TiltCard>
+          </div>
+        ))}
       </div>
     </section>
   )
