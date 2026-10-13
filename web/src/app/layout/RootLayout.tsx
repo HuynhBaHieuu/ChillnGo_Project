@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, ScrollRestoration, useLocation, useMatch } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { Navbar } from '@/components/Navbar'
+import { AssistantButton } from '@/features/assistant/AssistantButton'
 import { isStaff } from '@/lib/roles'
 import { useAuthStore, useUiStore } from '@/store'
 
@@ -18,6 +19,12 @@ export function RootLayout() {
   const location = useLocation()
   const setMobileNavOpen = useUiStore((s) => s.setMobileNavOpen)
   const staff = useAuthStore((s) => isStaff(s.user))
+  const signedIn = useAuthStore((s) => s.isAuthenticated)
+  // These pages keep their own controls at the bottom edge (post actions, live
+  // comments), which the floating assistant button would cover.
+  const postMatch = useMatch('/posts/:id')
+  const onLive = useMatch('/live/:id')
+  const bottomControls = Boolean(onLive) || (postMatch !== null && postMatch.params.id !== 'new')
 
   // A route change should never leave the mobile sheet hanging open.
   useEffect(() => {
@@ -34,6 +41,7 @@ export function RootLayout() {
       </main>
       <MobileBottomNav />
       <AnnouncementBanner />
+      {signedIn && !bottomControls && <AssistantButton />}
       <ScrollRestoration />
     </div>
   )

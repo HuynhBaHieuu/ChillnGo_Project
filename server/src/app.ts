@@ -7,6 +7,7 @@ import { HttpError, errorHandler } from './lib/errors.js'
 import { getSettings } from './models/Setting.js'
 import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
+import { assistantRouter } from './routes/assistant.js'
 import { authRouter } from './routes/auth.js'
 import { checkinsRouter } from './routes/checkins.js'
 import { geoRouter } from './routes/geo.js'
@@ -62,6 +63,7 @@ app.use('/api/livestreams', livestreamsRouter)
 app.use('/api/posts', postsRouter)
 app.use('/api/activity', activityRouter)
 app.use('/api/geo', geoRouter)
+app.use('/api/assistant', assistantRouter)
 
 /** Settings every visitor needs: the announcement banner and whether sign-up is open. */
 app.get('/api/settings/public', async (_req, res) => {

@@ -129,5 +129,10 @@ export const env = {
   cloudinary: readCloudinary(),
   livekit: readLiveKit(),
   recording: readRecording(),
+  /**
+   * Model the AI travel assistant asks through LiveKit Inference, as
+   * "provider/model" (see LiveKit Inference's model list).
+   */
+  assistantModel: process.env.ASSISTANT_MODEL?.trim() || 'google/gemini-2.5-flash',
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }
