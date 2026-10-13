@@ -61,6 +61,22 @@ export function isLiveKitConfigured(): boolean {
   return Boolean(env.livekit)
 }
 
+/**
+ * LiveKit Inference: LiveKit Cloud's model gateway (the one LiveKit Agents use),
+ * which also answers plain OpenAI-style chat completions. The AI assistant asks
+ * it, billed to this project's inference quota, so it needs no key of its own.
+ */
+export const INFERENCE_CHAT_URL = 'https://agent-gateway.livekit.cloud/v1/chat/completions'
+
+/** A short-lived token for INFERENCE_CHAT_URL, or null when the project is not on LiveKit Cloud. */
+export async function inferenceToken(): Promise<string | null> {
+  const livekit = env.livekit
+  if (!livekit || !new URL(livekit.url).hostname.endsWith('.livekit.cloud')) return null
+  const token = new AccessToken(livekit.apiKey, livekit.apiSecret, { identity: 'chillngo-assistant', ttl: TOKEN_TTL })
+  token.addInferenceGrant({ perform: true })
+  return token.toJwt()
+}
+
 function roomService(): RoomServiceClient {
   const { httpUrl, apiKey, apiSecret } = config()
   rooms ??= new RoomServiceClient(httpUrl, apiKey, apiSecret)
