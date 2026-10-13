@@ -3,8 +3,12 @@ import type * as React from 'react'
 import { cn } from '@/lib/utils'
 
 interface GlassCardProps extends React.ComponentProps<'div'> {
-  /** Render as a different element (e.g. `article`, `aside`, `nav`). */
-  as?: React.ElementType
+  /**
+   * Render as a different element. A fixed list rather than any element type:
+   * React Three Fiber adds its 3D elements to the JSX tag list, and a tag that
+   * could be any of those types `children` as `never`.
+   */
+  as?: 'div' | 'section' | 'article' | 'aside' | 'nav' | 'header' | 'footer' | 'main'
   /** Lift on hover — for cards that are themselves links or buttons. */
   interactive?: boolean
 }

@@ -53,6 +53,33 @@
 }
 
 /*
+ * robot-blink — the AI assistant button's screen eyes blink now and then.
+ * fill-box makes the eyes squash around their own centre, not the svg's.
+ */
+@keyframes robot-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
+.robot-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: robot-blink 4.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot-blink {
+    animation: none;
+  }
+}
+
+/*
  * reaction-float — a livestream reaction (❤️ 🔥 …) rising over the video and
  * fading out. --drift (set inline per emoji) sways each one sideways so a
  * burst of taps spreads out instead of stacking.

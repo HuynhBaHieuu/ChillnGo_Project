@@ -51,6 +51,7 @@ shows Minh's trips.
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | no | LiveKit project for livestreams. Unset: livestream routes answer `503` and the Newsfeed shows no live cards. See [Livestream](#livestream). |
 | `RECORDING_S3_*` | no | Private S3-compatible bucket (B2, R2, S3) for livestream recordings. Unset: no recording option. See [Livestream](#livestream). |
 | `GOOGLE_CLIENT_ID` | no | OAuth client ID for Sign in with Google. Unset makes `/api/auth/google` answer `503`. See [Sign in with Google](#sign-in-with-google). |
+| `ASSISTANT_MODEL` | no | Model the AI travel assistant (`POST /api/assistant/chat`) asks through LiveKit Inference, as `provider/model`. Default `google/gemini-2.5-flash`. The assistant needs no key of its own: it uses the `LIVEKIT_*` keys and works only with a LiveKit Cloud project, billed to its inference quota. |
 
 The server refuses to start if a required variable is missing.
 
@@ -73,6 +74,7 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/checkins/upload-signature` | none | `200 { publicId, uploadUrl, fields }`: one per photo. |
 | `POST /api/checkins` | `caption`, `photos` (0–4 publicIds), `feeling` (key from `src/lib/feelings.ts`) or null, `location` (`name`, `address`, `lat`, `lng`) or null. Needs photos, a feeling or a caption. | `201 { checkin }` |
 | `DELETE /api/checkins/:id` | none | `200`. Author only; also deletes the photos from Cloudinary. |
+| `POST /api/assistant/chat` | `messages`: up to 20 `{ role: "user" \| "assistant", content }`, ending with the user's question | `200`, the reply streamed as plain text. The model opens each reply with an intent tag (`<<g:explain>>` …), which the server strips and sends as the `X-Assistant-Intent` header (`greet`, `explain`, `agree`, `disagree`, `uncertain`, `celebrate`, `thanks`; absent when the model gave none); the web app's robot gestures by it. Signed in; 10 questions a minute per user. `503 ASSISTANT_OFF` without a LiveKit Cloud project, `429 ASSISTANT_BUSY` when the inference quota is used up, `503 ASSISTANT_UNAVAILABLE` for other gateway errors (the reason is in the server log). Nothing is stored. |
 | `GET /api/settings/public` | none | `200 { settings }`: announcement and whether registration is open. |
 | `GET /api/auth/me` | none; header `Authorization: Bearer <token>` | `200 { user }` |
 | `GET /api/health` | none | `200 { ok: true }` |
@@ -387,7 +389,7 @@ Deploy the API and the web client as **two Vercel projects from the same repo**.
    detects Express and runs the default export of `src/app.ts` as a function. No `vercel.json` is needed.
 2. Add the environment variables `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
    `APP_URL`, `SMTP_USER`, `SMTP_PASS`, `GOOGLE_CLIENT_ID`, `CLOUDINARY_URL`, and the
-   three `LIVEKIT_*` variables (plus the `RECORDING_*` ones to offer replays). Set both `CORS_ORIGIN` and `APP_URL`
+   three `LIVEKIT_*` variables (plus the `RECORDING_*` ones to offer replays). The AI assistant reuses the LiveKit keys. Set both `CORS_ORIGIN` and `APP_URL`
    to the web project's URL, e.g. `https://chillngo.vercel.app`. The API refuses
    to start on Vercel without `APP_URL` and SMTP settings.
 3. Deploy. Check `https://<api-project>.vercel.app/api/health`.
@@ -423,11 +425,12 @@ src/
   routes/checkins.ts    photo check-ins
   routes/livestreams.ts livestreams: start, watch, preview, end, comments, reactions,
                         moderation, history, LiveKit webhook
-  lib/livekit.ts        every LiveKit call (rooms, tokens, messages, recording, webhooks)
+  lib/livekit.ts        every LiveKit call (rooms, tokens, messages, recording, webhooks, inference)
   lib/recordings.ts     signed links to replays and rewind playlists; cleanup
   models/Livestream.ts  livestream, its comments, its viewers
   routes/profiles.ts    public profiles and follows
   routes/notifications.ts  the signed-in user's notifications
+  routes/assistant.ts   AI travel assistant: streams a reply from LiveKit Inference
   models/Follow.ts      who follows whom
   models/Notification.ts   notifications + notify()
   models/CheckIn.ts     check-in: photos, caption, feeling, place
