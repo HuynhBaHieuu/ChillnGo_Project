@@ -12,30 +12,12 @@ import { apiUrl } from './http'
 
 export interface AssistantMessage {
   role: 'user' | 'assistant'
+  /** Replies as the model wrote them, with the gesture tags the web app reads off (features/assistant/replyTags.ts). */
   content: string
-  /** Replies only: what the reply is doing (the robot gestures by it). Sent back so the model keeps tagging. */
-  intent?: AssistantIntent | null
 }
 
-/**
- * What a reply is doing, as the model tags it (the server passes it on in the
- * X-Assistant-Intent header). The robot's gestures follow it.
- */
-export const INTENTS = ['greet', 'explain', 'agree', 'disagree', 'uncertain', 'celebrate', 'thanks'] as const
-export type AssistantIntent = (typeof INTENTS)[number]
-
-const isIntent = (value: string | null): value is AssistantIntent => INTENTS.includes(value as AssistantIntent)
-
-/**
- * Sends the conversation, calls `onIntent` once with what the reply is doing
- * (null when the model gave no tag), then `onText` with each piece as it arrives.
- */
-export async function streamReply(
-  messages: AssistantMessage[],
-  onText: (text: string) => void,
-  signal: AbortSignal,
-  onIntent?: (intent: AssistantIntent | null) => void,
-): Promise<void> {
+/** Sends the conversation and calls `onText` with each piece of the reply as it arrives. */
+export async function streamReply(messages: AssistantMessage[], onText: (text: string) => void, signal: AbortSignal): Promise<void> {
   const token = useAuthStore.getState().token
 
   let response: Response
@@ -57,9 +39,6 @@ export async function streamReply(
     if (response.status === 401 && token) useAuthStore.getState().signOut()
     throw new ApiError(data?.message ?? `Máy chủ trả về lỗi ${response.status}`, response.status, data?.code)
   }
-
-  const intent = response.headers.get('X-Assistant-Intent')
-  onIntent?.(isIntent(intent) ? intent : null)
 
   const reader = response.body.getReader()
   const decoder = new TextDecoder()

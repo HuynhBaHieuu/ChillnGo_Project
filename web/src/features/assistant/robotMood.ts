@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { AssistantIntent } from '@/services/assistant.service'
+import type { AssistantIntent } from './replyTags'
 
-import { useAssistantStore } from './assistant.store'
+import { isTalking, replyLength, useAssistantStore } from './assistant.store'
+import { parseReply } from './replyTags'
 
 /** What the assistant robot is doing, shown by its eyes and the way it moves. */
 export type RobotMood =
@@ -58,7 +59,7 @@ interface MoodInput {
 
 /**
  * The robot's mood. The conversation comes first: thinking until the first
- * words arrive, speaking while they stream, then a short flash for how the
+ * words arrive, speaking while it says them, then a short flash for how the
  * reply ended. Otherwise it reacts to the reader (happy when greeted or
  * petted, listening while they type) and dozes off when left alone.
  *
@@ -66,8 +67,8 @@ interface MoodInput {
  * for opening the chat. Both are called from event handlers.
  */
 export function useRobotMood({ typing, petting }: MoodInput) {
-  const busy = useAssistantStore((s) => s.busy)
-  const replying = useAssistantStore((s) => s.busy && Boolean(s.messages.at(-1)?.content))
+  const talking = useAssistantStore(isTalking)
+  const replying = useAssistantStore((s) => isTalking(s) && replyLength(s.messages) > 0)
   const [flash, setFlash] = useState<RobotMood | null>(null)
   const [reaction, setReaction] = useState<'happy' | 'surprised' | null>(null)
   const [asleep, setAsleep] = useState(false)
@@ -98,15 +99,15 @@ export function useRobotMood({ typing, petting }: MoodInput) {
     react('happy', GREET_MS)
   }, [poke, react])
 
-  // The conversation moving counts as activity; a reply ending gets its flash.
+  // The conversation moving counts as activity; a reply ending (once all of it has been said) gets its flash.
   useEffect(
     () =>
       useAssistantStore.subscribe((state, previous) => {
         poke()
-        if (!previous.busy || state.busy) return
+        if (!isTalking(previous) || isTalking(state)) return
         const question = state.messages.findLast((m) => m.role === 'user')?.content
         const reply = state.messages.findLast((m) => m.role === 'assistant')
-        setFlash(state.error ? 'error' : finishedMood(reply?.intent, question))
+        setFlash(state.error ? 'error' : finishedMood(reply && parseReply(reply.content).intent, question))
         clearTimeout(timers.current.flash)
         timers.current.flash = setTimeout(() => setFlash(null), FLASH_MS)
       }),
@@ -123,7 +124,7 @@ export function useRobotMood({ typing, petting }: MoodInput) {
   }, [])
 
   let mood: RobotMood = 'idle'
-  if (busy) mood = replying ? 'speaking' : 'thinking'
+  if (talking) mood = replying ? 'speaking' : 'thinking'
   else if (flash) mood = flash
   else if (reaction) mood = reaction
   else if (petting) mood = 'happy'
