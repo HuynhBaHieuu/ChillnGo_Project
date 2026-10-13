@@ -1,13 +1,14 @@
 import * as Popover from '@radix-ui/react-popover'
 import { Loader2, Send, Square, X } from 'lucide-react'
-import { Suspense, lazy, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { FormEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-import { useAssistantStore } from './assistant.store'
+import { isTalking, useAssistantStore } from './assistant.store'
+import { parseReply } from './replyTags'
 import { RobotFace } from './RobotFace'
 import { useRobotMood } from './robotMood'
 
@@ -21,8 +22,8 @@ const SUGGESTIONS = [
 ]
 
 const QUESTION_MAX = 4000
-/** The end of a sentence (or a line) in a streaming reply. */
-const SENTENCE_END = /[.!?…](?=\s|$)|\n+/g
+/** A gesture cue fires this many characters before its word, so the gesture's stroke lands as the word appears. */
+const CUE_LEAD = 18
 
 /**
  * The AI travel assistant, in the bottom-right corner. Closed, it is the
@@ -36,12 +37,16 @@ export function AssistantButton() {
   const [text, setText] = useState('')
   const [petting, setPetting] = useState(false)
   const { mood, poke, greet } = useRobotMood({ typing: text.trim().length > 0, petting })
-  // The reply in progress, for the robot's gestures: which one, what it is doing, how many sentences in.
+  // The reply being said, for the robot's gestures: which one, what it is doing, and which of its cues are due.
   const reply = useAssistantStore((s) => {
     const last = s.messages.at(-1)
-    return s.busy && last?.role === 'assistant' ? last : null
+    return isTalking(s) && last?.role === 'assistant' ? last : null
   })
-  const beat = reply ? (reply.content.match(SENTENCE_END) ?? []).length : 0
+  const spoken = useAssistantStore((s) => s.spoken)
+  const parsed = useMemo(() => (reply ? parseReply(reply.content) : null), [reply])
+  // Known once the opening tag is in, or the text has started without one.
+  const intent = parsed && (parsed.intent || parsed.text) ? parsed.intent : undefined
+  const due = parsed ? parsed.cues.filter((cue) => cue.at <= spoken + CUE_LEAD).length : 0
   const wide = useMediaQuery('(min-width: 768px)')
   const launcher = useRef<HTMLButtonElement>(null)
 
@@ -81,7 +86,7 @@ export function AssistantButton() {
             className="size-full drop-shadow-[0_14px_16px_rgba(0,0,0,0.55)] animate-in fade-in-0 duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Suspense fallback={<RobotFace mood={mood} className="mx-auto mt-[22%] w-3/4" />}>
-              <AssistantRobot mood={mood} replyId={reply?.id ?? null} intent={reply?.intent} beat={beat} onReady={greet} />
+              <AssistantRobot mood={mood} replyId={reply?.id ?? null} intent={intent} cues={parsed?.cues ?? NO_CUES} due={due} onReady={greet} />
             </Suspense>
           </button>
         ) : (
@@ -139,16 +144,23 @@ interface AssistantChatProps {
 }
 
 function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
-  const { messages, busy, error, send, stop, clear } = useAssistantStore()
+  const { messages, busy, error, spoken, send, stop, clear } = useAssistantStore()
+  const talking = useAssistantStore(isTalking)
   const list = useRef<HTMLOListElement>(null)
+  // What each message shows: replies without their gesture tags, the one being said only as far as it has got.
+  const shown = messages.map((message, i) => {
+    if (message.role === 'user') return message.content
+    const reply = parseReply(message.content).text
+    return talking && i === messages.length - 1 ? reply.slice(0, wordEnd(reply, spoken)) : reply
+  })
 
-  // Follow the answer as it streams in, unless the reader scrolled up to read.
+  // Follow the answer as it is said, unless the reader scrolled up to read.
   const pinned = useRef(true)
-  const lastContent = messages.at(-1)?.content
+  const lastShown = shown.at(-1)
   useEffect(() => {
     const el = list.current
     if (el && pinned.current) el.scrollTop = el.scrollHeight
-  }, [messages.length, lastContent])
+  }, [messages.length, lastShown])
 
   async function ask(question: string) {
     const value = question.trim()
@@ -207,7 +219,7 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
           aria-live="polite"
           className="-mx-2 min-h-0 flex-1 space-y-3 overflow-y-auto px-2"
         >
-          {messages.map((message) => (
+          {messages.map((message, i) => (
             <li
               key={message.id}
               className={cn(
@@ -217,8 +229,8 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
                   : 'rounded-bl-md bg-white/[0.06]',
               )}
             >
-              {message.content ? (
-                plainText(message.content)
+              {shown[i] ? (
+                plainText(shown[i])
               ) : (
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -267,6 +279,16 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
       </div>
     </>
   )
+}
+
+const NO_CUES: [] = []
+
+/** Up to the end of the word at `n`: a reply being said shows whole words. */
+function wordEnd(text: string, n: number) {
+  if (n >= text.length) return text.length
+  const from = Math.floor(n)
+  const space = text.slice(from).search(/\s/)
+  return space < 0 ? text.length : from + space
 }
 
 /**

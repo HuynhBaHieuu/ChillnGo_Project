@@ -2,12 +2,19 @@
  * The assistant's 3D robot, standing in the corner beside the chat bubble.
  *
  * Loaded on demand (it brings three.js with it), only when the chat opens.
- * The model has no rig of its own: robotRig.ts gives it a skeleton at load
- * time. Each frame its joints follow, through springs (motion/springs.ts), the
- * sum of a posture for the conversational state and the small movements of
- * something alive (motion/postures.ts) and whatever gestures the director
- * (motion/director.ts) has chosen from the conversation. A new screen laid over
- * the painted one, riding on the head bone, shows the eyes.
+ * The model has no rig of its own: robotRig.ts gives it a skeleton, and longer
+ * arms with hands in the style of its own (robotArms.ts), at load time. Each frame:
+ *
+ *   1. its joints follow, through springs (motion/springs.ts), the sum of a
+ *      posture for the conversational state, the small movements of something
+ *      alive (motion/postures.ts), and whatever gestures the director
+ *      (motion/director.ts) has chosen from the conversation;
+ *   2. its fingers follow the hand shapes of the posture and the gestures
+ *      (motion/hands.ts);
+ *   3. IK puts a wrist where a gesture wants it, under the chin or on a cheek
+ *      (motion/ik.ts).
+ *
+ * A new screen laid over the painted one, riding on the head bone, shows the eyes.
  *
  * Swapping the model: replace public/models/assistant-robot.glb and re-measure
  * SCREEN (where its face screen sits) and the joints in robotRig.ts.
@@ -20,12 +27,16 @@ import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import type { AssistantIntent } from '@/services/assistant.service'
+import type { AssistantIntent } from './replyTags'
 
 import { GestureDirector } from './motion/director'
+import { HANDS, HandSprings, mixShape, poseHand } from './motion/hands'
+import { ArmReach } from './motion/ik'
 import { addPatch, restPose } from './motion/pose'
-import { lifeMotion, postureFor } from './motion/postures'
+import { handsFor, lifeMotion, postureFor } from './motion/postures'
 import { JointSprings } from './motion/springs'
+import type { Cue } from './replyTags'
+import { SIDES } from './robotArms'
 import { RobotFace } from './RobotFace'
 import type { RobotMood } from './robotMood'
 import { BONES, rigRobot } from './robotRig'
@@ -46,10 +57,12 @@ export interface AssistantRobotProps {
   mood: RobotMood
   /** The reply in progress: its id (so a new reply is noticed even with the same intent)… */
   replyId: number | null
-  /** …and what it is doing: undefined until the server has said, null when the model gave no tag. */
+  /** …what it is doing: undefined until its opening has arrived, null when the model gave no tag… */
   intent: AssistantIntent | null | undefined
-  /** How many sentences of the current reply have arrived: each may get a gesture. */
-  beat: number
+  /** …its gesture cues (stressed words, a thumbs-up, list points, sentence ends)… */
+  cues: Cue[]
+  /** …and how many of them are due, as the reply is said. */
+  due: number
   /** Fires once the model is loaded and on screen, so a greeting is not spent while it loads. */
   onReady?: () => void
 }
@@ -93,7 +106,7 @@ function StudioLight() {
 
 const seconds = () => performance.now() / 1000
 
-function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
+function Robot({ mood, replyId, intent, cues, due, onReady }: AssistantRobotProps) {
   const gltf = useLoader(GLTFLoader, MODEL_URL)
   // Mounted only after the model has loaded (Suspense), so this is the moment it appears.
   useEffect(() => onReady?.(), [onReady])
@@ -109,23 +122,35 @@ function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
   // The conversation drives the gestures; the director decides which and when.
   const [director] = useState(() => new GestureDirector(reduced))
   const [springs] = useState(() => new JointSprings())
+  const [fingers] = useState(() => new HandSprings())
   useEffect(() => director.setMood(mood, seconds()), [director, mood])
   useEffect(() => {
-    // Waits for the server's answer about the intent, so the thinking pose is not cut short at send.
+    // Waits for the reply's opening, so the thinking pose is not cut short at send.
     if (replyId !== null && intent !== undefined) director.startReply(intent, seconds())
   }, [director, replyId, intent])
+  // Each cue once, as it falls due.
+  const delivered = useRef({ replyId: null as number | null, count: 0 })
   useEffect(() => {
-    if (beat > 0) director.sentence(seconds())
-  }, [director, beat])
+    if (delivered.current.replyId !== replyId) delivered.current = { replyId, count: 0 }
+    for (const cue of cues.slice(delivered.current.count, due)) director.cue(cue, seconds())
+    delivered.current.count = Math.max(delivered.current.count, due)
+  }, [director, replyId, cues, due])
+  // Development: try any gesture from the console, e.g. __assistantRobot.play('thumbsUp').
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const w = window as { __assistantRobot?: GestureDirector }
+    w.__assistantRobot = director
+    return () => void delete w.__assistantRobot
+  }, [director])
 
   // Rigged, centred on its bounding box, and scaled to 2 units tall whatever the file's units.
   const rig = useMemo(() => rigRobot(gltf.scene), [gltf])
   // The frame loop moves the bones through a ref, not through the memoised rig.
-  const bones = useRef<RobotRig['bones'] | null>(null)
+  const live = useRef<{ bones: RobotRig['bones']; hands: RobotRig['hands']; reach: ArmReach } | null>(null)
   useEffect(() => {
-    bones.current = rig.bones
+    live.current = { bones: rig.bones, hands: rig.hands, reach: new ArmReach(rig) }
     return () => {
-      bones.current = null
+      live.current = null
       rig.dispose()
     }
   }, [rig])
@@ -133,7 +158,8 @@ function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
 
   useFrame((state, delta) => {
     const body = pivot.current
-    if (!body || !bones.current) return
+    const rigged = live.current
+    if (!body || !rigged) return
     const t = state.clock.elapsedTime
     // The pointer is measured against this small canvas, so anywhere else on the page it runs far past ±1.
     const px = THREE.MathUtils.clamp(state.pointer.x, -1.6, 1.6) / 1.6
@@ -143,7 +169,7 @@ function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
     // Posture for the state, the small movements of something alive, then the gestures on top.
     const frame = director.frame(seconds())
     const target = restPose()
-    addPatch(target, postureFor(mood))
+    addPatch(target, postureFor(mood, frame.arms))
     if (!reduced) addPatch(target, lifeMotion(t, mood))
     addPatch(target, frame.offsets)
     // The head turns to the pointer more than the body does.
@@ -154,8 +180,16 @@ function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
     springs.step(target, delta, reduced)
     for (const name of BONES) {
       const { x, y, z } = springs.value[name]
-      bones.current[name].rotation.set(x, y, z)
+      rigged.bones[name].rotation.set(x, y, z)
     }
+
+    // The fingers: the resting shape, the gestures' shapes over it.
+    const hands = handsFor(mood, reduced ? 0 : t)
+    for (const { side, shape, weight } of frame.hands) mixShape(hands[side], HANDS[shape], weight)
+    fingers.step(hands, delta)
+    for (const side of SIDES) poseHand(rigged.hands[side], fingers.value[side], side)
+    // Last, hands that should touch something (chin, cheek, the other arm) are put there.
+    rigged.reach.apply(frame.reach)
 
     gaze.current.x = awake ? px * 0.006 + frame.gaze.x : 0
     gaze.current.y = awake ? py * 0.004 + frame.gaze.y : 0
@@ -163,9 +197,13 @@ function Robot({ mood, replyId, intent, beat, onReady }: AssistantRobotProps) {
       shownFace.current = frame.face
       setGestureFace(frame.face)
     }
-    // What it is doing, readable from outside (tests, devtools): <canvas data-gestures="nod thinkChin">.
+    // What it is doing, readable from outside (tests, devtools):
+    // <canvas data-gestures="nod thinkChin" data-hands="R:cup L:flat">.
+    const canvas = state.gl.domElement
     const playing = director.active().join(' ')
-    if (state.gl.domElement.dataset.gestures !== playing) state.gl.domElement.dataset.gestures = playing
+    if (canvas.dataset.gestures !== playing) canvas.dataset.gestures = playing
+    const shapes = frame.hands.filter((h) => h.weight > 0.5).map((h) => `${h.side}:${h.shape}`).join(' ')
+    if (canvas.dataset.hands !== shapes) canvas.dataset.hands = shapes
 
     // The whole body only turns a little towards the pointer; the joints do the rest.
     // It pops in when the chat opens, inside the scene rather than with a CSS transform on the page.
@@ -203,6 +241,8 @@ function Screen({ mood, reduced, gaze, neck }: ScreenProps) {
   const dots = useRef<THREE.Group>(null)
   const mouth = useRef<THREE.Group>(null)
   const nextBlink = useRef(2)
+  /** Where the eyes are resting, and until when. */
+  const fixation = useRef({ x: 0, y: 0, until: 0 })
   const outline = useMemo(() => roundedRect(SCREEN.width, SCREEN.height, SCREEN.radius), [])
 
   useFrame((state) => {
@@ -218,9 +258,19 @@ function Screen({ mood, reduced, gaze, neck }: ScreenProps) {
       if (!reduced && mood === 'speaking') sy *= 1 - Math.abs(Math.sin(t * 9)) * 0.25
       if (!reduced && mood === 'love') sx = sy = 1 + 0.15 * Math.abs(Math.sin(t * 4)) // beating hearts
       face.scale.set(sx, sy, 1)
-      // The eyes drift towards where the robot is looking.
-      face.position.x = THREE.MathUtils.lerp(face.position.x, gaze.current.x, 0.15)
-      face.position.y = THREE.MathUtils.lerp(face.position.y, gaze.current.y, 0.15)
+      // Eyes jump to a point and rest there rather than gliding: when what it looks at has moved
+      // away, or after a moment, to a point just off it. A long jump sometimes takes a blink with it.
+      const rest = fixation.current
+      const away = Math.hypot(gaze.current.x - rest.x, gaze.current.y - rest.y)
+      if (away > 0.0018 || t > rest.until) {
+        const drift = reduced ? 0 : 0.0012
+        rest.x = gaze.current.x + (Math.random() - 0.5) * drift
+        rest.y = gaze.current.y + (Math.random() - 0.5) * drift * 0.6
+        rest.until = t + 0.5 + Math.random() * 1.8
+        if (!reduced && away > 0.005 && BLINKS.includes(mood) && Math.random() < 0.4) nextBlink.current = t
+      }
+      face.position.x = THREE.MathUtils.lerp(face.position.x, rest.x, 0.45)
+      face.position.y = THREE.MathUtils.lerp(face.position.y, rest.y, 0.45)
     }
     // Wrapper groups carry the animated scale, so the shapes inside keep their own size.
     dots.current?.children.forEach((dot, i) => dot.scale.setScalar(reduced ? 1 : 0.6 + 0.4 * Math.max(0, Math.sin(t * 5 - i * 0.9))))
@@ -299,6 +349,12 @@ function Screen({ mood, reduced, gaze, neck }: ScreenProps) {
           </>
         )}
       </group>
+      {mood === 'love' && (
+        <>
+          <Blush x={-EYE_GAP - 0.011} />
+          <Blush x={EYE_GAP + 0.011} />
+        </>
+      )}
       {mood === 'speaking' && (
         <group ref={mouth} position={[0, -0.025, 0.0004]}>
           <Oval x={0} rx={0.0065} ry={0.0045} />
@@ -366,6 +422,16 @@ function Heart({ x }: { x: number }) {
     <mesh position={[x, 0, 0]} rotation-z={Math.PI} scale={0.00062}>
       <shapeGeometry args={[HEART, 16]} />
       <meshBasicMaterial color="#ff7aa8" toneMapped={false} />
+    </mesh>
+  )
+}
+
+/** A blushing cheek, under and outside an eye. */
+function Blush({ x }: { x: number }) {
+  return (
+    <mesh position={[x, -0.017, 0.0004]} scale={[0.0088, 0.0046, 1]}>
+      <circleGeometry args={[1, 32]} />
+      <meshBasicMaterial color="#ff7aa8" toneMapped={false} transparent opacity={0.6} />
     </mesh>
   )
 }
