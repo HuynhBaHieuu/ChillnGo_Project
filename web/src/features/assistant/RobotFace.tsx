@@ -54,11 +54,12 @@ function eyes(mood: RobotMood) {
       return <path d="M16.5 29a5.5 5.5 0 0 1 11 0M36.5 29a5.5 5.5 0 0 1 11 0" fill="none" />
     case 'love':
       return (
-        <path
-          d="M22 33l-5.2-5a3.1 3.1 0 0 1 5.2-3.9 3.1 3.1 0 0 1 5.2 3.9zM42 33l-5.2-5a3.1 3.1 0 0 1 5.2-3.9 3.1 3.1 0 0 1 5.2 3.9z"
-          fill="#ff7aa8"
-          stroke="none"
-        />
+        <g fill="#ff7aa8" stroke="none">
+          <path d="M22 31l-5.2-5a3.1 3.1 0 0 1 5.2-3.9 3.1 3.1 0 0 1 5.2 3.9zM42 31l-5.2-5a3.1 3.1 0 0 1 5.2-3.9 3.1 3.1 0 0 1 5.2 3.9z" />
+          {/* Blushing cheeks. */}
+          <ellipse cx="15" cy="37" rx="4.4" ry="2.3" opacity="0.6" />
+          <ellipse cx="49" cy="37" rx="4.4" ry="2.3" opacity="0.6" />
+        </g>
       )
     case 'surprised':
       return (
