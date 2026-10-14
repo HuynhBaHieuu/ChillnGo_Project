@@ -1,7 +1,8 @@
 import * as Popover from '@radix-ui/react-popover'
-import { Loader2, Send, Square, X } from 'lucide-react'
+import { ArrowUpRight, Loader2, Send, Square, X } from 'lucide-react'
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils'
 
 import { isTalking, useAssistantStore } from './assistant.store'
 import { parseReply } from './replyTags'
+import type { ParsedReply } from './replyTags'
 import { RobotFace } from './RobotFace'
 import { useRobotMood } from './robotMood'
 
@@ -16,9 +18,9 @@ import { useRobotMood } from './robotMood'
 const AssistantRobot = lazy(() => import('./AssistantRobot'))
 
 const SUGGESTIONS = [
-  'Gợi ý lịch trình 3 ngày ở Đà Lạt',
-  'Đi Hà Giang mùa nào đẹp nhất?',
-  'Cần chuẩn bị gì khi đi biển Phú Quốc?',
+  'ChillnGo có hành trình đi biển nào?',
+  'So sánh chi phí các hành trình 3 ngày',
+  'Làm sao lưu nháp rồi đăng một hành trình?',
 ]
 
 const QUESTION_MAX = 4000
@@ -147,16 +149,18 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
   const { messages, busy, error, spoken, send, stop, clear } = useAssistantStore()
   const talking = useAssistantStore(isTalking)
   const list = useRef<HTMLOListElement>(null)
-  // What each message shows: replies without their gesture tags, the one being said only as far as it has got.
+  // What each message shows: replies without their tags (journeys they name become links),
+  // the one being said only as far as it has got.
   const shown = messages.map((message, i) => {
-    if (message.role === 'user') return message.content
-    const reply = parseReply(message.content).text
-    return talking && i === messages.length - 1 ? reply.slice(0, wordEnd(reply, spoken)) : reply
+    if (message.role === 'user') return { text: message.content, links: NO_LINKS }
+    const reply = parseReply(message.content)
+    const text = talking && i === messages.length - 1 ? reply.text.slice(0, wordEnd(reply.text, spoken)) : reply.text
+    return { text, links: reply.links.filter((link) => link.at <= text.length) }
   })
 
   // Follow the answer as it is said, unless the reader scrolled up to read.
   const pinned = useRef(true)
-  const lastShown = shown.at(-1)
+  const lastShown = shown.at(-1)?.text
   useEffect(() => {
     const el = list.current
     if (el && pinned.current) el.scrollTop = el.scrollHeight
@@ -182,7 +186,7 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-xl tracking-tight">Trợ lý du lịch</h2>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-            Hỏi về điểm đến, lịch trình hay cách chuẩn bị. Câu trả lời do AI tạo nên có thể chưa chính xác.
+            Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng trang web. Câu trả lời do AI tạo nên có thể chưa chính xác.
           </p>
         </div>
         <button
@@ -229,8 +233,8 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
                   : 'rounded-bl-md bg-white/[0.06]',
               )}
             >
-              {shown[i] ? (
-                plainText(shown[i])
+              {shown[i].text ? (
+                <ReplyText text={plainText(shown[i].text)} links={shown[i].links} />
               ) : (
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -282,6 +286,30 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
 }
 
 const NO_CUES: [] = []
+const NO_LINKS: ParsedReply['links'] = []
+
+/** A message's text, with a link to each journey it names right after that journey's title. */
+function ReplyText({ text, links }: { text: string; links: ParsedReply['links'] }) {
+  if (links.length === 0) return text
+  const parts: ReactNode[] = []
+  let from = 0
+  for (const link of links) {
+    parts.push(text.slice(from, link.at))
+    parts.push(
+      <Link
+        key={link.id}
+        to={`/posts/${link.id}`}
+        className="mx-1 inline-flex items-center gap-0.5 whitespace-nowrap rounded-full border border-foreground/20 px-2 py-px align-baseline text-xs font-medium text-foreground transition-colors hover:bg-white/10"
+      >
+        Xem hành trình
+        <ArrowUpRight className="size-3" aria-hidden />
+      </Link>,
+    )
+    from = link.at
+  }
+  parts.push(text.slice(from))
+  return <>{parts}</>
+}
 
 /** Up to the end of the word at `n`: a reply being said shows whole words. */
 function wordEnd(text: string, n: number) {

@@ -134,5 +134,7 @@ export const env = {
    * "provider/model" (see LiveKit Inference's model list).
    */
   assistantModel: process.env.ASSISTANT_MODEL?.trim() || 'google/gemini-2.5-flash',
+  /** Log each lookup the assistant makes (tool, arguments, result size). Off unless ASSISTANT_DEBUG=1. */
+  assistantDebug: process.env.ASSISTANT_DEBUG === '1',
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }
