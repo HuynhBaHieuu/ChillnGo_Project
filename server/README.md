@@ -51,6 +51,7 @@ shows Minh's trips.
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | no | LiveKit project for livestreams. Unset: livestream routes answer `503` and the Newsfeed shows no live cards. See [Livestream](#livestream). |
 | `RECORDING_S3_*` | no | Private S3-compatible bucket (B2, R2, S3) for livestream recordings. Unset: no recording option. See [Livestream](#livestream). |
 | `GOOGLE_CLIENT_ID` | no | OAuth client ID for Sign in with Google. Unset makes `/api/auth/google` answer `503`. See [Sign in with Google](#sign-in-with-google). |
+| `ASSISTANT_DEBUG` | no | `1` logs each lookup the assistant makes (tool, arguments, result size) to the console. |
 | `ASSISTANT_MODEL` | no | Model the AI travel assistant (`POST /api/assistant/chat`) asks through LiveKit Inference, as `provider/model`. Default `google/gemini-2.5-flash`. The assistant needs no key of its own: it uses the `LIVEKIT_*` keys and works only with a LiveKit Cloud project, billed to its inference quota. |
 
 The server refuses to start if a required variable is missing.
@@ -74,7 +75,7 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/checkins/upload-signature` | none | `200 { publicId, uploadUrl, fields }`: one per photo. |
 | `POST /api/checkins` | `caption`, `photos` (0–4 publicIds), `feeling` (key from `src/lib/feelings.ts`) or null, `location` (`name`, `address`, `lat`, `lng`) or null. Needs photos, a feeling or a caption. | `201 { checkin }` |
 | `DELETE /api/checkins/:id` | none | `200`. Author only; also deletes the photos from Cloudinary. |
-| `POST /api/assistant/chat` | `messages`: up to 20 `{ role: "user" \| "assistant", content }`, ending with the user's question | `200`, the reply streamed as plain text. The reply carries `<<…>>` gesture tags for the web app's robot (an intent such as `<<g:explain>>` at the start, `<<g:stress>>` before stressed words, `<<g:thumbsup>>`, `<<n:1>>` list points); they pass through and the web app reads them off. Send earlier replies back with their tags. Signed in; 10 questions a minute per user. `503 ASSISTANT_OFF` without a LiveKit Cloud project, `429 ASSISTANT_BUSY` when the inference quota is used up, `503 ASSISTANT_UNAVAILABLE` for other gateway errors (the reason is in the server log). Nothing is stored. |
+| `POST /api/assistant/chat` | `messages`: up to 20 `{ role: "user" \| "assistant", content }`, ending with the user's question | `200`, the reply streamed as plain text. The model looks things up through read-only tools run on the server as the signed-in user (`lib/assistantTools.ts`): published journeys, one journey's days and costs, the user's own journeys and drafts, and the website guide (`lib/siteGuide.ts`); it never sees the database or other users' private data. The reply carries `<<…>>` gesture tags for the web app's robot (an intent such as `<<g:explain>>` at the start, `<<g:stress>>` before stressed words, `<<g:thumbsup>>`, `<<n:1>>` list points, `<<j:id>>` after a journey's title, which the web app turns into a link); they pass through and the web app reads them off. Send earlier replies back with their tags. Signed in; 10 questions a minute per user. `503 ASSISTANT_OFF` without a LiveKit Cloud project, `429 ASSISTANT_BUSY` when the inference quota is used up, `503 ASSISTANT_UNAVAILABLE` for other gateway errors (the reason is in the server log). Nothing is stored. |
 | `GET /api/settings/public` | none | `200 { settings }`: announcement and whether registration is open. |
 | `GET /api/auth/me` | none; header `Authorization: Bearer <token>` | `200 { user }` |
 | `GET /api/health` | none | `200 { ok: true }` |
@@ -430,7 +431,9 @@ src/
   models/Livestream.ts  livestream, its comments, its viewers
   routes/profiles.ts    public profiles and follows
   routes/notifications.ts  the signed-in user's notifications
-  routes/assistant.ts   AI travel assistant: streams a reply from LiveKit Inference
+  routes/assistant.ts   AI assistant: streams a reply from LiveKit Inference, running its tool calls
+  lib/assistantTools.ts the assistant's read-only lookups (journeys, the user's own, the site guide)
+  lib/siteGuide.ts      how to use the website, by topic, for the assistant: keep in step with web/src
   models/Follow.ts      who follows whom
   models/Notification.ts   notifications + notify()
   models/CheckIn.ts     check-in: photos, caption, feeling, place
