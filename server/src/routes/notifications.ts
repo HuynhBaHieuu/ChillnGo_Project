@@ -31,7 +31,7 @@ notificationsRouter.get('/', async (_req, res) => {
         userId: n.userId,
         type: n.type,
         actorId: n.actorId,
-        postId: null,
+        postId: n.postId ?? null,
         livestreamId: n.livestreamId,
         message: n.message,
         read: n.read,
