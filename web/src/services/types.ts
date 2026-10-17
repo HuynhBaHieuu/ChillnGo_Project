@@ -164,6 +164,8 @@ export interface Comment {
   parentId: ObjectId | null
   content: string
   likeCount: number
+  /** Hidden by the journey's author: only the writer and the author still see it. From the API. */
+  hidden?: boolean
   createdAt: ISODate
 }
 

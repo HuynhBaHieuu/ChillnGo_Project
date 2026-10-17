@@ -171,7 +171,7 @@ export function PostDetailPage() {
         </div>
 
         <div ref={commentsRef} className="mt-16">
-          <CommentSection postId={post._id} commentCount={post.commentCount} />
+          <CommentSection postId={post._id} postAuthorId={post.authorId} commentCount={post.commentCount} />
         </div>
       </article>
 

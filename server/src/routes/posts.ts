@@ -5,6 +5,10 @@
  *   GET    /api/posts/mine?status=…        your own journeys: draft | published | all
  *   GET    /api/posts/deleted              your journeys in "Recently Deleted"
  *   GET    /api/posts/:id                  published: anyone; draft or deleted: the author only
+ *   GET    /api/posts/liked-ids            ids of the journeys you have liked
+ *   POST   /api/posts/:id/like             like / unlike (toggle); tells the author
+ *   GET    /api/posts/:id/comments         comments on a published journey (+ their authors)
+ *   POST   /api/posts/:id/comments         comment or reply; tells the author / the person replied to
  *   POST   /api/posts/cover-signature      one signed Cloudinary upload (cover or stop photo)
  *   POST   /api/posts                      create (draft or published)
  *   PATCH  /api/posts/:id                  edit your journey
@@ -28,6 +32,8 @@ import { HttpError } from '../lib/errors.js'
 import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
+import { Notification, notify } from '../models/Notification.js'
+import { PostComment, PostLike } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
 import type { TripPostDocument } from '../models/TripPost.js'
 import { User } from '../models/User.js'
@@ -288,6 +294,12 @@ async function releaseImages(userId: string, urls: string[]) {
 /** Removes a journey, and the uploaded images nothing else uses, for good. */
 async function destroyPost(post: TripPostDocument) {
   await post.deleteOne()
+  const postId = String(post._id)
+  await Promise.all([
+    PostLike.deleteMany({ postId }),
+    PostComment.deleteMany({ postId }),
+    Notification.deleteMany({ postId }),
+  ])
   await releaseImages(post.authorId, imagesOf(post))
 }
 
@@ -326,13 +338,226 @@ postsRouter.get('/deleted', requireAuth, loadCurrentUser, async (_req, res) => {
   res.json({ items: posts.map(toListView) })
 })
 
+postsRouter.get('/liked-ids', requireAuth, async (_req, res) => {
+  const likes = await PostLike.find({ userId: res.locals.userId as string }).sort({ createdAt: -1 }).select('postId').lean()
+  res.json({ ids: likes.map((l) => l.postId) })
+})
+
 postsRouter.get('/:id', optionalAuth, async (req, res) => {
   const id = String(req.params.id)
   const post = isValidObjectId(id) ? await TripPost.findById(id) : null
   const viewerId = res.locals.userId as string | undefined
   const visible = post && ((post.status === 'published' && !post.deletedAt) || post.authorId === viewerId)
   if (!post || !visible) throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
-  res.json({ post: toView(post), authors: await authorsOf([post]) })
+  const likedByMe = viewerId ? Boolean(await PostLike.exists({ postId: String(post._id), userId: viewerId })) : false
+  res.json({ post: toView(post), authors: await authorsOf([post]), likedByMe })
+})
+
+/* ------------------------------------------------------ likes & comments */
+
+/** A published, not-deleted journey that anyone may like or comment on, or 404. */
+async function loadPublished(id: string): Promise<TripPostDocument> {
+  const post = isValidObjectId(id) ? await TripPost.findById(id) : null
+  if (!post || post.status !== 'published' || post.deletedAt) {
+    throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
+  }
+  return post
+}
+
+/** The counters are recounted rather than stepped, so they cannot drift from the rows. */
+async function recountLikes(postId: string): Promise<number> {
+  const likeCount = await PostLike.countDocuments({ postId })
+  await TripPost.updateOne({ _id: postId }, { $set: { likeCount } })
+  return likeCount
+}
+
+async function recountComments(postId: string): Promise<number> {
+  const commentCount = await PostComment.countDocuments({ postId, hidden: { $ne: true } })
+  await TripPost.updateOne({ _id: postId }, { $set: { commentCount } })
+  return commentCount
+}
+
+/** A comment cut down for a notification line. */
+function snippet(text: string, max = 60): string {
+  const flat = text.replace(/\s+/g, ' ').trim()
+  return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat
+}
+
+postsRouter.post('/:id/like', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const user = currentUser(res)
+  const post = await loadPublished(String(req.params.id))
+  const postId = String(post._id)
+
+  const removed = await PostLike.findOneAndDelete({ postId, userId: user._id })
+  let likedByMe = false
+  if (removed) {
+    // Unliking takes the notification back, so liking again does not stack up copies.
+    await Notification.deleteMany({ type: 'like', postId, actorId: user._id })
+  } else {
+    try {
+      await PostLike.create({ postId, userId: user._id })
+      likedByMe = true
+      if (post.authorId !== user._id) {
+        await notify([post.authorId], {
+          type: 'like',
+          actorId: user._id,
+          postId,
+          message: `đã thích hành trình “${snippet(post.title, 50) || 'của bạn'}”`,
+        })
+      }
+    } catch (error) {
+      // A double tap raced us: the like already exists.
+      if ((error as { code?: number }).code !== 11000) throw error
+      likedByMe = true
+    }
+  }
+
+  res.json({ likeCount: await recountLikes(postId), likedByMe })
+})
+
+postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {
+  const post = await loadPublished(String(req.params.id))
+  const postId = String(post._id)
+  const viewerId = res.locals.userId as string | undefined
+  const all = await PostComment.find({ postId }).sort({ createdAt: 1 }).limit(500).lean()
+
+  // A hidden comment (and the replies under it) is seen only by its writer and the journey's author.
+  const canSee = (c: { authorId: string; hidden?: boolean | null }) =>
+    !c.hidden || (viewerId !== undefined && (c.authorId === viewerId || post.authorId === viewerId))
+  const rootVisible = new Map(all.filter((c) => !c.parentId).map((c) => [String(c._id), canSee(c)]))
+  const comments = all.filter((c) => canSee(c) && (!c.parentId || rootVisible.get(c.parentId) === true))
+
+  const authors = await User.find({ _id: { $in: [...new Set(comments.map((c) => c.authorId))] } })
+    .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount createdAt')
+    .lean()
+  res.json({
+    items: comments.map((c) => ({
+      _id: String(c._id),
+      postId: c.postId,
+      authorId: c.authorId,
+      parentId: c.parentId,
+      content: c.content,
+      likeCount: 0,
+      hidden: Boolean(c.hidden),
+      createdAt: c.createdAt.toISOString(),
+    })),
+    authors: authors.map((u) => ({
+      _id: u._id,
+      username: u.username,
+      displayName: u.displayName,
+      email: '',
+      avatarUrl: u.avatarUrl,
+      coverUrl: u.coverUrl,
+      bio: u.bio,
+      location: u.location,
+      followerCount: u.followerCount,
+      followingCount: u.followingCount,
+      postCount: u.postCount,
+      role: 'user' as const,
+      createdAt: (u as unknown as { createdAt: Date }).createdAt.toISOString(),
+    })),
+  })
+})
+
+const commentSchema = z.object({
+  content: z.string().trim().min(1, 'Hãy nhập nội dung bình luận.').max(1000, 'Bình luận tối đa 1000 ký tự'),
+  parentId: z.string().max(40).nullable().default(null),
+})
+
+postsRouter.post('/:id/comments', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const { content, parentId } = commentSchema.parse(req.body)
+  const user = currentUser(res)
+  const post = await loadPublished(String(req.params.id))
+  const postId = String(post._id)
+
+  // A reply to a reply goes under the same root.
+  let root: { _id: unknown; authorId: string } | null = null
+  if (parentId) {
+    const parent = isValidObjectId(parentId) ? await PostComment.findById(parentId).lean() : null
+    if (!parent || parent.postId !== postId) throw new HttpError(404, 'Không tìm thấy bình luận để trả lời.', 'NOT_FOUND')
+    root = parent.parentId ? await PostComment.findById(parent.parentId).lean() : parent
+    if (!root) throw new HttpError(404, 'Không tìm thấy bình luận để trả lời.', 'NOT_FOUND')
+  }
+
+  const comment = await PostComment.create({ postId, authorId: user._id, parentId: root ? String(root._id) : null, content })
+  const commentCount = await recountComments(postId)
+
+  // Whoever is addressed hears about it once: the person replied to, then the author.
+  const told = new Set<string>([user._id])
+  const title = snippet(post.title, 40) || 'của bạn'
+  if (root && !told.has(root.authorId)) {
+    told.add(root.authorId)
+    await notify([root.authorId], {
+      type: 'comment',
+      actorId: user._id,
+      postId,
+      commentId: String(comment._id),
+      message: `đã trả lời bình luận của bạn: “${snippet(content)}”`,
+    })
+  }
+  if (!told.has(post.authorId)) {
+    await notify([post.authorId], {
+      type: 'comment',
+      actorId: user._id,
+      postId,
+      commentId: String(comment._id),
+      message: `đã bình luận hành trình “${title}”: “${snippet(content)}”`,
+    })
+  }
+
+  res.status(201).json({
+    comment: {
+      _id: String(comment._id),
+      postId,
+      authorId: user._id,
+      parentId: comment.parentId,
+      content: comment.content,
+      likeCount: 0,
+      createdAt: comment.createdAt.toISOString(),
+    },
+    commentCount,
+  })
+})
+
+postsRouter.delete('/:id/comments/:commentId', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const user = currentUser(res)
+  const post = await loadPublished(String(req.params.id))
+  const postId = String(post._id)
+  const commentId = String(req.params.commentId)
+
+  const comment = isValidObjectId(commentId) ? await PostComment.findOne({ _id: commentId, postId }) : null
+  if (!comment) throw new HttpError(404, 'Không tìm thấy bình luận.', 'NOT_FOUND')
+  // You may remove your own comment, and the journey's author may remove any comment on it.
+  if (comment.authorId !== user._id && post.authorId !== user._id) {
+    throw new HttpError(403, 'Bạn không thể xoá bình luận này.', 'FORBIDDEN')
+  }
+
+  // A root comment takes its replies with it.
+  const replies = comment.parentId ? [] : await PostComment.find({ postId, parentId: commentId }).select('_id').lean()
+  const doomed = [commentId, ...replies.map((r) => String(r._id))]
+  await PostComment.deleteMany({ _id: { $in: doomed } })
+  await Notification.deleteMany({ type: 'comment', postId, commentId: { $in: doomed } })
+
+  res.json({ commentCount: await recountComments(postId), deletedIds: doomed })
+})
+
+const hideSchema = z.object({ hidden: z.boolean() })
+
+postsRouter.post('/:id/comments/:commentId/hide', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const { hidden } = hideSchema.parse(req.body)
+  const user = currentUser(res)
+  const post = await loadPublished(String(req.params.id))
+  const postId = String(post._id)
+  if (post.authorId !== user._id) throw new HttpError(403, 'Chỉ tác giả hành trình mới ẩn được bình luận.', 'FORBIDDEN')
+
+  const commentId = String(req.params.commentId)
+  const comment = isValidObjectId(commentId) ? await PostComment.findOne({ _id: commentId, postId }) : null
+  if (!comment) throw new HttpError(404, 'Không tìm thấy bình luận.', 'NOT_FOUND')
+  if (comment.authorId === user._id) throw new HttpError(400, 'Hãy xoá bình luận của chính bạn thay vì ẩn.', 'OWN_COMMENT')
+
+  comment.hidden = hidden
+  await comment.save()
+  res.json({ hidden, commentCount: await recountComments(postId) })
 })
 
 /* ----------------------------------------------------------------- writes */

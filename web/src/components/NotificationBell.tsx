@@ -24,10 +24,10 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   live: Radio,
 }
 
-/** Where a notification leads: the stream, the post, or the person who followed you. */
+/** Where a notification leads: the stream, the post (its comments, for a comment), or the person who followed you. */
 function targetOf(n: { livestreamId?: string | null; postId: string | null; type: NotificationType; actorId: string | null }): string | null {
   if (n.livestreamId) return `/live/${n.livestreamId}`
-  if (n.postId) return `/posts/${n.postId}`
+  if (n.postId) return n.type === 'comment' ? `/posts/${n.postId}#comments` : `/posts/${n.postId}`
   if (n.type === 'follow' && n.actorId) return `/users/${n.actorId}`
   return null
 }
