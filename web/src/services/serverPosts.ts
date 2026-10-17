@@ -37,9 +37,17 @@ export function upsertAuthors(authors: User[]) {
   }
 }
 
+/** Records that `viewerId` has (or has not) liked a journey, in the mock likes the rest of the service layer reads. */
+export function setLiked(viewerId: string, postId: string, liked: boolean) {
+  const index = db.likes.findIndex((l) => l.userId === viewerId && l.postId === postId)
+  if (liked && index === -1) db.likes.push({ userId: viewerId, postId })
+  if (!liked && index !== -1) db.likes.splice(index, 1)
+}
+
 /**
- * Puts one API journey into `db.tripPosts`. Like, comment and bookmark counts
- * are still counted by the mocks, so an existing copy keeps its own.
+ * Puts one API journey into `db.tripPosts`. Like and comment counts come from
+ * the API; bookmark and clone counts are still counted by the mocks, so an
+ * existing copy keeps its own.
  */
 export function upsertServerPost(post: ServerTripPost): TripPost {
   fromServer.add(post._id)
@@ -54,8 +62,6 @@ export function upsertServerPost(post: ServerTripPost): TripPost {
   const local = db.tripPosts[index]
   db.tripPosts[index] = {
     ...stored,
-    likeCount: local.likeCount,
-    commentCount: local.commentCount,
     bookmarkCount: local.bookmarkCount,
     cloneCount: local.cloneCount,
   }
@@ -77,9 +83,12 @@ const FRESH_MS = 5_000
 
 async function pull(viewerId: string | null) {
   const published = await http<{ items: ServerTripPost[]; authors: User[] }>('/api/posts', { auth: false })
-  const mine = viewerId
-    ? await http<{ items: ServerTripPost[] }>('/api/posts/mine?status=all').then((r) => r.items)
-    : []
+  const [mine, liked] = viewerId
+    ? await Promise.all([
+        http<{ items: ServerTripPost[] }>('/api/posts/mine?status=all').then((r) => r.items),
+        http<{ ids: string[] }>('/api/posts/liked-ids').then((r) => r.ids),
+      ])
+    : [[], null]
 
   upsertAuthors(published.authors)
   const seen = new Set<string>()
@@ -89,6 +98,13 @@ async function pull(viewerId: string | null) {
   }
   // Deleted, unpublished or signed out since the last sync.
   for (const id of [...fromServer]) if (!seen.has(id)) dropServerPost(id)
+
+  // Your likes on API journeys are the API's to say; likes on seed journeys stay as they are.
+  if (viewerId && liked) {
+    db.likes = db.likes.filter((l) => l.userId !== viewerId || !isServerPostId(l.postId))
+    // `liked` is newest first; db.likes is oldest first.
+    for (const postId of [...liked].reverse()) db.likes.push({ userId: viewerId, postId })
+  }
 }
 
 /**

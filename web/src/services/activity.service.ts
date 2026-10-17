@@ -111,14 +111,20 @@ export interface JourneyCommentActivity extends Comment {
   post: { _id: string; title: string; coverUrl: string } | null
 }
 
-/** Comments you wrote on journeys, newest first. Journey comments are still mock data. */
+/**
+ * Comments you wrote on journeys, newest first: those on API journeys come
+ * from the API, those on seed journeys are still mock data.
+ */
 export async function listJourneyComments(viewerId: ObjectId): Promise<JourneyCommentActivity[]> {
-  await syncServerPosts()
-  return db.comments
+  const [, remote] = await Promise.all([
+    syncServerPosts(),
+    http<{ items: JourneyCommentActivity[] }>('/api/activity/journey-comments').then((r) => r.items),
+  ])
+  const local = db.comments
     .filter((c) => c.authorId === viewerId)
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
     .map((c) => {
       const post = db.tripPosts.find((p) => p._id === c.postId)
       return { ...clone(c), post: post ? { _id: post._id, title: post.title, coverUrl: post.coverUrl } : null }
     })
+  return [...remote, ...local].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 }

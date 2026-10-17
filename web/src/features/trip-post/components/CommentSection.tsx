@@ -8,7 +8,7 @@ import { GlassCard } from '@/components/GlassCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { useAddComment, useComments } from '@/features/trip-post/hooks'
+import { useAddComment, useComments, useDeleteComment, useHideComment } from '@/features/trip-post/hooks'
 import { formatCount, relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { CommentThread } from '@/services/types'
@@ -16,12 +16,16 @@ import { useAuthStore } from '@/store'
 
 interface CommentSectionProps {
   postId: string
+  /** Who wrote the journey: they may delete or hide any comment on it. */
+  postAuthorId: string
   commentCount: number
 }
 
-export function CommentSection({ postId, commentCount }: CommentSectionProps) {
+export function CommentSection({ postId, postAuthorId, commentCount }: CommentSectionProps) {
   const { data: threads, isPending } = useComments(postId)
   const addComment = useAddComment(postId)
+  const deleteComment = useDeleteComment(postId)
+  const hideComment = useHideComment(postId)
   const user = useAuthStore((s) => s.user)
 
   const [draft, setDraft] = useState('')
@@ -129,6 +133,11 @@ export function CommentSection({ postId, commentCount }: CommentSectionProps) {
             }}
             onSubmitReply={(event) => submitReply(event, thread._id)}
             isSubmitting={addComment.isPending}
+            viewerId={user?._id}
+            postAuthorId={postAuthorId}
+            onDelete={(id) => deleteComment.mutate(id)}
+            onHide={(id, hidden) => hideComment.mutate({ commentId: id, hidden })}
+            isBusy={deleteComment.isPending || hideComment.isPending}
           />
         ))}
       </div>
@@ -145,6 +154,11 @@ interface CommentItemProps {
   onToggleReply: () => void
   onSubmitReply: (event: FormEvent) => void
   isSubmitting: boolean
+  viewerId: string | undefined
+  postAuthorId: string
+  onDelete: (commentId: string) => void
+  onHide: (commentId: string, hidden: boolean) => void
+  isBusy: boolean
   nested?: boolean
 }
 
@@ -157,10 +171,20 @@ function CommentItem({
   onToggleReply,
   onSubmitReply,
   isSubmitting,
+  viewerId,
+  postAuthorId,
+  onDelete,
+  onHide,
+  isBusy,
   nested = false,
 }: CommentItemProps) {
+  const [confirming, setConfirming] = useState(false)
+  const isMine = Boolean(viewerId) && comment.authorId === viewerId
+  const isJourneyAuthor = Boolean(viewerId) && postAuthorId === viewerId
+  const canDelete = isMine || isJourneyAuthor
+  const canHide = isJourneyAuthor && !isMine
   return (
-    <article className={cn('flex gap-3', nested && 'pl-4 sm:pl-6')}>
+    <article className={cn('flex gap-3', nested && 'pl-4 sm:pl-6', comment.hidden && 'opacity-60')}>
       <Link to={`/users/${comment.author._id}`} className="shrink-0">
         <Avatar className={cn('mt-0.5', nested ? 'size-7' : 'size-9')}>
           <AvatarImage src={comment.author.avatarUrl} alt="" />
@@ -181,19 +205,69 @@ function CommentItem({
           </time>
         </div>
 
+        {comment.hidden && (
+          <p className="mt-1 text-xs italic text-muted-foreground">
+            {isJourneyAuthor
+              ? 'Bạn đã ẩn bình luận này. Chỉ bạn và người viết còn thấy.'
+              : 'Bình luận này đã bị tác giả bài viết ẩn. Chỉ bạn và tác giả còn thấy.'}
+          </p>
+        )}
+
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
           {comment.content}
         </p>
 
-        {!nested && canReply && (
-          <button
-            type="button"
-            onClick={onToggleReply}
-            className="mt-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {isReplying ? 'Huỷ' : 'Trả lời'}
-          </button>
-        )}
+        <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+          {!nested && canReply && !comment.hidden && (
+            <button
+              type="button"
+              onClick={onToggleReply}
+              className="transition-colors hover:text-foreground"
+            >
+              {isReplying ? 'Huỷ' : 'Trả lời'}
+            </button>
+          )}
+
+          {canHide && (
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={() => onHide(comment._id, !comment.hidden)}
+              className="transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              {comment.hidden ? 'Bỏ ẩn' : 'Ẩn'}
+            </button>
+          )}
+
+          {canDelete &&
+            (confirming ? (
+              <span className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={isBusy}
+                  onClick={() => onDelete(comment._id)}
+                  className="text-rose-400 transition-colors hover:text-rose-300 disabled:opacity-50"
+                >
+                  {!nested && comment.replies.length > 0 ? 'Xoá cả các trả lời' : 'Xác nhận xoá'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  className="transition-colors hover:text-foreground"
+                >
+                  Giữ lại
+                </button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                className="transition-colors hover:text-foreground"
+              >
+                Xoá
+              </button>
+            ))}
+        </div>
 
         {isReplying && (
           <form onSubmit={onSubmitReply} className="mt-3 space-y-2">
@@ -231,6 +305,11 @@ function CommentItem({
                 onToggleReply={() => {}}
                 onSubmitReply={() => {}}
                 isSubmitting={false}
+                viewerId={viewerId}
+                postAuthorId={postAuthorId}
+                onDelete={onDelete}
+                onHide={onHide}
+                isBusy={isBusy}
               />
             ))}
           </div>
