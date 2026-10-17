@@ -9,6 +9,7 @@
  *   DELETE /api/activity/search-history          clear all
  *   GET    /api/activity/account-history         changes to your account, newest first
  *   GET    /api/activity/live-comments           comments you wrote in livestreams
+ *   GET    /api/activity/journey-comments        comments you wrote on journeys
  */
 
 import { Router } from 'express'
@@ -21,7 +22,9 @@ import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { AccountEvent } from '../models/AccountEvent.js'
 import { Livestream, LivestreamComment } from '../models/Livestream.js'
+import { PostComment } from '../models/PostInteraction.js'
 import { SEARCH_HISTORY_LIMIT, SEARCH_TYPES, SearchHistory } from '../models/SearchHistory.js'
+import { TripPost } from '../models/TripPost.js'
 import { User } from '../models/User.js'
 
 export const activityRouter = Router()
@@ -146,6 +149,33 @@ activityRouter.get('/live-comments', async (_req, res) => {
                 : null,
             }
           : null,
+      }
+    }),
+  })
+})
+
+/* ------------------------------------------------------- journey comments */
+
+activityRouter.get('/journey-comments', async (_req, res) => {
+  const user = currentUser(res)
+  const comments = await PostComment.find({ authorId: user._id }).sort({ createdAt: -1 }).limit(100).lean()
+
+  const postIds = [...new Set(comments.map((c) => c.postId))].filter((id) => isValidObjectId(id))
+  const posts = await TripPost.find({ _id: { $in: postIds } }).select('title coverUrl').lean()
+  const postById = new Map(posts.map((p) => [String(p._id), p]))
+
+  res.json({
+    items: comments.map((c) => {
+      const post = postById.get(c.postId)
+      return {
+        _id: String(c._id),
+        postId: c.postId,
+        authorId: c.authorId,
+        parentId: c.parentId,
+        content: c.content,
+        likeCount: 0,
+        createdAt: c.createdAt.toISOString(),
+        post: post ? { _id: String(post._id), title: post.title, coverUrl: post.coverUrl } : null,
       }
     }),
   })

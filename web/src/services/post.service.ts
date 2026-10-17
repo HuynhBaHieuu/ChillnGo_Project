@@ -20,6 +20,7 @@ import { http } from './http'
 import {
   dropServerPost,
   isServerPostId,
+  setLiked,
   syncServerPosts,
   upsertAuthors,
   upsertServerPost,
@@ -133,8 +134,11 @@ export async function getPostById(
   viewerId: ObjectId | null,
 ): Promise<TripPostWithAuthor> {
   if (isServerPostId(id)) {
-    const { post, authors } = await http<{ post: ServerTripPost; authors: User[] }>(`/api/posts/${id}`)
+    const { post, authors, likedByMe } = await http<{ post: ServerTripPost; authors: User[]; likedByMe: boolean }>(
+      `/api/posts/${id}`,
+    )
     upsertAuthors(authors)
+    if (viewerId) setLiked(viewerId, post._id, likedByMe)
     return decorate(upsertServerPost(post), viewerId)
   }
 
@@ -234,6 +238,14 @@ export async function toggleLike(
   postId: ObjectId,
   viewerId: ObjectId,
 ): Promise<{ likeCount: number; likedByMe: boolean }> {
+  if (isServerPostId(postId)) {
+    const result = await http<{ likeCount: number; likedByMe: boolean }>(`/api/posts/${postId}/like`, { method: 'POST' })
+    setLiked(viewerId, postId, result.likedByMe)
+    const stored = db.tripPosts.find((p) => p._id === postId)
+    if (stored) stored.likeCount = result.likeCount
+    return result
+  }
+
   await delay()
   const post = assertFound(
     db.tripPosts.find((p) => p._id === postId),
@@ -291,9 +303,15 @@ export async function toggleBookmark(
  * the same root, which is how the UI renders it anyway.
  */
 export async function getComments(postId: ObjectId): Promise<CommentThread[]> {
-  await delay()
-
-  const forPost = db.comments.filter((c) => c.postId === postId)
+  let forPost: Comment[]
+  if (isServerPostId(postId)) {
+    const { items, authors } = await http<{ items: Comment[]; authors: User[] }>(`/api/posts/${postId}/comments`)
+    upsertAuthors(authors)
+    forPost = items
+  } else {
+    await delay()
+    forPost = db.comments.filter((c) => c.postId === postId)
+  }
   const authorFor = (c: Comment): User => userOrPlaceholder(c.authorId)
 
   const roots = forPost
@@ -321,6 +339,16 @@ export async function addComment(input: {
   parentId: ObjectId | null
   content: string
 }): Promise<Comment> {
+  if (isServerPostId(input.postId)) {
+    const { comment, commentCount } = await http<{ comment: Comment; commentCount: number }>(
+      `/api/posts/${input.postId}/comments`,
+      { method: 'POST', body: { content: input.content, parentId: input.parentId } },
+    )
+    const stored = db.tripPosts.find((p) => p._id === input.postId)
+    if (stored) stored.commentCount = commentCount
+    return comment
+  }
+
   await delay()
 
   const comment: Comment = {
@@ -339,6 +367,37 @@ export async function addComment(input: {
   if (post) post.commentCount += 1
 
   return clone(comment)
+}
+
+/** DELETE /api/posts/:id/comments/:commentId — a root comment takes its replies with it. */
+export async function deleteComment(postId: ObjectId, commentId: ObjectId): Promise<void> {
+  if (isServerPostId(postId)) {
+    const { commentCount } = await http<{ commentCount: number }>(`/api/posts/${postId}/comments/${commentId}`, {
+      method: 'DELETE',
+    })
+    const stored = db.tripPosts.find((p) => p._id === postId)
+    if (stored) stored.commentCount = commentCount
+    return
+  }
+
+  await delay()
+  const doomed = new Set(
+    db.comments.filter((c) => c.postId === postId && (c._id === commentId || c.parentId === commentId)).map((c) => c._id),
+  )
+  db.comments = db.comments.filter((c) => !doomed.has(c._id))
+  const post = db.tripPosts.find((p) => p._id === postId)
+  if (post) post.commentCount = Math.max(0, post.commentCount - doomed.size)
+}
+
+/** POST /api/posts/:id/comments/:commentId/hide — the journey's author hides or shows someone's comment. */
+export async function hideComment(postId: ObjectId, commentId: ObjectId, hidden: boolean): Promise<void> {
+  if (!isServerPostId(postId)) throw new ApiError('Bình luận này không thể ẩn.', 400)
+  const { commentCount } = await http<{ commentCount: number }>(`/api/posts/${postId}/comments/${commentId}/hide`, {
+    method: 'POST',
+    body: { hidden },
+  })
+  const stored = db.tripPosts.find((p) => p._id === postId)
+  if (stored) stored.commentCount = commentCount
 }
 
 /* ------------------------------------------------------ journeys (drafts) */

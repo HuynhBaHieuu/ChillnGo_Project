@@ -62,8 +62,10 @@ export function usePublishedPosts(enabled = true) {
 }
 
 export function useComments(postId: string | undefined) {
+  const viewerId = useViewerId()
   return useQuery({
-    queryKey: qk.post.comments(postId ?? ''),
+    // Hidden comments depend on who is looking.
+    queryKey: [...qk.post.comments(postId ?? ''), viewerId],
     queryFn: () => postService.getComments(postId as string),
     enabled: Boolean(postId),
   })
@@ -81,6 +83,34 @@ export function useAddComment(postId: string) {
         parentId: input.parentId,
         content: input.content,
       }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: qk.post.comments(postId) })
+      void queryClient.invalidateQueries({ queryKey: qk.post.detail(postId, viewerId) })
+    },
+  })
+}
+
+export function useDeleteComment(postId: string) {
+  const queryClient = useQueryClient()
+  const viewerId = useViewerId()
+
+  return useMutation({
+    mutationFn: (commentId: string) => postService.deleteComment(postId, commentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: qk.post.comments(postId) })
+      void queryClient.invalidateQueries({ queryKey: qk.post.detail(postId, viewerId) })
+      void queryClient.invalidateQueries({ queryKey: ['activity'] })
+    },
+  })
+}
+
+export function useHideComment(postId: string) {
+  const queryClient = useQueryClient()
+  const viewerId = useViewerId()
+
+  return useMutation({
+    mutationFn: (input: { commentId: string; hidden: boolean }) =>
+      postService.hideComment(postId, input.commentId, input.hidden),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: qk.post.comments(postId) })
       void queryClient.invalidateQueries({ queryKey: qk.post.detail(postId, viewerId) })
