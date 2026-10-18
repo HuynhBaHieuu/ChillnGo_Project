@@ -79,15 +79,25 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
             className="flex items-baseline justify-between gap-4 text-sm"
           >
             <span className="min-w-0">
-              <span className="block truncate">{location.name}</span>
+              <span className="block truncate">
+                {location.startTime && (
+                  <span className="mr-2 tabular-nums text-muted-foreground">{location.startTime}</span>
+                )}
+                {location.name}
+              </span>
               {location.note && (
                 <span className="block truncate text-xs text-muted-foreground">
                   {location.note}
                 </span>
               )}
+              {location.planB && (
+                <span className="block truncate text-xs text-muted-foreground">
+                  Plan B: {location.planB.name} · cách khoảng {String(location.planB.distanceKm).replace('.', ',')} km
+                </span>
+              )}
             </span>
             <span className="shrink-0 text-muted-foreground">
-              {location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
+              {location.costUnknown ? 'Chưa có dữ liệu' : location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
             </span>
           </li>
         ))}

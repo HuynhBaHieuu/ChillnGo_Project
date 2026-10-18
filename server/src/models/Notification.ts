@@ -2,11 +2,11 @@ import { Schema, model } from 'mongoose'
 
 /**
  * Something that happened that a user should hear about. Only the kinds the
- * server produces live here (new follower, someone went live, a like or comment
- * on a journey); the rest of the app's notifications are still mock data in the
- * web app.
+ * server produces live here (new follower, someone went live, a like, comment
+ * or clone of a journey); the rest of the app's notifications are still mock
+ * data in the web app.
  */
-export const NOTIFICATION_TYPES = ['follow', 'live', 'like', 'comment'] as const
+export const NOTIFICATION_TYPES = ['follow', 'live', 'like', 'comment', 'clone'] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
 const notificationSchema = new Schema(

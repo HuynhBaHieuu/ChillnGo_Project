@@ -99,6 +99,15 @@ export interface TripLocation {
   placeTypes?: string[]
   /** The road route into this stop, cached when the journey was saved. */
   legRoute?: LegRoute
+  /** The place this stop is, when it was picked from ChillnGo's place data (AI clone, seed journeys). */
+  placeId?: string
+  /** Arrival time ("HH:mm") and stay, planned by AI clone. */
+  startTime?: string
+  durationMin?: number
+  /** No cost data: `estCost` is 0 for want of one, not because the stop is free. */
+  costUnknown?: boolean
+  /** The nearest open place of the same kind, saved from an AI draft. */
+  planB?: { name: string; address: string; placeId?: string; lat: number | null; lng: number | null; distanceKm: number; reason: string }
 }
 
 export interface TripDay {
@@ -189,11 +198,24 @@ export interface Bookmark {
 
 /* ------------------------------------------------------- ClonedItinerary */
 
+/** A journey an itinerary was cloned from, and who wrote it, for the attribution. */
+export interface ItinerarySource {
+  postId: ObjectId
+  title: string
+  author: Pick<User, '_id' | 'username' | 'displayName'> | null
+}
+
 export interface ClonedItinerary {
   _id: ObjectId
   ownerId: ObjectId
-  /** Every post this itinerary has pulled days from, in merge order. */
+  /** Every post this itinerary has pulled days from, in merge order. The first is the one it was cloned from. */
   sourcePostIds: ObjectId[]
+  /** Copied as-is, adapted by AI, or merged by AI. Absent on older ones: copied. */
+  cloneType?: 'manual' | 'ai' | 'merge'
+  /** The journeys in `sourcePostIds` with their authors, filled in by `getItineraryById`. */
+  sources?: ItinerarySource[]
+  /** The preparation checklist made for its AI draft. */
+  checklist?: AiChecklist | null
   title: string
   note: string
   coverUrl: string
@@ -328,4 +350,116 @@ export interface MomentPhoto {
   postId: ObjectId
   /** The trip's short title, e.g. "Hà Giang Loop 4N3Đ". */
   tripTitle: string
+}
+
+/* ------------------------------------------------------------- AI clone */
+
+export type AiPace = 'relaxed' | 'moderate' | 'packed'
+
+/** The AI clone form (server/src/ai/schemas.ts). */
+export interface AiCloneForm {
+  startDate: DateOnly
+  days: number
+  groupSize: number
+  withChildren: boolean
+  withElderly: boolean
+  /** Whole trip, whole group, VND. Null: no budget. */
+  budget: number | null
+  departure: string
+  /** Place categories, from `AiCloneOptions.interests`. */
+  interests: string[]
+  pace: AiPace
+}
+
+export interface AiCloneOptions {
+  /** Null when ChillnGo has no place data for where this journey goes. */
+  destination: string | null
+  interests: { value: string; label: string }[]
+  /** The destination's season data, as entered; empty lists say nothing. */
+  season: { rainyMonths: number[]; peakMonths: number[]; festivals: { name: string; month: number }[] } | null
+  /** Other journeys at the same destination an AI merge can take in. */
+  mergeable: { postId: ObjectId; title: string; days: number; author: string | null }[]
+  sourceDays: number
+  callsLeft: number
+  dailyLimit: number
+}
+
+/** What the destination's season data says about the trip's months. */
+export interface AiSeason {
+  months: number[]
+  rainy: boolean
+  peak: boolean
+  festivals: { name: string; month: number }[]
+}
+
+export interface AiChecklist {
+  groups: { group: string; items: { id: string; text: string }[] }[]
+  /** False when it is in template order (no AI request left, or the AI failed). */
+  sortedByAi: boolean
+}
+
+export type AiChangeType = 'keep' | 'replace' | 'add' | 'remove'
+export type AiChangeStatus = 'pending' | 'accepted' | 'reverted'
+
+/** A place as ChillnGo's data knows it. Null: no data. */
+export interface AiPlace {
+  name: string
+  address: string
+  lat: number | null
+  lng: number | null
+  category: string | null
+  avgCost: number | null
+  priceLevel: number | null
+  openingHours: { open: string; close: string } | null
+  isOutdoor: boolean | null
+  requiresBooking: boolean | null
+  rating: number | null
+  photoUrl: string | null
+  valueScore: number
+  inSource: boolean
+  /** For the whole group, VND. Null: no data. */
+  cost: number | null
+  /** perPerson: average per person × group; author: as the original journey's author wrote it. */
+  costBasis: 'perPerson' | 'author' | null
+}
+
+export interface AiDraftStop {
+  changeId: string
+  type: AiChangeType
+  status: AiChangeStatus
+  startTime: string
+  endTime: string
+  durationMin: number
+  reason: string
+  place: AiPlace
+  /** For a replace: the stop it replaces. */
+  original: AiPlace | null
+  /** The nearest place of the same kind that is free and open then; null when none. */
+  planB: { place: AiPlace; distanceKm: number; reason: string } | null
+}
+
+export interface AiDraft {
+  _id: ObjectId
+  sources: ItinerarySource[]
+  destination: string | null
+  formInput: AiCloneForm
+  days: {
+    dayIndex: number
+    date: DateOnly
+    cost: { total: number; missing: number }
+    stops: AiDraftStop[]
+  }[]
+  /** Stops the AI took out, and additions you turned down. */
+  notInPlan: { changeId: string; type: AiChangeType; status: AiChangeStatus; reason: string; place: AiPlace }[]
+  cost: { total: number; missing: number; budget: number | null; overBudget: boolean }
+  warnings: string[]
+  season: AiSeason | null
+  checklist: AiChecklist | null
+  pendingCount: number
+  chat: { role: 'user' | 'assistant'; content: string; at: ISODate }[]
+  /** Set once saved to "Đã clone về". */
+  committedItineraryId: ObjectId | null
+  expiresAt: ISODate
+  callsLeft: number
+  dailyLimit: number
 }

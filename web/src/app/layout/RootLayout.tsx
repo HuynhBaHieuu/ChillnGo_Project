@@ -21,10 +21,11 @@ export function RootLayout() {
   const staff = useAuthStore((s) => isStaff(s.user))
   const signedIn = useAuthStore((s) => s.isAuthenticated)
   // These pages keep their own controls at the bottom edge (post actions, live
-  // comments), which the floating assistant button would cover.
+  // comments, an AI draft's chat), which the floating assistant button would cover.
   const postMatch = useMatch('/posts/:id')
   const onLive = useMatch('/live/:id')
-  const bottomControls = Boolean(onLive) || (postMatch !== null && postMatch.params.id !== 'new')
+  const onAiDraft = useMatch('/ai-drafts/:id')
+  const bottomControls = Boolean(onLive || onAiDraft) || (postMatch !== null && postMatch.params.id !== 'new')
 
   // A route change should never leave the mobile sheet hanging open.
   useEffect(() => {

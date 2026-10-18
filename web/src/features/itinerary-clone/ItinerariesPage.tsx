@@ -1,4 +1,4 @@
-import { Compass, Map, PenLine, Plus } from 'lucide-react'
+import { Compass, Map, PenLine, Plus, Sparkles } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
@@ -234,7 +234,15 @@ function ClonedItineraries() {
 
             <div className="space-y-3 p-5">
               <div className="flex items-center justify-between gap-2">
-                <Badge variant="outline">{STATUS_LABELS[itinerary.status]}</Badge>
+                <span className="flex flex-wrap gap-1.5">
+                  <Badge variant="outline">{STATUS_LABELS[itinerary.status]}</Badge>
+                  {(itinerary.cloneType === 'ai' || itinerary.cloneType === 'merge') && (
+                    <Badge variant="outline" className="gap-1 border-np-teal/50 text-np-teal">
+                      <Sparkles className="size-3" />
+                      AI
+                    </Badge>
+                  )}
+                </span>
                 <span className="text-xs text-muted-foreground">{tripLengthLabel(itinerary.days.length)}</span>
               </div>
 
