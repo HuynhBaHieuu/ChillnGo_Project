@@ -39,6 +39,10 @@ export const qk = {
     mine: (ownerId: string) => ['itineraries', 'mine', ownerId] as const,
     detail: (id: string, viewerId: string | null) => ['itineraries', 'detail', id, viewerId] as const,
   },
+  aiClone: {
+    options: (postId: string) => ['ai-clone', 'options', postId] as const,
+    draft: (id: string) => ['ai-clone', 'draft', id] as const,
+  },
   /** Your Activity. Everything is keyed by the signed-in user. */
   activity: {
     all: (me: string) => ['activity', me] as const,

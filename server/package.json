@@ -11,8 +11,10 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"src/**/*.test.ts\"",
     "seed": "tsx src/scripts/seed.ts",
-    "seed:superadmin": "tsx src/scripts/seed-superadmin.ts"
+    "seed:superadmin": "tsx src/scripts/seed-superadmin.ts",
+    "seed:places": "tsx src/scripts/seed-places.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",

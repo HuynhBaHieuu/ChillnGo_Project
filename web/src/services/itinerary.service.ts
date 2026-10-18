@@ -1,77 +1,72 @@
 /**
- * Cloned itineraries.
+ * Cloned itineraries ("Đã clone về"), stored by the API
+ * (server/src/routes/itineraries.ts) and private to their owner.
  *
- * The clone and reorder operations here are deliberate stubs: a clone is a deep
- * copy with fresh ids and re-based dates, and a reorder is an array move. The
- * real algorithms (route re-optimisation, date/travel-time reconciliation,
- * conflict resolution when merging two posts) land with the Express API.
+ * The sample journeys (ids like p_001) exist only here in the browser, so
+ * cloning or merging one sends its days along; the API reads its own journeys
+ * itself. `ownerId` parameters stay for the callers' sake: the API knows who
+ * is asking.
  */
 
-import { ApiError, assertFound, clone, db, delay, nextId, nowIso } from './client'
-import { totalCostOf } from '@/lib/itinerary'
-import type {
-  ClonedItinerary,
-  ObjectId,
-  TripDay,
-  TripPost,
-} from './types'
+import { assertFound, db } from './client'
+import { http } from './http'
+import { isServerPostId, syncServerPosts } from './serverPosts'
+import type { ClonedItinerary, ObjectId } from './types'
+import { themeFromText, travelCover } from '@/lib/photos'
 
-/** Add `days` calendar days to a `YYYY-MM-DD` string, staying in UTC. */
-function addDays(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00.000Z`)
-  d.setUTCDate(d.getUTCDate() + days)
-  return d.toISOString().slice(0, 10)
+type ItineraryResponse = { itinerary: ClonedItinerary }
+
+/** The source's cover, or the automatic one a journey without photos gets. */
+function withCover(itinerary: ClonedItinerary): ClonedItinerary {
+  if (itinerary.coverUrl) return itinerary
+  return { ...itinerary, coverUrl: travelCover(itinerary.title.slice(0, 30) || 'chillngo', themeFromText(itinerary.title)) }
 }
 
-/**
- * Re-key a set of days onto a new itinerary: fresh ids, sequential day numbers
- * and dates counted forward from `startDate`.
- */
-function rekeyDays(days: TripDay[], itineraryId: ObjectId, startDate: string): TripDay[] {
-  return days.map((day, i) => ({
-    ...clone(day),
-    _id: `${itineraryId}_d${i + 1}`,
-    dayNumber: i + 1,
-    date: addDays(startDate, i),
-    locations: day.locations.map((loc, j) => ({
-      ...clone(loc),
-      _id: `${itineraryId}_d${i + 1}_l${j + 1}`,
-    })),
-  }))
+/** A sample journey's days as this browser has them; nothing for a journey the API stores. */
+function sampleSource(postId: ObjectId, dayIds?: ObjectId[]) {
+  if (isServerPostId(postId)) return undefined
+  const post = assertFound(
+    db.tripPosts.find((p) => p._id === postId),
+    `Không tìm thấy bài viết ${postId}`,
+  )
+  return {
+    title: post.title,
+    coverUrl: post.coverUrl,
+    startDate: post.startDate,
+    days: dayIds ? post.days.filter((d) => dayIds.includes(d._id)) : post.days,
+  }
 }
 
 /** GET /api/itineraries */
-export async function getMyItineraries(ownerId: ObjectId): Promise<ClonedItinerary[]> {
-  await delay()
-  return db.clonedItineraries
-    .filter((it) => it.ownerId === ownerId)
-    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-    .map((it) => clone(it))
+export async function getMyItineraries(_ownerId: ObjectId): Promise<ClonedItinerary[]> {
+  const { items } = await http<{ items: ClonedItinerary[] }>('/api/itineraries')
+  return items.map(withCover)
 }
 
 /**
- * One of `ownerId`'s itineraries. Someone else's answers "not found", as the
- * API will: an itinerary is private to the person who cloned it.
+ * GET /api/itineraries/:id, with the journeys it came from and their authors
+ * (for "Phỏng theo hành trình của @…"). Someone else's answers "not found".
  */
-function ownItinerary(id: ObjectId, ownerId: ObjectId): ClonedItinerary {
-  const itinerary = db.clonedItineraries.find((it) => it._id === id)
-  if (!itinerary || itinerary.ownerId !== ownerId) {
-    throw new ApiError(`Không tìm thấy lịch trình ${id}`, 404)
+export async function getItineraryById(id: ObjectId, _ownerId: ObjectId): Promise<ClonedItinerary> {
+  const [{ itinerary }] = await Promise.all([http<ItineraryResponse>(`/api/itineraries/${id}`), syncServerPosts()])
+  return {
+    ...withCover(itinerary),
+    sources: itinerary.sourcePostIds.map((postId) => {
+      const post = db.tripPosts.find((p) => p._id === postId)
+      const author = post ? db.users.find((u) => u._id === post.authorId) : undefined
+      return {
+        postId,
+        title: post?.title ?? '',
+        author: author ? { _id: author._id, username: author.username, displayName: author.displayName } : null,
+      }
+    }),
   }
-  return itinerary
-}
-
-/** GET /api/itineraries/:id */
-export async function getItineraryById(id: ObjectId, ownerId: ObjectId): Promise<ClonedItinerary> {
-  await delay()
-  return clone(ownItinerary(id, ownerId))
 }
 
 /**
- * POST /api/posts/:id/clone — the core action of the product.
- *
- * Copies every day of a post into a new itinerary owned by the viewer, starting
- * on `startDate` (defaults to the source post's own start date).
+ * POST /api/itineraries — the core action of the product: copies every day of
+ * a journey into a new itinerary you own, dated from `startDate` (default: the
+ * journey's own).
  */
 export async function clonePost(input: {
   postId: ObjectId
@@ -79,140 +74,50 @@ export async function clonePost(input: {
   title?: string
   startDate?: string
 }): Promise<ClonedItinerary> {
-  await delay()
-
-  const post: TripPost = assertFound(
-    db.tripPosts.find((p) => p._id === input.postId),
-    `Không tìm thấy bài viết ${input.postId}`,
-  )
-
-  const id = nextId('ci')
-  const startDate = input.startDate ?? post.startDate
-  const days = rekeyDays(post.days, id, startDate)
-
-  const itinerary: ClonedItinerary = {
-    _id: id,
-    ownerId: input.ownerId,
-    sourcePostIds: [post._id],
-    title: input.title?.trim() || `${post.title} (bản của tôi)`,
-    note: `Clone từ bài viết "${post.title}".`,
-    coverUrl: post.coverUrl,
-    startDate,
-    days,
-    totalEstCost: totalCostOf(days),
-    status: 'planning',
-    createdAt: nowIso(),
-    updatedAt: nowIso(),
-  }
-
-  db.clonedItineraries.unshift(itinerary)
-  post.cloneCount += 1
-
-  return clone(itinerary)
+  const { itinerary } = await http<ItineraryResponse>('/api/itineraries', {
+    method: 'POST',
+    body: { postId: input.postId, title: input.title, startDate: input.startDate, source: sampleSource(input.postId) },
+  })
+  // The API counted it on its own journeys; this keeps the open page in step until the next sync.
+  const post = db.tripPosts.find((p) => p._id === input.postId)
+  if (post) post.cloneCount += 1
+  return withCover(itinerary)
 }
 
-/**
- * PATCH /api/itineraries/:id/days — persist a new day order.
- *
- * Stub: the caller has already moved the array, so this renumbers, re-bases the
- * dates and recomputes the total. No route re-optimisation yet.
- */
+/** PATCH /api/itineraries/:id/days — a new day order; days are renumbered and re-dated. */
 export async function reorderItineraryDays(
   id: ObjectId,
   orderedDayIds: ObjectId[],
-  ownerId: ObjectId,
+  _ownerId: ObjectId,
 ): Promise<ClonedItinerary> {
-  await delay()
-
-  const itinerary = ownItinerary(id, ownerId)
-
-  const byId = new Map(itinerary.days.map((d) => [d._id, d]))
-  const reordered = orderedDayIds
-    .map((dayId) => byId.get(dayId))
-    .filter((d): d is TripDay => Boolean(d))
-
-  // Anything the caller left out keeps its relative position at the end.
-  for (const day of itinerary.days) {
-    if (!orderedDayIds.includes(day._id)) reordered.push(day)
-  }
-
-  itinerary.days = reordered.map((day, i) => ({
-    ...day,
-    dayNumber: i + 1,
-    date: addDays(itinerary.startDate, i),
-  }))
-  itinerary.totalEstCost = totalCostOf(itinerary.days)
-  itinerary.updatedAt = nowIso()
-
-  return clone(itinerary)
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}/days`, {
+    method: 'PATCH',
+    body: { dayIds: orderedDayIds },
+  })
+  return withCover(itinerary)
 }
 
-/**
- * POST /api/itineraries/:id/merge — append selected days from other posts.
- *
- * Stub: days are appended in the order given and renumbered. The real version
- * will interleave by geography and flag date conflicts.
- */
+/** POST /api/itineraries/:id/merge — appends the chosen days of other journeys, in order. */
 export async function mergeIntoItinerary(input: {
   itineraryId: ObjectId
   ownerId: ObjectId
   selections: { postId: ObjectId; dayIds: ObjectId[] }[]
 }): Promise<ClonedItinerary> {
-  await delay()
-
-  const itinerary = ownItinerary(input.itineraryId, input.ownerId)
-
-  const incoming: TripDay[] = []
-  for (const selection of input.selections) {
-    const post = db.tripPosts.find((p) => p._id === selection.postId)
-    if (!post) continue
-
-    for (const dayId of selection.dayIds) {
-      const day = post.days.find((d) => d._id === dayId)
-      if (day) incoming.push(day)
-    }
-
-    if (!itinerary.sourcePostIds.includes(post._id)) {
-      itinerary.sourcePostIds.push(post._id)
-    }
-  }
-
-  const merged = [...itinerary.days, ...incoming]
-  itinerary.days = merged.map((day, i) => ({
-    ...clone(day),
-    _id: `${itinerary._id}_d${i + 1}`,
-    dayNumber: i + 1,
-    date: addDays(itinerary.startDate, i),
-    locations: day.locations.map((loc, j) => ({
-      ...clone(loc),
-      _id: `${itinerary._id}_d${i + 1}_l${j + 1}`,
-    })),
-  }))
-  itinerary.totalEstCost = totalCostOf(itinerary.days)
-  itinerary.updatedAt = nowIso()
-
-  return clone(itinerary)
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${input.itineraryId}/merge`, {
+    method: 'POST',
+    body: {
+      selections: input.selections.map((s) => ({ ...s, source: sampleSource(s.postId, s.dayIds) })),
+    },
+  })
+  return withCover(itinerary)
 }
 
 /** DELETE /api/itineraries/:id/days/:dayId */
 export async function removeItineraryDay(
   id: ObjectId,
   dayId: ObjectId,
-  ownerId: ObjectId,
+  _ownerId: ObjectId,
 ): Promise<ClonedItinerary> {
-  await delay()
-
-  const itinerary = ownItinerary(id, ownerId)
-
-  itinerary.days = itinerary.days
-    .filter((d) => d._id !== dayId)
-    .map((day, i) => ({
-      ...day,
-      dayNumber: i + 1,
-      date: addDays(itinerary.startDate, i),
-    }))
-  itinerary.totalEstCost = totalCostOf(itinerary.days)
-  itinerary.updatedAt = nowIso()
-
-  return clone(itinerary)
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}/days/${dayId}`, { method: 'DELETE' })
+  return withCover(itinerary)
 }

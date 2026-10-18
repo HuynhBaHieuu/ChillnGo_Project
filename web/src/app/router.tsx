@@ -15,6 +15,7 @@ import { DiscoverPage } from '@/features/discovery-admin/DiscoverPage'
 import { InterestPage } from '@/features/discovery-admin/InterestPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
+import { AiDraftPage } from '@/features/ai-clone/AiDraftPage'
 import { EditProfilePage } from '@/features/social/EditProfilePage'
 import { LiveNowPage } from '@/features/livestream/LiveNowPage'
 import { ProfilePage } from '@/features/social/ProfilePage'
@@ -77,6 +78,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <ItineraryDetailPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/ai-drafts/:id',
+        element: (
+          <RequireAuth>
+            <AiDraftPage />
           </RequireAuth>
         ),
       },

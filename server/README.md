@@ -27,6 +27,8 @@ comments and itineraries from mock JSON in `web/src/services/`.
 | `npm run dev` | Runs `src/index.ts` with reload on save. |
 | `npm run seed` | Creates or updates the six demo accounts from `web/src/mocks/users.json`. They are already email-verified and all get the password `chillngo` (override with `SEED_PASSWORD`). `admin@chillngo.vn` is the admin. |
 | `npm run seed:superadmin` | Creates the Super Admin from `SUPERADMIN_*` in `.env`. Changes no other account; safe to re-run. See [Super Admin and admins](#super-admin-and-admins). |
+| `npm run seed:places` | Demo data for AI clone: Đà Lạt and Hội An with about 30 places each, the checklist templates, and four published sample journeys linked to them (`src/scripts/data/aiSeed.ts`). A missing author account is created without a password. Safe to re-run. See [AI clone](#ai-clone). |
+| `npm test` | Unit tests (`src/**/*.test.ts`, Node's test runner). The model is faked; nothing calls a real AI. |
 | `npm run typecheck` | Type-checks without emitting. |
 | `npm run build` / `npm start` | Compiles to `dist/` and runs it, for hosts other than Vercel. |
 
@@ -54,6 +56,9 @@ shows Minh's trips.
 | `ASSISTANT_DEBUG` | no | `1` logs each lookup the assistant makes (tool, arguments, result size) to the console. |
 | `ASSISTANT_MODEL` | no | Model the AI travel assistant (`POST /api/assistant/chat`) asks through LiveKit Inference, as `provider/model`. Default `google/gemini-2.5-flash`. The assistant needs no key of its own: it uses the `LIVEKIT_*` keys and works only with a LiveKit Cloud project, billed to its inference quota. |
 
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | no | Google Gemini for AI clone (key from https://aistudio.google.com/apikey); model default `gemini-3.8-flash`. When Gemini fails or runs out of quota, AI clone falls back to LiveKit Inference with `ASSISTANT_MODEL`. Unset: LiveKit only. |
+| `AI_DAILY_LIMIT_PER_USER` | no | AI requests (an AI clone, a chat message) each user may make per day. Default `20`. |
+
 The server refuses to start if a required variable is missing.
 
 ## API
@@ -76,6 +81,23 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/checkins` | `caption`, `photos` (0–4 publicIds), `feeling` (key from `src/lib/feelings.ts`) or null, `location` (`name`, `address`, `lat`, `lng`) or null. Needs photos, a feeling or a caption. | `201 { checkin }` |
 | `DELETE /api/checkins/:id` | none | `200`. Author only; also deletes the photos from Cloudinary. |
 | `POST /api/assistant/chat` | `messages`: up to 20 `{ role: "user" \| "assistant", content }`, ending with the user's question | `200`, the reply streamed as plain text. The model looks things up through read-only tools run on the server as the signed-in user (`lib/assistantTools.ts`): published journeys, one journey's days and costs, the user's own journeys and drafts, and the website guide (`lib/siteGuide.ts`); it never sees the database or other users' private data. The reply carries `<<…>>` gesture tags for the web app's robot (an intent such as `<<g:explain>>` at the start, `<<g:stress>>` before stressed words, `<<g:thumbsup>>`, `<<n:1>>` list points, `<<j:id>>` after a journey's title, which the web app turns into a link); they pass through and the web app reads them off. Send earlier replies back with their tags. Signed in; 10 questions a minute per user. `503 ASSISTANT_OFF` without a LiveKit Cloud project, `429 ASSISTANT_BUSY` when the inference quota is used up, `503 ASSISTANT_UNAVAILABLE` for other gateway errors (the reason is in the server log). Nothing is stored. |
+| `GET /api/itineraries` | none | `200 { items }`: your cloned itineraries ("Đã clone về"), newest first. Private to their owner. |
+| `GET /api/itineraries/:id` | none | `200 { itinerary }`; someone else's is a `404`. |
+| `POST /api/itineraries` | `postId`, `title?`, `startDate?`, and for a sample journey (mock id like `p_001`) its `source` (`title`, `coverUrl`, `startDate`, `days`) | `201 { itinerary }`: the journey copied as it is, dated from `startDate`. A stored journey must be published or yours; its `cloneCount` goes up and its author is told. |
+| `PATCH /api/itineraries/:id/days` | `dayIds` in the new order | `200 { itinerary }`, renumbered and re-dated. |
+| `POST /api/itineraries/:id/merge` | `selections`: `{ postId, dayIds, source? }[]` | `200 { itinerary }` with those days appended. |
+| `DELETE /api/itineraries/:id/days/:dayId` | none | `200 { itinerary }`; the last day cannot go (`400 LAST_DAY`). |
+| `GET /api/posts/:id/ai-clone` | none | `200 { destination, interests, sourceDays, callsLeft, dailyLimit }` for the AI clone form. |
+| `POST /api/posts/:id/ai-clone` | `startDate`, `days` (1–14), `groupSize` (1–30), `withChildren`, `withElderly`, `budget` (VND, whole group) or null, `departure`, `interests` (place categories), `pace` (`relaxed` \| `moderate` \| `packed`) | `201 { draft }`, in 20–60 s. Uses one AI request: `429 AI_DAILY_LIMIT` when none are left, `503 AI_UNAVAILABLE` / `502 AI_INVALID_OUTPUT` when the AI could not answer (that request is given back). |
+| `GET /api/ai-drafts/:id` | none | `200 { draft }`: days with each stop's change (`keep` \| `replace` \| `add` \| `remove`, status `pending` \| `accepted` \| `reverted`) and reason, costs against the budget, time warnings, chat. Drafts last 24 hours (`404 DRAFT_NOT_FOUND` after). |
+| `POST /api/ai-drafts/:id/chat` | `message` (up to 500 characters) | `200 { draft, reply }`: the AI's edits applied. Uses one AI request. |
+| `PATCH /api/ai-drafts/:id/changes/:changeId` | `status` | `200 { draft }`. Reverting a replace shows the original stop again; reverting a remove brings the stop back after its day's last stop. |
+| `POST /api/ai-drafts/:id/accept-all` | none | `200 { draft }` |
+| `POST /api/posts/ai-merge` | `sourceIds` (2–3 journeys at one destination), `form` (as for AI clone) | `201 { draft }` from all of them, every author credited. `400 DIFFERENT_DESTINATIONS` otherwise. Uses one AI request. |
+| `POST /api/ai-drafts/:id/optimize-route` | `dayIndex?` (all days without it) | `200 { draft, routes }`: each day reordered by nearest neighbour (meals and the hotel stay put), only when that shortens it. No AI. |
+| `GET /api/ai-drafts/:id/plan-b` | none | `200 { planB }`: per stop, the nearest place of the same category that is free and open then (indoors first in the rainy season). Also in every `draft`. No AI. |
+| `POST /api/ai-drafts/:id/checklist` | none | `200 { draft }` with `checklist`: ChecklistTemplate items matching the trip (places, season, group) plus places to book; the AI only orders them, when an AI request is left. Saved with the itinerary. |
+| `POST /api/ai-drafts/:id/commit` | `title?` | `201 { itinerary }` in "Đã clone về" (`cloneType: "ai"`, or `"merge"`); the sources' `cloneCount` goes up. Committing again returns the same itinerary. |
 | `GET /api/settings/public` | none | `200 { settings }`: announcement and whether registration is open. |
 | `GET /api/auth/me` | none; header `Authorization: Bearer <token>` | `200 { user }` |
 | `GET /api/health` | none | `200 { ok: true }` |
@@ -122,6 +144,42 @@ Rules enforced by the API:
   item is deleted for good.
 - **Locked accounts:** every signed-in route, including the
   notifications the apps poll, answers `401`, which signs the app out.
+
+## AI clone
+
+Adapts someone's journey to your trip (dates, group, budget, interests, pace),
+shows what it changed and why, lets you accept or revert each change or edit
+by chat, and saves the result to "Đã clone về". Code in `src/ai/`.
+
+**The AI invents nothing.** It sees only the form and what the database holds:
+the source journey's stops and the places of its destination
+(`models/Place.ts`, `models/Destination.ts`), each under a short id (`P1`,
+`S1`). It answers with ids, never place data; every answer is checked
+(`ai/validate.ts`: ids from this request only, the right number of days, no
+overlapping times, no digits in its free text) and on any problem sent back
+with the problems, at most twice, before the request fails. Costs, value
+scores, distances and warnings are the backend's (`ai/draft.ts`); a missing
+fact shows as "chưa có dữ liệu". No personal data goes to the model. Only
+journeys stored here can be adapted (the web app's sample journeys are not in
+the database).
+
+**Models.** Gemini first (`GEMINI_*`), LiveKit Inference when Gemini fails;
+after a `429` Gemini is skipped for as long as it asks. Each call logs its
+provider, model, tokens and time as `[ai] task=…`. Tunable numbers (value
+score weights, pace, retries, Gemini's reasoning effort) are in
+`ai/config.ts`.
+
+**Checks without AI.** `ai/feasibility.ts` warns about a stop outside its
+opening hours, too little travel time between stops (straight-line km ÷
+`travelSpeedKmh`, labelled an estimate), and a day longer than its pace
+allows; it also optimises a day's route and picks each stop's Plan B. Season
+facts (`Destination.rainyMonths`, `peakMonths`, `festivals`) reach the model
+only when entered. The checklist (`ai/checklist.ts`) comes from
+`ChecklistTemplate`; the model may only order its items.
+
+**Data.** Places and destinations come from admins or `npm run seed:places`.
+The seed data is demo data: positions are approximate, and prices, opening
+hours and ratings are illustrative, so check them before real use.
 
 ## Super Admin and admins
 
@@ -453,6 +511,27 @@ src/
   lib/token.ts          sign and verify JWTs
   lib/errors.ts         HttpError and the error handler
   scripts/seed.ts       demo accounts
+  routes/itineraries.ts cloned itineraries ("Đã clone về"): clone, reorder, merge, remove days
+  models/Itinerary.ts   a cloned itinerary
+  lib/journeys.ts       which journeys may be cloned, re-dating copied days, clone credit
+  routes/aiClone.ts     AI clone: the form, drafts, review, chat, commit
+  ai/aiService.ts       structured answers: parse, validate, send problems back, retry
+  ai/llm.ts             the model: Gemini, falling back to LiveKit Inference
+  ai/prompts.ts         what the model is told (Vietnamese) and the input it gets
+  ai/schemas.ts         the form, and the model's plan and chat patches (zod, strict)
+  ai/candidates.ts      the candidate places of a request, from the database, with value scores
+  ai/validate.ts        checks on the model's output
+  ai/draft.ts           the draft as data: diff, accept/revert, patches, costs, time checks, commit
+  ai/cloneService.ts    makes a draft from one journey or merges several (plus one budget round), edits one by chat
+  ai/feasibility.ts     travel time, opening hours, day length, route optimiser, Plan B, season facts
+  ai/checklist.ts       the preparation checklist and the model's ordering of it
+  ai/view.ts            the draft as the web app shows it, and the days saved on commit
+  ai/config.ts          tunable numbers
+  models/Place.ts, models/Destination.ts   places and destinations the AI may use
+  models/AiDraft.ts     a draft under review (24-hour TTL)
+  models/AiUsage.ts     AI requests per user per day
+  models/ChecklistTemplate.ts   preparation checklist items, tagged by trip kind
+  scripts/seed-places.ts, scripts/data/aiSeed.ts   AI clone demo data
 ```
 
 ## Planned endpoints (mirrors `web/src/services/`)
@@ -462,8 +541,6 @@ src/
 | `getFeed` | `GET /api/feed` |
 | `getPostById` | `GET /api/posts/:id` |
 | `createPost` / `updatePost` | `POST /api/posts`, `PATCH /api/posts/:id` |
-| `clonePost` | `POST /api/posts/:id/clone` |
-| `getMyItineraries` | `GET /api/itineraries` |
 | `discoverPosts` | `GET /api/discover` |
 
 New routes that need a signed-in user use the `requireAuth` middleware and read

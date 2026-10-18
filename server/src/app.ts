@@ -7,10 +7,12 @@ import { HttpError, errorHandler } from './lib/errors.js'
 import { getSettings } from './models/Setting.js'
 import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
+import { aiCloneRouter } from './routes/aiClone.js'
 import { assistantRouter } from './routes/assistant.js'
 import { authRouter } from './routes/auth.js'
 import { checkinsRouter } from './routes/checkins.js'
 import { geoRouter } from './routes/geo.js'
+import { itinerariesRouter } from './routes/itineraries.js'
 import { livestreamsRouter } from './routes/livestreams.js'
 import { notificationsRouter } from './routes/notifications.js'
 import { postsRouter } from './routes/posts.js'
@@ -64,6 +66,9 @@ app.use('/api/posts', postsRouter)
 app.use('/api/activity', activityRouter)
 app.use('/api/geo', geoRouter)
 app.use('/api/assistant', assistantRouter)
+app.use('/api/itineraries', itinerariesRouter)
+// AI clone: /api/posts/:id/ai-clone and /api/ai-drafts/…
+app.use('/api', aiCloneRouter)
 
 /** Settings every visitor needs: the announcement banner and whether sign-up is open. */
 app.get('/api/settings/public', async (_req, res) => {
