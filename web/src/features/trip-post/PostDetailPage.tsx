@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { DimensionalSwitchSlider } from '@/components/ui/dimensional-switch-slider'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AiCloneDialog } from '@/features/ai-clone/AiCloneDialog'
 import { CloneDialog } from '@/features/itinerary-clone/components/CloneDialog'
 import { CommentSection } from '@/features/trip-post/components/CommentSection'
 import { DayItinerary } from '@/features/trip-post/components/DayItinerary'
@@ -30,6 +31,7 @@ export function PostDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: post, isPending, isError, error } = usePost(id)
   const [cloneOpen, setCloneOpen] = useState(false)
+  const [aiCloneOpen, setAiCloneOpen] = useState(false)
   const commentsRef = useRef<HTMLDivElement>(null)
   const viewerId = useAuthStore((s) => s.user?._id)
 
@@ -164,6 +166,7 @@ export function PostDetailPage() {
           <PostActionBar
             post={post}
             onClone={() => setCloneOpen(true)}
+            onAiClone={() => setAiCloneOpen(true)}
             onComment={() =>
               commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }
@@ -176,6 +179,7 @@ export function PostDetailPage() {
       </article>
 
       <CloneDialog post={post} open={cloneOpen} onOpenChange={setCloneOpen} />
+      <AiCloneDialog post={post} open={aiCloneOpen} onOpenChange={setAiCloneOpen} />
     </PageContainer>
   )
 }

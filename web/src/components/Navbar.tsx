@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 import { AccountMenu } from '@/components/AccountMenu'
 import { GlassButton } from '@/components/Button'
+import { LiquidLogo } from '@/components/LiquidLogo'
 import { PillNav } from '@/components/PillNav'
 import { NotificationBell } from '@/components/NotificationBell'
 import {
@@ -81,11 +82,10 @@ function TransparentNavbar() {
 
 function Logo() {
   return (
-    <Link
-      to="/"
-      className="font-display text-3xl tracking-tight transition-opacity hover:opacity-80"
-    >
-      ChillnGo
+    <Link to="/" className="block transition-opacity hover:opacity-80">
+      <span className="sr-only">ChillnGo</span>
+      {/* Negative margins: the texture's padding would otherwise push the bar taller and the word right. */}
+      <LiquidLogo className="-my-2 -ml-2 h-14" />
     </Link>
   )
 }

@@ -1,4 +1,4 @@
-import { Bookmark, Copy, Heart, MessageCircle } from 'lucide-react'
+import { Bookmark, Copy, Heart, MessageCircle, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
@@ -6,17 +6,20 @@ import { GlassCard } from '@/components/GlassCard'
 import { useToggleBookmark, useToggleLike } from '@/features/trip-post/hooks'
 import { formatCount } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { aiCloneService } from '@/services'
 import type { TripPostWithAuthor } from '@/services/types'
 import { useAuthStore } from '@/store'
 
 interface PostActionBarProps {
   post: TripPostWithAuthor
   onClone: () => void
+  /** Opens the AI clone form; offered only on journeys the AI can adapt. */
+  onAiClone: () => void
   /** Scrolls to the comment box. */
   onComment: () => void
 }
 
-export function PostActionBar({ post, onClone, onComment }: PostActionBarProps) {
+export function PostActionBar({ post, onClone, onAiClone, onComment }: PostActionBarProps) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const navigate = useNavigate()
 
@@ -58,14 +61,26 @@ export function PostActionBar({ post, onClone, onComment }: PostActionBarProps) 
           {formatCount(post.bookmarkCount)}
         </ActionButton>
 
-        <GlassButton
-          size="lg"
-          className="ml-auto w-full sm:w-auto"
-          onClick={() => requireAuth(onClone)}
+        <span
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground"
+          title="Số lần hành trình này được clone"
         >
-          <Copy />
-          Dùng làm lịch trình của tôi
-        </GlassButton>
+          <Copy className="size-4" />
+          {formatCount(post.cloneCount)} lượt clone
+        </span>
+
+        <div className="ml-auto flex w-full flex-wrap gap-2 sm:w-auto">
+          {aiCloneService.canAiClone(post._id) && (
+            <GlassButton size="lg" tone="sunset" className="flex-1 sm:flex-none" onClick={() => requireAuth(onAiClone)}>
+              <Sparkles />
+              Clone với AI
+            </GlassButton>
+          )}
+          <GlassButton size="lg" className="flex-1 sm:flex-none" onClick={() => requireAuth(onClone)}>
+            <Copy />
+            Dùng làm lịch trình của tôi
+          </GlassButton>
+        </div>
       </div>
     </GlassCard>
   )
