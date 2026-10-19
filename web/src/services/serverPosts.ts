@@ -45,9 +45,9 @@ export function setLiked(viewerId: string, postId: string, liked: boolean) {
 }
 
 /**
- * Puts one API journey into `db.tripPosts`. Like and comment counts come from
- * the API; bookmark and clone counts are still counted by the mocks, so an
- * existing copy keeps its own.
+ * Puts one API journey into `db.tripPosts`. Like, comment and clone counts come
+ * from the API; bookmarks are still counted by the mocks, so an existing copy
+ * keeps its own.
  */
 export function upsertServerPost(post: ServerTripPost): TripPost {
   fromServer.add(post._id)
@@ -63,7 +63,6 @@ export function upsertServerPost(post: ServerTripPost): TripPost {
   db.tripPosts[index] = {
     ...stored,
     bookmarkCount: local.bookmarkCount,
-    cloneCount: local.cloneCount,
   }
   return db.tripPosts[index]
 }

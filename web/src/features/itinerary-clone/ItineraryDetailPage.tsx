@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { ArrowLeft, GitMerge, Loader2 } from 'lucide-react'
+import { ArrowLeft, GitMerge, Loader2, Sparkles } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -133,6 +133,12 @@ export function ItineraryDetailPage() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline">{STATUS_LABELS[itinerary.status]}</Badge>
+            {(itinerary.cloneType === 'ai' || itinerary.cloneType === 'merge') && (
+              <Badge variant="outline" className="gap-1 border-np-teal/50 text-np-teal">
+                <Sparkles className="size-3" />
+                Điều chỉnh bằng AI
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground">
               {tripLengthLabel(days.length)} · khởi hành{' '}
               {formatShortDate(itinerary.startDate)}
@@ -142,6 +148,8 @@ export function ItineraryDetailPage() {
           <h1 className="mt-5 max-w-[22ch] font-display text-4xl tracking-tight">
             {itinerary.title}
           </h1>
+
+          <SourceCredit itinerary={itinerary} />
 
           {itinerary.note && (
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
@@ -238,19 +246,44 @@ export function ItineraryDetailPage() {
             />
           </div>
 
+          {itinerary.checklist && itinerary.checklist.groups.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl">Chuẩn bị</h2>
+              <div className="mt-4 space-y-4">
+                {itinerary.checklist.groups.map((group) => (
+                  <div key={group.group}>
+                    <h3 className="text-sm font-medium">{group.group}</h3>
+                    <ul className="mt-1.5 space-y-1">
+                      {group.items.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-np-teal" />
+                          {item.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <h2 className="font-display text-2xl">Bài viết gốc</h2>
             <ul className="mt-4 space-y-2">
-              {itinerary.sourcePostIds.map((postId) => (
-                <li key={postId}>
-                  <Link
-                    to={`/posts/${postId}`}
-                    className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-                  >
-                    Xem bài viết gốc →
-                  </Link>
-                </li>
-              ))}
+              {itinerary.sourcePostIds.map((postId) => {
+                const source = itinerary.sources?.find((s) => s.postId === postId)
+                return (
+                  <li key={postId} className="text-sm text-muted-foreground">
+                    <Link
+                      to={`/posts/${postId}`}
+                      className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                    >
+                      {source?.title ? `“${source.title}”` : 'Xem bài viết gốc'} →
+                    </Link>
+                    {source?.author && <span> của @{source.author.username}</span>}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         </aside>
@@ -263,5 +296,26 @@ export function ItineraryDetailPage() {
         onOpenChange={setMergeOpen}
       />
     </PageContainer>
+  )
+}
+
+/** "Phỏng theo hành trình của @…": every author whose journey this itinerary was made from. */
+function SourceCredit({ itinerary }: { itinerary: ClonedItinerary }) {
+  const authors = (itinerary.sources ?? []).filter(
+    (s, i, all) => s.author && all.findIndex((o) => o.author?._id === s.author?._id) === i,
+  )
+  if (authors.length === 0) return null
+  return (
+    <p className="mt-3 text-sm text-muted-foreground">
+      Phỏng theo hành trình của{' '}
+      {authors.map((source, i) => (
+        <span key={source.postId}>
+          {i > 0 && ', '}
+          <Link to={`/posts/${source.postId}`} className="text-foreground underline-offset-4 hover:underline">
+            @{source.author?.username}
+          </Link>
+        </span>
+      ))}
+    </p>
   )
 }

@@ -136,5 +136,14 @@ export const env = {
   assistantModel: process.env.ASSISTANT_MODEL?.trim() || 'google/gemini-2.5-flash',
   /** Log each lookup the assistant makes (tool, arguments, result size). Off unless ASSISTANT_DEBUG=1. */
   assistantDebug: process.env.ASSISTANT_DEBUG === '1',
+  /**
+   * Google Gemini, asked first by AI clone. When it fails or its quota runs out,
+   * AI clone falls back to LiveKit Inference (with ASSISTANT_MODEL). Unset: LiveKit only.
+   */
+  gemini: process.env.GEMINI_API_KEY?.trim()
+    ? { apiKey: process.env.GEMINI_API_KEY.trim(), model: process.env.GEMINI_MODEL?.trim() || 'gemini-3.8-flash' }
+    : null,
+  /** AI requests (an AI clone, a chat message) each user may make per day. */
+  aiDailyLimit: Number(process.env.AI_DAILY_LIMIT_PER_USER) || 20,
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }

@@ -92,6 +92,13 @@ const locationSchema = z.object({
       distance: z.number().min(0).max(1e8),
     })
     .optional(),
+  /** The Place this stop is (models/Place.ts), which AI clone reads its facts from. */
+  placeId: z.string().max(40).optional(),
+  /** Arrival and stay planned by AI clone. */
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+  durationMin: z.number().int().min(0).max(1440).optional(),
+  /** No cost data: `estCost` is 0 for want of one, not because it is free. */
+  costUnknown: z.boolean().optional(),
 })
 
 type LocationInput = z.infer<typeof locationSchema>
@@ -127,7 +134,7 @@ function keepCurrentLegRoutes(locations: LocationInput[]): LocationInput[] {
   })
 }
 
-const daySchema = z.object({
+export const daySchema = z.object({
   _id: z.string().max(80),
   dayNumber: z.number().int().min(1).max(60),
   date: dateOnly,
