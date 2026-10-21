@@ -10,6 +10,8 @@ export default {
         display: ['var(--font-display)'],
         body: ['var(--font-body)'],
         sans: ['var(--font-body)'],
+        /* The two giant titles of the home expedition stages (Hero, Route). */
+        condensed: ['Oswald', '"Arial Narrow"', 'Arial', 'sans-serif'],
       },
       colors: {
         /* Brand palette, for the few places that want a specific colour
