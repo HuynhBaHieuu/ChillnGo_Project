@@ -91,3 +91,69 @@ html[data-nav-theme='light'] .nav-controls .nav-login {
   padding-block: 0.14em 0.2em;
   margin-block: -0.14em -0.2em;
 }
+
+/* ------------------------------------------------------------------------
+   Expedition stages (Hero → Statement → Trips → Route), on the dark ground.
+
+   `.xp` sets the type scale every stage sizes against in `em`: 16px on
+   phones, 1/90 of the viewport from tablet up (16px at 1440), held at
+   ~17.3px on very wide screens. Only leaf text sets its own font-size, so
+   em spacing on containers never compounds.
+   ------------------------------------------------------------------------ */
+.xp {
+  font-size: 16px;
+}
+@media (min-width: 768px) {
+  .xp { font-size: 1.1111vw; }
+}
+@media (min-width: 1560px) {
+  .xp { font-size: 17.3333px; }
+}
+
+/* Hairline column guides over the expedition stages. `difference` keeps them
+   visible on both the footage and the dark ground. The blend and opacity
+   sit on the positioned layer itself: on a child they would only blend inside
+   the layer's own stacking context, i.e. with nothing. */
+.xp-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0.1;
+}
+.xp-grid > div {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+.xp-grid i {
+  position: absolute;
+  top: 0;
+  width: 0.5px;
+  height: 100%;
+  background: #fff;
+}
+
+/* Heading that brightens top-down as it scrolls through: a soft mask edge whose
+   position (`--mask`, in %) the stage tweens from -40 to 100. Defaults to 100,
+   fully shown, so reduced motion and no-JS read it plainly. */
+.xp-fade {
+  --mask: 100;
+  -webkit-mask-image: linear-gradient(
+    #000 calc(var(--mask) * 1%),
+    rgb(0 0 0 / 0.6) calc((var(--mask) + 20) * 1%),
+    rgb(0 0 0 / 0.1) calc((var(--mask) + 40) * 1%)
+  );
+  mask-image: linear-gradient(
+    #000 calc(var(--mask) * 1%),
+    rgb(0 0 0 / 0.6) calc((var(--mask) + 20) * 1%),
+    rgb(0 0 0 / 0.1) calc((var(--mask) + 40) * 1%)
+  );
+}
+
+/* Hand-drawn underline, drawn on by the scroll (stroke-dashoffset 1 → 0). */
+.xp-scribble path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}

@@ -4,22 +4,22 @@ import { useEffect, useLayoutEffect } from 'react'
 import { ScrollTrigger } from '@/app/landing/home/gsap'
 import { clearNavTheme, setNavTheme } from '@/app/landing/home/navTheme'
 import { SmoothScroll } from '@/app/landing/home/SmoothScroll'
-import { DestinationsStage } from '@/app/landing/home/stages/DestinationsStage'
+import { GridOverlay } from '@/app/landing/home/parts/ExpeditionMarks'
 import { FeaturedTripsStage } from '@/app/landing/home/stages/FeaturedTripsStage'
 import { HomeFooter } from '@/app/landing/home/stages/HomeFooter'
 import { HowItWorksStage } from '@/app/landing/home/stages/HowItWorksStage'
-import { IntroStage } from '@/app/landing/home/stages/IntroStage'
-import { PlacesMarquee } from '@/app/landing/home/stages/PlacesMarquee'
-import { StatsStage } from '@/app/landing/home/stages/StatsStage'
+import { HeroStage } from '@/app/landing/home/stages/HeroStage'
+import { RouteScrollStage } from '@/app/landing/home/stages/RouteScrollStage'
+import { StatementStage } from '@/app/landing/home/stages/StatementStage'
+import { TripsFlickStage } from '@/app/landing/home/stages/TripsFlickStage'
 import { qk } from '@/lib/queryKeys'
 import { discoveryService, landingService } from '@/services'
 import { useViewerId } from '@/store'
 
-const MOMENT_PHOTOS = 14
-
 /**
- * The home page: scroll-driven stages on a Lenis-smoothed page. Only two of
- * them pin (the intro and the destinations); the rest scroll in flow.
+ * The home page: scroll-driven stages on a Lenis-smoothed page. It opens with
+ * the expedition stages (hero → statement → trips → route, on the dark ground
+ * under hairline column guides), then the dark stages. Only the route pins.
  *
  * The hero needs no data, so it renders immediately. Every stage below it waits
  * for its data before mounting: the destinations pin measures its own content
@@ -37,16 +37,12 @@ export function HomePage() {
     queryKey: qk.landing.destinations,
     queryFn: () => landingService.getDestinationRows(),
   })
-  const photos = useQuery({
-    queryKey: qk.landing.moments(MOMENT_PHOTOS),
-    queryFn: () => landingService.getMomentPhotos(MOMENT_PHOTOS),
-  })
   const featured = useQuery({
     queryKey: qk.discover.list(discoveryService.DEFAULT_FILTERS, viewerId),
     queryFn: () => discoveryService.discoverPosts(discoveryService.DEFAULT_FILTERS, viewerId),
   })
 
-  const ready = Boolean(stats.data && rows.data && photos.data && featured.data)
+  const ready = Boolean(stats.data && rows.data && featured.data)
 
   // Every stage sits on the dark ground; hand the nav back to its default on leave.
   useLayoutEffect(() => {
@@ -84,14 +80,21 @@ export function HomePage() {
           sub-pixel, enough for a horizontal scrollbar. `clip`, unlike `hidden`, does
           not create a scroll container, so sticky and pinned elements keep working. */}
       <div className="overflow-x-clip bg-background text-foreground">
-        <IntroStage />
+        <div className="xp relative">
+          <HeroStage />
+          {ready && stats.data && rows.data && featured.data && (
+            <>
+              <StatementStage stats={stats.data} />
+              <TripsFlickStage posts={featured.data} />
+              <RouteScrollStage rows={rows.data} stats={stats.data} />
+            </>
+          )}
+          <GridOverlay />
+        </div>
 
-        {ready && stats.data && rows.data && photos.data && featured.data ? (
+        {ready && stats.data && rows.data && featured.data ? (
           <>
-            <StatsStage stats={stats.data} />
-            <PlacesMarquee rows={rows.data} />
             <HowItWorksStage />
-            <DestinationsStage rows={rows.data} photos={photos.data} />
             <FeaturedTripsStage posts={featured.data} />
             <HomeFooter />
           </>
