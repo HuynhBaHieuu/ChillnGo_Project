@@ -33,6 +33,13 @@ export async function followerIdsOf(userId: string): Promise<string[]> {
   return rows.map((r) => r.followerId)
 }
 
+/** `userId`'s friends: everyone they follow who follows them back. */
+export async function friendIdsOf(userId: string): Promise<string[]> {
+  const [following, followers] = await Promise.all([followingIdsOf(userId), followerIdsOf(userId)])
+  const back = new Set(followers)
+  return following.filter((id) => back.has(id))
+}
+
 /**
  * Takes a locked account out of everyone else's follower / following counts
  * (`counted` false), or puts it back when it is unlocked (`counted` true).

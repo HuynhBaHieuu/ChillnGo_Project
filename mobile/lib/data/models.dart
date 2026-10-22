@@ -197,6 +197,26 @@ class TripDay {
   TripDay copy() => TripDay.fromJson(toJson());
 }
 
+/// A friend the author invited along on a journey: 'pending' until they
+/// accept. [user] is filled by `decorate` in the post service.
+class TripCompanion {
+  TripCompanion({required this.userId, this.status = 'pending', this.user});
+
+  String userId;
+
+  /// 'pending' | 'accepted'
+  String status;
+  User? user;
+
+  factory TripCompanion.fromJson(Json json) => TripCompanion(
+    userId: str(json['userId']),
+    status: str(json['status'], 'pending'),
+    user: mapOrNull(json['user']) != null ? User.fromJson(mapOf(json['user'])) : null,
+  );
+
+  Json toJson() => {'userId': userId, 'status': status, if (user != null) 'user': user!.toJson()};
+}
+
 /// A journey. On the web, "TripPostWithAuthor" adds the author and the
 /// viewer's like and bookmark state; here those are the last three fields,
 /// filled by `decorate` in the post service.
@@ -221,6 +241,7 @@ class TripPost {
     this.commentCount = 0,
     this.bookmarkCount = 0,
     this.cloneCount = 0,
+    this.companions,
     this.status = 'published',
     this.createdAt = '',
     this.updatedAt = '',
@@ -259,6 +280,10 @@ class TripPost {
   int bookmarkCount;
   int cloneCount;
 
+  /// Who came along: those who accepted, plus the pending invites the viewer
+  /// may see. From the API; null on sample journeys, which cannot have companions.
+  List<TripCompanion>? companions;
+
   /// 'draft' | 'pending' | 'published' | 'rejected'
   String status;
   String createdAt;
@@ -294,6 +319,7 @@ class TripPost {
     commentCount: intOf(json['commentCount']),
     bookmarkCount: intOf(json['bookmarkCount']),
     cloneCount: intOf(json['cloneCount']),
+    companions: json['companions'] is List ? listOf(json['companions'], (c) => TripCompanion.fromJson(mapOf(c))) : null,
     status: str(json['status'], 'published'),
     createdAt: str(json['createdAt']),
     updatedAt: str(json['updatedAt']),
@@ -324,6 +350,7 @@ class TripPost {
     'commentCount': commentCount,
     'bookmarkCount': bookmarkCount,
     'cloneCount': cloneCount,
+    if (companions != null) 'companions': companions!.map((c) => c.toJson()).toList(),
     'status': status,
     'createdAt': createdAt,
     'updatedAt': updatedAt,
@@ -539,7 +566,7 @@ class AppNotification {
   String id;
   String userId;
 
-  /// 'like' | 'comment' | 'follow' | 'clone' | 'bookmark' | 'system' | 'live'
+  /// 'like' | 'comment' | 'follow' | 'clone' | 'bookmark' | 'system' | 'live' | 'invite' | 'invite_accepted'
   String type;
   String? actorId;
   String? postId;

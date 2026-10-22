@@ -34,6 +34,9 @@ export type NotificationType =
   | 'system'
   /** Someone you follow went live. From the API (server/src/models/Notification.ts). */
   | 'live'
+  /** A friend invited you along on their journey, or accepted your invite. From the API. */
+  | 'invite'
+  | 'invite_accepted'
 
 /* ------------------------------------------------------------------ User */
 
@@ -137,6 +140,12 @@ export interface RouteGeoJson {
   features: RouteFeature[]
 }
 
+/** A friend the author invited along on a journey: 'pending' until they accept. */
+export interface TripCompanion {
+  userId: ObjectId
+  status: 'pending' | 'accepted'
+}
+
 export interface TripPost {
   _id: ObjectId
   authorId: ObjectId
@@ -158,6 +167,12 @@ export interface TripPost {
   commentCount: number
   bookmarkCount: number
   cloneCount: number
+  /**
+   * Who came along: those who accepted, plus the pending invites the viewer may
+   * see (all of them for the author, their own for an invitee). From the API;
+   * absent on sample journeys, which cannot have companions.
+   */
+  companions?: TripCompanion[]
   status: PostStatus
   createdAt: ISODate
   updatedAt: ISODate
@@ -252,6 +267,7 @@ export interface Notification {
  */
 export interface TripPostWithAuthor extends TripPost {
   author: User
+  companions?: (TripCompanion & { user: User })[]
   likedByMe: boolean
   bookmarkedByMe: boolean
 }

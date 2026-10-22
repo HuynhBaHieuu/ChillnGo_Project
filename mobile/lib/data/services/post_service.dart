@@ -20,6 +20,7 @@ User authorOf(String authorId) => _db.userById(authorId) ?? deletedUser(authorId
 TripPost decorate(TripPost post, String? viewerId) {
   return post.copy()
     ..author = authorOf(post.authorId).copy()
+    ..companions = post.companions?.map((c) => TripCompanion(userId: c.userId, status: c.status, user: authorOf(c.userId).copy())).toList()
     ..likedByMe = viewerId != null && _db.likes.any((l) => l.userId == viewerId && l.postId == post.id)
     ..bookmarkedByMe = viewerId != null && _db.bookmarks.any((b) => b.userId == viewerId && b.postId == post.id);
 }
@@ -56,10 +57,11 @@ abstract final class PostService {
     return decorate(post, viewerId);
   }
 
-  /// Published posts of one author.
+  /// Published posts of one author, and those they came along on.
   static Future<List<TripPost>> getPostsByAuthor(String authorId, String? viewerId) async {
     await Future.wait([mockDelay(), syncServerPosts()]);
-    return _published(_db.tripPosts.where((p) => p.authorId == authorId)).map((p) => decorate(p, viewerId)).toList();
+    bool along(TripPost p) => p.companions?.any((c) => c.userId == authorId && c.status == 'accepted') ?? false;
+    return _published(_db.tripPosts.where((p) => p.authorId == authorId || along(p))).map((p) => decorate(p, viewerId)).toList();
   }
 
   /// Every published post: the source list for the merge picker.
@@ -223,5 +225,24 @@ abstract final class PostService {
   static Future<void> deleteJourneyPermanently(String id) async {
     await Api.delete('/api/posts/$id/permanent');
     dropServerPost(id);
+  }
+
+  /* ------------------------------------------------------------ companions */
+
+  /// POST /api/posts/:id/companions: invite friends along on your journey.
+  static Future<void> inviteCompanions(String postId, List<String> userIds) async {
+    final data = await Api.post('/api/posts/$postId/companions', body: {'userIds': userIds});
+    upsertAuthors(listOf(data['authors'], (u) => User.fromJson(mapOf(u))));
+    upsertServerPost(_post(data));
+  }
+
+  /// POST /api/posts/:id/companions/respond: accept or decline your invite.
+  static Future<void> respondToInvite(String postId, bool accept) async {
+    await Api.post('/api/posts/$postId/companions/respond', body: {'accept': accept});
+  }
+
+  /// DELETE /api/posts/:id/companions/:userId: the author takes someone off, or you leave.
+  static Future<void> removeCompanion(String postId, String userId) async {
+    await Api.delete('/api/posts/$postId/companions/$userId');
   }
 }

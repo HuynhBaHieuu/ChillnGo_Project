@@ -233,3 +233,38 @@ export function useUpdatePost(postId: string) {
     },
   })
 }
+
+/* ------------------------------------------------------------ companions */
+
+/** Your friends, who you can invite along. Only fetched while `enabled` (the invite dialog is open). */
+export function useFriends(enabled: boolean) {
+  const viewerId = useViewerId()
+  return useQuery({
+    queryKey: qk.social.friends(viewerId),
+    queryFn: () => socialService.getFriends(viewerId as string),
+    enabled: enabled && Boolean(viewerId),
+  })
+}
+
+/** Invite, answer an invite, or take someone off: each refreshes every journey list and the journey itself. */
+function useCompanionMutation<T>(fn: (input: T) => Promise<void>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: qk.post.all })
+    },
+  })
+}
+
+export function useInviteCompanions(postId: string) {
+  return useCompanionMutation((userIds: string[]) => postService.inviteCompanions(postId, userIds))
+}
+
+export function useRespondToInvite(postId: string) {
+  return useCompanionMutation((accept: boolean) => postService.respondToInvite(postId, accept))
+}
+
+export function useRemoveCompanion(postId: string) {
+  return useCompanionMutation((userId: string) => postService.removeCompanion(postId, userId))
+}

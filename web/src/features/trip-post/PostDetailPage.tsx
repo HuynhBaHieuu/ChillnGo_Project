@@ -1,4 +1,4 @@
-import { CalendarRange, Pencil, Wallet } from 'lucide-react'
+import { CalendarRange, Pencil, UserPlus, Wallet } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AiCloneDialog } from '@/features/ai-clone/AiCloneDialog'
 import { CloneDialog } from '@/features/itinerary-clone/components/CloneDialog'
 import { CommentSection } from '@/features/trip-post/components/CommentSection'
+import { CompanionsRow, InviteBanner, InviteFriendsDialog } from '@/features/trip-post/components/Companions'
 import { DayItinerary } from '@/features/trip-post/components/DayItinerary'
 import { PostActionBar } from '@/features/trip-post/components/PostActionBar'
 import { usePost } from '@/features/trip-post/hooks'
@@ -32,6 +33,7 @@ export function PostDetailPage() {
   const { data: post, isPending, isError, error } = usePost(id)
   const [cloneOpen, setCloneOpen] = useState(false)
   const [aiCloneOpen, setAiCloneOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
   const commentsRef = useRef<HTMLDivElement>(null)
   const viewerId = useAuthStore((s) => s.user?._id)
 
@@ -58,6 +60,8 @@ export function PostDetailPage() {
   return (
     <PageContainer>
       <article>
+        <InviteBanner post={post} viewerId={viewerId} />
+
         {/* Header */}
         <header className="animate-fade-rise">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -99,14 +103,25 @@ export function PostDetailPage() {
             </Link>
 
             {isAuthor && (
-              <Button asChild variant="outline" size="sm" className="ml-auto">
-                <Link to={`/posts/${post._id}/edit`}>
-                  <Pencil />
-                  Chỉnh sửa
-                </Link>
-              </Button>
+              <div className="ml-auto flex gap-2">
+                {/* Sample journeys have no companions to invite. */}
+                {post.companions && (
+                  <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+                    <UserPlus />
+                    Mời bạn đi cùng
+                  </Button>
+                )}
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/posts/${post._id}/edit`}>
+                    <Pencil />
+                    Chỉnh sửa
+                  </Link>
+                </Button>
+              </div>
             )}
           </div>
+
+          <CompanionsRow post={post} viewerId={viewerId} />
 
           <div className="mt-6 flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
@@ -180,6 +195,7 @@ export function PostDetailPage() {
 
       <CloneDialog post={post} open={cloneOpen} onOpenChange={setCloneOpen} />
       <AiCloneDialog post={post} open={aiCloneOpen} onOpenChange={setAiCloneOpen} />
+      {isAuthor && <InviteFriendsDialog post={post} open={inviteOpen} onOpenChange={setInviteOpen} />}
     </PageContainer>
   )
 }

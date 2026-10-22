@@ -15,6 +15,7 @@ import '../../ui/surfaces.dart';
 import '../map/route_map.dart';
 import 'clone_sheet.dart';
 import 'comment_section.dart';
+import 'companions.dart';
 import 'day_itinerary.dart';
 import 'post_actions.dart';
 import 'trip_card.dart';
@@ -100,6 +101,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    InviteBanner(post: post, viewerId: viewerId),
                     if (draft) ...[
                       const Align(alignment: Alignment.centerLeft, child: AppBadge('Bản nháp, chỉ bạn thấy', uppercase: true)),
                       const SizedBox(height: 12),
@@ -140,6 +142,22 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           ),
                         ),
                       ),
+                    // Sample journeys have no companions to invite.
+                    if (isAuthor && post.companions != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: AppButton(
+                            label: 'Mời bạn đi cùng',
+                            icon: LucideIcons.userPlus,
+                            variant: ButtonVariant.outline,
+                            size: ButtonSize.sm,
+                            onPressed: () => showInviteSheet(context, post),
+                          ),
+                        ),
+                      ),
+                    CompanionsRow(post: post, viewerId: viewerId),
                     if (post.tags.isNotEmpty) ...[const SizedBox(height: 12), TagList(tags: post.tags, linked: true)],
                     const SizedBox(height: 24),
                     _Fact(icon: LucideIcons.calendarRange, label: 'Thời gian', value: formatDateRange(post.startDate, post.endDate)),

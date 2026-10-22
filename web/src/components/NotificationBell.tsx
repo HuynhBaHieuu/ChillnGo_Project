@@ -1,4 +1,4 @@
-import { Bell, Bookmark, Copy, Heart, MessageCircle, Radio, UserPlus } from 'lucide-react'
+import { Bell, Bookmark, Copy, Heart, MessageCircle, Radio, UserPlus, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -22,6 +22,8 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   bookmark: Bookmark,
   system: Bell,
   live: Radio,
+  invite: Users,
+  invite_accepted: Users,
 }
 
 /** Where a notification leads: the stream, the post (its comments, for a comment), or the person who followed you. */

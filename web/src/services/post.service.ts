@@ -82,6 +82,7 @@ export function decorate(post: TripPost, viewerId: ObjectId | null): TripPostWit
   return {
     ...clone(post),
     author: clone(authorOf(post)),
+    companions: post.companions?.map((c) => ({ ...c, user: clone(userOrPlaceholder(c.userId)) })),
     likedByMe: viewerId
       ? db.likes.some((l) => l.userId === viewerId && l.postId === post._id)
       : false,
@@ -160,7 +161,12 @@ export async function getPostsByAuthor(
 ): Promise<TripPostWithAuthor[]> {
   await Promise.all([delay(), syncServerPosts()])
   return db.tripPosts
-    .filter((p) => p.authorId === authorId)
+    // Journeys they came along on count as theirs too.
+    .filter(
+      (p) =>
+        p.authorId === authorId ||
+        p.companions?.some((c) => c.userId === authorId && c.status === 'accepted'),
+    )
     .filter((p) => p.status === 'published')
     .sort(byNewest)
     .map((p) => decorate(p, viewerId))
@@ -466,4 +472,26 @@ export async function restoreJourney(id: ObjectId): Promise<ServerTripPost> {
 export async function deleteJourneyPermanently(id: ObjectId): Promise<void> {
   await http(`/api/posts/${id}/permanent`, { method: 'DELETE' })
   dropServerPost(id)
+}
+
+/* ------------------------------------------------------------ companions */
+
+/** POST /api/posts/:id/companions — invite friends along on your journey. */
+export async function inviteCompanions(postId: ObjectId, userIds: ObjectId[]): Promise<void> {
+  const { post, authors } = await http<{ post: ServerTripPost; authors: User[] }>(`/api/posts/${postId}/companions`, {
+    method: 'POST',
+    body: { userIds },
+  })
+  upsertAuthors(authors)
+  upsertServerPost(post)
+}
+
+/** POST /api/posts/:id/companions/respond — accept or decline your invite. */
+export async function respondToInvite(postId: ObjectId, accept: boolean): Promise<void> {
+  await http(`/api/posts/${postId}/companions/respond`, { method: 'POST', body: { accept } })
+}
+
+/** DELETE /api/posts/:id/companions/:userId — the author takes someone off, or you leave. */
+export async function removeCompanion(postId: ObjectId, userId: ObjectId): Promise<void> {
+  await http(`/api/posts/${postId}/companions/${userId}`, { method: 'DELETE' })
 }

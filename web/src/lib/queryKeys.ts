@@ -33,6 +33,7 @@ export const qk = {
     bookmarks: (userId: string, viewerId: string | null) =>
       ['social', 'bookmarks', userId, viewerId] as const,
     notifications: (viewerId: string) => ['social', 'notifications', viewerId] as const,
+    friends: (viewerId: string | null) => ['social', 'friends', viewerId] as const,
   },
   itinerary: {
     all: ['itineraries'] as const,

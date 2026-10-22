@@ -379,7 +379,11 @@ include.
 | `GET /api/users/:id` | anyone | `{ user, followedByMe }`: public profile (no email, no admin details) |
 | `POST /api/users/:id/follow` | signed in | toggles; `{ following, followerCount }`. Staff accounts cannot be followed |
 | `GET /api/users/me/following` | signed in | `{ ids }` |
-| `GET /api/notifications` | signed in | latest 50, newest first (`follow`, `live`) |
+| `GET /api/users/me/friends` | signed in | `{ items }`: profiles of those you follow who follow you back |
+| `POST /api/posts/:id/companions` `{ userIds }` | the author | invites friends along (≤10 per journey; `400 NOT_FRIEND` otherwise) and tells them → `{ post, authors }` |
+| `POST /api/posts/:id/companions/respond` `{ accept }` | an invitee | accepts (the author is told) or declines (the invite is dropped) |
+| `DELETE /api/posts/:id/companions/:userId` | the author, or that companion | takes them off the journey |
+| `GET /api/notifications` | signed in | latest 50, newest first (`follow`, `live`, `invite`, `invite_accepted`, …) |
 | `POST /api/notifications/read` | signed in | marks all read |
 
 Follows live in `follows` (unique per pair; the users' follower counts are
