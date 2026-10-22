@@ -20,6 +20,8 @@ const _icons = {
   'bookmark': LucideIcons.bookmark,
   'system': LucideIcons.bell,
   'live': LucideIcons.radio,
+  'invite': LucideIcons.users,
+  'invite_accepted': LucideIcons.users,
 };
 
 /// Where a notification leads: the stream, the post, or the person who followed you.

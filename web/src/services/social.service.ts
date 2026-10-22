@@ -59,6 +59,13 @@ export async function getFollowingIds(viewerId: ObjectId): Promise<ObjectId[]> {
   return [...ids, ...local]
 }
 
+/** GET /api/users/me/friends — the people you follow who follow you back. Demo accounts have none. */
+export async function getFriends(viewerId: ObjectId): Promise<User[]> {
+  if (!isServerId(viewerId)) return []
+  const { items } = await http<{ items: User[] }>('/api/users/me/friends')
+  return items.map(withAvatar)
+}
+
 /** Is `viewerId` following `userId`? */
 export async function isFollowing(
   userId: ObjectId,

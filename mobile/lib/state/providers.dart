@@ -47,6 +47,12 @@ final isFollowingProvider = FutureProvider.autoDispose.family<bool, String>((ref
   return SocialService.isFollowing(userId, ref.watch(viewerIdProvider));
 });
 
+/// Your friends, who you can invite along on a journey.
+final friendsProvider = FutureProvider.autoDispose<List<User>>((ref) {
+  final viewerId = ref.watch(viewerIdProvider);
+  return viewerId == null ? Future.value(<User>[]) : SocialService.getFriends(viewerId);
+});
+
 final bookmarksProvider = FutureProvider.autoDispose.family<List<TripPost>, String>((ref, userId) {
   return SocialService.getBookmarkedPosts(userId, ref.watch(viewerIdProvider));
 });

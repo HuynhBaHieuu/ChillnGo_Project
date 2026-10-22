@@ -32,6 +32,17 @@ const tripPostSchema = new Schema(
     commentCount: { type: Number, default: 0 },
     bookmarkCount: { type: Number, default: 0 },
     cloneCount: { type: Number, default: 0 },
+    /** Friends the author invited along (lib/companions.ts). */
+    companions: {
+      type: [
+        {
+          _id: false,
+          userId: { type: String, required: true },
+          status: { type: String, enum: ['pending', 'accepted'], default: 'pending' },
+        },
+      ],
+      default: [],
+    },
     status: { type: String, enum: ['draft', 'published'], default: 'draft', index: true },
     publishedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },

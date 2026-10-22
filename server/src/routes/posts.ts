@@ -4,7 +4,7 @@
  *   GET    /api/posts?author=<id>          published journeys, newest first (+ their authors)
  *   GET    /api/posts/mine?status=…        your own journeys: draft | published | all
  *   GET    /api/posts/deleted              your journeys in "Recently Deleted"
- *   GET    /api/posts/:id                  published: anyone; draft or deleted: the author only
+ *   GET    /api/posts/:id                  published: anyone; draft: the author and those invited along; deleted: the author only
  *   GET    /api/posts/liked-ids            ids of the journeys you have liked
  *   POST   /api/posts/:id/like             like / unlike (toggle); tells the author
  *   GET    /api/posts/:id/comments         comments on a published journey (+ their authors)
@@ -17,6 +17,9 @@
  *   DELETE /api/posts/:id                  move to "Recently Deleted"
  *   POST   /api/posts/:id/restore          back out of "Recently Deleted"
  *   DELETE /api/posts/:id/permanent        delete for good (only from "Recently Deleted")
+ *   POST   /api/posts/:id/companions       invite friends along: { userIds }; tells them
+ *   POST   /api/posts/:id/companions/respond  answer your invite: { accept }; tells the author when accepted
+ *   DELETE /api/posts/:id/companions/:userId  the author takes someone off, or you leave
  *
  * A journey that is not yours, or not visible to you, is always a 404: whether
  * someone else's draft exists is not something to reveal.
@@ -28,10 +31,12 @@ import { isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
 import { destroyImages, ownPostCoverId, signPostCoverUpload } from '../lib/cloudinary.js'
+import { MAX_COMPANIONS, visibleCompanions } from '../lib/companions.js'
 import { HttpError } from '../lib/errors.js'
 import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
+import { friendIdsOf } from '../models/Follow.js'
 import { Notification, notify } from '../models/Notification.js'
 import { PostComment, PostLike } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
@@ -185,8 +190,8 @@ const payloadSchema = z
     message: 'Hãy nhập tiêu đề và tóm tắt trước khi đăng.',
   })
 
-/** What the web app's `TripPost` type expects. */
-function toView(post: TripPostDocument) {
+/** What the web app's `TripPost` type expects, as `viewerId` may see it. */
+function toView(post: TripPostDocument, viewerId: string | undefined) {
   return {
     _id: String(post._id),
     authorId: post.authorId,
@@ -207,6 +212,7 @@ function toView(post: TripPostDocument) {
     commentCount: post.commentCount,
     bookmarkCount: post.bookmarkCount,
     cloneCount: post.cloneCount,
+    companions: visibleCompanions(post.companions, post.authorId, viewerId),
     status: post.status,
     createdAt: post.createdAt.toISOString(),
     updatedAt: post.updatedAt.toISOString(),
@@ -215,9 +221,11 @@ function toView(post: TripPostDocument) {
   }
 }
 
-/** Public profile fields of each author, so the web app can show who wrote what. */
-async function authorsOf(posts: TripPostDocument[]) {
-  const ids = [...new Set(posts.map((p) => p.authorId))]
+/** Public profile fields of each author and companion `viewerId` may see, so the web app can show who wrote what. */
+async function authorsOf(posts: TripPostDocument[], viewerId: string | undefined) {
+  const ids = [
+    ...new Set(posts.flatMap((p) => [p.authorId, ...visibleCompanions(p.companions, p.authorId, viewerId).map((c) => c.userId)])),
+  ]
   const users = await User.find({ _id: { $in: ids } })
     .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount createdAt')
     .lean()
@@ -256,8 +264,8 @@ async function loadOwn(userId: string, id: string, deleted: boolean): Promise<Tr
 type DayShape = { locations?: { photoUrl?: string | null; legRoute?: unknown }[]; photos?: string[] }
 
 /** For lists: without the cached road routes, which only the journey's own map needs. */
-function toListView(post: TripPostDocument) {
-  const view = toView(post)
+function toListView(post: TripPostDocument, viewerId: string | undefined) {
+  const view = toView(post, viewerId)
   return {
     ...view,
     days: (view.days as DayShape[]).map((day) => ({
@@ -325,24 +333,25 @@ postsRouter.get('/', async (req, res) => {
   const filter: Record<string, unknown> = { status: 'published', deletedAt: null }
   if (author) filter.authorId = author
   const posts = await TripPost.find(filter).sort({ createdAt: -1 }).limit(200)
-  res.json({ items: posts.map(toListView), authors: await authorsOf(posts) })
+  res.json({ items: posts.map((p) => toListView(p, undefined)), authors: await authorsOf(posts, undefined) })
 })
 
 const mineSchema = z.object({ status: z.enum(['draft', 'published', 'all']).catch('all') })
 
 postsRouter.get('/mine', requireAuth, loadCurrentUser, async (req, res) => {
   const { status } = mineSchema.parse(req.query)
-  const filter: Record<string, unknown> = { authorId: currentUser(res)._id, deletedAt: null }
+  const userId = currentUser(res)._id
+  const filter: Record<string, unknown> = { authorId: userId, deletedAt: null }
   if (status !== 'all') filter.status = status
   const posts = await TripPost.find(filter).sort({ updatedAt: -1 }).limit(200)
-  res.json({ items: posts.map(toListView) })
+  res.json({ items: posts.map((p) => toListView(p, userId)) })
 })
 
 postsRouter.get('/deleted', requireAuth, loadCurrentUser, async (_req, res) => {
   const userId = currentUser(res)._id
   await purgeExpired(userId)
   const posts = await TripPost.find({ authorId: userId, deletedAt: { $ne: null } }).sort({ deletedAt: -1 })
-  res.json({ items: posts.map(toListView) })
+  res.json({ items: posts.map((p) => toListView(p, userId)) })
 })
 
 postsRouter.get('/liked-ids', requireAuth, async (_req, res) => {
@@ -354,10 +363,12 @@ postsRouter.get('/:id', optionalAuth, async (req, res) => {
   const id = String(req.params.id)
   const post = isValidObjectId(id) ? await TripPost.findById(id) : null
   const viewerId = res.locals.userId as string | undefined
-  const visible = post && ((post.status === 'published' && !post.deletedAt) || post.authorId === viewerId)
+  // Someone invited along may look at it before it is published, to decide.
+  const invited = post && !post.deletedAt && post.companions.some((c) => c.userId === viewerId)
+  const visible = post && ((post.status === 'published' && !post.deletedAt) || post.authorId === viewerId || invited)
   if (!post || !visible) throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
   const likedByMe = viewerId ? Boolean(await PostLike.exists({ postId: String(post._id), userId: viewerId })) : false
-  res.json({ post: toView(post), authors: await authorsOf([post]), likedByMe })
+  res.json({ post: toView(post, viewerId), authors: await authorsOf([post], viewerId), likedByMe })
 })
 
 /* ------------------------------------------------------ likes & comments */
@@ -582,7 +593,7 @@ postsRouter.post('/', requireAuth, loadCurrentUser, writeLimiter, async (req, re
     publishedAt: input.status === 'published' ? new Date() : null,
   })
   if (post.status === 'published') await adjustPostCount(user._id, 1)
-  res.status(201).json({ post: toView(post) })
+  res.status(201).json({ post: toView(post, user._id) })
 })
 
 postsRouter.patch('/:id', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
@@ -601,7 +612,7 @@ postsRouter.patch('/:id', requireAuth, loadCurrentUser, writeLimiter, async (req
   const kept = new Set(imagesOf(post))
   await releaseImages(user._id, oldImages.filter((url) => !kept.has(url)))
 
-  res.json({ post: toView(post) })
+  res.json({ post: toView(post, user._id) })
 })
 
 postsRouter.post('/:id/publish', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
@@ -616,7 +627,7 @@ postsRouter.post('/:id/publish', requireAuth, loadCurrentUser, writeLimiter, asy
     await post.save()
     await adjustPostCount(user._id, 1)
   }
-  res.json({ post: toView(post) })
+  res.json({ post: toView(post, user._id) })
 })
 
 postsRouter.post('/:id/duplicate', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
@@ -640,7 +651,7 @@ postsRouter.post('/:id/duplicate', requireAuth, loadCurrentUser, writeLimiter, a
     routeGeoJson: source.routeGeoJson,
     status: 'draft',
   })
-  res.status(201).json({ post: toView(copy) })
+  res.status(201).json({ post: toView(copy, user._id) })
 })
 
 postsRouter.delete('/:id', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
@@ -649,7 +660,7 @@ postsRouter.delete('/:id', requireAuth, loadCurrentUser, writeLimiter, async (re
   post.deletedAt = new Date()
   await post.save()
   if (post.status === 'published') await adjustPostCount(user._id, -1)
-  res.json({ post: toView(post) })
+  res.json({ post: toView(post, user._id) })
 })
 
 postsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
@@ -663,12 +674,90 @@ postsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, asy
   post.deletedAt = null
   await post.save()
   if (post.status === 'published') await adjustPostCount(user._id, 1)
-  res.json({ post: toView(post) })
+  res.json({ post: toView(post, user._id) })
 })
 
 postsRouter.delete('/:id/permanent', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const user = currentUser(res)
   const post = await loadOwn(user._id, String(req.params.id), true)
   await destroyPost(post)
+  res.json({ ok: true })
+})
+
+/* ------------------------------------------------------------ companions */
+
+const inviteSchema = z.object({ userIds: z.array(z.string().max(40)).min(1).max(MAX_COMPANIONS) })
+
+postsRouter.post('/:id/companions', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const { userIds } = inviteSchema.parse(req.body)
+  const user = currentUser(res)
+  const post = await loadOwn(user._id, String(req.params.id), false)
+  const postId = String(post._id)
+
+  const already = new Set(post.companions.map((c) => c.userId))
+  const fresh = [...new Set(userIds)].filter((id) => !already.has(id))
+  if (already.size + fresh.length > MAX_COMPANIONS) {
+    throw new HttpError(400, `Mỗi hành trình mời tối đa ${MAX_COMPANIONS} người đi cùng.`, 'TOO_MANY_COMPANIONS')
+  }
+  const friends = new Set(await friendIdsOf(user._id))
+  const active = await User.countDocuments({ _id: { $in: fresh }, role: 'user', status: 'active' })
+  if (fresh.some((id) => !friends.has(id)) || active !== fresh.length) {
+    throw new HttpError(400, 'Chỉ mời được bạn bè (hai người theo dõi nhau).', 'NOT_FRIEND')
+  }
+
+  for (const userId of fresh) post.companions.push({ userId, status: 'pending' })
+  await post.save()
+  await notify(fresh, {
+    type: 'invite',
+    actorId: user._id,
+    postId,
+    message: `mời bạn đi cùng hành trình “${snippet(post.title, 50) || 'của họ'}”`,
+  })
+  res.json({ post: toView(post, user._id), authors: await authorsOf([post], user._id) })
+})
+
+const respondSchema = z.object({ accept: z.boolean() })
+
+postsRouter.post('/:id/companions/respond', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const { accept } = respondSchema.parse(req.body)
+  const user = currentUser(res)
+  const id = String(req.params.id)
+  const post = isValidObjectId(id) ? await TripPost.findById(id) : null
+  const invite = post && !post.deletedAt ? post.companions.find((c) => c.userId === user._id) : undefined
+  if (!post || !invite) throw new HttpError(404, 'Không tìm thấy lời mời.', 'NOT_FOUND')
+
+  if (invite.status === 'pending') {
+    if (accept) {
+      invite.status = 'accepted'
+      await post.save()
+      await notify([post.authorId], {
+        type: 'invite_accepted',
+        actorId: user._id,
+        postId: String(post._id),
+        message: `đã nhận lời đi cùng hành trình “${snippet(post.title, 50) || 'của bạn'}”`,
+      })
+    } else {
+      post.set('companions', post.companions.filter((c) => c.userId !== user._id))
+      await post.save()
+    }
+  }
+  res.json({ ok: true })
+})
+
+/** The author takes someone off (or an invite back), or a companion leaves. */
+postsRouter.delete('/:id/companions/:userId', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const user = currentUser(res)
+  const id = String(req.params.id)
+  const userId = String(req.params.userId)
+  const post = isValidObjectId(id) ? await TripPost.findById(id) : null
+  const allowed = post && !post.deletedAt && (post.authorId === user._id || userId === user._id)
+  if (!post || !allowed || !post.companions.some((c) => c.userId === userId)) {
+    throw new HttpError(404, 'Không tìm thấy người đi cùng này.', 'NOT_FOUND')
+  }
+
+  post.set('companions', post.companions.filter((c) => c.userId !== userId))
+  await post.save()
+  // An invite taken back before it was answered takes its notification with it.
+  await Notification.deleteMany({ type: 'invite', postId: String(post._id), userId })
   res.json({ ok: true })
 })

@@ -2,6 +2,7 @@
  * Other people's profiles and following them.
  *
  *   GET  /api/users/me/following   ids of everyone you follow
+ *   GET  /api/users/me/friends     your friends (you follow each other), by name
  *   GET  /api/users/:id            a member's public profile (+ followedByMe)
  *   POST /api/users/:id/follow     follow / unfollow (toggles)
  *
@@ -16,7 +17,7 @@ import { isValidObjectId } from 'mongoose'
 import { HttpError } from '../lib/errors.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
-import { Follow, followingIdsOf, follows } from '../models/Follow.js'
+import { Follow, followingIdsOf, follows, friendIdsOf } from '../models/Follow.js'
 import { notify } from '../models/Notification.js'
 import { User, adjustCount } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
@@ -53,6 +54,12 @@ async function loadMember(id: string): Promise<UserDocument> {
 
 profilesRouter.get('/me/following', requireAuth, loadCurrentUser, async (_req, res) => {
   res.json({ ids: await followingIdsOf(res.locals.userId as string) })
+})
+
+profilesRouter.get('/me/friends', requireAuth, loadCurrentUser, async (_req, res) => {
+  const ids = await friendIdsOf(res.locals.userId as string)
+  const users = await User.find({ _id: { $in: ids }, role: 'user', status: 'active' }).sort({ displayName: 1 }).limit(500)
+  res.json({ items: users.map(publicProfile) })
 })
 
 profilesRouter.get('/:id', optionalAuth, async (req, res, next) => {

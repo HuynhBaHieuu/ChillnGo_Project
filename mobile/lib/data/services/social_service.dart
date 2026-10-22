@@ -33,6 +33,13 @@ abstract final class SocialService {
     return {...stringList(data['ids']), ...local}.toList();
   }
 
+  /// GET /api/users/me/friends: the people [viewerId] follows who follow back. Demo accounts have none.
+  static Future<List<User>> getFriends(String viewerId) async {
+    if (!isServerId(viewerId)) return [];
+    final data = await Api.get('/api/users/me/friends');
+    return listOf(data['items'], (u) => withDefaultPhotos(User.fromJson(mapOf(u))));
+  }
+
   static Future<bool> isFollowing(String userId, String? viewerId) async {
     if (viewerId == null) return false;
     if (isServerId(userId)) return (await _profile(userId)).followedByMe;
