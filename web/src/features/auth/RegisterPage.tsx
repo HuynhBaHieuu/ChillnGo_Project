@@ -12,6 +12,7 @@ import { AuthCard } from '@/features/auth/AuthCard'
 import { CheckEmailPanel } from '@/features/auth/CheckEmailPanel'
 import { AuthDivider, GoogleSignInButton } from '@/features/auth/GoogleSignInButton'
 import { PasswordChecklist } from '@/features/auth/PasswordChecklist'
+import { t } from '@/i18n'
 import { passwordMeetsRules } from '@/lib/password'
 import { adminService, authService } from '@/services'
 
@@ -37,11 +38,11 @@ export function RegisterPage() {
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!passwordMeetsRules(password)) {
-      setFormError('Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.')
+      setFormError(t('Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.'))
       return
     }
     if (password !== confirmPassword) {
-      setFormError('Mật khẩu xác nhận không khớp.')
+      setFormError(t('Mật khẩu xác nhận không khớp.'))
       return
     }
     setFormError(null)
@@ -51,13 +52,13 @@ export function RegisterPage() {
   if (mutation.isSuccess) {
     return (
       <AuthCard
-        title="Kiểm tra email"
-        description="Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong."
+        title={t('Kiểm tra email')}
+        description={t('Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong.')}
         footer={
           <>
-            Đã xác nhận xong?{' '}
+            {t('Đã xác nhận xong?')}{' '}
             <Link to="/login" className="text-foreground">
-              Đăng nhập
+              {t('Đăng nhập')}
             </Link>
           </>
         }
@@ -73,19 +74,19 @@ export function RegisterPage() {
   if (publicSettings.data?.settings.registrationOpen === false) {
     return (
       <AuthCard
-        title="Tạm ngừng đăng ký"
-        description="ChillnGo đang tạm ngừng nhận tài khoản mới. Vui lòng quay lại sau."
+        title={t('Tạm ngừng đăng ký')}
+        description={t('ChillnGo đang tạm ngừng nhận tài khoản mới. Vui lòng quay lại sau.')}
         footer={
           <>
-            Đã có tài khoản?{' '}
+            {t('Đã có tài khoản?')}{' '}
             <Link to="/login" className="text-foreground">
-              Đăng nhập
+              {t('Đăng nhập')}
             </Link>
           </>
         }
       >
         <p className="rounded-2xl bg-muted p-4 text-sm leading-relaxed text-muted-foreground">
-          Người đã có tài khoản vẫn đăng nhập bình thường, bằng email hoặc Google.
+          {t('Người đã có tài khoản vẫn đăng nhập bình thường, bằng email hoặc Google.')}
         </p>
       </AuthCard>
     )
@@ -95,20 +96,20 @@ export function RegisterPage() {
 
   return (
     <AuthCard
-      title="Bắt đầu ngay"
-      description="Tạo tài khoản để chia sẻ hành trình của bạn, và clone những lịch trình bạn thích về làm của mình."
+      title={t('Bắt đầu ngay')}
+      description={t('Tạo tài khoản để chia sẻ hành trình của bạn, và clone những lịch trình bạn thích về làm của mình.')}
       footer={
         <>
-          Đã có tài khoản?{' '}
+          {t('Đã có tài khoản?')}{' '}
           <Link to="/login" className="text-foreground">
-            Đăng nhập
+            {t('Đăng nhập')}
           </Link>
         </>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="displayName">Tên hiển thị</Label>
+          <Label htmlFor="displayName">{t('Tên hiển thị')}</Label>
           <Input
             id="displayName"
             required
@@ -120,14 +121,14 @@ export function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="username">Tên người dùng</Label>
+          <Label htmlFor="username">{t('Tên người dùng')}</Label>
           <Input
             id="username"
             required
             minLength={3}
             maxLength={30}
             pattern="[A-Za-z0-9._]+"
-            title="Chữ không dấu, số, dấu chấm hoặc gạch dưới"
+            title={t('Chữ không dấu, số, dấu chấm hoặc gạch dưới')}
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -135,7 +136,7 @@ export function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('Email')}</Label>
           <Input
             id="email"
             type="email"
@@ -145,12 +146,12 @@ export function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
-            Chúng tôi sẽ gửi email xác nhận tới địa chỉ này.
+            {t('Chúng tôi sẽ gửi email xác nhận tới địa chỉ này.')}
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Mật khẩu</Label>
+          <Label htmlFor="password">{t('Mật khẩu')}</Label>
           <PasswordInput
             id="password"
             required
@@ -169,7 +170,7 @@ export function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+          <Label htmlFor="confirmPassword">{t('Xác nhận mật khẩu')}</Label>
           <PasswordInput
             id="confirmPassword"
             required
@@ -184,9 +185,9 @@ export function RegisterPage() {
             }}
           />
           <p id="confirm-password-hint" aria-live="polite" className="text-xs">
-            {confirmMismatch && <span className="text-destructive">Mật khẩu xác nhận không khớp.</span>}
+            {confirmMismatch && <span className="text-destructive">{t('Mật khẩu xác nhận không khớp.')}</span>}
             {!confirmMismatch && confirmPassword.length > 0 && (
-              <span className="text-foreground">Mật khẩu đã khớp.</span>
+              <span className="text-foreground">{t('Mật khẩu đã khớp.')}</span>
             )}
           </p>
         </div>
@@ -199,7 +200,7 @@ export function RegisterPage() {
 
         <GlassButton type="submit" size="lg" tone="beam" className="w-full" disabled={mutation.isPending}>
           {mutation.isPending && <Loader2 className="animate-spin" />}
-          Tạo tài khoản
+          {t('Tạo tài khoản')}
         </GlassButton>
       </form>
 

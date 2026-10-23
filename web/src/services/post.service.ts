@@ -38,6 +38,7 @@ import type {
 import { uploadToCloudinary } from '@/lib/cloudinaryUpload'
 import type { SignedUpload } from '@/lib/cloudinaryUpload'
 import { prepareImageForUpload } from '@/lib/images'
+import { t } from '@/i18n'
 
 export type { ServerTripPost } from './serverPosts'
 
@@ -51,7 +52,7 @@ function deletedUser(id: ObjectId): User {
   return {
     _id: id,
     username: 'deleted',
-    displayName: 'Tài khoản đã xoá',
+    displayName: t('Tài khoản đã xoá'),
     email: '',
     avatarUrl: '',
     coverUrl: '',
@@ -146,7 +147,7 @@ export async function getPostById(
   await delay()
   const post = assertFound(
     db.tripPosts.find((p) => p._id === id),
-    `Không tìm thấy bài viết ${id}`,
+    t('Không tìm thấy bài viết {id}', { id }),
   )
   return decorate(post, viewerId)
 }
@@ -209,7 +210,7 @@ export async function uploadJourneyImage(
   const file = await prepareImageForUpload(original, maxSide)
   const signature = await http<SignedUpload & { publicId: string }>('/api/posts/cover-signature', { method: 'POST' })
   const uploaded = await uploadToCloudinary(signature, file, onProgress)
-  if (!uploaded.secure_url) throw new ApiError('Không nhận được địa chỉ ảnh sau khi tải lên.', 0)
+  if (!uploaded.secure_url) throw new ApiError(t('Không nhận được địa chỉ ảnh sau khi tải lên.'), 0)
   return uploaded.secure_url
 }
 
@@ -227,7 +228,7 @@ export async function updatePost(
   await delay()
 
   const index = db.tripPosts.findIndex((p) => p._id === id)
-  if (index === -1) throw new ApiError(`Không tìm thấy bài viết ${id}`)
+  if (index === -1) throw new ApiError(t('Không tìm thấy bài viết {id}', { id }))
 
   const updated: TripPost = {
     ...db.tripPosts[index],
@@ -255,7 +256,7 @@ export async function toggleLike(
   await delay()
   const post = assertFound(
     db.tripPosts.find((p) => p._id === postId),
-    `Không tìm thấy bài viết ${postId}`,
+    t('Không tìm thấy bài viết {id}', { id: postId }),
   )
 
   const index = db.likes.findIndex((l) => l.userId === viewerId && l.postId === postId)
@@ -278,7 +279,7 @@ export async function toggleBookmark(
   await delay()
   const post = assertFound(
     db.tripPosts.find((p) => p._id === postId),
-    `Không tìm thấy bài viết ${postId}`,
+    t('Không tìm thấy bài viết {id}', { id: postId }),
   )
 
   const index = db.bookmarks.findIndex(
@@ -397,7 +398,7 @@ export async function deleteComment(postId: ObjectId, commentId: ObjectId): Prom
 
 /** POST /api/posts/:id/comments/:commentId/hide — the journey's author hides or shows someone's comment. */
 export async function hideComment(postId: ObjectId, commentId: ObjectId, hidden: boolean): Promise<void> {
-  if (!isServerPostId(postId)) throw new ApiError('Bình luận này không thể ẩn.', 400)
+  if (!isServerPostId(postId)) throw new ApiError(t('Bình luận này không thể ẩn.'), 400)
   const { commentCount } = await http<{ commentCount: number }>(`/api/posts/${postId}/comments/${commentId}/hide`, {
     method: 'POST',
     body: { hidden },

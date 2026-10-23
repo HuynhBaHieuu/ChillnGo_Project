@@ -4,17 +4,18 @@
  * have a road between them, and a flight between them is still a flight.
  */
 
+import { t, translated } from '@/i18n'
 import type { TravelMode, TripLocation } from '@/services/types'
 
 export const TRAVEL_MODES: readonly TravelMode[] = ['driving', 'walking', 'transit', 'flight', 'ferry']
 
-export const MODE_LABEL: Record<TravelMode, string> = {
+export const MODE_LABEL = translated<TravelMode>({
   driving: 'Ô tô, xe máy',
   walking: 'Đi bộ',
   transit: 'Xe buýt, xe khách',
   flight: 'Máy bay',
   ferry: 'Tàu, phà, ca nô',
-}
+})
 
 /** Modes drawn along real roads, from Mapbox Directions. */
 export function isRoadMode(mode: TravelMode): boolean {
@@ -104,10 +105,10 @@ export function estimatedSeconds(mode: 'flight' | 'ferry', from: Point, to: Poin
 export function formatDuration(seconds: number, estimate = false): string {
   const step = estimate ? 5 : 1
   const minutes = Math.max(step, Math.round(seconds / 60 / step) * step)
-  if (minutes < 60) return `${minutes} phút`
+  if (minutes < 60) return t('{n} phút', { n: minutes })
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
-  return rest ? `${hours} giờ ${rest} phút` : `${hours} giờ`
+  return rest ? t('{h} giờ {n} phút', { h: hours, n: rest }) : t('{n} giờ', { n: hours })
 }
 
 export function formatDistance(metres: number): string {

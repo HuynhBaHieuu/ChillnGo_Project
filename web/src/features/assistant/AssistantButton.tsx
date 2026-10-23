@@ -13,11 +13,13 @@ import { parseReply } from './replyTags'
 import type { ParsedReply } from './replyTags'
 import { RobotFace } from './RobotFace'
 import { useRobotMood } from './robotMood'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 
 /** Loaded the first time the chat opens: it brings three.js with it. */
 const AssistantRobot = lazy(() => import('./AssistantRobot'))
 
-const SUGGESTIONS = [
+const SUGGESTIONS: MessageKey[] = [
   'ChillnGo có hành trình đi biển nào?',
   'So sánh chi phí các hành trình 3 ngày',
   'Làm sao lưu nháp rồi đăng một hành trình?',
@@ -70,7 +72,7 @@ export function AssistantButton() {
         {open ? (
           <button
             type="button"
-            aria-label="Đóng trợ lý du lịch"
+            aria-label={t('Đóng trợ lý du lịch')}
             data-mood={mood}
             onClick={() => {
               setOpen(false)
@@ -95,7 +97,7 @@ export function AssistantButton() {
           <button
             ref={launcher}
             type="button"
-            aria-label="Trợ lý du lịch AI"
+            aria-label={t('Trợ lý du lịch AI')}
             onClick={() => {
               setOpen(true)
               poke()
@@ -113,7 +115,7 @@ export function AssistantButton() {
           align="end"
           sideOffset={6}
           collisionPadding={12}
-          aria-label="Trợ lý du lịch"
+          aria-label={t('Trợ lý du lịch')}
           // A chat stays open while the reader scrolls or clicks around the page; Escape or ✕ closes it.
           onInteractOutside={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => {
@@ -184,15 +186,15 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
     <>
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="font-display text-xl tracking-tight">Trợ lý du lịch</h2>
+          <h2 className="font-display text-xl tracking-tight">{t('Trợ lý du lịch')}</h2>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-            Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng trang web. Câu trả lời do AI tạo nên có thể chưa chính xác.
+            {t('Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng trang web. Câu trả lời do AI tạo nên có thể chưa chính xác.')}
           </p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Đóng"
+          aria-label={t('Đóng')}
           className="-mr-1.5 -mt-1 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
         >
           <X className="size-5" aria-hidden />
@@ -201,15 +203,15 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
 
       {messages.length === 0 ? (
         <div className="flex min-h-0 flex-1 flex-col justify-end gap-2">
-          <p className="text-sm text-muted-foreground">Thử hỏi:</p>
+          <p className="text-sm text-muted-foreground">{t('Thử hỏi:')}</p>
           {SUGGESTIONS.map((suggestion) => (
             <button
               key={suggestion}
               type="button"
-              onClick={() => void ask(suggestion)}
+              onClick={() => void ask(t(suggestion))}
               className="rounded-xl border border-foreground/15 px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/5"
             >
-              {suggestion}
+              {t(suggestion)}
             </button>
           ))}
         </div>
@@ -238,7 +240,7 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
               ) : (
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" aria-hidden />
-                  Đang soạn câu trả lời…
+                  {t('Đang soạn câu trả lời…')}
                 </span>
               )}
             </li>
@@ -257,16 +259,16 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={QUESTION_MAX}
-            placeholder="Hỏi về chuyến đi của bạn…"
-            aria-label="Câu hỏi cho trợ lý"
+            placeholder={t('Hỏi về chuyến đi của bạn…')}
+            aria-label={t('Câu hỏi cho trợ lý')}
             autoComplete="off"
           />
           {busy ? (
-            <Button type="button" onClick={stop} size="icon" className="size-10 shrink-0 rounded-full" aria-label="Dừng trả lời">
+            <Button type="button" onClick={stop} size="icon" className="size-10 shrink-0 rounded-full" aria-label={t('Dừng trả lời')}>
               <Square aria-hidden />
             </Button>
           ) : (
-            <Button type="submit" size="icon" className="size-10 shrink-0 rounded-full" disabled={!text.trim()} aria-label="Gửi câu hỏi">
+            <Button type="submit" size="icon" className="size-10 shrink-0 rounded-full" disabled={!text.trim()} aria-label={t('Gửi câu hỏi')}>
               <Send aria-hidden />
             </Button>
           )}
@@ -277,7 +279,7 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
             onClick={clear}
             className="text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
-            Bắt đầu cuộc trò chuyện mới
+            {t('Bắt đầu cuộc trò chuyện mới')}
           </button>
         )}
       </div>
@@ -301,7 +303,7 @@ function ReplyText({ text, links }: { text: string; links: ParsedReply['links'] 
         to={`/posts/${link.id}`}
         className="mx-1 inline-flex items-center gap-0.5 whitespace-nowrap rounded-full border border-foreground/20 px-2 py-px align-baseline text-xs font-medium text-foreground transition-colors hover:bg-white/10"
       >
-        Xem hành trình
+        {t('Xem hành trình')}
         <ArrowUpRight className="size-3" aria-hidden />
       </Link>,
     )

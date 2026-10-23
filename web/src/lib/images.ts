@@ -14,12 +14,14 @@
  * server/src/lib/cloudinary.ts enforces the same list on the upload itself.
  */
 
+import { t } from '@/i18n'
+
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const
 
 /** For `<input type="file" accept=…>`. */
 export const ACCEPT_ATTRIBUTE = ACCEPTED_IMAGE_TYPES.join(',')
 
-export const ACCEPTED_LABEL = 'JPG, PNG, WebP hoặc AVIF'
+export const ACCEPTED_LABEL = 'JPG, PNG, WebP, AVIF'
 
 /** Largest original a user may pick. It is shrunk well below this before upload. */
 export const MAX_SOURCE_BYTES = 15 * 1024 * 1024
@@ -34,9 +36,9 @@ const QUALITY = 0.85
 /** Why a picked file cannot be used, or null when it can. */
 export function checkImageFile(file: File): string | null {
   if (!(ACCEPTED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
-    return `Định dạng ảnh không được hỗ trợ. Vui lòng chọn ảnh ${ACCEPTED_LABEL}.`
+    return t('Định dạng ảnh không được hỗ trợ. Vui lòng chọn ảnh {formats}.', { formats: ACCEPTED_LABEL })
   }
-  if (file.size > MAX_SOURCE_BYTES) return 'Ảnh quá lớn. Vui lòng chọn ảnh dưới 15 MB.'
+  if (file.size > MAX_SOURCE_BYTES) return t('Ảnh quá lớn. Vui lòng chọn ảnh dưới 15 MB.')
   return null
 }
 
@@ -64,7 +66,7 @@ function toBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
  */
 export async function prepareImageForUpload(file: File, maxSide: number): Promise<File> {
   const image = await decode(file).catch(() => {
-    throw new Error('Không đọc được ảnh này. Vui lòng chọn ảnh khác.')
+    throw new Error(t('Không đọc được ảnh này. Vui lòng chọn ảnh khác.'))
   })
 
   try {
@@ -89,7 +91,7 @@ export async function prepareImageForUpload(file: File, maxSide: number): Promis
 
     // Re-encoding a small, already-compressed file can make it bigger.
     const result = scale === 1 && blob.size >= file.size ? file : new File([blob], renamed(file.name, type), { type })
-    if (result.size > MAX_UPLOAD_BYTES) throw new Error('Ảnh vẫn quá lớn sau khi nén. Vui lòng chọn ảnh khác.')
+    if (result.size > MAX_UPLOAD_BYTES) throw new Error(t('Ảnh vẫn quá lớn sau khi nén. Vui lòng chọn ảnh khác.'))
     return result
   } finally {
     image.close()

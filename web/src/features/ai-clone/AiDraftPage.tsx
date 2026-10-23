@@ -31,25 +31,28 @@ import {
   useOptimizeRoute,
   useSetChangeStatus,
 } from '@/features/ai-clone/hooks'
+import { localeTag, t, tx } from '@/i18n'
+import type { MessageKey } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { formatLongDate, formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { AiChangeStatus, AiChangeType, AiDraft, AiPlace, ItinerarySource, TripDay } from '@/services/types'
 
 /** "3,2 km" — Vietnamese decimal comma. */
 function km(value: number): string {
-  return `${value.toFixed(1).replace('.', ',')} km`
+  return `${value.toLocaleString(localeTag(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`
 }
 
 /** What the season data says about the trip, in words; nothing without data. */
 function seasonNotes(draft: AiDraft): string[] {
   const season = draft.season
   if (!season) return []
-  const where = draft.destination ?? 'điểm đến'
+  const where = draft.destination ?? t('điểm đến')
   return [
     season.rainy &&
-      `Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở ${where}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.`,
-    season.peak && 'Đang mùa cao điểm: nên đặt phòng và vé sớm.',
-    ...season.festivals.map((f) => `Trong thời gian này có ${f.name} (tháng ${f.month}).`),
+      t('Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở {place}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.', { place: where }),
+    season.peak && t('Đang mùa cao điểm: nên đặt phòng và vé sớm.'),
+    ...season.festivals.map((f) => t('Trong thời gian này có {name} (tháng {month}).', { name: f.name, month: f.month })),
   ].filter((note): note is string => Boolean(note))
 }
 
@@ -59,13 +62,13 @@ function SourcesLine({ sources }: { sources: ItinerarySource[] }) {
     <>
       {sources.map((source, i) => (
         <span key={source.postId}>
-          {i > 0 && (i === sources.length - 1 ? ' và ' : ', ')}
+          {i > 0 && (i === sources.length - 1 ? ` ${t('và')} ` : ', ')}
           <Link to={`/posts/${source.postId}`} className="text-foreground underline-offset-4 hover:underline">
             “{source.title}”
           </Link>
           {source.author && (
             <>
-              {' '}của{' '}
+              {' '}{t('của')}{' '}
               <Link to={`/users/${source.author._id}`} className="text-foreground underline-offset-4 hover:underline">
                 @{source.author.username}
               </Link>
@@ -79,15 +82,15 @@ function SourcesLine({ sources }: { sources: ItinerarySource[] }) {
 
 /** What a change did, and its colour in the diff. */
 function labelOf(type: AiChangeType, status: AiChangeStatus): { text: string; tone: string } {
-  if (type === 'keep') return { text: 'Giữ nguyên', tone: 'border-np-sage/40 text-np-sage' }
-  if (type === 'replace' && status === 'reverted') return { text: 'Dùng điểm gốc', tone: 'border-np-sage/40 text-np-sage' }
-  if (type === 'replace') return { text: 'Thay thế', tone: 'border-[hsl(var(--np-ochre)/0.5)] text-[hsl(var(--np-ochre))]' }
-  if (type === 'add') return { text: 'Thêm mới', tone: 'border-np-teal/50 text-np-teal' }
-  if (status === 'reverted') return { text: 'Khôi phục', tone: 'border-np-sage/40 text-np-sage' }
-  return { text: 'Đã bỏ', tone: 'border-destructive/50 text-destructive' }
+  if (type === 'keep') return { text: t('Giữ nguyên'), tone: 'border-np-sage/40 text-np-sage' }
+  if (type === 'replace' && status === 'reverted') return { text: t('Dùng điểm gốc'), tone: 'border-np-sage/40 text-np-sage' }
+  if (type === 'replace') return { text: t('Thay thế'), tone: 'border-[hsl(var(--np-ochre)/0.5)] text-[hsl(var(--np-ochre))]' }
+  if (type === 'add') return { text: t('Thêm mới'), tone: 'border-np-teal/50 text-np-teal' }
+  if (status === 'reverted') return { text: t('Khôi phục'), tone: 'border-np-sage/40 text-np-sage' }
+  return { text: t('Đã bỏ'), tone: 'border-destructive/50 text-destructive' }
 }
 
-type Action = { label: string; status: AiChangeStatus; icon: typeof Check }
+type Action = { label: MessageKey; status: AiChangeStatus; icon: typeof Check }
 
 /** The buttons a change offers in its current state. */
 function actionsOf(type: AiChangeType, status: AiChangeStatus): Action[] {
@@ -103,31 +106,31 @@ function actionsOf(type: AiChangeType, status: AiChangeStatus): Action[] {
   }
   if (status === 'reverted') return [{ label: 'Bỏ lại', status: 'pending', icon: Undo2 }]
   return [
-    ...(status === 'pending' ? [{ ...accept, label: 'Đồng ý bỏ' }] : []),
+    ...(status === 'pending' ? [{ ...accept, label: 'Đồng ý bỏ' } as Action] : []),
     { label: 'Khôi phục', status: 'reverted', icon: RotateCcw },
   ]
 }
 
 function costText(place: AiPlace): string {
-  if (place.cost === null) return 'Chưa có dữ liệu'
-  if (place.cost === 0) return 'Miễn phí'
+  if (place.cost === null) return t('Chưa có dữ liệu')
+  if (place.cost === 0) return t('Miễn phí')
   return formatVnd(place.cost)
 }
 
 function costNote(place: AiPlace): string | null {
-  if (place.costBasis === 'perPerson' && place.avgCost) return `${formatVnd(place.avgCost)}/người`
-  if (place.costBasis === 'author') return 'theo chi phí tác giả ghi'
+  if (place.costBasis === 'perPerson' && place.avgCost) return t('{price}/người', { price: formatVnd(place.avgCost) })
+  if (place.costBasis === 'author') return t('theo chi phí tác giả ghi')
   return null
 }
 
 /** Facts ChillnGo has about a place; unknown ones are left out. */
 function factsOf(place: AiPlace): string[] {
   return [
-    place.category,
-    place.openingHours && `Mở ${place.openingHours.open}–${place.openingHours.close}`,
-    place.isOutdoor === true ? 'Ngoài trời' : place.isOutdoor === false ? 'Trong nhà' : null,
-    place.requiresBooking && 'Cần đặt trước',
-    place.rating !== null && `★ ${String(place.rating).replace('.', ',')}`,
+    place.category && tx(place.category),
+    place.openingHours && t('Mở {open}–{close}', { open: place.openingHours.open, close: place.openingHours.close }),
+    place.isOutdoor === true ? t('Ngoài trời') : place.isOutdoor === false ? t('Trong nhà') : null,
+    place.requiresBooking && t('Cần đặt trước'),
+    place.rating !== null && `★ ${place.rating.toLocaleString(localeTag())}`,
   ].filter((f): f is string => Boolean(f))
 }
 
@@ -192,11 +195,11 @@ export function AiDraftPage() {
     return (
       <PageContainer>
         <EmptyState
-          title="Không mở được bản nháp"
-          description={(error as Error | null)?.message ?? 'Bản nháp có thể đã hết hạn.'}
+          title={t('Không mở được bản nháp')}
+          description={(error as Error | null)?.message ?? t('Bản nháp có thể đã hết hạn.')}
           action={
             <Button asChild variant="outline">
-              <Link to="/itineraries?tab=cloned">Về lịch trình của tôi</Link>
+              <Link to="/itineraries?tab=cloned">{t('Về lịch trình của tôi')}</Link>
             </Button>
           }
         />
@@ -221,8 +224,11 @@ export function AiDraftPage() {
           setRouteNotes((notes) => ({
             ...notes,
             [dayIndex]: route.changed
-              ? `Đã sắp lại tuyến: quãng đường ước tính từ ${km(route.beforeKm)} còn ${km(route.afterKm)}. Bữa ăn giữ nguyên giờ.`
-              : 'Thứ tự hiện tại đã cho tuyến ngắn hơn, nên giữ nguyên.',
+              ? t('Đã sắp lại tuyến: quãng đường ước tính từ {before} còn {after}. Bữa ăn giữ nguyên giờ.', {
+                  before: km(route.beforeKm),
+                  after: km(route.afterKm),
+                })
+              : t('Thứ tự hiện tại đã cho tuyến ngắn hơn, nên giữ nguyên.'),
           }))
         },
         onSettled: done,
@@ -257,7 +263,7 @@ export function AiDraftPage() {
             className="h-7 rounded-full px-3 text-xs"
           >
             <action.icon className="size-3.5" />
-            {action.label}
+            {t(action.label)}
           </Button>
         ))}
       </div>
@@ -271,22 +277,29 @@ export function AiDraftPage() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Hành trình gốc
+          {t('Hành trình gốc')}
         </Link>
       )}
 
       <header className="animate-fade-rise mt-6">
         <p className="inline-flex items-center gap-2 text-sm text-np-teal">
           <Sparkles className="size-4" />
-          Bản nháp AI
+          {t('Bản nháp AI')}
         </p>
         <h1 className="mt-3 max-w-[26ch] font-display text-4xl tracking-tight">
-          {draft.destination ?? 'Lịch trình'} {form.days} ngày cho {form.groupSize} người
+          {t('{place} {days} ngày cho {people} người', {
+            place: draft.destination ?? t('Lịch trình'),
+            days: form.days,
+            people: form.groupSize,
+            n: form.groupSize,
+          })}
         </h1>
         {source && (
           <p className="mt-3 text-sm text-muted-foreground">
-            {draft.sources.length > 1 ? 'Gộp từ các hành trình ' : 'Phỏng theo hành trình '}
-            <SourcesLine sources={draft.sources} />. Khởi hành {formatLongDate(form.startDate)}.
+            {tr(draft.sources.length > 1 ? 'Gộp từ các hành trình {sources}. Khởi hành {date}.' : 'Phỏng theo hành trình {sources}. Khởi hành {date}.', {
+              sources: <SourcesLine sources={draft.sources} />,
+              date: formatLongDate(form.startDate),
+            })}
           </p>
         )}
         {season.length > 0 && (
@@ -305,11 +318,11 @@ export function AiDraftPage() {
       <GlassCard className="mt-8 p-5 sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Tổng chi phí ước tính</p>
+            <p className="text-sm text-muted-foreground">{t('Tổng chi phí ước tính')}</p>
             <p className={cn('mt-1 font-display text-3xl tracking-tight', cost.overBudget && 'text-destructive')}>
               {formatVnd(cost.total)}
               {cost.budget !== null && (
-                <span className="ml-2 text-base text-muted-foreground">/ ngân sách {formatVnd(cost.budget)}</span>
+                <span className="ml-2 text-base text-muted-foreground">/ {t('ngân sách {amount}', { amount: formatVnd(cost.budget) })}</span>
               )}
             </p>
             {cost.budget !== null && cost.budget > 0 && (
@@ -322,11 +335,11 @@ export function AiDraftPage() {
             )}
             <p className="mt-2 text-xs text-muted-foreground">
               {cost.overBudget && cost.budget !== null && (
-                <span className="text-destructive">Vượt ngân sách {formatVnd(cost.total - cost.budget)}. </span>
+                <span className="text-destructive">{t('Vượt ngân sách {amount}.', { amount: formatVnd(cost.total - cost.budget) })} </span>
               )}
               {cost.missing > 0
-                ? `${cost.missing} điểm chưa có dữ liệu giá, chưa tính vào tổng.`
-                : 'Tính từ giá trung bình trong dữ liệu ChillnGo × số người.'}
+                ? t('{n} điểm chưa có dữ liệu giá, chưa tính vào tổng.', { n: cost.missing })
+                : t('Tính từ giá trung bình trong dữ liệu ChillnGo × số người.')}
             </p>
           </div>
 
@@ -334,16 +347,16 @@ export function AiDraftPage() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-2 text-sm text-np-teal">
                 <CheckCheck className="size-4" />
-                Đã lưu vào lịch trình của bạn
+                {t('Đã lưu vào lịch trình của bạn')}
               </span>
               <GlassButton asChild tone="sunset">
-                <Link to={`/itineraries/${draft.committedItineraryId}`}>Mở lịch trình</Link>
+                <Link to={`/itineraries/${draft.committedItineraryId}`}>{t('Mở lịch trình')}</Link>
               </GlassButton>
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm text-muted-foreground">
-                {draft.pendingCount > 0 ? `Còn ${draft.pendingCount} thay đổi chờ duyệt` : 'Đã duyệt hết thay đổi'}
+                {draft.pendingCount > 0 ? t('Còn {n} thay đổi chờ duyệt', { n: draft.pendingCount }) : t('Đã duyệt hết thay đổi')}
               </span>
               <Button
                 variant="outline"
@@ -351,11 +364,11 @@ export function AiDraftPage() {
                 onClick={() => once((done) => acceptAll.mutate(undefined, { onSettled: done }))}
               >
                 <CheckCheck />
-                Chấp nhận tất cả
+                {t('Chấp nhận tất cả')}
               </Button>
               <GlassButton tone="sunset" onClick={save} disabled={busy}>
                 {commit.isPending && <Loader2 className="animate-spin" />}
-                Lưu vào lịch trình của tôi
+                {t('Lưu vào lịch trình của tôi')}
               </GlassButton>
             </div>
           )}
@@ -384,13 +397,13 @@ export function AiDraftPage() {
             <GlassCard as="section" key={day.dayIndex} className="p-5 sm:p-7">
               <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
                 <div>
-                  <p className="text-sm text-muted-foreground">Ngày {day.dayIndex}</p>
+                  <p className="text-sm text-muted-foreground">{t('Ngày {n}', { n: day.dayIndex })}</p>
                   <h2 className="mt-1 font-display text-xl">{formatLongDate(day.date)}</h2>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <p className="text-sm text-muted-foreground">
-                    Ước tính <span className="text-foreground">{formatVnd(day.cost.total)}</span>
-                    {day.cost.missing > 0 && ` · ${day.cost.missing} điểm chưa có giá`}
+                    {t('Ước tính')} <span className="text-foreground">{formatVnd(day.cost.total)}</span>
+                    {day.cost.missing > 0 && ` · ${t('{n} điểm chưa có giá', { n: day.cost.missing })}`}
                   </p>
                   {!committed && day.stops.length >= 3 && (
                     <Button
@@ -406,7 +419,7 @@ export function AiDraftPage() {
                       ) : (
                         <Route className="size-3.5" />
                       )}
-                      Tối ưu tuyến
+                      {t('Tối ưu tuyến')}
                     </Button>
                   )}
                 </div>
@@ -418,7 +431,7 @@ export function AiDraftPage() {
               )}
 
               {day.stops.length === 0 && (
-                <p className="mt-6 text-sm text-muted-foreground">Ngày này chưa có điểm nào.</p>
+                <p className="mt-6 text-sm text-muted-foreground">{t('Ngày này chưa có điểm nào.')}</p>
               )}
 
               <ol className="mt-6 space-y-5">
@@ -437,12 +450,12 @@ export function AiDraftPage() {
                             {label.text}
                           </span>
                           {stop.status === 'accepted' && stop.type !== 'keep' && (
-                            <span className="text-[11px] text-muted-foreground">đã chấp nhận</span>
+                            <span className="text-[11px] text-muted-foreground">{t('đã chấp nhận')}</span>
                           )}
                         </div>
                         {stop.type === 'replace' && stop.status !== 'reverted' && stop.original && (
                           <p className="text-[13px] text-muted-foreground">
-                            Thay cho <span className="line-through">{stop.original.name}</span>
+                            {tr('Thay cho {name}', { name: <span className="line-through">{stop.original.name}</span> })}
                           </p>
                         )}
                         <p className="text-[13px] text-muted-foreground">
@@ -453,7 +466,7 @@ export function AiDraftPage() {
                         {/* A reverted change is the user's call: the AI's reason for it no longer applies. */}
                         {stop.reason && stop.status !== 'reverted' && (
                           <p className="flex gap-1.5 text-sm leading-relaxed">
-                            <Sparkles className="mt-1 size-3.5 shrink-0 text-np-teal" aria-label="Lý do của AI" />
+                            <Sparkles className="mt-1 size-3.5 shrink-0 text-np-teal" aria-label={t('Lý do của AI')} />
                             {stop.reason}
                           </p>
                         )}
@@ -476,15 +489,15 @@ export function AiDraftPage() {
 
           {draft.notInPlan.length > 0 && (
             <GlassCard as="section" className="p-5 sm:p-7">
-              <h2 className="font-display text-xl">Không có trong lịch trình</h2>
+              <h2 className="font-display text-xl">{t('Không có trong lịch trình')}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.
+                {t('Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.')}
               </p>
               <ul className="mt-5 space-y-4">
                 {draft.notInPlan.map((item) => {
                   const label =
                     item.type === 'add'
-                      ? { text: 'Bạn đã bỏ', tone: 'border-border text-muted-foreground' }
+                      ? { text: t('Bạn đã bỏ'), tone: 'border-border text-muted-foreground' }
                       : labelOf(item.type, item.status)
                   return (
                     <li key={item.changeId} className="space-y-1.5">
@@ -508,14 +521,14 @@ export function AiDraftPage() {
               <div>
                 <h2 className="flex items-center gap-2 font-display text-xl">
                   <ListChecks className="size-5 text-np-teal" aria-hidden />
-                  Chuẩn bị cho chuyến đi
+                  {t('Chuẩn bị cho chuyến đi')}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {draft.checklist
                     ? draft.checklist.sortedByAi
-                      ? 'AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.'
-                      : 'Theo thứ tự mặc định của ChillnGo.'
-                    : 'Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.'}
+                      ? t('AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.')
+                      : t('Theo thứ tự mặc định của ChillnGo.')
+                    : t('Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.')}
                 </p>
               </div>
               {!committed && (
@@ -526,7 +539,7 @@ export function AiDraftPage() {
                   onClick={() => once((done) => checklist.mutate(undefined, { onSettled: done }))}
                 >
                   {checklist.isPending ? <Loader2 className="animate-spin" /> : <ListChecks />}
-                  {draft.checklist ? 'Tạo lại' : 'Tạo checklist'}
+                  {draft.checklist ? t('Tạo lại') : t('Tạo checklist')}
                 </Button>
               )}
             </div>
@@ -550,17 +563,17 @@ export function AiDraftPage() {
           </GlassCard>
 
           <section>
-            <h2 className="font-display text-2xl">Bản đồ tuyến</h2>
-            <MapPreview days={mapDaysOf(draft)} className="mt-4 h-80 w-full" label="Bản đồ các điểm trong bản nháp" />
+            <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
+            <MapPreview days={mapDaysOf(draft)} className="mt-4 h-80 w-full" label={t('Bản đồ các điểm trong bản nháp')} />
           </section>
         </div>
 
         <aside className="min-w-0 space-y-3 lg:sticky lg:top-32">
           <ChatPanel draft={draft} busy={busy} />
           <p className="px-1 text-xs text-muted-foreground">
-            Bản nháp tự xoá sau 24 giờ, lúc{' '}
-            {new Date(draft.expiresAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
-            .
+            {t('Bản nháp tự xoá sau 24 giờ, lúc {time}.', {
+              time: new Date(draft.expiresAt).toLocaleString(localeTag(), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
+            })}
           </p>
         </aside>
       </div>

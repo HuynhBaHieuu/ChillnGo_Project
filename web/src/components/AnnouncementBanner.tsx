@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Megaphone, X } from 'lucide-react'
 import { useState } from 'react'
 
+import { t } from '@/i18n'
 import { adminService } from '@/services'
 
 const DISMISSED_KEY = 'chillngo.announcement.dismissed'
@@ -46,7 +47,7 @@ export function AnnouncementBanner() {
   return (
     <aside
       role="status"
-      aria-label="Thông báo từ ChillnGo"
+      aria-label={t('Thông báo từ ChillnGo')}
       className="fixed inset-x-4 bottom-44 z-40 mx-auto max-w-md rounded-2xl border-2 border-foreground bg-card p-4 shadow-[4px_4px_0_hsl(var(--foreground))] md:inset-x-auto md:bottom-24 md:right-6"
     >
       <div className="flex items-start gap-3">
@@ -57,7 +58,7 @@ export function AnnouncementBanner() {
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Đóng thông báo"
+          aria-label={t('Đóng thông báo')}
           className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <X aria-hidden className="size-4" />

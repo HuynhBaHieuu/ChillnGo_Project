@@ -136,6 +136,44 @@ Submitting the post form logs the full payload to the console in the exact
 `TripPost` shape, so the form and the schema can be checked against each other
 before the API exists.
 
+## Languages
+
+The site speaks Vietnamese (the source language), English, Chinese, Japanese
+and Korean. The globe button in the navbar (and in the admin sidebar) switches
+language; the choice is kept in localStorage, and a first visit follows the
+browser's language when the site speaks it. Everything lives in `src/i18n/`.
+
+Strings stay in Vietnamese in the code, wrapped in `t()`; the Vietnamese is the
+key into the catalog:
+
+```tsx
+t('Đăng nhập')                         // "Log in"
+t('{n} ngày', { n: 3 })                // "3 days"
+tr('Gửi tới {email}.', { email: <b>{email}</b> })   // a sentence with JSX inside
+```
+
+- Translations live in `src/i18n/messages/*.ts`, one file per area, each
+  entry `'Tiếng Việt': { en, zh, ja, ko }`. An English entry may be a
+  `[singular, plural]` pair, picked by the `n` parameter.
+- `t()` only accepts strings the catalog has, so a new string fails
+  `npm run typecheck` until it gets its translations. Add a file to
+  `catalog.ts` when you create one.
+- A Vietnamese word with two meanings gets a context after `#`
+  (`'Người dùng#role'`); the context is never shown.
+- Text only known at run time (tags, labels from the API) goes through `tx()`,
+  which shows it unchanged when the catalog lacks it.
+- Changing language remounts the pages, so every `t()` call runs again. Label
+  tables declared at module level use `translated()` / `translatedList()` so
+  they translate when read, not once at load.
+- Dates, numbers and money use the current language's `Intl` locale
+  (`localeTag()`, `dateLocale()`); map labels use `mapLanguage()`.
+- The API answers in Vietnamese. `i18n/server.ts` translates its error
+  messages and notification lines back (exact matches, plus patterns for the
+  templated ones). A new server message needs an entry in
+  `messages/server.ts`, or it shows in Vietnamese.
+
+Content people write (journey titles, comments, AI replies) is shown as written.
+
 ## Design system
 
 One dark theme, defined as HSL tokens in `src/styles/theme.css`, plus a light

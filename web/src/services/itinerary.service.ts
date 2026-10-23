@@ -13,6 +13,7 @@ import { http } from './http'
 import { isServerPostId, syncServerPosts } from './serverPosts'
 import type { ClonedItinerary, ObjectId } from './types'
 import { themeFromText, travelCover } from '@/lib/photos'
+import { t } from '@/i18n'
 
 type ItineraryResponse = { itinerary: ClonedItinerary }
 
@@ -27,7 +28,7 @@ function sampleSource(postId: ObjectId, dayIds?: ObjectId[]) {
   if (isServerPostId(postId)) return undefined
   const post = assertFound(
     db.tripPosts.find((p) => p._id === postId),
-    `Không tìm thấy bài viết ${postId}`,
+    t('Không tìm thấy bài viết {id}', { id: postId }),
   )
   return {
     title: post.title,

@@ -4,6 +4,7 @@ import { GlassCard } from '@/components/GlassCard'
 import { googleMapsUrl } from '@/lib/geo'
 import { dayCostOf, isPinned } from '@/lib/itinerary'
 import { formatLongDate, formatVnd } from '@/lib/format'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import type { TripDay } from '@/services/types'
 
@@ -22,7 +23,7 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
       <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <div>
           <p className="text-sm text-muted-foreground">
-            Ngày {day.dayNumber}
+            {t('Ngày {n}', { n: day.dayNumber })}
           </p>
           <h3 className="mt-1 font-display text-xl">
             {day.title}
@@ -32,7 +33,7 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
           </time>
         </div>
         <p className="text-sm text-muted-foreground">
-          Ước tính{' '}
+          {t('Ước tính')}{' '}
           <span className="text-foreground">{formatVnd(dayCostOf(day))}</span>
         </p>
       </header>
@@ -57,7 +58,7 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                 <h4 className="font-medium">{location.name}</h4>
                 <span className="shrink-0 text-sm text-muted-foreground">
-                  {location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
+                  {location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí')}
                 </span>
               </div>
               {(location.address || isPinned(location)) && (
@@ -71,7 +72,7 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
                       rel="noreferrer"
                       className="underline underline-offset-2 hover:text-foreground"
                     >
-                      Chỉ đường
+                      {t('Chỉ đường')}
                     </a>
                   )}
                 </p>
@@ -86,7 +87,7 @@ export function DayItinerary({ day, className }: DayItineraryProps) {
                   href={location.photoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={`Xem ảnh ${location.name || `điểm dừng ${index + 1}`} cỡ lớn`}
+                  aria-label={t('Xem ảnh {name} cỡ lớn', { name: location.name || t('điểm dừng {n}', { n: index + 1 }) })}
                   className="np-media group mt-3 block aspect-[16/10] w-full max-w-md overflow-hidden rounded-xl bg-np-well"
                 >
                   <img

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ConfirmDialog } from '@/features/discovery-admin/admin/shared'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 /** The title block at the top of each section. */
@@ -105,13 +106,13 @@ export function ErrorPanel({ error, onRetry }: { error: unknown; onRetry: () => 
   return (
     <div role="alert" className="flex flex-col items-center rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
       <AlertTriangle className="mb-3 size-6 text-destructive" aria-hidden />
-      <p className="font-display text-xl">Không tải được nội dung</p>
+      <p className="font-display text-xl">{t('Không tải được nội dung')}</p>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        {error instanceof Error ? error.message : 'Đã có lỗi xảy ra. Vui lòng thử lại.'}
+        {error instanceof Error ? error.message : t('Đã có lỗi xảy ra. Vui lòng thử lại.')}
       </p>
       <Button variant="outline" size="sm" className="mt-5 rounded-full" onClick={onRetry}>
         <RotateCcw aria-hidden />
-        Thử lại
+        {t('Thử lại')}
       </Button>
     </div>
   )
@@ -147,7 +148,7 @@ export function Empty({
  * suggests there is simply no activity.
  */
 export function NotAvailable({ icon, feature, description }: { icon: LucideIcon; feature: string; description: string }) {
-  return <Empty icon={icon} title={`ChillnGo chưa có ${feature}`} description={description} />
+  return <Empty icon={icon} title={t('ChillnGo chưa có {feature}', { feature })} description={description} />
 }
 
 /** A thumbnail that falls back to a quiet tile when there is no image. */

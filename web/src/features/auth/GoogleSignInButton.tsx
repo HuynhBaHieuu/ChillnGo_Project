@@ -3,6 +3,8 @@ import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { currentLocale, t } from '@/i18n'
+import type { Locale } from '@/i18n'
 import { optionalEnv } from '@/lib/env'
 import { homePathFor } from '@/lib/roles'
 import { authService } from '@/services'
@@ -74,6 +76,9 @@ function loadGoogleIdentity(): Promise<GoogleIdentity> {
 let onCredential: ((credential: string) => void) | null = null
 let initialized = false
 
+/** Google's own locale codes for the button's text. */
+const GOOGLE_LOCALES: Record<Locale, string> = { vi: 'vi', en: 'en', zh: 'zh_CN', ja: 'ja', ko: 'ko' }
+
 interface GoogleSignInButtonProps {
   /** Where to go after sign-in. Default: the admin console for staff, the feed for everyone else. */
   redirectTo?: string
@@ -129,7 +134,7 @@ export function GoogleSignInButton({ redirectTo, mode = 'signin' }: GoogleSignIn
           shape: 'pill',
           text: mode === 'signup' ? 'signup_with' : 'signin_with',
           logo_alignment: 'center',
-          locale: 'vi',
+          locale: GOOGLE_LOCALES[currentLocale()],
           width,
         })
       })
@@ -151,14 +156,14 @@ export function GoogleSignInButton({ redirectTo, mode = 'signin' }: GoogleSignIn
         {mutation.isPending && (
           <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-full bg-card/90 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Đang đăng nhập bằng Google…
+            {t('Đang đăng nhập bằng Google…')}
           </div>
         )}
       </div>
 
       {loadFailed && (
         <p className="text-center text-xs text-muted-foreground">
-          Không tải được nút đăng nhập Google. Kiểm tra kết nối mạng hoặc trình chặn quảng cáo.
+          {t('Không tải được nút đăng nhập Google. Kiểm tra kết nối mạng hoặc trình chặn quảng cáo.')}
         </p>
       )}
       {mutation.isError && (
@@ -171,7 +176,7 @@ export function GoogleSignInButton({ redirectTo, mode = 'signin' }: GoogleSignIn
 }
 
 /** "hoặc" rule between the Google button and the email form. */
-export function AuthDivider({ label = 'hoặc' }: { label?: string }) {
+export function AuthDivider({ label = t('hoặc') }: { label?: string }) {
   if (!CLIENT_ID) return null
   return (
     <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">

@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Confirm, Empty, ErrorPanel, SectionHeader } from '@/features/activity/components'
 import { journeyRoute, journeyStats, timeAgo } from '@/features/activity/format'
 import { useDraftJourneys, useJourneyAction } from '@/features/activity/hooks'
+import { t } from '@/i18n'
 import { themeFromText, travelCover } from '@/lib/photos'
 import { postService } from '@/services'
 import type { ServerTripPost } from '@/services/post.service'
@@ -25,20 +26,20 @@ export function JourneysSection() {
   return (
     <>
       <SectionHeader
-        title="Hành trình"
-        description="Những hành trình bạn đã bắt đầu lên kế hoạch nhưng chưa đăng. Chúng được lưu vào tài khoản, nên bạn có thể làm tiếp trên bất kỳ thiết bị nào."
+        title={t('Hành trình')}
+        description={t('Những hành trình bạn đã bắt đầu lên kế hoạch nhưng chưa đăng. Chúng được lưu vào tài khoản, nên bạn có thể làm tiếp trên bất kỳ thiết bị nào.')}
         action={
           <GlassButton asChild tone="sunset" size="md">
             <Link to="/posts/new">
               <Plus />
-              Hành trình mới
+              {t('Hành trình mới')}
             </Link>
           </GlassButton>
         }
       />
 
       <h3 className="mb-4 flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.12em] text-np-meta">
-        Hành trình nháp
+        {t('Hành trình nháp')}
         {drafts.data && drafts.data.length > 0 && (
           <span className="rounded-full bg-np-well px-2 py-0.5 text-[11px] tabular-nums text-np-cream">{drafts.data.length}</span>
         )}
@@ -62,11 +63,11 @@ export function JourneysSection() {
       ) : drafts.data.length === 0 ? (
         <Empty
           icon={MapIcon}
-          title="Chưa có hành trình nháp"
-          description="Bắt đầu lên kế hoạch cho một chuyến đi và bấm “Lưu nháp” trong trình soạn. Bản nháp sẽ chờ bạn ở đây."
+          title={t('Chưa có hành trình nháp')}
+          description={t('Bắt đầu lên kế hoạch cho một chuyến đi và bấm “Lưu nháp” trong trình soạn. Bản nháp sẽ chờ bạn ở đây.')}
           action={
             <Button asChild variant="outline" size="sm" className="rounded-full">
-              <Link to="/posts/new">Bắt đầu một hành trình</Link>
+              <Link to="/posts/new">{t('Bắt đầu một hành trình')}</Link>
             </Button>
           }
         />
@@ -89,7 +90,7 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
   const duplicate = useJourneyAction(postService.duplicateJourney)
   const remove = useJourneyAction(postService.deleteJourney)
 
-  const title = draft.title.trim() || 'Hành trình chưa đặt tên'
+  const title = draft.title.trim() || t('Hành trình chưa đặt tên')
   const route = journeyRoute(draft)
   const cover = draft.coverUrl || travelCover(draft.title.slice(0, 30) || 'chillngo', themeFromText(draft.title))
   const incomplete = !draft.title.trim() || !draft.summary.trim()
@@ -108,7 +109,7 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
         />
         <span className="absolute inset-0 bg-gradient-to-t from-np-canopy/70 via-transparent to-transparent" />
         <span className="absolute left-3 top-3 rounded-full border border-np-beige/15 bg-np-canopy/75 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-np-cream">
-          Nháp
+          {t('Nháp')}
         </span>
       </Link>
 
@@ -116,7 +117,7 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
         {route && <p className="mb-1 truncate text-[13px] font-semibold text-np-sage">{route}</p>}
         <h4 className="font-display text-xl leading-snug text-np-cream">{title}</h4>
         <p className="mt-1 text-[13px] text-muted-foreground">{journeyStats(draft)}</p>
-        <p className="mt-3 text-xs text-np-meta">Sửa lần cuối {timeAgo(draft.updatedAt)}</p>
+        <p className="mt-3 text-xs text-np-meta">{t('Sửa lần cuối {time}', { time: timeAgo(draft.updatedAt) })}</p>
 
         {error && (
           <p role="alert" className="mt-3 text-xs text-destructive">
@@ -128,13 +129,13 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
           <GlassButton asChild tone="sunset" size="md">
             <Link to={`/posts/${draft._id}/edit`}>
               <PenLine />
-              Tiếp tục chỉnh sửa
+              {t('Tiếp tục chỉnh sửa')}
             </Link>
           </GlassButton>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full" aria-label={`Thêm thao tác cho ${title}`} disabled={busy}>
+              <Button variant="ghost" size="icon" className="rounded-full" aria-label={t('Thêm thao tác cho {title}', { title })} disabled={busy}>
                 <MoreHorizontal aria-hidden />
               </Button>
             </DropdownMenuTrigger>
@@ -142,21 +143,21 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
               <DropdownMenuItem asChild>
                 <Link to={`/posts/${draft._id}`}>
                   <Eye />
-                  Xem trước
+                  {t('Xem trước')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setConfirm('publish')}>
                 <Send />
-                Đăng
+                {t('Đăng')}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => duplicate.mutate(draft._id)}>
                 <Copy />
-                Nhân bản
+                {t('Nhân bản')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setConfirm('delete')} className="text-destructive">
                 <Trash2 />
-                Xoá bản nháp
+                {t('Xoá bản nháp')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -166,17 +167,17 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
       <Confirm
         open={confirm === 'publish'}
         onOpenChange={(open) => !open && setConfirm(null)}
-        title="Đăng hành trình này?"
+        title={t('Đăng hành trình này?')}
         description={
           incomplete ? (
             <span className="text-destructive">
-              Hãy thêm tiêu đề và tóm tắt trước. Bấm Tiếp tục chỉnh sửa để hoàn thiện.
+              {t('Hãy thêm tiêu đề và tóm tắt trước. Bấm Tiếp tục chỉnh sửa để hoàn thiện.')}
             </span>
           ) : (
-            'Hành trình sẽ hiện trên trang cá nhân của bạn, trong Newsfeed của người theo dõi và ở trang Khám phá.'
+            t('Hành trình sẽ hiện trên trang cá nhân của bạn, trong Newsfeed của người theo dõi và ở trang Khám phá.')
           )
         }
-        confirmLabel="Đăng"
+        confirmLabel={t('Đăng')}
         pending={publish.isPending}
         onConfirm={() => {
           if (incomplete) return setConfirm(null)
@@ -186,9 +187,9 @@ function DraftJourneyCard({ draft }: { draft: ServerTripPost }) {
       <Confirm
         open={confirm === 'delete'}
         onOpenChange={(open) => !open && setConfirm(null)}
-        title="Xoá bản nháp này?"
-        description="Bản nháp sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày."
-        confirmLabel="Xoá bản nháp"
+        title={t('Xoá bản nháp này?')}
+        description={t('Bản nháp sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày.')}
+        confirmLabel={t('Xoá bản nháp')}
         destructive
         pending={remove.isPending}
         onConfirm={() => remove.mutate(draft._id, { onSuccess: () => setConfirm(null) })}

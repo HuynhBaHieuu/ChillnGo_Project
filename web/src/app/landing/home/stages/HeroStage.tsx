@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { MEDIA, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { t } from '@/i18n'
 import { landingPhoto } from '@/lib/photos'
 
 /*
@@ -102,7 +103,7 @@ export function HeroStage() {
           <div className="mx-auto grid w-[calc(100%-1.5em)] grid-cols-12 content-end items-center gap-x-[0.75em] gap-y-[2.5em] pb-[2em] md:content-center md:pb-0">
             <div className="col-span-12 px-[2.5em] text-center md:col-span-3 md:pl-[calc(3.75em-12px)] md:pr-0 md:text-left">
               <p data-hero-reveal className="text-balance font-display text-[1.25em] font-medium leading-[1.2] md:text-[1.125em]">
-                Những chuyến đi có thật, kể lại bởi chính người đã đi
+                {t('Những chuyến đi có thật, kể lại bởi chính người đã đi')}
               </p>
             </div>
             <div className="col-span-12 px-[2.5em] md:col-span-3 md:col-start-10 md:px-0">
@@ -120,7 +121,7 @@ export function HeroStage() {
               // pb: room for the dot under "Ệ", which hangs below the line box.
               className="whitespace-nowrap pb-[0.1em] text-center font-condensed text-[5em] font-normal uppercase leading-none md:text-[16em]"
             >
-              Việt Nam
+              {t('Việt Nam')}
             </h1>
           </div>
         </div>
@@ -131,7 +132,7 @@ export function HeroStage() {
 
       <Dialog open={filmOpen} onOpenChange={setFilmOpen}>
         <DialogContent className="max-w-5xl bg-black p-0">
-          <DialogTitle className="sr-only">Phim ChillnGo</DialogTitle>
+          <DialogTitle className="sr-only">{t('Phim ChillnGo')}</DialogTitle>
           {filmOpen && <video src={FILM_VIDEO} autoPlay controls playsInline className="aspect-video w-full rounded-2xl" />}
         </DialogContent>
       </Dialog>
@@ -158,7 +159,7 @@ function FilmButton({ onClick }: { onClick: () => void }) {
         <img src={FILM_PREVIEW} alt="" loading="lazy" className="size-full object-cover" />
       </span>
       <span className={`relative z-[1] flex w-full items-center justify-between group-hover:w-[90%] ${ease}`}>
-        <span className="font-body text-[0.875em] font-medium">Xem phim</span>
+        <span className="font-body text-[0.875em] font-medium">{t('Xem phim')}</span>
         <Play aria-hidden className="size-[0.7em] fill-current" />
       </span>
     </button>

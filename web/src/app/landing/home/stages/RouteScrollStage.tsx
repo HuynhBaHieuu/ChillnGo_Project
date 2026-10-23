@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom'
 
 import { MEDIA, ScrollTrigger, SplitText, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
+import { localeTag, t } from '@/i18n'
 import { landingPhoto, themeFromText, travelPhoto } from '@/lib/photos'
 import type { DestinationRow, LandingStats } from '@/services/types'
 
-const formatNumber = new Intl.NumberFormat('vi-VN').format
+const formatNumber = (value: number) => new Intl.NumberFormat(localeTag()).format(value)
 const formatLat = (lat: number) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`
 const formatLng = (lng: number) => `${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`
 
@@ -140,15 +141,21 @@ export function RouteScrollStage({ rows, stats }: { rows: DestinationRow[]; stat
               <img src={PANEL_PHOTO_INNER} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
               <div className="absolute inset-0 bg-black/25" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <h2 className="font-display text-[3.75em] font-bold tracking-[-0.035em] leading-none md:text-[8.75em]">Điểm dừng</h2>
+                <h2 className="font-display text-[3.75em] font-bold tracking-[-0.035em] leading-none md:text-[8.75em]">{t('Điểm dừng')}</h2>
               </div>
               <div className="absolute inset-x-0 bottom-[12%] mx-auto grid w-[calc(100%-1.5em)] grid-cols-8 md:grid-cols-12">
                 <div className="col-span-6 col-start-2 flex flex-col gap-[0.35em] md:col-span-2 md:col-start-9">
-                  <p className="font-mono text-[0.75em] uppercase leading-[1.2] tracking-[0.12em] text-primary">Toạ độ có thật</p>
+                  <p className="font-mono text-[0.75em] uppercase leading-[1.2] tracking-[0.12em] text-primary">{t('Toạ độ có thật')}</p>
                   <p className="font-body text-[0.875em] font-medium leading-[1.5]">
-                    {formatNumber(stats.stopCount)} điểm dừng được ghim toạ độ bởi chính người đã đến
-                    {ends ? `, từ ${tripPlace(ends.north.tripTitle)} tới ${tripPlace(ends.south.tripTitle)}` : ''}. Cuộn để đi
-                    một vòng.
+                    {ends
+                      ? t('{n} điểm dừng được ghim toạ độ bởi chính người đã đến, từ {from} tới {to}. Cuộn để đi một vòng.', {
+                          n: formatNumber(stats.stopCount),
+                          from: tripPlace(ends.north.tripTitle),
+                          to: tripPlace(ends.south.tripTitle),
+                        })
+                      : t('{n} điểm dừng được ghim toạ độ bởi chính người đã đến. Cuộn để đi một vòng.', {
+                          n: formatNumber(stats.stopCount),
+                        })}
                   </p>
                 </div>
               </div>
@@ -176,10 +183,10 @@ export function RouteScrollStage({ rows, stats }: { rows: DestinationRow[]; stat
                   <div className="relative flex h-full flex-col items-center gap-[1.25em] text-center text-white md:gap-[2em]">
                     <h3 className="font-display text-[1.625em] font-bold tracking-[-0.035em] leading-none md:text-[2.625em]">{stop.name}</h3>
                     <p className="mx-auto max-w-full font-body text-[0.875em] font-medium leading-[1.4] md:max-w-[80%]">
-                      Một điểm dừng trong {stop.tripTitle}. Mở hành trình để xem giờ giấc, chi phí và ghi chú của người đã đi.
+                      {t('Một điểm dừng trong {trip}. Mở hành trình để xem giờ giấc, chi phí và ghi chú của người đã đi.', { trip: stop.tripTitle })}
                     </p>
                     <span className="inline-flex items-center gap-[0.5em] border-b border-white/40 pb-[0.2em] font-body text-[0.875em] font-medium md:hidden">
-                      Xem hành trình <ArrowRight aria-hidden className="size-[1em]" />
+                      {t('Xem hành trình')} <ArrowRight aria-hidden className="size-[1em]" />
                     </span>
                     <p className="mt-auto font-mono text-[0.75em] leading-[1.4] text-primary">
                       [ {formatLat(stop.lat)}, {formatLng(stop.lng)} ]
@@ -197,10 +204,10 @@ export function RouteScrollStage({ rows, stats }: { rows: DestinationRow[]; stat
                 “
               </span>
               <blockquote className="font-display text-[1.5em] font-medium leading-[1.2] md:text-[2em]">
-                Lên kế hoạch mất ba tuần. Clone một chuyến đi có thật chỉ mất một chạm.
+                {t('Lên kế hoạch mất ba tuần. Clone một chuyến đi có thật chỉ mất một chạm.')}
               </blockquote>
               <p className="font-body text-[0.875em] font-medium">-</p>
-              <figcaption className="font-mono text-[0.75em] uppercase tracking-[0.12em] text-primary">Cộng đồng ChillnGo</figcaption>
+              <figcaption className="font-mono text-[0.75em] uppercase tracking-[0.12em] text-primary">{t('Cộng đồng ChillnGo')}</figcaption>
             </figure>
           </div>
         </div>
@@ -209,11 +216,11 @@ export function RouteScrollStage({ rows, stats }: { rows: DestinationRow[]; stat
       {/* The route's two ends, set in soft-light over the photo. */}
       <section data-route-title className="relative flex min-h-svh flex-col justify-center gap-[2em] pb-[6em] pt-[8.75em]">
         <h2 className="whitespace-nowrap text-center font-condensed text-[8em] font-normal uppercase leading-[0.9] text-white mix-blend-soft-light md:text-[17em]">
-          <span className="hidden pt-[0.12em] md:inline-block">Bắc — Nam</span>
+          <span className="hidden pt-[0.12em] md:inline-block">{t('Bắc — Nam')}</span>
           <span className="inline-block pt-[0.12em] md:hidden">
-            Bắc
+            {t('Bắc — Nam').split(' — ')[0]}
             <br />
-            Nam
+            {t('Bắc — Nam').split(' — ')[1]}
           </span>
         </h2>
         {ends && (

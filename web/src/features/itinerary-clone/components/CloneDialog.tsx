@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useClonePost } from '@/features/itinerary-clone/hooks'
+import { t } from '@/i18n'
 import { formatVnd, tripLengthLabel } from '@/lib/format'
 import type { TripPostWithAuthor } from '@/services/types'
 
@@ -25,7 +26,7 @@ interface CloneDialogProps {
  * itself are stubbed in the service — see `itinerary.service.ts`.
  */
 export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
-  const [title, setTitle] = useState(`${post.title} (bản của tôi)`)
+  const [title, setTitle] = useState(t('{title} (bản của tôi)', { title: post.title }))
   const [startDate, setStartDate] = useState(post.startDate)
   const clonePost = useClonePost()
   const navigate = useNavigate()
@@ -37,7 +38,7 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
   if (open !== wasOpen) {
     setWasOpen(open)
     if (open) {
-      setTitle(`${post.title} (bản của tôi)`)
+      setTitle(t('{title} (bản của tôi)', { title: post.title }))
       setStartDate(post.startDate)
     }
   }
@@ -58,16 +59,16 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Dùng làm lịch trình của tôi"
-      description={`Sao chép ${post.days.length} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể sửa, đổi thứ tự và ghép thêm ngày từ bài khác sau.`}
+      title={t('Dùng làm lịch trình của tôi')}
+      description={t('Sao chép {n} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể sửa, đổi thứ tự và ghép thêm ngày từ bài khác sau.', { n: post.days.length })}
       footer={
         <>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Huỷ
+            {t('Huỷ')}
           </Button>
           <GlassButton onClick={handleClone} disabled={clonePost.isPending}>
             {clonePost.isPending && <Loader2 className="animate-spin" />}
-            Clone hành trình
+            {t('Clone hành trình')}
           </GlassButton>
         </>
       }
@@ -88,7 +89,7 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="clone-title">Tên lịch trình</Label>
+          <Label htmlFor="clone-title">{t('Tên lịch trình')}</Label>
           <Input
             id="clone-title"
             value={title}
@@ -97,7 +98,7 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="clone-start">Ngày khởi hành</Label>
+          <Label htmlFor="clone-start">{t('Ngày khởi hành')}</Label>
           <Input
             id="clone-start"
             type="date"
@@ -105,7 +106,7 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
             onChange={(e) => setStartDate(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
-            Các ngày trong lịch trình sẽ được đánh lại từ ngày này.
+            {t('Các ngày trong lịch trình sẽ được đánh lại từ ngày này.')}
           </p>
         </div>
 

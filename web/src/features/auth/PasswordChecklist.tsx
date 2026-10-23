@@ -1,5 +1,6 @@
 import { Circle, CircleCheck } from 'lucide-react'
 
+import { t } from '@/i18n'
 import { PASSWORD_RULES } from '@/lib/password'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +30,7 @@ export function PasswordChecklist({ id, password }: PasswordChecklistProps) {
             />
             <span>
               {rule.label}
-              <span className="sr-only">{met ? ': đã đạt' : ': chưa đạt'}</span>
+              <span className="sr-only">{met ? t(': đã đạt') : t(': chưa đạt')}</span>
             </span>
           </li>
         )

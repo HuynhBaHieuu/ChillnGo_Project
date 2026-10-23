@@ -19,6 +19,7 @@ import { ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
 import { cn } from '@/lib/utils'
 import { livestreamService } from '@/services'
 import type { Livestream } from '@/services/livestream.service'
+import { t } from '@/i18n'
 
 /** How many frames, evenly spread over the replay, are offered to pick from. */
 const SUGGESTED_FRAMES = 6
@@ -145,9 +146,9 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-display text-2xl">Ảnh bìa video xem lại</DialogTitle>
+        <DialogTitle className="font-display text-2xl">{t('Ảnh bìa video xem lại')}</DialogTitle>
         <DialogDescription>
-          Chọn một khung hình trong video, hoặc tải ảnh của bạn lên. Ảnh bìa hiện trên Newsfeed và trang cá nhân.
+          {t('Chọn một khung hình trong video, hoặc tải ảnh của bạn lên. Ảnh bìa hiện trên Newsfeed và trang cá nhân.')}
         </DialogDescription>
       </DialogHeader>
 
@@ -171,9 +172,9 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
               setTime(at)
             }}
             onError={() => setFramesBlocked(true)}
-            aria-label="Khung hình đang chọn"
+            aria-label={t('Khung hình đang chọn')}
           />
-          {choice.kind === 'file' && <img src={choice.preview} alt="Ảnh bạn vừa chọn" className="absolute inset-0 size-full object-cover" />}
+          {choice.kind === 'file' && <img src={choice.preview} alt={t('Ảnh bạn vừa chọn')} className="absolute inset-0 size-full object-cover" />}
           {choice.kind === 'frame' && duration === 0 && !framesBlocked && (
             <span className="absolute inset-0 grid place-items-center text-background">
               <Loader2 className="size-6 animate-spin" aria-hidden />
@@ -183,7 +184,7 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
 
         {framesBlocked ? (
           <p className="rounded-xl bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
-            Không lấy được khung hình từ video này. Bạn vẫn có thể tải ảnh của mình lên.
+            {t('Không lấy được khung hình từ video này. Bạn vẫn có thể tải ảnh của mình lên.')}
           </p>
         ) : (
           <>
@@ -195,7 +196,7 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
                 step={0.1}
                 disabled={duration === 0 || busy}
                 onValueChange={([at]) => seek(at)}
-                aria-label="Chọn thời điểm trong video"
+                aria-label={t('Chọn thời điểm trong video')}
                 className="[&>span:first-child]:bg-muted"
               />
               <span className="w-24 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
@@ -203,7 +204,7 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6" role="list" aria-label="Khung hình gợi ý">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6" role="list" aria-label={t('Khung hình gợi ý')}>
               {Array.from({ length: SUGGESTED_FRAMES }, (_, i) => {
                 const frame = frames[i]
                 const selected = frame && choice.kind === 'frame' && Math.abs(frame.time - time) < 0.05
@@ -214,7 +215,7 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
                         type="button"
                         onClick={() => seek(frame.time)}
                         disabled={busy}
-                        aria-label={`Khung hình lúc ${formatClock(frame.time)}`}
+                        aria-label={t('Khung hình lúc {time}', { time: formatClock(frame.time) })}
                         aria-pressed={selected}
                         className={cn(
                           'block aspect-video w-full overflow-hidden rounded-lg border-2 transition-colors',
@@ -237,11 +238,11 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
           <input ref={fileInput} type="file" accept={ACCEPT_ATTRIBUTE} className="hidden" onChange={pickFile} />
           <Button type="button" variant="outline" size="sm" onClick={() => fileInput.current?.click()} disabled={busy}>
             <ImageUp aria-hidden />
-            Tải ảnh lên
+            {t('Tải ảnh lên')}
           </Button>
           {choice.kind === 'file' && !framesBlocked && (
             <Button type="button" variant="ghost" size="sm" onClick={() => seek(time)} disabled={busy}>
-              Dùng khung hình trong video
+              {t('Dùng khung hình trong video')}
             </Button>
           )}
         </div>
@@ -257,14 +258,14 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
         {stream.thumbnailUrl ? (
           <Button type="button" variant="ghost" onClick={() => remove.mutate()} disabled={busy} className="text-destructive hover:text-destructive">
             {remove.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Trash2 aria-hidden />}
-            Gỡ ảnh bìa
+            {t('Gỡ ảnh bìa')}
           </Button>
         ) : (
           <span />
         )}
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={onDone} disabled={busy}>
-            Huỷ
+            {t('Huỷ')}
           </Button>
           <Button
             type="button"
@@ -276,7 +277,7 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
             disabled={!canSave || busy}
           >
             {save.isPending && <Loader2 className="animate-spin" aria-hidden />}
-            {save.isPending ? `Đang lưu${progress ? ` ${progress}%` : ''}` : 'Lưu ảnh bìa'}
+            {save.isPending ? (progress ? t('Đang lưu {progress}%', { progress }) : t('Đang lưu')) : t('Lưu ảnh bìa')}
           </Button>
         </div>
       </DialogFooter>
@@ -286,14 +287,14 @@ function Picker({ stream, videoUrl, onDone }: { stream: Livestream; videoUrl: st
 
 /** The preview's current frame as a JPEG file, at the video's own size (capped at 1920 wide). */
 async function captureFrame(video: HTMLVideoElement | null): Promise<File> {
-  if (!video || !video.videoWidth) throw new Error('Video chưa tải xong. Vui lòng đợi một chút.')
+  if (!video || !video.videoWidth) throw new Error(t('Video chưa tải xong. Vui lòng đợi một chút.'))
   const canvas = snapshot(video, document.createElement('canvas'), 1920)
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9))
-  if (!blob) throw new Error('Không chụp được khung hình này. Vui lòng thử lại.')
+  if (!blob) throw new Error(t('Không chụp được khung hình này. Vui lòng thử lại.'))
   return new File([blob], 'cover.jpg', { type: 'image/jpeg' })
 }
 
 function errorMessage(error: unknown): string {
-  if ((error as Error).name === 'SecurityError') return 'Không lấy được khung hình từ video này. Hãy tải ảnh của bạn lên.'
-  return (error as Error).message || 'Không lưu được ảnh bìa. Vui lòng thử lại.'
+  if ((error as Error).name === 'SecurityError') return t('Không lấy được khung hình từ video này. Hãy tải ảnh của bạn lên.')
+  return (error as Error).message || t('Không lưu được ảnh bìa. Vui lòng thử lại.')
 }

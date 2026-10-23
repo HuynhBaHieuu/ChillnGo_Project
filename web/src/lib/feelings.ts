@@ -5,6 +5,8 @@
  * Shown as "Minh <lead> <what>": "đang cảm thấy thư giãn", "đang ngắm hoàng hôn".
  */
 
+import { t, translatedList } from '@/i18n'
+
 export type FeelingKind = 'feeling' | 'activity'
 
 export interface FeelingOption {
@@ -15,7 +17,7 @@ export interface FeelingOption {
   label: string
 }
 
-export const FEELING_OPTIONS: FeelingOption[] = [
+export const FEELING_OPTIONS: FeelingOption[] = translatedList<FeelingOption, 'label'>([
   { key: 'happy', kind: 'feeling', emoji: '😊', label: 'Vui vẻ' },
   { key: 'relaxed', kind: 'feeling', emoji: '😌', label: 'Thư giãn' },
   { key: 'excited', kind: 'feeling', emoji: '🤩', label: 'Hào hứng' },
@@ -37,13 +39,13 @@ export const FEELING_OPTIONS: FeelingOption[] = [
   { key: 'exploring', kind: 'activity', emoji: '🧭', label: 'Khám phá' },
   { key: 'taking_photos', kind: 'activity', emoji: '📸', label: 'Chụp ảnh' },
   { key: 'shopping', kind: 'activity', emoji: '🛍️', label: 'Mua sắm' },
-]
+], ['label'])
 
 const BY_KEY = new Map(FEELING_OPTIONS.map((f) => [f.key, f]))
 
 /** "đang cảm thấy" + "thư giãn", or "đang" + "ngắm hoàng hôn". */
 export function feelingSentence(option: FeelingOption): { lead: string; what: string } {
-  return { lead: option.kind === 'feeling' ? 'đang cảm thấy' : 'đang', what: option.label.toLowerCase() }
+  return { lead: option.kind === 'feeling' ? t('đang cảm thấy') : t('đang'), what: option.label.toLowerCase() }
 }
 
 export function feelingOption(key: string | null | undefined): FeelingOption | null {

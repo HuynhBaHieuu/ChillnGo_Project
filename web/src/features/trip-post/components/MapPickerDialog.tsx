@@ -3,6 +3,7 @@ import { Suspense, lazy, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { t } from '@/i18n'
 import { placeAt } from '@/lib/geo'
 import type { ResolvedPlace } from '@/lib/mapsLink'
 
@@ -58,8 +59,8 @@ function PickerBody({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Chọn vị trí trên bản đồ</DialogTitle>
-        <DialogDescription>Bấm vào bản đồ để thả ghim, kéo ghim để chỉnh cho đúng chỗ.</DialogDescription>
+        <DialogTitle>{t('Chọn vị trí trên bản đồ')}</DialogTitle>
+        <DialogDescription>{t('Bấm vào bản đồ để thả ghim, kéo ghim để chỉnh cho đúng chỗ.')}</DialogDescription>
       </DialogHeader>
 
       <div className="np-media relative h-[min(60vh,28rem)] overflow-hidden rounded-xl">
@@ -76,16 +77,16 @@ function PickerBody({
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <MapPin className="size-3.5 shrink-0" aria-hidden />
-        {position ? `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}` : 'Chưa chọn vị trí'}
+        {position ? `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}` : t('Chưa chọn vị trí')}
       </p>
 
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={onCancel} disabled={confirming}>
-          Huỷ
+          {t('Huỷ')}
         </Button>
         <Button onClick={() => void confirm()} disabled={!position || confirming}>
           {confirming && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          Dùng vị trí này
+          {t('Dùng vị trí này')}
         </Button>
       </DialogFooter>
     </>

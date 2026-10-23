@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { t } from '@/i18n'
 import { ADMIN_MODULES, MODULE_LABELS } from '@/lib/roles'
 import type { AdminModule } from '@/lib/roles'
 
@@ -29,7 +30,7 @@ export function PermissionChecklist({
 
   return (
     <fieldset className="space-y-3">
-      <legend className="mb-2 text-sm font-medium">Được phép dùng</legend>
+      <legend className="mb-2 text-sm font-medium">{t('Được phép dùng')}</legend>
       {ADMIN_MODULES.map((module) => (
         <label
           key={module}
@@ -49,8 +50,7 @@ export function PermissionChecklist({
         </label>
       ))}
       <p className="text-xs text-muted-foreground">
-        Admin không bao giờ tạo được Admin khác, đổi cấu hình hệ thống hay thao tác trên Super Admin, dù được
-        cấp quyền nào.
+        {t('Admin không bao giờ tạo được Admin khác, đổi cấu hình hệ thống hay thao tác trên Super Admin, dù được cấp quyền nào.')}
       </p>
     </fieldset>
   )
@@ -84,12 +84,12 @@ function PermissionsBody({ onOpenChange, title, confirmLabel, initial, pending, 
     <>
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>Chọn những mục Admin này được dùng trong trang quản trị.</DialogDescription>
+        <DialogDescription>{t('Chọn những mục Admin này được dùng trong trang quản trị.')}</DialogDescription>
       </DialogHeader>
       <PermissionChecklist value={value} onChange={setValue} idPrefix="perm-dialog" />
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-          Huỷ
+          {t('Huỷ')}
         </Button>
         <Button onClick={() => onConfirm(value)} disabled={pending}>
           {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}

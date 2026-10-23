@@ -34,6 +34,7 @@ import {
   formatVnd,
 } from '@/lib/format'
 import { withLegRoutes } from '@/features/map/legs'
+import { t } from '@/i18n'
 import { searchPlaces } from '@/lib/geo'
 import { UNPINNED, isPinned, totalCostOf } from '@/lib/itinerary'
 import { themeFromText, travelCover } from '@/lib/photos'
@@ -179,7 +180,7 @@ export function PostEditorPage() {
       title: '#title',
       cover: '#coverUrl',
       days: '[data-editor-days] input[id$="-title"]',
-      place: '[data-editor-days] input[aria-label="Tên địa điểm 1"]',
+      place: `[data-editor-days] input[aria-label="${t('Tên địa điểm {n}', { n: 1 })}"]`,
     }
     const timer = window.setTimeout(() => {
       const field = document.querySelector<HTMLElement>(selector[focusTarget] ?? '#title')
@@ -319,16 +320,16 @@ export function PostEditorPage() {
     return (
       <PageContainer>
         <EmptyState
-          title={existingPost ? 'Bạn không thể sửa hành trình này' : 'Không tìm thấy hành trình'}
+          title={existingPost ? t('Bạn không thể sửa hành trình này') : t('Không tìm thấy hành trình')}
           description={
             existingPost
-              ? 'Chỉ tác giả mới chỉnh sửa được hành trình của mình.'
-              : ((postError as Error | null)?.message ?? 'Bài viết có thể đã bị xoá.')
+              ? t('Chỉ tác giả mới chỉnh sửa được hành trình của mình.')
+              : ((postError as Error | null)?.message ?? t('Bài viết có thể đã bị xoá.'))
           }
           action={
             <Button asChild variant="outline">
               <Link to={existingPost ? `/posts/${existingPost._id}` : '/discover'}>
-                {existingPost ? 'Xem hành trình' : 'Quay lại Khám phá'}
+                {existingPost ? t('Xem hành trình') : t('Quay lại Khám phá')}
               </Link>
             </Button>
           }
@@ -340,8 +341,8 @@ export function PostEditorPage() {
   return (
     <PageContainer>
       <PageHeader
-        title={isEdit ? 'Chỉnh sửa hành trình' : 'Đăng hành trình mới'}
-        description="Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người clone lịch trình của bạn càng đỡ phải đoán."
+        title={isEdit ? t('Chỉnh sửa hành trình') : t('Đăng hành trình mới')}
+        description={t('Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người clone lịch trình của bạn càng đỡ phải đoán.')}
       />
 
       <form
@@ -351,10 +352,10 @@ export function PostEditorPage() {
         <div className="space-y-8">
           {/* Basics */}
           <GlassCard className="space-y-5 p-6">
-            <h2 className="font-display text-2xl">Thông tin chung</h2>
+            <h2 className="font-display text-2xl">{t('Thông tin chung')}</h2>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Tiêu đề</Label>
+              <Label htmlFor="title">{t('Tiêu đề')}</Label>
               <Input
                 id="title"
                 required
@@ -364,7 +365,7 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="summary">Tóm tắt</Label>
+              <Label htmlFor="summary">{t('Tóm tắt')}</Label>
               <Textarea
                 id="summary"
                 required
@@ -375,7 +376,7 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="coverUrl">Ảnh bìa</Label>
+              <Label htmlFor="coverUrl">{t('Ảnh bìa')}</Label>
               <CoverPicker
                 value={form.coverImages}
                 onChange={(coverImages) => patch({ coverImages })}
@@ -389,11 +390,11 @@ export function PostEditorPage() {
           <section className="space-y-5" data-editor-days>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-2xl">
-                Lịch trình ({form.days.length} ngày)
+                {t('Lịch trình ({n} ngày)', { n: form.days.length })}
               </h2>
               <Button type="button" variant="outline" size="sm" onClick={addDay}>
                 <Plus />
-                Thêm ngày
+                {t('Thêm ngày')}
               </Button>
             </div>
 
@@ -410,18 +411,17 @@ export function PostEditorPage() {
           </section>
 
           {/* The route as it will appear on the journey, updated as stops are pinned. */}
-          <GlassCard as="section" aria-label="Xem trước bản đồ tuyến" className="space-y-4 p-6">
+          <GlassCard as="section" aria-label={t('Xem trước bản đồ tuyến')} className="space-y-4 p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-display text-2xl">Bản đồ tuyến</h2>
+              <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
               <p className="text-sm text-muted-foreground">
-                {pinnedStops}/{totalStops} điểm dừng đã ghim
+                {t('{pinned}/{total} điểm dừng đã ghim', { pinned: pinnedStops, total: totalStops })}
               </p>
             </div>
             {/* Drawn as the journey page will show it, each leg by how it was travelled. */}
-            <MapPreview days={form.days} className="h-72 w-full" label="Xem trước tuyến hành trình" />
+            <MapPreview days={form.days} className="h-72 w-full" label={t('Xem trước tuyến hành trình')} />
             <p className="text-xs text-muted-foreground">
-              Chỉ những điểm dừng đã ghim mới hiện trên bản đồ. Ghim bằng ô Địa chỉ: chọn gợi ý, dán link Google
-              Maps, hoặc chọn trên bản đồ. Chọn một ngày để xem đường đi.
+              {t('Chỉ những điểm dừng đã ghim mới hiện trên bản đồ. Ghim bằng ô Địa chỉ: chọn gợi ý, dán link Google Maps, hoặc chọn trên bản đồ. Chọn một ngày để xem đường đi.')}
             </p>
           </GlassCard>
         </div>
@@ -429,10 +429,10 @@ export function PostEditorPage() {
         {/* Sidebar */}
         <aside className="space-y-6 lg:sticky lg:top-32">
           <GlassCard className="space-y-5 p-6">
-            <h2 className="font-display text-2xl">Phân loại</h2>
+            <h2 className="font-display text-2xl">{t('Phân loại')}</h2>
 
             <div className="space-y-2">
-              <Label>Khu vực</Label>
+              <Label>{t('Khu vực')}</Label>
               <Select
                 value={form.region}
                 onValueChange={(value) => patch({ region: value as Region })}
@@ -451,7 +451,7 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Mùa</Label>
+              <Label>{t('Mùa')}</Label>
               <Select
                 value={form.season}
                 onValueChange={(value) => patch({ season: value as Season })}
@@ -470,7 +470,7 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Mức chi tiêu</Label>
+              <Label>{t('Mức chi tiêu')}</Label>
               <Select
                 value={form.budgetLevel}
                 onValueChange={(value) => patch({ budgetLevel: value as BudgetLevel })}
@@ -489,7 +489,7 @@ export function PostEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Thẻ</Label>
+              <Label>{t('Thẻ')}</Label>
               <TagPicker value={form.tags} onChange={(tags) => patch({ tags })} />
             </div>
           </GlassCard>
@@ -497,13 +497,13 @@ export function PostEditorPage() {
           <GlassCard className="space-y-4 p-6">
             <div>
               <p className="text-sm text-muted-foreground">
-                Tổng chi phí ước tính
+                {t('Tổng chi phí ước tính')}
               </p>
               <p className="mt-1 font-display text-3xl">
                 {formatVnd(totalEstCost)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Tự động cộng từ các điểm dừng.
+                {t('Tự động cộng từ các điểm dừng.')}
               </p>
             </div>
 
@@ -521,7 +521,7 @@ export function PostEditorPage() {
                 disabled={mutation.isPending || pinning}
               >
                 {mutation.isPending || pinning ? <Loader2 className="animate-spin" /> : <Save />}
-                {isEdit ? 'Lưu thay đổi' : 'Đăng hành trình'}
+                {isEdit ? t('Lưu thay đổi') : t('Đăng hành trình')}
               </GlassButton>
 
               <Button
@@ -531,12 +531,12 @@ export function PostEditorPage() {
                 disabled={mutation.isPending || pinning}
                 onClick={(e) => void submit(e, 'draft')}
               >
-                Lưu nháp
+                {t('Lưu nháp')}
               </Button>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Bản nháp được lưu vào tài khoản của bạn. Xem lại ở Hoạt động của bạn → Hành trình.
+              {t('Bản nháp được lưu vào tài khoản của bạn. Xem lại ở Hoạt động của bạn → Hành trình.')}
             </p>
           </GlassCard>
         </aside>

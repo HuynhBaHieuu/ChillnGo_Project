@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { canSearchPlaces, searchPlaces } from '@/lib/geo'
 import type { Place } from '@/lib/geo'
+import { t } from '@/i18n'
 import type { TripLocation } from '@/services/types'
 
 interface PlaceFieldProps {
@@ -74,7 +75,7 @@ export function PlaceField({ id, label, location, onChange }: PlaceFieldProps) {
           aria-expanded={open}
           aria-controls={listId}
           aria-autocomplete="list"
-          placeholder={canSearchPlaces ? 'Gõ tên địa điểm, rồi chọn một gợi ý' : undefined}
+          placeholder={canSearchPlaces ? t('Gõ tên địa điểm, rồi chọn một gợi ý') : undefined}
           onChange={(e) => {
             onChange({ name: e.target.value })
             setQuery(e.target.value)

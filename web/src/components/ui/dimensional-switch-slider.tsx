@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 gsap.registerPlugin(CustomEase)
@@ -44,7 +45,7 @@ export function DimensionalSwitchSlider({
   items,
   className,
   stageClassName,
-  label = 'Ảnh',
+  label = t('Ảnh'),
   duration = 1.1,
 }: DimensionalSwitchSliderProps) {
   const [index, setIndex] = useState(0)
@@ -197,7 +198,7 @@ export function DimensionalSwitchSlider({
                 key={`${item.image}-${i}`}
                 type="button"
                 onClick={() => go(i, i > index ? 1 : -1)}
-                aria-label={`Xem ảnh ${i + 1}`}
+                aria-label={t('Xem ảnh {n}', { n: i + 1 })}
                 aria-current={i === index}
                 className="group/bar py-2"
               >
@@ -215,7 +216,7 @@ export function DimensionalSwitchSlider({
             <button
               type="button"
               onClick={prevSlide}
-              aria-label="Ảnh trước"
+              aria-label={t('Ảnh trước')}
               className="grid size-9 place-items-center rounded-full border border-border bg-foreground/5 text-foreground transition-colors hover:border-foreground/40 hover:bg-foreground/15"
             >
               <ArrowLeft className="size-4" aria-hidden />
@@ -223,7 +224,7 @@ export function DimensionalSwitchSlider({
             <button
               type="button"
               onClick={nextSlide}
-              aria-label="Ảnh tiếp theo"
+              aria-label={t('Ảnh tiếp theo')}
               className="grid size-9 place-items-center rounded-full bg-orange-600 text-white ring-1 ring-inset ring-white/25 transition-colors hover:bg-orange-500"
             >
               <ArrowRight className="size-4" aria-hidden />
@@ -231,7 +232,7 @@ export function DimensionalSwitchSlider({
           </div>
 
           <p className="sr-only" aria-live="polite">
-            Ảnh {index + 1} / {count}
+            {t('Ảnh {n} / {count}', { n: index + 1, count })}
           </p>
         </div>
       )}

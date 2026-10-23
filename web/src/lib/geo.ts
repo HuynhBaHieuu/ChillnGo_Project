@@ -5,6 +5,7 @@
  */
 
 import { MAPBOX_TOKEN } from '@/features/map/geometry'
+import { t } from '@/i18n'
 
 export interface Place {
   name: string
@@ -64,7 +65,7 @@ export async function searchPlaces(query: string, signal?: AbortSignal): Promise
     proximity: 'ip',
   })
   const response = await fetch(`${SEARCH}/forward?${params}`, { signal })
-  if (!response.ok) throw new Error('Không tìm được địa điểm lúc này. Vui lòng thử lại.')
+  if (!response.ok) throw new Error(t('Không tìm được địa điểm lúc này. Vui lòng thử lại.'))
   const data = (await response.json()) as { features: Feature[] }
   return distinct(data.features.map(toPlace)).slice(0, 6)
 }
@@ -91,7 +92,7 @@ export async function placeAt(lat: number, lng: number): Promise<Place | null> {
 export function getDevicePosition(): Promise<{ lat: number; lng: number }> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
-      reject(new Error('Trình duyệt này không hỗ trợ lấy vị trí. Hãy tìm địa điểm bằng tên.'))
+      reject(new Error(t('Trình duyệt này không hỗ trợ lấy vị trí. Hãy tìm địa điểm bằng tên.')))
       return
     }
     navigator.geolocation.getCurrentPosition(
@@ -99,11 +100,11 @@ export function getDevicePosition(): Promise<{ lat: number; lng: number }> {
       (error) => {
         const messages: Record<number, string> = {
           [error.PERMISSION_DENIED]:
-            'Bạn chưa cho phép ChillnGo dùng vị trí. Hãy bật quyền vị trí cho trang này trong trình duyệt, hoặc tìm địa điểm bằng tên.',
-          [error.POSITION_UNAVAILABLE]: 'Không xác định được vị trí của thiết bị. Hãy tìm địa điểm bằng tên.',
-          [error.TIMEOUT]: 'Lấy vị trí quá lâu. Vui lòng thử lại.',
+            t('Bạn chưa cho phép ChillnGo dùng vị trí. Hãy bật quyền vị trí cho trang này trong trình duyệt, hoặc tìm địa điểm bằng tên.'),
+          [error.POSITION_UNAVAILABLE]: t('Không xác định được vị trí của thiết bị. Hãy tìm địa điểm bằng tên.'),
+          [error.TIMEOUT]: t('Lấy vị trí quá lâu. Vui lòng thử lại.'),
         }
-        reject(new Error(messages[error.code] ?? 'Không lấy được vị trí.'))
+        reject(new Error(messages[error.code] ?? t('Không lấy được vị trí.')))
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
     )

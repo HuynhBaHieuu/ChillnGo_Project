@@ -7,13 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Confirm, Empty, ErrorPanel, ListSkeleton, Row, SectionHeader } from '@/features/activity/components'
 import { timeAgo } from '@/features/activity/format'
 import { useClearSearchHistory, useRemoveSearch, useSearchHistory } from '@/features/activity/hooks'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import type { SearchEntry, SearchType } from '@/services/activity.service'
 
-const TYPES: Record<SearchType, { label: string; icon: LucideIcon }> = {
+const TYPES: Record<SearchType, { label: MessageKey; icon: LucideIcon }> = {
   journey: { label: 'Hành trình', icon: MapIcon },
   place: { label: 'Địa điểm', icon: MapPin },
   post: { label: 'Bài viết', icon: FileText },
-  user: { label: 'Người dùng', icon: User },
+  user: { label: 'Người dùng#role', icon: User },
 }
 
 /** Where searching again takes you. Journey searches reopen Discover; the others have no search page. */
@@ -32,12 +34,12 @@ export function SearchHistorySection() {
   return (
     <>
       <SectionHeader
-        title="Lịch sử tìm kiếm"
-        description="Những lần bạn tìm kiếm ở trang Khám phá và khi chọn địa điểm check-in. Chỉ mình bạn thấy được."
+        title={t('Lịch sử tìm kiếm')}
+        description={t('Những lần bạn tìm kiếm ở trang Khám phá và khi chọn địa điểm check-in. Chỉ mình bạn thấy được.')}
         action={
           hasItems && (
             <Button variant="outline" size="sm" className="rounded-full" onClick={() => setConfirmClear(true)}>
-              Xoá tất cả
+              {t('Xoá tất cả')}
             </Button>
           )
         }
@@ -48,7 +50,7 @@ export function SearchHistorySection() {
       ) : history.isError ? (
         <ErrorPanel error={history.error} onRetry={() => void history.refetch()} />
       ) : !hasItems ? (
-        <Empty icon={Search} title="Chưa có lượt tìm kiếm nào" description="Tìm hành trình ở trang Khám phá, các lượt tìm của bạn sẽ được liệt kê ở đây." />
+        <Empty icon={Search} title={t('Chưa có lượt tìm kiếm nào')} description={t('Tìm hành trình ở trang Khám phá, các lượt tìm của bạn sẽ được liệt kê ở đây.')} />
       ) : (
         <ul className="space-y-1">
           {history.data.map((entry) => {
@@ -62,7 +64,7 @@ export function SearchHistorySection() {
                 <div className="min-w-0">
                   <p className="truncate text-[15px] font-semibold text-np-cream">{entry.query}</p>
                   <p className="text-[13px] text-muted-foreground">
-                    {type.label} · {timeAgo(entry.searchedAt)}
+                    {t(type.label)} · {timeAgo(entry.searchedAt)}
                   </p>
                 </div>
               </>
@@ -70,7 +72,7 @@ export function SearchHistorySection() {
             return (
               <Row key={entry._id}>
                 {href ? (
-                  <Link to={href} className="flex min-w-0 flex-1 items-center gap-4" title="Tìm lại">
+                  <Link to={href} className="flex min-w-0 flex-1 items-center gap-4" title={t('Tìm lại')}>
                     {body}
                   </Link>
                 ) : (
@@ -80,7 +82,7 @@ export function SearchHistorySection() {
                   variant="ghost"
                   size="icon"
                   className="shrink-0 rounded-full"
-                  aria-label={`Xoá “${entry.query}” khỏi lịch sử tìm kiếm`}
+                  aria-label={t('Xoá “{query}” khỏi lịch sử tìm kiếm', { query: entry.query })}
                   disabled={remove.isPending && remove.variables === entry._id}
                   onClick={() => remove.mutate(entry._id)}
                 >
@@ -101,14 +103,14 @@ export function SearchHistorySection() {
       <Confirm
         open={confirmClear}
         onOpenChange={setConfirmClear}
-        title="Xoá toàn bộ lịch sử tìm kiếm?"
+        title={t('Xoá toàn bộ lịch sử tìm kiếm?')}
         description={
           <>
-            Mọi lượt tìm kiếm trong lịch sử sẽ bị xoá. Không thể hoàn tác.
+            {t('Mọi lượt tìm kiếm trong lịch sử sẽ bị xoá. Không thể hoàn tác.')}
             {clear.isError && <span className="mt-2 block text-destructive">{(clear.error as Error).message}</span>}
           </>
         }
-        confirmLabel="Xoá tất cả"
+        confirmLabel={t('Xoá tất cả')}
         destructive
         pending={clear.isPending}
         onConfirm={() => clear.mutate(undefined, { onSuccess: () => setConfirmClear(false) })}

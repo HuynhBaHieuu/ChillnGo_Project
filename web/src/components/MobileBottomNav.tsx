@@ -1,6 +1,7 @@
 import { Bookmark, Compass, Home, Plus, User as UserIcon } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store'
 
@@ -17,22 +18,22 @@ export function MobileBottomNav() {
   const bookmarksPath = user ? `/users/${user._id}?tab=saved` : '/login'
 
   const items = [
-    { to: '/feed', label: 'Home', icon: Home },
-    { to: '/discover', label: 'Discover', icon: Compass },
-    { to: '/posts/new', label: 'Create', icon: Plus, primary: true },
-    { to: bookmarksPath, label: 'Bookmarks', icon: Bookmark },
-    { to: profilePath, label: 'Profile', icon: UserIcon },
+    { to: '/feed', label: t('Home'), icon: Home },
+    { to: '/discover', label: t('Discover'), icon: Compass },
+    { to: '/posts/new', label: t('Create'), icon: Plus, primary: true },
+    { to: bookmarksPath, label: t('Bookmarks'), icon: Bookmark },
+    { to: profilePath, label: t('Profile'), icon: UserIcon },
   ]
 
   return (
     <nav
-      aria-label="Điều hướng chính"
+      aria-label={t('Điều hướng chính')}
       className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
     >
       <div data-nav="dock" className="liquid-glass w-full max-w-sm rounded-full">
         <ul className="relative z-[1] flex items-center justify-between px-3 py-2">
           {items.map((item) => (
-            <li key={item.label}>
+            <li key={item.icon.displayName ?? item.to}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>

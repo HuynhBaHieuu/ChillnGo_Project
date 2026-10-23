@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type * as React from 'react'
 
 import { Input } from '@/components/ui/input'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 /** A password field with an eye button that shows or hides what was typed. */
@@ -16,7 +17,7 @@ export function PasswordInput({ className, ...props }: Omit<React.ComponentProps
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+        aria-label={visible ? t('Ẩn mật khẩu') : t('Hiện mật khẩu')}
         aria-pressed={visible}
         aria-controls={props.id}
         className={cn(
