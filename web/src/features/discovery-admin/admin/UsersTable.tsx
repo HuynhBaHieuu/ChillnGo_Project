@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { t } from '@/i18n'
 import { MODULE_LABELS, ROLE_LABELS } from '@/lib/roles'
 import type { Role } from '@/lib/roles'
 import { adminService } from '@/services'
@@ -62,7 +63,7 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Tìm tài khoản"
+            aria-label={t('Tìm tài khoản')}
             className="pl-9"
           />
         </div>
@@ -74,11 +75,11 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
               setPage(1)
             }}
           >
-            <SelectTrigger className="sm:w-44" aria-label="Lọc theo vai trò">
+            <SelectTrigger className="sm:w-44" aria-label={t('Lọc theo vai trò')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>Mọi vai trò</SelectItem>
+              <SelectItem value={ALL}>{t('Mọi vai trò')}</SelectItem>
               {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
                 <SelectItem key={r} value={r}>
                   {ROLE_LABELS[r]}
@@ -94,13 +95,13 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
             setPage(1)
           }}
         >
-          <SelectTrigger className="sm:w-44" aria-label="Lọc theo trạng thái">
+          <SelectTrigger className="sm:w-44" aria-label={t('Lọc theo trạng thái')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Mọi trạng thái</SelectItem>
-            <SelectItem value="active">Hoạt động</SelectItem>
-            <SelectItem value="locked">Đã khoá</SelectItem>
+            <SelectItem value={ALL}>{t('Mọi trạng thái')}</SelectItem>
+            <SelectItem value="active">{t('Hoạt động')}</SelectItem>
+            <SelectItem value="locked">{t('Đã khoá')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -108,13 +109,13 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
       {list.isPending ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
           <Loader2 className="size-4 animate-spin" aria-hidden />
-          Đang tải danh sách…
+          {t('Đang tải danh sách…')}
         </p>
       ) : list.isError ? (
         <p className="text-sm text-destructive">{(list.error as Error).message}</p>
       ) : list.data.items.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-foreground/20 px-4 py-10 text-center text-sm text-muted-foreground">
-          Không có tài khoản nào khớp bộ lọc.
+          {t('Không có tài khoản nào khớp bộ lọc.')}
         </p>
       ) : (
         <>
@@ -122,12 +123,12 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="border-b border-foreground/10 text-xs text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Tài khoản</th>
-                  <th className="px-4 py-3 font-medium">Vai trò</th>
-                  <th className="px-4 py-3 font-medium">Trạng thái</th>
-                  <th className="px-4 py-3 font-medium">{showPermissions ? 'Quyền' : 'Đăng nhập gần nhất'}</th>
+                  <th className="px-4 py-3 font-medium">{t('Tài khoản')}</th>
+                  <th className="px-4 py-3 font-medium">{t('Vai trò')}</th>
+                  <th className="px-4 py-3 font-medium">{t('Trạng thái')}</th>
+                  <th className="px-4 py-3 font-medium">{showPermissions ? t('Quyền') : t('Đăng nhập gần nhất')}</th>
                   <th className="px-4 py-3 font-medium">
-                    <span className="sr-only">Thao tác</span>
+                    <span className="sr-only">{t('Thao tác')}</span>
                   </th>
                 </tr>
               </thead>
@@ -140,12 +141,12 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
                         <div className="min-w-0">
                           <p className="truncate font-semibold">
                             {u.displayName}
-                            {u._id === actor._id && <span className="ml-2 text-xs text-muted-foreground">(bạn)</span>}
+                            {u._id === actor._id && <span className="ml-2 text-xs text-muted-foreground">{t('(bạn)')}</span>}
                           </p>
                           <p className="truncate text-xs text-muted-foreground">
                             @{u.username} · {u.email}
                           </p>
-                          {!u.emailVerified && <p className="text-xs text-muted-foreground">Chưa xác nhận email</p>}
+                          {!u.emailVerified && <p className="text-xs text-muted-foreground">{t('Chưa xác nhận email')}</p>}
                         </div>
                       </div>
                     </td>
@@ -163,9 +164,9 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {showPermissions ? (
                         u.role === 'superadmin' ? (
-                          'Toàn quyền'
+                          t('Toàn quyền')
                         ) : u.permissions.length === 0 ? (
-                          'Chưa được cấp quyền nào'
+                          t('Chưa được cấp quyền nào')
                         ) : (
                           <span className="flex flex-wrap gap-1">
                             {u.permissions.map((p) => (
@@ -188,7 +189,7 @@ export function UsersTable({ actor, fixedRole, showPermissions = false, onNotice
             </table>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">{list.data.total} tài khoản</p>
+            <p className="text-xs text-muted-foreground">{t('{n} tài khoản', { n: list.data.total })}</p>
             <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPage={setPage} />
           </div>
         </>

@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { AddressField } from '@/features/trip-post/components/AddressField'
 import { MODE_ICON } from '@/features/map/modeIcons'
 import { PlaceField } from '@/features/trip-post/components/PlaceField'
+import { t } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { UNPINNED, dayCostOf, isPinned } from '@/lib/itinerary'
 import { formatVnd } from '@/lib/format'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
@@ -63,7 +65,7 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
         <div className="flex-1 space-y-4">
           <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
             <div className="space-y-2">
-              <Label htmlFor={`${day._id}-title`}>Tiêu đề ngày {index + 1}</Label>
+              <Label htmlFor={`${day._id}-title`}>{t('Tiêu đề ngày {n}', { n: index + 1 })}</Label>
               <Input
                 id={`${day._id}-title`}
                 value={day.title}
@@ -71,7 +73,7 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${day._id}-date`}>Ngày</Label>
+              <Label htmlFor={`${day._id}-date`}>{t('Ngày')}</Label>
               <Input
                 id={`${day._id}-date`}
                 type="date"
@@ -88,7 +90,7 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
             variant="ghost"
             size="icon"
             onClick={onRemove}
-            aria-label={`Xoá ngày ${index + 1}`}
+            aria-label={t('Xoá ngày {n}', { n: index + 1 })}
             className="mt-7 text-muted-foreground hover:text-destructive"
           >
             <Trash2 />
@@ -123,10 +125,10 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <Button type="button" variant="outline" size="sm" onClick={addLocation}>
           <Plus />
-          Thêm điểm dừng
+          {t('Thêm điểm dừng')}
         </Button>
         <p className="text-sm text-muted-foreground">
-          Ngày này: <span className="text-foreground">{formatVnd(dayCostOf(day))}</span>
+          {tr('Ngày này: {cost}', { cost: <span className="text-foreground">{formatVnd(dayCostOf(day))}</span> })}
         </p>
       </div>
     </GlassCard>
@@ -176,18 +178,18 @@ function LocationRow({
           <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
             <div className="space-y-1.5">
               <Label htmlFor={`${location._id}-name`} className="text-xs">
-                Tên địa điểm
+                {t('Tên địa điểm')}
               </Label>
               <PlaceField
                 id={`${location._id}-name`}
-                label={`Tên địa điểm ${index + 1}`}
+                label={t('Tên địa điểm {n}', { n: index + 1 })}
                 location={location}
                 onChange={onChange}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor={`${location._id}-cost`} className="text-xs">
-                Chi phí (₫)
+                {t('Chi phí (₫)')}
               </Label>
               <Input
                 id={`${location._id}-cost`}
@@ -196,18 +198,18 @@ function LocationRow({
                 step={1000}
                 value={location.estCost}
                 onChange={(e) => onChange({ estCost: Number(e.target.value) || 0 })}
-                aria-label={`Chi phí ước tính cho địa điểm ${index + 1}`}
+                aria-label={t('Chi phí ước tính cho địa điểm {n}', { n: index + 1 })}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor={`${location._id}-address`} className="text-xs">
-              Địa chỉ
+              {t('Địa chỉ')}
             </Label>
             <AddressField
               id={`${location._id}-address`}
-              label={`Địa chỉ của địa điểm ${index + 1}`}
+              label={t('Địa chỉ của địa điểm {n}', { n: index + 1 })}
               location={location}
               onChange={onChange}
             />
@@ -215,14 +217,14 @@ function LocationRow({
 
           <div className="space-y-1.5">
             <Label htmlFor={`${location._id}-note`} className="text-xs">
-              Ghi chú
+              {t('Ghi chú')}
             </Label>
             <Textarea
               id={`${location._id}-note`}
               value={location.note}
               onChange={(e) => onChange({ note: e.target.value })}
               rows={2}
-              aria-label={`Ghi chú cho địa điểm ${index + 1}`}
+              aria-label={t('Ghi chú cho địa điểm {n}', { n: index + 1 })}
             />
           </div>
 
@@ -232,7 +234,7 @@ function LocationRow({
                 href={location.photoUrl ?? undefined}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Xem ảnh cỡ lớn"
+                aria-label={t('Xem ảnh cỡ lớn')}
                 className="np-media relative block size-16 shrink-0 overflow-hidden rounded-xl bg-np-well"
               >
                 {location.photoUrl && (
@@ -267,7 +269,7 @@ function LocationRow({
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus />
-              {uploading !== null ? 'Đang tải ảnh…' : location.photoUrl ? 'Đổi ảnh' : 'Thêm ảnh'}
+              {uploading !== null ? t('Đang tải ảnh…') : location.photoUrl ? t('Đổi ảnh') : t('Thêm ảnh')}
             </Button>
 
             {location.photoUrl && (
@@ -279,12 +281,12 @@ function LocationRow({
                 onClick={() => onChange({ photoUrl: null })}
                 className="text-muted-foreground"
               >
-                Bỏ ảnh
+                {t('Bỏ ảnh')}
               </Button>
             )}
 
             <span className="text-xs text-muted-foreground">
-              {ACCEPTED_LABEL}, tối đa 15 MB. Ảnh được tự nén rồi tải lên.
+              {t('{formats}, tối đa 15 MB. Ảnh được tự nén rồi tải lên.', { formats: ACCEPTED_LABEL })}
             </span>
             {photoError && (
               <span role="alert" className="w-full text-xs text-destructive">
@@ -300,7 +302,7 @@ function LocationRow({
             variant="ghost"
             size="icon"
             onClick={onRemove}
-            aria-label={`Xoá địa điểm ${index + 1}`}
+            aria-label={t('Xoá địa điểm {n}', { n: index + 1 })}
             className="text-muted-foreground hover:text-destructive"
           >
             <Trash2 />
@@ -350,7 +352,7 @@ function LegPicker({
       <span aria-hidden className="h-10 border-l border-dashed border-border" />
       <div
         role="group"
-        aria-label={`Phương tiện từ điểm ${from} đến điểm ${to}`}
+        aria-label={t('Phương tiện từ điểm {from} đến điểm {to}', { from, to })}
         className="flex items-center gap-0.5 rounded-full border border-border p-0.5"
       >
         {TRAVEL_MODES.map((mode) => {

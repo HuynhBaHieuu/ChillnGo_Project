@@ -26,6 +26,7 @@ import {
   relativeTime,
   tripLengthLabel,
 } from '@/lib/format'
+import { t } from '@/i18n'
 import { useAuthStore } from '@/store'
 
 export function PostDetailPage() {
@@ -43,11 +44,11 @@ export function PostDetailPage() {
     return (
       <PageContainer>
         <EmptyState
-          title="Không tìm thấy hành trình"
-          description={(error as Error | null)?.message ?? 'Bài viết có thể đã bị xoá.'}
+          title={t('Không tìm thấy hành trình')}
+          description={(error as Error | null)?.message ?? t('Bài viết có thể đã bị xoá.')}
           action={
             <Button asChild variant="outline">
-              <Link to="/discover">Quay lại Khám phá</Link>
+              <Link to="/discover">{t('Quay lại Khám phá')}</Link>
             </Button>
           }
         />
@@ -97,7 +98,7 @@ export function PostDetailPage() {
                   dateTime={post.createdAt}
                   className="block text-xs text-muted-foreground"
                 >
-                  Đăng {relativeTime(post.createdAt)}
+                  {t('Đăng {time}', { time: relativeTime(post.createdAt) })}
                 </time>
               </span>
             </Link>
@@ -108,13 +109,13 @@ export function PostDetailPage() {
                 {post.companions && (
                   <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
                     <UserPlus />
-                    Mời bạn đi cùng
+                    {t('Mời bạn đi cùng')}
                   </Button>
                 )}
                 <Button asChild variant="outline" size="sm">
                   <Link to={`/posts/${post._id}/edit`}>
                     <Pencil />
-                    Chỉnh sửa
+                    {t('Chỉnh sửa')}
                   </Link>
                 </Button>
               </div>
@@ -137,17 +138,17 @@ export function PostDetailPage() {
         <dl className="animate-fade-rise-delay mt-8 grid gap-4 sm:grid-cols-3">
           <Fact
             icon={<CalendarRange className="size-4" />}
-            label="Thời gian"
+            label={t('Thời gian')}
             value={formatDateRange(post.startDate, post.endDate)}
           />
           <Fact
             icon={<Wallet className="size-4" />}
-            label="Tổng chi phí ước tính"
+            label={t('Tổng chi phí ước tính')}
             value={formatVnd(post.totalEstCost)}
           />
           <Fact
             icon={<Wallet className="size-4" />}
-            label="Mức chi tiêu"
+            label={t('Mức chi tiêu')}
             value={BUDGET_LABELS[post.budgetLevel]}
           />
         </dl>
@@ -155,7 +156,7 @@ export function PostDetailPage() {
         <div className="mt-14 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           {/* Itinerary */}
           <div className="min-w-0 space-y-6">
-            <h2 className="font-display text-3xl">Lịch trình từng ngày</h2>
+            <h2 className="font-display text-3xl">{t('Lịch trình từng ngày')}</h2>
             {post.days.map((day) => (
               <DayItinerary key={day._id} day={day} />
             ))}
@@ -163,16 +164,14 @@ export function PostDetailPage() {
 
           {/* Map */}
           <aside className="min-w-0 lg:sticky lg:top-32">
-            <h2 className="font-display text-3xl">Bản đồ tuyến</h2>
+            <h2 className="font-display text-3xl">{t('Bản đồ tuyến')}</h2>
             <MapPreview
               days={post.days}
               className="mt-6 h-[28rem] w-full"
-              label={`Bản đồ tuyến đường của ${post.title}`}
+              label={t('Bản đồ tuyến đường của {title}', { title: post.title })}
             />
             <p className="mt-3 text-xs text-muted-foreground">
-              Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc
-              một điểm để xem đường đi của ngày đó: đường bộ theo đường thật, nét đứt là
-              máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.
+              {t('Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi của ngày đó: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.')}
             </p>
           </aside>
         </div>
@@ -207,7 +206,7 @@ function PostGallery({ coverUrl, images }: { coverUrl: string; images: string[] 
       // A new set of photos starts again from the first.
       key={photos.join('|')}
       items={photos.map((image) => ({ image }))}
-      label="Ảnh của hành trình"
+      label={t('Ảnh của hành trình')}
       className="animate-fade-rise-delay mt-10"
       stageClassName="aspect-[16/10] w-full rounded-2xl sm:aspect-[21/9]"
     />

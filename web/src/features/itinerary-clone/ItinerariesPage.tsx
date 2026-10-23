@@ -11,13 +11,16 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useMyItineraries } from '@/features/itinerary-clone/hooks'
 import { useMyJourneys } from '@/features/trip-post/hooks'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
+import { translateServerMessage } from '@/i18n/server'
 import { formatShortDate, formatVnd, relativeTime, tripLengthLabel } from '@/lib/format'
 import { themeFromText, travelCover } from '@/lib/photos'
 import { cn } from '@/lib/utils'
 import type { ServerTripPost } from '@/services/post.service'
 import type { ItineraryStatus } from '@/services/types'
 
-const STATUS_LABELS: Record<ItineraryStatus, string> = {
+const STATUS_LABELS: Record<ItineraryStatus, MessageKey> = {
   planning: 'Đang lên kế hoạch',
   confirmed: 'Đã chốt',
   completed: 'Đã đi',
@@ -37,20 +40,20 @@ export function ItinerariesPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Hành trình của tôi"
-        description="Hành trình bạn tự đăng và những lịch trình bạn đã clone về. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực."
+        title={t('Hành trình của tôi')}
+        description={t('Hành trình bạn tự đăng và những lịch trình bạn đã clone về. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.')}
         action={
           <div className="flex flex-wrap gap-3">
             <GlassButton asChild size="lg" tone="sunset">
               <Link to="/posts/new">
                 <Plus />
-                Đăng hành trình
+                {t('Đăng hành trình')}
               </Link>
             </GlassButton>
             <GlassButton asChild size="lg">
               <Link to="/discover">
                 <Compass />
-                Tìm hành trình mới
+                {t('Tìm hành trình mới')}
               </Link>
             </GlassButton>
           </div>
@@ -65,9 +68,9 @@ export function ItinerariesPage() {
           setSearchParams(next, { replace: true })
         }}
       >
-        <TabsList aria-label="Loại hành trình" className="np-well border-transparent">
-          <TabsTrigger value="mine">Tôi đăng</TabsTrigger>
-          <TabsTrigger value="cloned">Đã clone về</TabsTrigger>
+        <TabsList aria-label={t('Loại hành trình')} className="np-well border-transparent">
+          <TabsTrigger value="mine">{t('Tôi đăng')}</TabsTrigger>
+          <TabsTrigger value="cloned">{t('Đã clone về')}</TabsTrigger>
         </TabsList>
         <TabsContent value="mine">
           <MyJourneys />
@@ -100,11 +103,11 @@ function MyJourneys() {
   if (isError) {
     return (
       <EmptyState
-        title="Không tải được hành trình của bạn"
+        title={t('Không tải được hành trình của bạn')}
         description={(error as Error).message}
         action={
           <Button variant="outline" onClick={() => void refetch()}>
-            Thử lại
+            {t('Thử lại')}
           </Button>
         }
       />
@@ -115,13 +118,13 @@ function MyJourneys() {
     return (
       <EmptyState
         icon={PenLine}
-        title="Bạn chưa đăng hành trình nào"
-        description="Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể clone về làm lịch trình của họ."
+        title={t('Bạn chưa đăng hành trình nào')}
+        description={t('Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể clone về làm lịch trình của họ.')}
         action={
           <GlassButton asChild size="lg" tone="sunset">
             <Link to="/posts/new">
               <Plus />
-              Đăng hành trình đầu tiên
+              {t('Đăng hành trình đầu tiên')}
             </Link>
           </GlassButton>
         }
@@ -140,7 +143,7 @@ function MyJourneys() {
 
 function MyJourneyCard({ journey }: { journey: ServerTripPost }) {
   const draft = journey.status === 'draft'
-  const title = journey.title.trim() || 'Hành trình chưa đặt tên'
+  const title = journey.title.trim() || t('Hành trình chưa đặt tên')
   const cover = journey.coverUrl || travelCover(journey.title.slice(0, 30) || 'chillngo', themeFromText(journey.title))
   // A draft opens in the editor; a published journey opens its page.
   const href = draft ? `/posts/${journey._id}/edit` : `/posts/${journey._id}`
@@ -161,7 +164,7 @@ function MyJourneyCard({ journey }: { journey: ServerTripPost }) {
               draft ? 'border border-np-beige/15 bg-np-canopy/75 text-np-cream' : 'bg-primary text-primary-foreground',
             )}
           >
-            {draft ? 'Nháp' : 'Đã đăng'}
+            {draft ? t('Nháp') : t('Đã đăng')}
           </span>
         </div>
 
@@ -177,16 +180,18 @@ function MyJourneyCard({ journey }: { journey: ServerTripPost }) {
 
           <div className="flex items-center justify-between gap-3 pt-1">
             <p className="text-xs text-muted-foreground">
-              {draft ? 'Sửa lần cuối' : 'Cập nhật'} {relativeTime(journey.updatedAt)}
+              {draft
+                ? t('Sửa lần cuối {time}', { time: relativeTime(journey.updatedAt) })
+                : t('Cập nhật {time}', { time: relativeTime(journey.updatedAt) })}
             </p>
             <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-np-cream group-hover:underline">
               {draft ? (
                 <>
                   <PenLine className="size-4" aria-hidden />
-                  Viết tiếp
+                  {t('Viết tiếp')}
                 </>
               ) : (
-                'Xem bài'
+                t('Xem bài')
               )}
             </span>
           </div>
@@ -207,11 +212,11 @@ function ClonedItineraries() {
     return (
       <EmptyState
         icon={Map}
-        title="Chưa có lịch trình nào"
-        description="Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để clone nó về đây rồi sửa theo cách bạn muốn đi."
+        title={t('Chưa có lịch trình nào')}
+        description={t('Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để clone nó về đây rồi sửa theo cách bạn muốn đi.')}
         action={
           <GlassButton asChild size="lg">
-            <Link to="/discover">Khám phá hành trình</Link>
+            <Link to="/discover">{t('Khám phá hành trình')}</Link>
           </GlassButton>
         }
       />
@@ -235,7 +240,7 @@ function ClonedItineraries() {
             <div className="space-y-3 p-5">
               <div className="flex items-center justify-between gap-2">
                 <span className="flex flex-wrap gap-1.5">
-                  <Badge variant="outline">{STATUS_LABELS[itinerary.status]}</Badge>
+                  <Badge variant="outline">{t(STATUS_LABELS[itinerary.status])}</Badge>
                   {(itinerary.cloneType === 'ai' || itinerary.cloneType === 'merge') && (
                     <Badge variant="outline" className="gap-1 border-np-teal/50 text-np-teal">
                       <Sparkles className="size-3" />
@@ -248,20 +253,20 @@ function ClonedItineraries() {
 
               <h3 className="font-display text-xl">{itinerary.title}</h3>
 
-              <p className="line-clamp-2 text-sm text-muted-foreground">{itinerary.note}</p>
+              <p className="line-clamp-2 text-sm text-muted-foreground">{translateServerMessage(itinerary.note)}</p>
 
               <dl className="flex items-baseline justify-between pt-1 text-sm">
-                <dt className="text-muted-foreground">Khởi hành</dt>
+                <dt className="text-muted-foreground">{t('Khởi hành')}</dt>
                 <dd>{formatShortDate(itinerary.startDate)}</dd>
               </dl>
               <dl className="flex items-baseline justify-between text-sm">
-                <dt className="text-muted-foreground">Tổng chi phí</dt>
+                <dt className="text-muted-foreground">{t('Tổng chi phí')}</dt>
                 <dd>{formatVnd(itinerary.totalEstCost)}</dd>
               </dl>
 
               <p className="pt-1 text-xs text-muted-foreground">
-                Cập nhật {relativeTime(itinerary.updatedAt)}
-                {itinerary.sourcePostIds.length > 1 && ` · ghép từ ${itinerary.sourcePostIds.length} bài`}
+                {t('Cập nhật {time}', { time: relativeTime(itinerary.updatedAt) })}
+                {itinerary.sourcePostIds.length > 1 && ` · ${t('ghép từ {n} bài', { n: itinerary.sourcePostIds.length })}`}
               </p>
             </div>
           </Link>

@@ -3,6 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
 import type * as React from 'react'
 
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 const Sheet = SheetPrimitive.Root
@@ -58,7 +59,7 @@ function SheetContent({
         <div className="relative z-[1] flex min-h-0 flex-1 flex-col gap-4">{children}</div>
         <SheetPrimitive.Close className="absolute right-4 top-4 z-[2] rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground focus:outline-none">
           <X className="size-5" />
-          <span className="sr-only">Đóng</span>
+          <span className="sr-only">{t('Đóng')}</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>

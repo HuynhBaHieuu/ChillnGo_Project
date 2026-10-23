@@ -9,6 +9,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 export interface Gallery4Item {
@@ -36,7 +37,7 @@ function Gallery4({
   title,
   description,
   items,
-  ctaLabel = 'Xem hành trình',
+  ctaLabel = t('Xem hành trình'),
   className,
 }: Gallery4Props) {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -85,7 +86,7 @@ function Gallery4({
             onClick={() => carouselApi?.scrollPrev()}
             disabled={!canScrollPrev}
             className="rounded-full disabled:pointer-events-auto"
-            aria-label="Trước"
+            aria-label={t('Trước')}
           >
             <ArrowLeft className="size-5" />
           </Button>
@@ -95,7 +96,7 @@ function Gallery4({
             onClick={() => carouselApi?.scrollNext()}
             disabled={!canScrollNext}
             className="rounded-full disabled:pointer-events-auto"
-            aria-label="Sau"
+            aria-label={t('Sau')}
           >
             <ArrowRight className="size-5" />
           </Button>
@@ -158,7 +159,7 @@ function Gallery4({
                 currentSlide === index ? 'bg-primary' : 'bg-primary/20',
               )}
               onClick={() => carouselApi?.scrollTo(index)}
-              aria-label={`Đến slide ${index + 1}`}
+              aria-label={t('Đến slide {n}', { n: index + 1 })}
             />
           ))}
         </div>

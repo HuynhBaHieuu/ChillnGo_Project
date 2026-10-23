@@ -5,23 +5,24 @@ import { Button } from '@/components/ui/button'
 import { ActivityTabs, Empty, ErrorPanel, ListSkeleton, NotAvailable, SectionHeader } from '@/features/activity/components'
 import { journeyStats } from '@/features/activity/format'
 import { useSavedJourneys, useUnsave } from '@/features/activity/hooks'
+import { t } from '@/i18n'
 
 export function SavedSection() {
   return (
     <>
-      <SectionHeader title="Đã lưu" description="Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này." />
+      <SectionHeader title={t('Đã lưu')} description={t('Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')} />
       <ActivityTabs
-        label="Loại đã lưu"
+        label={t('Loại đã lưu')}
         tabs={[
-          { value: 'journeys', label: 'Hành trình', content: <SavedJourneys /> },
+          { value: 'journeys', label: t('Hành trình'), content: <SavedJourneys /> },
           {
             value: 'places',
-            label: 'Địa điểm',
+            label: t('Địa điểm'),
             content: (
               <NotAvailable
                 icon={MapPin}
-                feature="tính năng lưu địa điểm"
-                description="Tính năng lưu từng địa điểm sắp có. Hiện tại, hãy lưu hành trình có địa điểm đó."
+                feature={t('tính năng lưu địa điểm')}
+                description={t('Tính năng lưu từng địa điểm sắp có. Hiện tại, hãy lưu hành trình có địa điểm đó.')}
               />
             ),
           },
@@ -41,11 +42,11 @@ function SavedJourneys() {
     return (
       <Empty
         icon={Bookmark}
-        title="Chưa lưu gì"
-        description="Bấm biểu tượng lưu ở một hành trình để giữ nó ở đây xem sau."
+        title={t('Chưa lưu gì')}
+        description={t('Bấm biểu tượng lưu ở một hành trình để giữ nó ở đây xem sau.')}
         action={
           <Button asChild variant="outline" size="sm" className="rounded-full">
-            <Link to="/discover">Khám phá hành trình</Link>
+            <Link to="/discover">{t('Khám phá hành trình')}</Link>
           </Button>
         }
       />
@@ -68,7 +69,7 @@ function SavedJourneys() {
             <div className="p-4">
               <p className="line-clamp-2 font-display text-lg leading-snug text-np-cream group-hover:underline">{post.title}</p>
               <p className="mt-1 truncate text-[13px] text-muted-foreground">
-                của {post.author.displayName} · {journeyStats(post)}
+                {t('của {name}', { name: post.author.displayName })} · {journeyStats(post)}
               </p>
             </div>
           </Link>
@@ -76,8 +77,8 @@ function SavedJourneys() {
             type="button"
             onClick={() => unsave.mutate(post._id)}
             disabled={unsave.isPending && unsave.variables === post._id}
-            aria-label={`Bỏ lưu ${post.title}`}
-            title="Bỏ lưu"
+            aria-label={t('Bỏ lưu {title}', { title: post.title })}
+            title={t('Bỏ lưu')}
             className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-np-canopy/75 text-np-cream transition-colors hover:bg-np-canopy disabled:opacity-50"
           >
             <Bookmark className="size-4 fill-current" aria-hidden />

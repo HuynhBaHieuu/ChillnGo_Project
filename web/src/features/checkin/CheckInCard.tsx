@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ConfirmDialog } from '@/features/discovery-admin/admin/shared'
 import { feelingOption, feelingSentence } from '@/lib/feelings'
+import { t } from '@/i18n'
 import { relativeTime } from '@/lib/format'
 import { googleMapsUrl, staticMapUrl } from '@/lib/geo'
 import { cn } from '@/lib/utils'
@@ -49,7 +50,7 @@ export function CheckInCard({ checkin, viewerId }: { checkin: CheckIn; viewerId:
               {location && (
                 <>
                   {' '}
-                  <span className="text-muted-foreground">{feeling ? 'tại' : 'đã check-in tại'}</span>{' '}
+                  <span className="text-muted-foreground">{feeling ? t('tại') : t('đã check-in tại')}</span>{' '}
                   <span className="font-semibold">
                     <span aria-hidden>📍 </span>
                     {location.name}
@@ -57,7 +58,7 @@ export function CheckInCard({ checkin, viewerId }: { checkin: CheckIn; viewerId:
                 </>
               )}
               {!feeling && !location && (
-                <span className="text-muted-foreground"> {photos.length > 0 ? 'đã chia sẻ ảnh' : 'đã chia sẻ'}</span>
+                <span className="text-muted-foreground"> {photos.length > 0 ? t('đã chia sẻ ảnh') : t('đã chia sẻ')}</span>
               )}
             </p>
             <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
@@ -100,7 +101,7 @@ function PhotoGrid({ photos }: { photos: CheckIn['photos'] }) {
           href={photo.url}
           target="_blank"
           rel="noreferrer"
-          aria-label={`Xem ảnh ${i + 1} cỡ lớn`}
+          aria-label={t('Xem ảnh {name} cỡ lớn', { name: i + 1 })}
           className={cn('block min-h-0 overflow-hidden bg-np-canopy', count === 3 && i === 0 && 'row-span-2')}
         >
           <img
@@ -134,7 +135,7 @@ function LocationStrip({ location }: { location: NonNullable<CheckIn['location']
           {location.address && <p className="truncate text-xs text-muted-foreground">{location.address}</p>}
         </div>
         <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
-          Chỉ đường
+          {t('Chỉ đường')}
           <ExternalLink className="size-3.5" aria-hidden />
         </span>
       </div>
@@ -155,20 +156,20 @@ function DeleteCheckIn({ id }: { id: string }) {
 
   return (
     <>
-      <Button variant="ghost" size="icon" aria-label="Xoá check-in" onClick={() => setOpen(true)} className="shrink-0 rounded-full">
+      <Button variant="ghost" size="icon" aria-label={t('Xoá check-in')} onClick={() => setOpen(true)} className="shrink-0 rounded-full">
         <Trash2 className="size-4" aria-hidden />
       </Button>
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
-        title="Xoá check-in"
+        title={t('Xoá check-in')}
         description={
           <>
-            Check-in sẽ được chuyển vào mục Đã xoá gần đây (Hoạt động của bạn) và có thể khôi phục trong 30 ngày.
+            {t('Check-in sẽ được chuyển vào mục Đã xoá gần đây (Hoạt động của bạn) và có thể khôi phục trong 30 ngày.')}
             {remove.isError && <span className="mt-2 block text-destructive">{(remove.error as Error).message}</span>}
           </>
         }
-        confirmLabel="Xoá"
+        confirmLabel={t('Xoá')}
         destructive
         pending={remove.isPending}
         onConfirm={() => remove.mutate()}

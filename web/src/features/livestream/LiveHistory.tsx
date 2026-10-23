@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { LivestreamCard } from '@/features/livestream/LivestreamCard'
 import { ReplayCard } from '@/features/livestream/ReplayCard'
 import { livestreamService } from '@/services'
+import { t } from '@/i18n'
 
 /**
  * The "Livestream" tab of a profile: the stream running right now, if any,
@@ -42,21 +43,21 @@ export function LiveHistory({ userId, isOwn }: { userId: string; isOwn: boolean 
         </div>
       )}
 
-      {history.isError && <EmptyState title="Không tải được các buổi phát" description={(history.error as Error).message} />}
+      {history.isError && <EmptyState title={t('Không tải được các buổi phát')} description={(history.error as Error).message} />}
 
       {history.isSuccess && past.length === 0 && !live.data?.length && (
         <EmptyState
           icon={Radio}
-          title="Chưa có buổi phát nào"
+          title={t('Chưa có buổi phát nào')}
           description={
             isOwn
-              ? 'Bấm "Livestream" ở ô đăng bài trên Newsfeed để phát trực tiếp lần đầu. Các buổi phát sẽ được lưu ở đây.'
-              : 'Người dùng này chưa phát trực tiếp lần nào.'
+              ? t('Bấm "Livestream" ở ô đăng bài trên Newsfeed để phát trực tiếp lần đầu. Các buổi phát sẽ được lưu ở đây.')
+              : t('Người dùng này chưa phát trực tiếp lần nào.')
           }
           action={
             isOwn ? (
               <Button asChild variant="outline">
-                <Link to="/feed">Tới Newsfeed</Link>
+                <Link to="/feed">{t('Tới Newsfeed')}</Link>
               </Button>
             ) : undefined
           }
@@ -77,7 +78,7 @@ export function LiveHistory({ userId, isOwn }: { userId: string; isOwn: boolean 
         <div className="flex justify-center">
           <Button variant="outline" onClick={() => void history.fetchNextPage()} disabled={history.isFetchingNextPage}>
             {history.isFetchingNextPage && <Loader2 className="size-4 animate-spin" aria-hidden />}
-            Xem thêm
+            {t('Xem thêm')}
           </Button>
         </div>
       )}

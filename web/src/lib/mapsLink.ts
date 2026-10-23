@@ -9,6 +9,7 @@
  * Google does not let a browser read them cross-origin.
  */
 
+import { t } from '@/i18n'
 import { placeAt, searchPlaces } from '@/lib/geo'
 import { http } from '@/services/http'
 
@@ -96,7 +97,7 @@ async function addressAt(lat: number, lng: number): Promise<string> {
 /** Looks a text up with Mapbox; the first result wins. */
 async function lookUp(text: string): Promise<ResolvedPlace> {
   const [place] = await searchPlaces(text)
-  if (!place) throw new Error('Không tìm thấy địa chỉ này. Hãy thử dán link Google Maps hoặc chọn trên bản đồ.')
+  if (!place) throw new Error(t('Không tìm thấy địa chỉ này. Hãy thử dán link Google Maps hoặc chọn trên bản đồ.'))
   return { lat: place.lat, lng: place.lng, address: [place.name, place.address].filter(Boolean).join(', '), types: place.types }
 }
 
@@ -111,7 +112,7 @@ export async function resolveLinkOrCoordinates(input: string): Promise<ResolvedP
   const coords = parseCoordinates(text)
   if (coords) return { ...coords, address: await addressAt(coords.lat, coords.lng) }
 
-  if (!isGoogleMapsUrl(text)) throw new Error('Không nhận ra link hay toạ độ này.')
+  if (!isGoogleMapsUrl(text)) throw new Error(t('Không nhận ra link hay toạ độ này.'))
 
   let full = text
   if (isShortLink(new URL(text))) {
@@ -125,7 +126,7 @@ export async function resolveLinkOrCoordinates(input: string): Promise<ResolvedP
     return { lat: info.lat, lng: info.lng, address, name: info.name }
   }
   if (info.query) return { ...(await lookUp(info.query)), name: info.name }
-  throw new Error('Link Google Maps này không có vị trí. Hãy mở địa điểm trên Google Maps rồi bấm Chia sẻ → Sao chép đường liên kết.')
+  throw new Error(t('Link Google Maps này không có vị trí. Hãy mở địa điểm trên Google Maps rồi bấm Chia sẻ → Sao chép đường liên kết.'))
 }
 
 /** True when the text should be resolved as a link or coordinates rather than searched as an address. */

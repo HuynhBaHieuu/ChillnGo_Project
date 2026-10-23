@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { foldText as fold } from '@/lib/format'
 import type { Region, TripPostWithAuthor } from '@/services/types'
 
@@ -41,13 +42,13 @@ export function buildSuggestions(
   if (!q) {
     const groups: SuggestionGroup[] = [
       {
-        label: 'Tìm kiếm gần đây',
+        label: t('Tìm kiếm gần đây'),
         items: recent
           .slice(0, LIMITS.recent)
           .map((text): Suggestion => ({ kind: 'recent', id: `recent-${text}`, query: text })),
       },
       {
-        label: 'Hành trình phổ biến',
+        label: t('Hành trình phổ biến'),
         items: scoped
           .slice(0, LIMITS.popular)
           .map((post): Suggestion => ({ kind: 'trip', id: `trip-${post._id}`, post })),
@@ -86,11 +87,11 @@ export function buildSuggestions(
 
   const groups: SuggestionGroup[] = [
     {
-      label: 'Hành trình',
+      label: t('Hành trình'),
       items: trips.map((post): Suggestion => ({ kind: 'trip', id: `trip-${post._id}`, post })),
     },
-    { label: 'Điểm dừng', items: stops.slice(0, LIMITS.stops) },
-    { label: 'Thẻ', items: tags },
+    { label: t('Điểm dừng'), items: stops.slice(0, LIMITS.stops) },
+    { label: t('Thẻ'), items: tags },
     {
       label: null,
       items: [{ kind: 'all', id: 'all', query: query.trim() }],

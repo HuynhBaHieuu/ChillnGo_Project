@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMarkNotificationsRead, useNotifications } from '@/features/social/hooks'
+import { t } from '@/i18n'
+import { translateServerMessage } from '@/i18n/server'
 import { relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { NotificationType } from '@/services/types'
@@ -54,7 +56,7 @@ export function NotificationBell() {
         <button
           type="button"
           aria-label={
-            unreadCount > 0 ? `Thông báo (${unreadCount} chưa đọc)` : 'Thông báo'
+            unreadCount > 0 ? t('Thông báo ({n} chưa đọc)', { n: unreadCount }) : t('Thông báo')
           }
           className="liquid-glass liquid-glass-interactive relative flex size-10 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
@@ -70,9 +72,9 @@ export function NotificationBell() {
 
       <DropdownMenuContent align="end" className="w-[22rem] p-0">
         <div className="flex items-center justify-between px-4 py-3">
-          <h3 className="font-display text-lg tracking-tight">Thông báo</h3>
+          <h3 className="font-display text-lg tracking-tight">{t('Thông báo')}</h3>
           {unreadCount > 0 && (
-            <span className="text-xs text-muted-foreground">{unreadCount} mới</span>
+            <span className="text-xs text-muted-foreground">{t('{n} mới', { n: unreadCount })}</span>
           )}
         </div>
 
@@ -93,7 +95,7 @@ export function NotificationBell() {
 
           {!isLoading && notifications?.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-              Chưa có thông báo nào.
+              {t('Chưa có thông báo nào.')}
             </p>
           )}
 
@@ -121,7 +123,7 @@ export function NotificationBell() {
                         {notification.actor.displayName}{' '}
                       </span>
                     )}
-                    <span className="text-muted-foreground">{notification.message}</span>
+                    <span className="text-muted-foreground">{translateServerMessage(notification.message)}</span>
                   </p>
                   <time
                     dateTime={notification.createdAt}

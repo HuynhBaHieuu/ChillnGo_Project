@@ -19,6 +19,7 @@ import type {
   TripPostWithAuthor,
   User,
 } from './types'
+import { t } from '@/i18n'
 
 /** An account stored on the server, as opposed to a fixture account. */
 export function isServerId(id: string): boolean {
@@ -46,7 +47,7 @@ export async function getUserById(id: ObjectId): Promise<User> {
   return clone(
     assertFound(
       db.users.find((u) => u._id === id),
-      `Không tìm thấy người dùng ${id}`,
+      t('Không tìm thấy người dùng {id}', { id }),
     ),
   )
 }
@@ -96,7 +97,7 @@ export async function toggleFollow(
 
   const target = assertFound(
     db.users.find((u) => u._id === userId),
-    `Không tìm thấy người dùng ${userId}`,
+    t('Không tìm thấy người dùng {id}', { id: userId }),
   )
   const viewer = db.users.find((u) => u._id === viewerId)
 

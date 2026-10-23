@@ -16,6 +16,7 @@ import { livestreamService } from '@/services'
 import { REACTION_KINDS } from '@/services/livestream.service'
 import type { Livestream } from '@/services/livestream.service'
 import { useAuthStore } from '@/store'
+import { t } from '@/i18n'
 
 /**
  * /live/:id once the stream is over: the replay when there is one, the
@@ -61,7 +62,7 @@ export function LiveEnded({ initial }: { initial: Livestream }) {
                 <Link to={`/users/${stream.host._id}`} className="font-semibold text-foreground hover:underline">
                   {stream.host.displayName}
                 </Link>{' '}
-                · phát lúc {formatStart(stream.startedAt)}
+                · {t('phát lúc {time}', { time: formatStart(stream.startedAt) })}
               </p>
               {stream.description && <p className="mt-2 whitespace-pre-line text-sm leading-relaxed">{stream.description}</p>}
             </div>
@@ -74,21 +75,21 @@ export function LiveEnded({ initial }: { initial: Livestream }) {
         </div>
 
         <div className="space-y-3 rounded-2xl border-2 border-foreground bg-card p-4 sm:p-5">
-          <h2 className="font-display text-xl">{isHost ? 'Tổng kết buổi phát của bạn' : 'Thống kê buổi phát'}</h2>
+          <h2 className="font-display text-xl">{isHost ? t('Tổng kết buổi phát của bạn') : t('Thống kê buổi phát')}</h2>
           <LiveStats stream={stream} />
           {isHost && (
             <div className="flex flex-wrap gap-2 pt-1">
               {stream.recording.status === 'ready' && stream.recording.url && (
                 <GlassButton size="sm" onClick={() => setPickingThumbnail(true)}>
                   <ImageIcon aria-hidden />
-                  {stream.thumbnailUrl ? 'Đổi ảnh bìa' : 'Chọn ảnh bìa'}
+                  {stream.thumbnailUrl ? t('Đổi ảnh bìa') : t('Chọn ảnh bìa')}
                 </GlassButton>
               )}
               <GlassButton asChild tone="sunset" size="sm">
-                <Link to={`/users/${stream.host._id}?tab=live`}>Các buổi phát của tôi</Link>
+                <Link to={`/users/${stream.host._id}?tab=live`}>{t('Các buổi phát của tôi')}</Link>
               </GlassButton>
               <GlassButton asChild size="sm">
-                <Link to="/feed">Về Newsfeed</Link>
+                <Link to="/feed">{t('Về Newsfeed')}</Link>
               </GlassButton>
             </div>
           )}
@@ -99,7 +100,7 @@ export function LiveEnded({ initial }: { initial: Livestream }) {
         comments={comments.data ?? []}
         onSend={async () => undefined}
         disabled
-        disabledReason="Livestream đã kết thúc."
+        disabledReason={t('Livestream đã kết thúc.')}
         hostId={stream.host._id}
         className="h-[26rem] lg:h-[calc(100vh-9rem)] lg:max-h-[46rem]"
       />
@@ -136,7 +137,7 @@ function Replay({ stream }: { stream: Livestream }) {
           playsInline
           preload="metadata"
           className="size-full object-contain"
-          aria-label={`Xem lại: ${stream.title}`}
+          aria-label={`${t('Xem lại')}: ${stream.title}`}
         />
       </div>
     )
@@ -144,10 +145,10 @@ function Replay({ stream }: { stream: Livestream }) {
 
   const message =
     status === 'processing' || status === 'recording'
-      ? { icon: Loader2, spin: true, title: 'Bản ghi đang được xử lý', text: 'Thường chỉ mất vài phút. Trang sẽ tự hiện video khi xong.' }
+      ? { icon: Loader2, spin: true, title: t('Bản ghi đang được xử lý'), text: t('Thường chỉ mất vài phút. Trang sẽ tự hiện video khi xong.') }
       : status === 'failed'
-        ? { icon: Film, spin: false, title: 'Livestream đã kết thúc', text: 'Buổi phát này không lưu được bản ghi.' }
-        : { icon: Film, spin: false, title: 'Livestream đã kết thúc', text: 'Buổi phát này không được lưu lại để xem lại.' }
+        ? { icon: Film, spin: false, title: t('Livestream đã kết thúc'), text: t('Buổi phát này không lưu được bản ghi.') }
+        : { icon: Film, spin: false, title: t('Livestream đã kết thúc'), text: t('Buổi phát này không được lưu lại để xem lại.') }
 
   return (
     <div className={frame}>
@@ -177,11 +178,11 @@ export function LiveStats({
 }) {
   const reactions = totalReactions(stream.reactions)
   const stats: { icon: LucideIcon; label: string; value: string }[] = [
-    { icon: Clock, label: 'Thời lượng', value: formatDuration(stream.durationSec) },
-    { icon: Users, label: 'Người xem', value: compact(stream.uniqueViewers) },
-    { icon: Eye, label: 'Cao nhất cùng lúc', value: compact(stream.peakViewers) },
-    { icon: MessageCircle, label: 'Bình luận', value: compact(stream.commentCount) },
-    { icon: Sparkles, label: 'Cảm xúc', value: compact(reactions) },
+    { icon: Clock, label: t('Thời lượng'), value: formatDuration(stream.durationSec) },
+    { icon: Users, label: t('Người xem'), value: compact(stream.uniqueViewers) },
+    { icon: Eye, label: t('Cao nhất cùng lúc'), value: compact(stream.peakViewers) },
+    { icon: MessageCircle, label: t('Bình luận'), value: compact(stream.commentCount) },
+    { icon: Sparkles, label: t('Cảm xúc#reactions'), value: compact(reactions) },
   ]
 
   if (featured) {

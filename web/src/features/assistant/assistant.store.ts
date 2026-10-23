@@ -18,6 +18,7 @@ import type { AssistantMessage } from '@/services/assistant.service'
 import { useAuthStore } from '@/store/auth.store'
 
 import { parseReply } from './replyTags'
+import { t } from '@/i18n'
 
 export interface ChatMessage extends AssistantMessage {
   id: number
@@ -89,7 +90,7 @@ export const useAssistantStore = create<AssistantState>()((set, get) => ({
       )
       if (parseReply(replyText()).text.trim()) return true
       dropExchange()
-      set({ error: 'Trợ lý chưa trả lời được câu này. Bạn thử hỏi cách khác nhé.' })
+      set({ error: t('Trợ lý chưa trả lời được câu này. Bạn thử hỏi cách khác nhé.') })
       return false
     } catch (error) {
       if (controller.signal.aborted) {

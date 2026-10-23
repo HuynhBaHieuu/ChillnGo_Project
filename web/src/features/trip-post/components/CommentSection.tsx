@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { useAddComment, useComments, useDeleteComment, useHideComment } from '@/features/trip-post/hooks'
+import { t } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { formatCount, relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { CommentThread } from '@/services/types'
@@ -58,7 +60,7 @@ export function CommentSection({ postId, postAuthorId, commentCount }: CommentSe
   return (
     <section id="comments" className="scroll-mt-32">
       <h2 className="font-display text-3xl">
-        Bình luận{' '}
+        {t('Bình luận')}{' '}
         <span className="text-muted-foreground">{formatCount(commentCount)}</span>
       </h2>
 
@@ -74,7 +76,7 @@ export function CommentSection({ postId, postAuthorId, commentCount }: CommentSe
               <Textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                aria-label="Viết bình luận"
+                aria-label={t('Viết bình luận')}
                 rows={3}
               />
               <div className="flex justify-end">
@@ -83,17 +85,20 @@ export function CommentSection({ postId, postAuthorId, commentCount }: CommentSe
                   disabled={!draft.trim() || addComment.isPending}
                 >
                   {addComment.isPending && <Loader2 className="animate-spin" />}
-                  Gửi bình luận
+                  {t('Gửi bình luận')}
                 </GlassButton>
               </div>
             </div>
           </form>
         ) : (
           <p className="text-sm text-muted-foreground">
-            <Link to="/login" className="text-foreground underline-offset-4 hover:underline">
-              Đăng nhập
-            </Link>{' '}
-            để tham gia bình luận.
+            {tr('{login} để tham gia bình luận.', {
+              login: (
+                <Link to="/login" className="text-foreground underline-offset-4 hover:underline">
+                  {t('Đăng nhập')}
+                </Link>
+              ),
+            })}
           </p>
         )}
       </GlassCard>
@@ -115,7 +120,7 @@ export function CommentSection({ postId, postAuthorId, commentCount }: CommentSe
         {threads?.length === 0 && (
           <p className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
             <MessageCircle className="size-4" />
-            Chưa có bình luận nào. Hãy là người đầu tiên.
+            {t('Chưa có bình luận nào. Hãy là người đầu tiên.')}
           </p>
         )}
 
@@ -208,8 +213,8 @@ function CommentItem({
         {comment.hidden && (
           <p className="mt-1 text-xs italic text-muted-foreground">
             {isJourneyAuthor
-              ? 'Bạn đã ẩn bình luận này. Chỉ bạn và người viết còn thấy.'
-              : 'Bình luận này đã bị tác giả bài viết ẩn. Chỉ bạn và tác giả còn thấy.'}
+              ? t('Bạn đã ẩn bình luận này. Chỉ bạn và người viết còn thấy.')
+              : t('Bình luận này đã bị tác giả bài viết ẩn. Chỉ bạn và tác giả còn thấy.')}
           </p>
         )}
 
@@ -224,7 +229,7 @@ function CommentItem({
               onClick={onToggleReply}
               className="transition-colors hover:text-foreground"
             >
-              {isReplying ? 'Huỷ' : 'Trả lời'}
+              {isReplying ? t('Huỷ') : t('Trả lời')}
             </button>
           )}
 
@@ -235,7 +240,7 @@ function CommentItem({
               onClick={() => onHide(comment._id, !comment.hidden)}
               className="transition-colors hover:text-foreground disabled:opacity-50"
             >
-              {comment.hidden ? 'Bỏ ẩn' : 'Ẩn'}
+              {comment.hidden ? t('Bỏ ẩn') : t('Ẩn')}
             </button>
           )}
 
@@ -248,14 +253,14 @@ function CommentItem({
                   onClick={() => onDelete(comment._id)}
                   className="text-rose-400 transition-colors hover:text-rose-300 disabled:opacity-50"
                 >
-                  {!nested && comment.replies.length > 0 ? 'Xoá cả các trả lời' : 'Xác nhận xoá'}
+                  {!nested && comment.replies.length > 0 ? t('Xoá cả các trả lời') : t('Xác nhận xoá')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirming(false)}
                   className="transition-colors hover:text-foreground"
                 >
-                  Giữ lại
+                  {t('Giữ lại')}
                 </button>
               </span>
             ) : (
@@ -264,7 +269,7 @@ function CommentItem({
                 onClick={() => setConfirming(true)}
                 className="transition-colors hover:text-foreground"
               >
-                Xoá
+                {t('Xoá')}
               </button>
             ))}
         </div>
@@ -274,7 +279,7 @@ function CommentItem({
             <Textarea
               value={replyDraft}
               onChange={(e) => onReplyDraftChange(e.target.value)}
-              aria-label={`Trả lời ${comment.author.displayName}`}
+              aria-label={t('Trả lời {name}', { name: comment.author.displayName })}
               rows={2}
               autoFocus
             />
@@ -285,7 +290,7 @@ function CommentItem({
                 disabled={!replyDraft.trim() || isSubmitting}
               >
                 {isSubmitting && <Loader2 className="animate-spin" />}
-                Gửi
+                {t('Gửi')}
               </GlassButton>
             </div>
           </form>

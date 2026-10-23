@@ -10,6 +10,7 @@ import { LivePreview } from '@/features/livestream/LivePreview'
 import { relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Livestream } from '@/services/livestream.service'
+import { t } from '@/i18n'
 
 /**
  * A stream that is live right now, at the top of the Newsfeed. While the card
@@ -52,11 +53,11 @@ export function LivestreamCard({ stream, featured = false }: { stream: Livestrea
               <Link to={`/users/${stream.host._id}`} className={cn('font-semibold hover:underline', featured && 'text-np-cream')}>
                 {stream.host.displayName}
               </Link>{' '}
-              <span className="text-muted-foreground">đang phát trực tiếp</span>
+              <span className="text-muted-foreground">{t('đang phát trực tiếp')}</span>
             </p>
             <p className={cn('mt-1 flex flex-wrap items-center gap-2 text-muted-foreground', featured ? 'text-[13px]' : 'text-xs')}>
               <LiveBadge className={featured ? 'np-glow-social bg-np-social text-np-ink' : undefined} />
-              <span>Bắt đầu {relativeTime(stream.startedAt)}</span>
+              <span>{t('Bắt đầu {time}', { time: relativeTime(stream.startedAt) })}</span>
             </p>
           </div>
         </header>
@@ -88,11 +89,11 @@ export function LivestreamCard({ stream, featured = false }: { stream: Livestrea
             >
               <Radio className="size-7" aria-hidden />
             </span>
-            <span className="text-sm font-semibold">Đang phát trực tiếp · bấm để xem</span>
+            <span className="text-sm font-semibold">{t('Đang phát trực tiếp · bấm để xem')}</span>
           </div>
           <LivePreview streamId={stream._id} hostId={stream.host._id} />
           <span className="absolute bottom-3 right-3 rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            Bấm để xem
+            {t('Bấm để xem')}
           </span>
           <div className="absolute left-3 top-3 flex items-center gap-2 text-white">
             <LiveClock
@@ -108,8 +109,8 @@ export function LivestreamCard({ stream, featured = false }: { stream: Livestrea
           <div className="flex items-center gap-1 text-muted-foreground">
             <Link
               to={href}
-              aria-label="Bình luận trong livestream"
-              title="Bình luận trong livestream"
+              aria-label={t('Bình luận trong livestream')}
+              title={t('Bình luận trong livestream')}
               className="grid size-10 place-items-center rounded-full hover:bg-muted hover:text-foreground"
             >
               <MessageCircle className="size-5" aria-hidden />
@@ -117,15 +118,15 @@ export function LivestreamCard({ stream, featured = false }: { stream: Livestrea
             <button
               type="button"
               onClick={() => void copyLink()}
-              aria-label="Sao chép liên kết livestream"
-              title={copied ? 'Đã sao chép liên kết' : 'Sao chép liên kết'}
+              aria-label={t('Sao chép liên kết livestream')}
+              title={copied ? t('Đã sao chép liên kết') : t('Sao chép liên kết')}
               className="grid size-10 place-items-center rounded-full hover:bg-muted hover:text-foreground"
             >
               {copied ? <Check className="size-5 text-emerald-600" aria-hidden /> : <Link2 className="size-5" aria-hidden />}
             </button>
           </div>
           <GlassButton asChild tone="sunset" size="md">
-            <Link to={href}>Xem livestream</Link>
+            <Link to={href}>{t('Xem livestream')}</Link>
           </GlassButton>
         </div>
       </div>

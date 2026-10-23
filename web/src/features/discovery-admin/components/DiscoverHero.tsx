@@ -23,6 +23,9 @@ import {
   type Suggestion,
   buildSuggestions,
 } from '@/features/discovery-admin/searchSuggestions'
+import { t, tx } from '@/i18n'
+import type { MessageKey } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { REGION_LABELS, tripLengthLabel } from '@/lib/format'
 import { qk } from '@/lib/queryKeys'
 import { cn } from '@/lib/utils'
@@ -33,10 +36,10 @@ import { useAuthStore, useViewerId } from '@/store'
 /** Each tab re-titles the hero and re-words the search box. */
 const TABS: {
   value: Region | 'all'
-  label: string
+  label: MessageKey
   icon: LucideIcon
-  heading: string
-  placeholder: string
+  heading: MessageKey
+  placeholder: MessageKey
 }[] = [
   {
     value: 'all',
@@ -47,35 +50,35 @@ const TABS: {
   },
   {
     value: 'north',
-    label: REGION_LABELS.north,
+    label: 'Miền Bắc',
     icon: Mountain,
     heading: 'Lên núi săn mây',
     placeholder: 'Hà Giang, Sa Pa, Ninh Bình…',
   },
   {
     value: 'central',
-    label: REGION_LABELS.central,
+    label: 'Miền Trung',
     icon: Landmark,
     heading: 'Về miền di sản',
     placeholder: 'Huế, Hội An, Đà Lạt…',
   },
   {
     value: 'south',
-    label: REGION_LABELS.south,
+    label: 'Miền Nam',
     icon: TreePalm,
     heading: 'Xuôi về phương Nam',
     placeholder: 'Sài Gòn, Cần Thơ, Vũng Tàu…',
   },
   {
     value: 'islands',
-    label: REGION_LABELS.islands,
+    label: 'Hải đảo',
     icon: Sailboat,
     heading: 'Ra đảo thôi',
     placeholder: 'Phú Quốc, Côn Đảo, Cát Bà…',
   },
   {
     value: 'overseas',
-    label: REGION_LABELS.overseas,
+    label: 'Nước ngoài',
     icon: Plane,
     heading: 'Đi xa hơn một chút',
     placeholder: 'Bangkok, Seoul, Tokyo…',
@@ -226,12 +229,12 @@ export function DiscoverHero({
 
       <header className="animate-fade-rise relative z-30 mx-auto flex max-w-3xl flex-col items-center text-center">
         <h1 className="font-display text-5xl leading-[1.05] tracking-tight sm:text-6xl">
-          {tab.heading}
+          {t(tab.heading)}
         </h1>
 
         <div
           role="tablist"
-          aria-label="Khu vực"
+          aria-label={t('Khu vực')}
           className="mt-10 flex max-w-full gap-6 overflow-x-auto px-1 pb-1 [scrollbar-width:none]"
         >
           {TABS.map(({ value, label, icon: Icon }) => {
@@ -251,7 +254,7 @@ export function DiscoverHero({
                 )}
               >
                 <Icon className="size-5" />
-                {label}
+                {t(label)}
               </button>
             )
           })}
@@ -271,14 +274,14 @@ export function DiscoverHero({
               ref={inputRef}
               type="search"
               role="combobox"
-              aria-label="Tìm hành trình"
+              aria-label={t('Tìm hành trình')}
               aria-autocomplete="list"
               aria-expanded={expanded}
               aria-controls={listboxId}
               aria-activedescendant={activeId}
               autoComplete="off"
               value={draft}
-              placeholder={tab.placeholder}
+              placeholder={t(tab.placeholder)}
               onChange={(e) => {
                 setDraft(e.target.value.slice(0, 120))
                 setActive(-1)
@@ -291,13 +294,13 @@ export function DiscoverHero({
               className="relative z-[1] min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-muted-foreground"
             />
             <GlassButton type="submit" tone="sunset" className="relative z-[1] rounded-full">
-              Tìm kiếm
+              {t('Tìm kiếm')}
             </GlassButton>
           </form>
 
           {expanded && (
             <GlassCard className="np-featured absolute inset-x-0 top-full mt-2 max-h-[min(70vh,36rem)] overflow-y-auto p-2 text-left">
-              <ul id={listboxId} role="listbox" aria-label="Gợi ý tìm kiếm">
+              <ul id={listboxId} role="listbox" aria-label={t('Gợi ý tìm kiếm')}>
                 {groups.map((group) => (
                   <li key={group.label ?? 'footer'} role="presentation">
                     {group.label && (
@@ -356,18 +359,18 @@ function SuggestionRow({ option, active, ...props }: SuggestionRowProps) {
     case 'stop':
       media = <RowIcon icon={MapPin} />
       title = option.name
-      subtitle = `Trong hành trình: ${option.post.title}`
+      subtitle = t('Trong hành trình: {title}', { title: option.post.title })
       break
     case 'tag':
       media = <RowIcon icon={Hash} />
-      title = option.tag
-      subtitle = `${option.count} hành trình`
+      title = tx(option.tag)
+      subtitle = t('{n} hành trình', { n: option.count })
       break
     case 'all':
       media = <RowIcon icon={Search} />
       title = (
         <>
-          Xem tất cả kết quả cho “<span className="font-semibold">{option.query}</span>”
+          {tr('Xem tất cả kết quả cho “{query}”', { query: <span className="font-semibold">{option.query}</span> })}
         </>
       )
       break

@@ -11,6 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useMergeIntoItinerary } from '@/features/itinerary-clone/hooks'
 import { usePublishedPosts } from '@/features/trip-post/hooks'
 import { dayCostOf } from '@/lib/itinerary'
+import { t } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -100,20 +102,20 @@ export function MergeModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Ghép ngày từ bài viết khác"
-      description="Chọn những ngày bạn muốn thêm vào lịch trình này. Ngày được ghép sẽ nối vào cuối và đánh số lại."
+      title={t('Ghép ngày từ bài viết khác')}
+      description={t('Chọn những ngày bạn muốn thêm vào lịch trình này. Ngày được ghép sẽ nối vào cuối và đánh số lại.')}
       className="max-w-2xl"
       footer={
         <>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Huỷ
+            {t('Huỷ')}
           </Button>
           <GlassButton
             onClick={handleMerge}
             disabled={selectedDayIds.size === 0 || merge.isPending}
           >
             {merge.isPending && <Loader2 className="animate-spin" />}
-            Ghép {selectedDayIds.size > 0 ? `${selectedDayIds.size} ngày` : ''}
+            {selectedDayIds.size > 0 ? t('Ghép {n} ngày', { n: selectedDayIds.size }) : t('Ghép')}
           </GlassButton>
         </>
       }
@@ -121,15 +123,17 @@ export function MergeModal({
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="merge-search" className="text-xs">
-            Tìm hành trình theo tên hoặc thẻ
+            {t('Tìm hành trình theo tên hoặc thẻ')}
           </Label>
           <Input id="merge-search" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
 
         {selectedDayIds.size > 0 && (
           <p className="text-sm text-muted-foreground">
-            Đã chọn {selectedDayIds.size} ngày · thêm khoảng{' '}
-            <span className="text-foreground">{formatVnd(selectedCost)}</span>
+            {tr('Đã chọn {n} ngày · thêm khoảng {cost}', {
+              n: selectedDayIds.size,
+              cost: <span className="text-foreground">{formatVnd(selectedCost)}</span>,
+            })}
           </p>
         )}
 
@@ -139,7 +143,7 @@ export function MergeModal({
 
           {filtered.length === 0 && !isPending && (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              Không tìm thấy hành trình nào khớp.
+              {t('Không tìm thấy hành trình nào khớp.')}
             </p>
           )}
 
@@ -165,8 +169,8 @@ export function MergeModal({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm">{post.title}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {post.days.length} ngày · {post.author.displayName}
-                      {sourcePostIds.includes(post._id) && ' · đã ghép trước đó'}
+                      {t('{n} ngày', { n: post.days.length })} · {post.author.displayName}
+                      {sourcePostIds.includes(post._id) && ` · ${t('đã ghép trước đó')}`}
                     </span>
                   </span>
                   {selectedInPost > 0 && (
@@ -193,10 +197,10 @@ export function MergeModal({
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm">
-                              Ngày {day.dayNumber}: {day.title}
+                              {t('Ngày {n}', { n: day.dayNumber })}: {day.title}
                             </span>
                             <span className="block text-xs text-muted-foreground">
-                              {day.locations.length} điểm dừng
+                              {t('{n} điểm dừng', { n: day.locations.length })}
                             </span>
                           </span>
                           <span className="shrink-0 text-xs text-muted-foreground">

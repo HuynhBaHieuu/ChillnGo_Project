@@ -7,6 +7,7 @@ import { TiltCard } from '@/components/TiltCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { t } from '@/i18n'
 import {
   BUDGET_LABELS,
   REGION_LABELS,
@@ -131,7 +132,7 @@ export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
   if (!isGrid) return card
 
   return (
-    <TiltCard caption={`${REGION_LABELS[post.region]} · Xem hành trình`}>
+    <TiltCard caption={`${REGION_LABELS[post.region]} · ${t('Xem hành trình')}`}>
       {card}
     </TiltCard>
   )

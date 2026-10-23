@@ -10,8 +10,10 @@ import { formatDuration, formatStart } from '@/features/livestream/live-format'
 import { relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Livestream } from '@/services/livestream.service'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 
-const AUDIENCE_LABEL: Record<Livestream['audience'], string | null> = {
+const AUDIENCE_LABEL: Record<Livestream['audience'], MessageKey | null> = {
   public: null,
   followers: 'Người theo dõi',
   private: 'Chỉ mình tôi',
@@ -51,13 +53,13 @@ export function ReplayCard({
             <Link to={`/users/${stream.host._id}`} className={cn('font-semibold hover:underline', featured && 'text-np-cream')}>
               {stream.host.displayName}
             </Link>{' '}
-            <span className="text-muted-foreground">đã phát trực tiếp</span>
+            <span className="text-muted-foreground">{t('đã phát trực tiếp')}</span>
             <span className={cn('block text-muted-foreground', featured ? 'mt-0.5 text-[13px]' : 'text-xs')}>{relativeTime(stream.endedAt ?? stream.startedAt)}</span>
           </p>
         </header>
       )}
 
-      <Link to={href} className={cn('flex flex-col gap-4 sm:flex-row', featured && 'group sm:gap-5')} aria-label={`${replay ? 'Xem lại' : 'Xem tổng kết'}: ${stream.title}`}>
+      <Link to={href} className={cn('flex flex-col gap-4 sm:flex-row', featured && 'group sm:gap-5')} aria-label={`${replay ? t('Xem lại') : t('Xem tổng kết')}: ${stream.title}`}>
         <div
           className={cn(
             'relative aspect-video w-full shrink-0 overflow-hidden',
@@ -115,13 +117,13 @@ export function ReplayCard({
             {featured && replay && (
               <span className="np-replay-status">
                 <Play className="size-3 fill-current" aria-hidden />
-                Xem lại
+                {t('Xem lại')}
               </span>
             )}
             <span>{formatStart(stream.startedAt)}</span>
-            {audience && <span className="rounded-full bg-muted px-2 py-0.5">{audience}</span>}
-            {!featured && replay && <span className="rounded-full bg-rose-600/10 px-2 py-0.5 font-semibold text-rose-700">Xem lại</span>}
-            {processing && <span className="rounded-full bg-muted px-2 py-0.5">Bản ghi đang xử lý</span>}
+            {audience && <span className="rounded-full bg-muted px-2 py-0.5">{t(audience)}</span>}
+            {!featured && replay && <span className="rounded-full bg-rose-600/10 px-2 py-0.5 font-semibold text-rose-700">{t('Xem lại')}</span>}
+            {processing && <span className="rounded-full bg-muted px-2 py-0.5">{t('Bản ghi đang xử lý')}</span>}
           </div>
           <h3 className={cn('font-display leading-tight', featured ? 'text-xl sm:text-2xl' : 'text-xl')}>{stream.title}</h3>
           {featured ? <LiveStats stream={stream} featured /> : <LiveStats stream={stream} compactView />}
