@@ -22,6 +22,8 @@ import {
 } from '@/features/activity/components'
 import { dateTime, duration, timeAgo } from '@/features/activity/format'
 import { useDeleteCheckIn, useJourneyAction, useMyCheckIns, useMyPublishedJourneys, useMyStreams } from '@/features/activity/hooks'
+import { localeTag, t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import { themeFromText, travelCover } from '@/lib/photos'
 import { cn } from '@/lib/utils'
 import { postService } from '@/services'
@@ -31,26 +33,26 @@ export function MediaSection() {
   return (
     <>
       <SectionHeader
-        title="Ảnh và video"
-        description="Mọi thứ bạn đã chia sẻ: hành trình, check-in ảnh, bản ghi livestream và các buổi phát trực tiếp của bạn."
+        title={t('Ảnh và video')}
+        description={t('Mọi thứ bạn đã chia sẻ: hành trình, check-in ảnh, bản ghi livestream và các buổi phát trực tiếp của bạn.')}
       />
       <ActivityTabs
-        label="Loại nội dung"
+        label={t('Loại nội dung')}
         tabs={[
-          { value: 'posts', label: 'Bài viết', content: <Posts /> },
-          { value: 'videos', label: 'Video', content: <Videos /> },
+          { value: 'posts', label: t('Bài viết'), content: <Posts /> },
+          { value: 'videos', label: t('Video'), content: <Videos /> },
           {
             value: 'stories',
-            label: 'Tin',
+            label: t('Tin'),
             content: (
               <NotAvailable
                 icon={Clapperboard}
-                feature="tính năng tin (story)"
-                description="Khi có tính năng tin, những tin bạn đăng sẽ được gom lại ở đây."
+                feature={t('tính năng tin (story)')}
+                description={t('Khi có tính năng tin, những tin bạn đăng sẽ được gom lại ở đây.')}
               />
             ),
           },
-          { value: 'live', label: 'Trực tiếp', content: <Live /> },
+          { value: 'live', label: t('Trực tiếp'), content: <Live /> },
         ]}
       />
     </>
@@ -82,14 +84,14 @@ function Posts() {
       at: p.createdAt,
       // Same automatic cover the journey gets everywhere else when none was chosen.
       image: p.coverUrl || travelCover(p.title.slice(0, 30) || 'chillngo', themeFromText(p.title)),
-      title: p.title || 'Hành trình chưa đặt tên',
+      title: p.title || t('Hành trình chưa đặt tên'),
     })),
     ...checkins.data.map((c) => ({
       kind: 'checkin' as const,
       id: c._id,
       at: c.createdAt,
       image: c.photos[0]?.url ?? null,
-      title: c.caption || c.location?.name || 'Check-in',
+      title: c.caption || c.location?.name || t('Check-in'),
     })),
   ].sort((a, b) => b.at.localeCompare(a.at))
 
@@ -97,11 +99,11 @@ function Posts() {
     return (
       <Empty
         icon={Camera}
-        title="Bạn chưa chia sẻ gì"
-        description="Hành trình bạn đăng và ảnh bạn check-in sẽ hiện ở đây."
+        title={t('Bạn chưa chia sẻ gì')}
+        description={t('Hành trình bạn đăng và ảnh bạn check-in sẽ hiện ở đây.')}
         action={
           <Button asChild variant="outline" size="sm" className="rounded-full">
-            <Link to="/feed">Check-in ngay</Link>
+            <Link to="/feed">{t('Check-in ngay')}</Link>
           </Button>
         }
       />
@@ -127,14 +129,14 @@ function Posts() {
               <span className="absolute inset-0 bg-gradient-to-t from-np-canopy/90 via-np-canopy/10 to-transparent" aria-hidden />
               <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-np-canopy/75 px-2 py-0.5 text-[11px] font-semibold text-np-cream">
                 {tile.kind === 'journey' ? <MapIcon className="size-3" aria-hidden /> : <Camera className="size-3" aria-hidden />}
-                {tile.kind === 'journey' ? 'Hành trình' : 'Check-in'}
+                {tile.kind === 'journey' ? t('Hành trình') : t('Check-in')}
               </span>
               <div className="absolute inset-x-0 bottom-0 p-3">
                 <p className="truncate text-sm font-semibold text-np-cream">{tile.title}</p>
                 <p className="text-xs text-np-meta">{timeAgo(tile.at)}</p>
               </div>
               {tile.kind === 'journey' && (
-                <Link to={`/posts/${tile.id}`} className="absolute inset-0" aria-label={`Mở ${tile.title}`} />
+                <Link to={`/posts/${tile.id}`} className="absolute inset-0" aria-label={t('Mở {title}', { title: tile.title })} />
               )}
             </div>
 
@@ -142,7 +144,7 @@ function Posts() {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  aria-label={`Thêm tuỳ chọn cho ${tile.title}`}
+                  aria-label={t('Thêm tuỳ chọn cho {title}', { title: tile.title })}
                   className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-np-canopy/75 text-np-cream opacity-100 transition-opacity hover:bg-np-canopy focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <MoreHorizontal className="size-4" aria-hidden />
@@ -152,17 +154,17 @@ function Posts() {
                 {tile.kind === 'journey' && (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to={`/posts/${tile.id}`}>Xem</Link>
+                      <Link to={`/posts/${tile.id}`}>{t('Xem')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to={`/posts/${tile.id}/edit`}>Chỉnh sửa</Link>
+                      <Link to={`/posts/${tile.id}/edit`}>{t('Chỉnh sửa')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
                 <DropdownMenuItem onSelect={() => setConfirm(tile)} className="text-destructive">
                   <Trash2 />
-                  Xoá
+                  {t('Xoá')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -173,14 +175,14 @@ function Posts() {
       <Confirm
         open={confirm !== null}
         onOpenChange={(open) => !open && setConfirm(null)}
-        title={confirm?.kind === 'journey' ? 'Xoá hành trình này?' : 'Xoá check-in này?'}
+        title={confirm?.kind === 'journey' ? t('Xoá hành trình này?') : t('Xoá check-in này?')}
         description={
           <>
-            Nội dung sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày.
+            {t('Nội dung sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày.')}
             {error && <span className="mt-2 block text-destructive">{(error as Error).message}</span>}
           </>
         }
-        confirmLabel="Xoá"
+        confirmLabel={t('Xoá')}
         destructive
         pending={deleting}
         onConfirm={() => {
@@ -219,8 +221,8 @@ function Videos() {
     return (
       <Empty
         icon={Film}
-        title="Chưa có video nào"
-        description="Bật ghi hình khi phát trực tiếp, bản ghi sẽ được giữ lại ở đây."
+        title={t('Chưa có video nào')}
+        description={t('Bật ghi hình khi phát trực tiếp, bản ghi sẽ được giữ lại ở đây.')}
         action={past.hasNextPage ? <LoadMore query={past} /> : undefined}
       />
     )
@@ -242,12 +244,12 @@ function Videos() {
                     </span>
                   </span>
                   <span className="absolute bottom-2 right-2 rounded-full bg-np-canopy/75 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-np-cream">
-                    {ready ? duration(stream.recording.durationSec || stream.durationSec) : 'Đang xử lý…'}
+                    {ready ? duration(stream.recording.durationSec || stream.durationSec) : t('Đang xử lý…')}
                   </span>
                 </div>
                 <p className="mt-2.5 truncate font-display text-lg leading-snug text-np-cream group-hover:underline">{stream.title}</p>
                 <p className="text-[13px] text-muted-foreground">
-                  {dateTime(stream.startedAt)} · {stream.uniqueViewers.toLocaleString('vi-VN')} người xem
+                  {dateTime(stream.startedAt)} · {t('{n} người xem', { n: stream.uniqueViewers.toLocaleString(localeTag()) })}
                 </p>
               </Link>
             </li>
@@ -272,14 +274,14 @@ function LoadMore({ query }: { query: ReturnType<typeof useMyStreams>['past'] })
       disabled={query.isFetchingNextPage}
       onClick={() => void query.fetchNextPage()}
     >
-      {query.isFetchingNextPage ? 'Đang tải…' : 'Xem thêm'}
+      {query.isFetchingNextPage ? t('Đang tải…') : t('Xem thêm')}
     </Button>
   )
 }
 
 /* -------------------------------------------------------------------- live */
 
-const RECORDING_LABEL: Record<Livestream['recording']['status'], string | null> = {
+const RECORDING_LABEL: Record<Livestream['recording']['status'], MessageKey | null> = {
   none: null,
   recording: 'Đang ghi hình',
   processing: 'Bản ghi đang xử lý',
@@ -299,11 +301,11 @@ function Live() {
     return (
       <Empty
         icon={Radio}
-        title="Bạn chưa phát trực tiếp lần nào"
-        description="Bắt đầu livestream từ ô đăng bài ở Newsfeed. Mọi buổi bạn phát sẽ được liệt kê ở đây."
+        title={t('Bạn chưa phát trực tiếp lần nào')}
+        description={t('Bắt đầu livestream từ ô đăng bài ở Newsfeed. Mọi buổi bạn phát sẽ được liệt kê ở đây.')}
         action={
           <Button asChild variant="outline" size="sm" className="rounded-full">
-            <Link to="/live">Đến trang Đang live</Link>
+            <Link to="/live">{t('Đến trang Đang live')}</Link>
           </Button>
         }
       />
@@ -334,14 +336,14 @@ function Live() {
                 <div className="min-w-0">
                   <p className="truncate font-display text-lg leading-snug text-np-cream group-hover:underline">{stream.title}</p>
                   <p className="mt-0.5 text-[13px] text-muted-foreground">
-                    {isLive ? `Đang phát · bắt đầu ${timeAgo(stream.startedAt)}` : dateTime(stream.startedAt)}
+                    {isLive ? t('Đang phát · bắt đầu {time}', { time: timeAgo(stream.startedAt) }) : dateTime(stream.startedAt)}
                   </p>
                   <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-np-meta">
                     <span className="inline-flex items-center gap-1">
                       <Eye className="size-3.5" aria-hidden />
-                      cao nhất {stream.peakViewers.toLocaleString('vi-VN')}
+                      {t('cao nhất {n}', { n: stream.peakViewers.toLocaleString(localeTag()) })}
                     </span>
-                    {recording && <span>{recording}</span>}
+                    {recording && <span>{t(recording)}</span>}
                   </p>
                 </div>
               </Link>

@@ -24,6 +24,7 @@ import type { DevicePick } from '@/features/livestream/media'
 import { ApiError, livestreamService } from '@/services'
 import type { LiveAudience, LiveConnection } from '@/services/livestream.service'
 import type { User } from '@/services/types'
+import { t } from '@/i18n'
 
 const NO_CAMERA = 'none'
 const TITLE_MAX = 100
@@ -76,7 +77,7 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
   const supported = Boolean(navigator.mediaDevices?.getUserMedia)
   const [access, setAccess] = useState<Access>(supported ? 'asking' : 'blocked')
   const [notice, setNotice] = useState<string | null>(
-    supported ? null : 'Trình duyệt này không hỗ trợ camera. Hãy dùng Chrome, Edge, Firefox hoặc Safari bản mới.',
+    supported ? null : t('Trình duyệt này không hỗ trợ camera. Hãy dùng Chrome, Edge, Firefox hoặc Safari bản mới.'),
   )
   const [hasMic, setHasMic] = useState(false)
   const level = useMicLevel(streamRef, access)
@@ -106,7 +107,7 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
         if (video && (name === 'NotFoundError' || name === 'NotReadableError' || name === 'OverconstrainedError')) {
           // No usable camera: try sound only.
           stream = await navigator.mediaDevices.getUserMedia({ audio }).catch(() => null)
-          message = stream ? 'Không dùng được camera. Livestream sẽ chỉ có âm thanh.' : mediaErrorMessage(error)
+          message = stream ? t('Không dùng được camera. Livestream sẽ chỉ có âm thanh.') : mediaErrorMessage(error)
         } else {
           message = mediaErrorMessage(error)
         }
@@ -171,14 +172,14 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
 
   const startError =
     start.error instanceof ApiError && start.error.code === 'ALREADY_LIVE'
-      ? 'Bạn đang có một livestream khác. Hãy kết thúc nó trước khi phát buổi mới.'
+      ? t('Bạn đang có một livestream khác. Hãy kết thúc nó trước khi phát buổi mới.')
       : (start.error as Error | null)?.message
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <DialogHeader>
-        <DialogTitle>Bắt đầu livestream</DialogTitle>
-        <DialogDescription>Kiểm tra hình và tiếng trước khi phát trực tiếp, {user.displayName}.</DialogDescription>
+        <DialogTitle>{t('Bắt đầu livestream')}</DialogTitle>
+        <DialogDescription>{t('Kiểm tra hình và tiếng trước khi phát trực tiếp, {name}.', { name: user.displayName })}</DialogDescription>
       </DialogHeader>
 
       {/* Preview */}
@@ -195,7 +196,7 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
             {access === 'asking' ? (
               <>
                 <Loader2 className="size-6 animate-spin" aria-hidden />
-                Đang xin quyền dùng camera và micro…
+                {t('Đang xin quyền dùng camera và micro…')}
               </>
             ) : access === 'blocked' ? (
               <>
@@ -205,13 +206,13 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
                     setAccess('asking')
                     void openDevices('', '')
                   }}>
-                  Thử lại
+                  {t('Thử lại')}
                 </Button>
               </>
             ) : (
               <>
                 <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="size-20 rounded-full border-2 border-background object-cover" />
-                Chỉ phát âm thanh
+                {t('Chỉ phát âm thanh')}
               </>
             )}
           </div>
@@ -222,7 +223,7 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
             <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-background/30" aria-hidden>
               <span className="absolute inset-y-0 left-0 rounded-full bg-sunset transition-[width] duration-100" style={{ width: `${level}%` }} />
             </span>
-            <span className="sr-only">{hasMic ? 'Micro đang nhận âm thanh' : 'Không có micro'}</span>
+            <span className="sr-only">{hasMic ? t('Micro đang nhận âm thanh') : t('Không có micro')}</span>
           </div>
         )}
       </div>
@@ -232,39 +233,39 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
       {access === 'ready' && (
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">Camera</Label>
+            <Label className="text-xs">{t('Camera')}</Label>
             <Select value={videoId} onValueChange={(v) => {
                 setVideoId(v)
                 setAccess('asking')
                 void openDevices(v, audioId)
               }}>
-              <SelectTrigger aria-label="Chọn camera">
+              <SelectTrigger aria-label={t('Chọn camera')}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {cameras.map((c, i) => (
                   <SelectItem key={c.deviceId} value={c.deviceId}>
-                    {c.label || `Camera ${i + 1}`}
+                    {c.label || `${t('Camera')} ${i + 1}`}
                   </SelectItem>
                 ))}
-                <SelectItem value={NO_CAMERA}>Không dùng camera (chỉ âm thanh)</SelectItem>
+                <SelectItem value={NO_CAMERA}>{t('Không dùng camera (chỉ âm thanh)')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">Micro</Label>
+            <Label className="text-xs">{t('Micro')}</Label>
             <Select value={audioId} onValueChange={(v) => {
                 setAudioId(v)
                 setAccess('asking')
                 void openDevices(videoId, v)
               }} disabled={mics.length === 0}>
-              <SelectTrigger aria-label="Chọn micro">
-                <SelectValue placeholder="Không có micro" />
+              <SelectTrigger aria-label={t('Chọn micro')}>
+                <SelectValue placeholder={t('Không có micro')} />
               </SelectTrigger>
               <SelectContent>
                 {mics.map((m, i) => (
                   <SelectItem key={m.deviceId} value={m.deviceId}>
-                    {m.label || `Micro ${i + 1}`}
+                    {m.label || `${t('Micro')} ${i + 1}`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -275,11 +276,11 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
 
       {/* Details */}
       <div className="space-y-1.5">
-        <Label htmlFor="live-title">Tiêu đề</Label>
+        <Label htmlFor="live-title">{t('Tiêu đề')}</Label>
         <Input id="live-title" required maxLength={TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="live-description">Mô tả (không bắt buộc)</Label>
+        <Label htmlFor="live-description">{t('Mô tả (không bắt buộc)')}</Label>
         <Textarea
           id="live-description"
           rows={2}
@@ -289,19 +290,19 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
         />
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">Ai được xem</Label>
+        <Label className="text-xs">{t('Ai được xem')}</Label>
         <Select value={audience} onValueChange={(v) => setAudience(v as LiveAudience)}>
-          <SelectTrigger aria-label="Ai được xem">
+          <SelectTrigger aria-label={t('Ai được xem')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="public">Công khai: mọi người đã đăng nhập</SelectItem>
-            <SelectItem value="followers">Người theo dõi: chỉ những ai theo dõi bạn</SelectItem>
-            <SelectItem value="private">Chỉ mình tôi: để phát thử</SelectItem>
+            <SelectItem value="public">{t('Công khai: mọi người đã đăng nhập')}</SelectItem>
+            <SelectItem value="followers">{t('Người theo dõi: chỉ những ai theo dõi bạn')}</SelectItem>
+            <SelectItem value="private">{t('Chỉ mình tôi: để phát thử')}</SelectItem>
           </SelectContent>
         </Select>
         {audience !== 'private' && (
-          <p className="text-xs text-muted-foreground">Người theo dõi bạn sẽ nhận được thông báo khi bạn bắt đầu phát.</p>
+          <p className="text-xs text-muted-foreground">{t('Người theo dõi bạn sẽ nhận được thông báo khi bạn bắt đầu phát.')}</p>
         )}
       </div>
 
@@ -309,9 +310,9 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
         <label htmlFor="live-record" className="flex cursor-pointer items-start gap-3 rounded-xl border border-foreground/10 p-3 hover:bg-muted/60">
           <Checkbox id="live-record" checked={record} onCheckedChange={(checked) => setRecord(checked === true)} className="mt-0.5" />
           <span className="text-sm">
-            <span className="block font-semibold">Lưu lại buổi phát</span>
+            <span className="block font-semibold">{t('Lưu lại buổi phát')}</span>
             <span className="block text-xs text-muted-foreground">
-              Sau khi kết thúc, mọi người được xem lại trên trang cá nhân của bạn (cùng chế độ người xem như trên).
+              {t('Sau khi kết thúc, mọi người được xem lại trên trang cá nhân của bạn (cùng chế độ người xem như trên).')}
             </span>
           </span>
         </label>
@@ -325,11 +326,11 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
 
       <DialogFooter className="gap-2">
         <Button type="button" variant="outline" onClick={onDone} disabled={start.isPending}>
-          Huỷ
+          {t('Huỷ')}
         </Button>
         <Button type="submit" disabled={!canGoLive}>
           {start.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Radio className="size-4" aria-hidden />}
-          Phát trực tiếp
+          {t('Phát trực tiếp')}
         </Button>
       </DialogFooter>
     </form>

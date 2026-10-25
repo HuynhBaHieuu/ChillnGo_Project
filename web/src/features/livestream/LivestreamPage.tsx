@@ -24,8 +24,10 @@ import { ApiError, livestreamService } from '@/services'
 import { showComment } from '@/services/livestream.service'
 import type { LiveComment, LiveConnection, Livestream, ReactionKind } from '@/services/livestream.service'
 import { useAuthStore } from '@/store'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 
-const AUDIENCE_NOTE: Record<Livestream['audience'], string | null> = {
+const AUDIENCE_NOTE: Record<Livestream['audience'], MessageKey | null> = {
   public: null,
   followers: 'Chỉ người theo dõi',
   private: 'Chỉ mình bạn xem được',
@@ -50,7 +52,7 @@ export function LivestreamPage() {
       <Shell>
         <p className="flex items-center justify-center gap-2 py-24 text-sm text-muted-foreground" role="status">
           <Loader2 className="size-5 animate-spin" aria-hidden />
-          Đang mở livestream…
+          {t('Đang mở livestream…')}
         </p>
       </Shell>
     )
@@ -58,14 +60,14 @@ export function LivestreamPage() {
   if (stream.isError) {
     return (
       <Shell>
-        <Notice title="Không mở được livestream" text={(stream.error as Error).message} />
+        <Notice title={t('Không mở được livestream')} text={(stream.error as Error).message} />
       </Shell>
     )
   }
   if (stream.data.blockedMe) {
     return (
       <Shell>
-        <Notice title="Bạn không xem được livestream này" text="Người phát đã chặn bạn khỏi buổi phát này." />
+        <Notice title={t('Bạn không xem được livestream này')} text={t('Người phát đã chặn bạn khỏi buổi phát này.')} />
       </Shell>
     )
   }
@@ -91,7 +93,7 @@ function Notice({ title, text }: { title: string; text: string }) {
       <h1 className="font-display text-2xl">{title}</h1>
       <p className="text-sm text-muted-foreground">{text}</p>
       <GlassButton asChild tone="sunset">
-        <Link to="/feed">Về Newsfeed</Link>
+        <Link to="/feed">{t('Về Newsfeed')}</Link>
       </GlassButton>
     </div>
   )
@@ -241,11 +243,12 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
   }
 
   if (blocked) {
-    return <Notice title="Bạn đã bị chặn" text="Người phát đã chặn bạn khỏi livestream này." />
+    return <Notice title={t('Bạn đã bị chặn')} text={t('Người phát đã chặn bạn khỏi livestream này.')} />
   }
 
   const isOver = ended || endedBeforeJoin
   const reactionTotal = totalReactions(reactionCounts)
+  const audienceNote = AUDIENCE_NOTE[stream.audience]
 
   return (
     <>
@@ -278,17 +281,17 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                 {isOver ? (
                   <p className="flex items-center gap-2 font-display text-2xl">
                     <Loader2 className="size-5 animate-spin" aria-hidden />
-                    Livestream đã kết thúc
+                    {t('Livestream đã kết thúc')}
                   </p>
                 ) : room.state === 'connecting' || (!connection && !fetched.isError) ? (
                   <p className="flex items-center gap-2">
                     <Loader2 className="size-4 animate-spin" aria-hidden />
-                    Đang kết nối…
+                    {t('Đang kết nối…')}
                   </p>
                 ) : room.isHost && !room.camOn ? (
-                  <p>Camera đang tắt. Người xem vẫn nghe được bạn.</p>
+                  <p>{t('Camera đang tắt. Người xem vẫn nghe được bạn.')}</p>
                 ) : (
-                  <p>{room.isHost ? 'Đang bật camera…' : 'Đang chờ hình ảnh từ người phát…'}</p>
+                  <p>{room.isHost ? t('Đang bật camera…') : t('Đang chờ hình ảnh từ người phát…')}</p>
                 )}
               </div>
             )}
@@ -302,7 +305,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                 {!isOver && rewinding && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-foreground">
                     <History className="size-3.5" aria-hidden />
-                    Đang xem lại
+                    {t('Đang xem lại')}
                   </span>
                 )}
                 {!isOver && <ViewerCount count={room.viewerCount} className="rounded-full bg-black/40 px-2.5 py-1" />}
@@ -315,7 +318,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
               <button
                 type="button"
                 onClick={() => (room.isHost && !isOver ? setConfirmEnd(true) : navigate('/feed'))}
-                aria-label={room.isHost && !isOver ? 'Kết thúc và rời livestream' : 'Rời livestream'}
+                aria-label={room.isHost && !isOver ? t('Kết thúc và rời livestream') : t('Rời livestream')}
                 className="grid size-10 place-items-center rounded-full bg-black/40 hover:bg-black/60"
               >
                 <X className="size-5" aria-hidden />
@@ -325,7 +328,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
             {room.state === 'reconnecting' && !isOver && (
               <div className="absolute inset-x-0 top-16 mx-auto flex w-fit items-center gap-2 rounded-full bg-black/60 px-3 py-1.5 text-xs text-white">
                 <WifiOff className="size-3.5" aria-hidden />
-                Mạng chập chờn, đang kết nối lại…
+                {t('Mạng chập chờn, đang kết nối lại…')}
               </div>
             )}
 
@@ -339,7 +342,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                 )}
               >
                 <Volume2 className="size-4" aria-hidden />
-                Bật âm thanh
+                {t('Bật âm thanh')}
               </button>
             )}
 
@@ -364,10 +367,10 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
             {/* Host controls */}
             {room.isHost && !isOver && (
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-3 bg-gradient-to-t from-black/60 to-transparent p-4">
-                <ControlButton on={room.micOn} onClick={() => void room.toggleMic()} labelOn="Tắt micro" labelOff="Bật micro" iconOn={Mic} iconOff={MicOff} />
-                <ControlButton on={room.camOn} onClick={() => void room.toggleCamera()} labelOn="Tắt camera" labelOff="Bật camera" iconOn={Video} iconOff={VideoOff} />
+                <ControlButton on={room.micOn} onClick={() => void room.toggleMic()} labelOn={t('Tắt micro')} labelOff={t('Bật micro')} iconOn={Mic} iconOff={MicOff} />
+                <ControlButton on={room.camOn} onClick={() => void room.toggleCamera()} labelOn={t('Tắt camera')} labelOff={t('Bật camera')} iconOn={Video} iconOff={VideoOff} />
                 {room.canSwitchCamera && room.camOn && (
-                  <ControlButton on onClick={() => void room.switchCamera()} labelOn="Đổi camera" labelOff="Đổi camera" iconOn={SwitchCamera} iconOff={SwitchCamera} />
+                  <ControlButton on onClick={() => void room.switchCamera()} labelOn={t('Đổi camera')} labelOff={t('Đổi camera')} iconOn={SwitchCamera} iconOff={SwitchCamera} />
                 )}
                 <button
                   type="button"
@@ -375,7 +378,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                   className="flex h-12 items-center gap-2 rounded-full bg-rose-600 px-5 text-sm font-semibold text-white shadow-lg hover:bg-rose-700"
                 >
                   <PhoneOff className="size-4" aria-hidden />
-                  Kết thúc
+                  {t('Kết thúc')}
                 </button>
               </div>
             )}
@@ -387,7 +390,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
               {room.state === 'disconnected' && (
                 <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
                   <RefreshCw className="size-4" aria-hidden />
-                  Thử lại
+                  {t('Thử lại')}
                 </Button>
               )}
             </p>
@@ -411,9 +414,9 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                   <Link to={`/users/${stream.host._id}`} className="font-semibold text-foreground hover:underline">
                     {stream.host.displayName}
                   </Link>{' '}
-                  · bắt đầu {relativeTime(stream.startedAt)}
-                  {AUDIENCE_NOTE[stream.audience] && ` · ${AUDIENCE_NOTE[stream.audience]}`}
-                  {stream.recording.status === 'recording' && ' · Đang được ghi lại'}
+                  · {t('bắt đầu {time}', { time: relativeTime(stream.startedAt) })}
+                  {audienceNote && ` · ${t(audienceNote)}`}
+                  {stream.recording.status === 'recording' && ` · ${t('Đang được ghi lại')}`}
                 </p>
                 {stream.description && <p className="mt-2 whitespace-pre-line text-sm leading-relaxed">{stream.description}</p>}
               </div>
@@ -431,7 +434,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
           comments={comments}
           onSend={send}
           disabled={isOver || !me}
-          disabledReason={isOver ? 'Livestream đã kết thúc.' : 'Đăng nhập để bình luận.'}
+          disabledReason={isOver ? t('Livestream đã kết thúc.') : t('Đăng nhập để bình luận.')}
           hostId={stream.host._id}
           meId={me?._id}
           onDelete={(comment) => {
@@ -446,14 +449,14 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
       <ConfirmDialog
         open={confirmEnd}
         onOpenChange={setConfirmEnd}
-        title="Kết thúc livestream?"
+        title={t('Kết thúc livestream?')}
         description={
           <>
-            Người xem sẽ được báo là buổi phát đã kết thúc. Camera và micro sẽ tắt.
+            {t('Người xem sẽ được báo là buổi phát đã kết thúc. Camera và micro sẽ tắt.')}
             {end.isError && <span className="mt-2 block text-destructive">{(end.error as Error).message}</span>}
           </>
         }
-        confirmLabel="Kết thúc"
+        confirmLabel={t('Kết thúc')}
         destructive
         pending={end.isPending}
         onConfirm={() => end.mutate()}
@@ -467,18 +470,17 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
             block.reset()
           }
         }}
-        title={toBlock ? `Chặn ${toBlock.author.displayName}?` : ''}
+        title={toBlock ? t('Chặn {name}?', { name: toBlock.author.displayName }) : ''}
         description={
           <>
             <span className="flex items-start gap-2">
               <Ban className="mt-0.5 size-4 shrink-0" aria-hidden />
-              Người này bị đưa ra khỏi livestream, không vào xem lại, bình luận hay thả cảm xúc được nữa. Các bình luận
-              của họ trong buổi phát này sẽ bị xoá.
+              {t('Người này bị đưa ra khỏi livestream, không vào xem lại, bình luận hay thả cảm xúc được nữa. Các bình luận của họ trong buổi phát này sẽ bị xoá.')}
             </span>
             {block.isError && <span className="mt-2 block text-destructive">{(block.error as Error).message}</span>}
           </>
         }
-        confirmLabel="Chặn"
+        confirmLabel={t('Chặn')}
         destructive
         pending={block.isPending}
         onConfirm={() => toBlock && block.mutate(toBlock.author._id)}

@@ -6,6 +6,7 @@ import { MEDIA, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { drawScribbles } from '@/app/landing/home/parts/expedition'
 import { Scribble } from '@/app/landing/home/parts/ExpeditionMarks'
+import { t } from '@/i18n'
 import { REGION_LABELS, formatVndShort, tripLengthLabel } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
@@ -75,7 +76,7 @@ export function TripsFlickStage({ posts }: { posts: TripPostWithAuthor[] }) {
     <section ref={ref} className="bg-background text-foreground">
       <div className="flex justify-center pb-[3em] pt-[12.5em] md:pb-[6em] md:pt-[15em]">
         <div className="relative">
-          <h2 className="text-center font-display text-[2em] font-bold tracking-[-0.035em] leading-none md:text-[3.75em]">Hành trình</h2>
+          <h2 className="text-center font-display text-[2em] font-bold tracking-[-0.035em] leading-none md:text-[3.75em]">{t('Hành trình')}</h2>
           <Scribble className="left-1/2 top-[85%] w-[160%] max-w-[40em] -translate-x-1/2" />
         </div>
       </div>
@@ -128,7 +129,7 @@ export function TripsFlickStage({ posts }: { posts: TripPostWithAuthor[] }) {
                   </div>
                   <p className="line-clamp-3 max-w-[36ch] font-body text-[1em] font-medium leading-[1.4]">{post.summary}</p>
                   <span className="inline-flex items-center gap-[0.5em] border-b border-white/40 pb-[0.2em] font-body text-[0.875em] font-medium md:hidden">
-                    Xem hành trình <ArrowRight aria-hidden className="size-[1em]" />
+                    {t('Xem hành trình')} <ArrowRight aria-hidden className="size-[1em]" />
                   </span>
                 </div>
               </div>
@@ -144,13 +145,12 @@ export function TripsFlickStage({ posts }: { posts: TripPostWithAuthor[] }) {
             “
           </span>
           <blockquote className="font-display text-[1.5em] font-medium leading-[1.2] indent-[16.667%] md:text-[1.375em]">
-            Lịch trình hay nhất không nằm trong cẩm nang, mà nằm trong chuyến đi của ai đó vừa trở về. Chúng tôi làm ChillnGo
-            để những chuyến đi ấy được kể lại đủ chi tiết, và người đi sau chỉ cần một chạm để bắt đầu.
+            {t('Lịch trình hay nhất không nằm trong cẩm nang, mà nằm trong chuyến đi của ai đó vừa trở về. Chúng tôi làm ChillnGo để những chuyến đi ấy được kể lại đủ chi tiết, và người đi sau chỉ cần một chạm để bắt đầu.')}
           </blockquote>
           <p className="font-body text-[0.875em] font-medium">-</p>
           <figcaption className="relative">
-            <p className="font-body text-[0.875em] font-medium leading-[1.5]">Đội ngũ ChillnGo</p>
-            <p className="font-body text-[0.875em] font-medium leading-[1.5] text-muted-foreground">Những người làm ra ChillnGo</p>
+            <p className="font-body text-[0.875em] font-medium leading-[1.5]">{t('Đội ngũ ChillnGo')}</p>
+            <p className="font-body text-[0.875em] font-medium leading-[1.5] text-muted-foreground">{t('Những người làm ra ChillnGo')}</p>
             <Scribble className="-left-[20%] top-[70%] w-[160%] min-w-[10em]" />
           </figcaption>
         </figure>

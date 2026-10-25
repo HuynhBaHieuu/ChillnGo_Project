@@ -15,6 +15,7 @@ import type Hls from 'hls.js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ApiError, livestreamService } from '@/services'
+import { t } from '@/i18n'
 
 export type DvrMode = 'live' | 'dvr'
 
@@ -41,10 +42,10 @@ function waitFor(video: HTMLVideoElement, event: string): Promise<void> {
 }
 
 function dvrErrorMessage(error: unknown): string {
-  if (error instanceof ApiError && error.code === 'DVR_UNAVAILABLE') return 'Buổi phát này không được ghi lại nên không tua được.'
-  if ((error as Error).message === 'not-ready') return 'Chưa có đoạn nào để tua. Thử lại sau vài giây nhé.'
-  if ((error as Error).message === 'unsupported') return 'Trình duyệt này không hỗ trợ tua lại livestream.'
-  return 'Không tải được đoạn đã phát. Vui lòng thử lại.'
+  if (error instanceof ApiError && error.code === 'DVR_UNAVAILABLE') return t('Buổi phát này không được ghi lại nên không tua được.')
+  if ((error as Error).message === 'not-ready') return t('Chưa có đoạn nào để tua. Thử lại sau vài giây nhé.')
+  if ((error as Error).message === 'unsupported') return t('Trình duyệt này không hỗ trợ tua lại livestream.')
+  return t('Không tải được đoạn đã phát. Vui lòng thử lại.')
 }
 
 export function useDvr(streamId: string, startedAt: string) {

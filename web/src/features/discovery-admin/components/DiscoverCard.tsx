@@ -8,6 +8,7 @@ import { BUDGET_LABELS, formatCount, formatVndShort, tripLengthLabel } from '@/l
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
 import { useAuthStore } from '@/store'
+import { t } from '@/i18n'
 
 interface DiscoverCardProps {
   post: TripPostWithAuthor
@@ -98,7 +99,7 @@ export function DiscoverCard({
               </span>
             </div>
             <p className="mt-1.5 text-sm font-medium">
-              {BUDGET_LABELS[post.budgetLevel]} · từ {formatVndShort(post.totalEstCost)}
+              {BUDGET_LABELS[post.budgetLevel]} · {t('từ {price}', { price: formatVndShort(post.totalEstCost) })}
             </p>
           </div>
         )}
@@ -108,7 +109,7 @@ export function DiscoverCard({
         type="button"
         onClick={save}
         aria-pressed={post.bookmarkedByMe}
-        aria-label={post.bookmarkedByMe ? 'Bỏ lưu hành trình' : 'Lưu hành trình'}
+        aria-label={post.bookmarkedByMe ? t('Bỏ lưu hành trình') : t('Lưu hành trình')}
         className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-background/80 text-foreground shadow-md backdrop-blur-sm transition-colors hover:bg-background"
       >
         <Bookmark className={cn('size-4', post.bookmarkedByMe && 'fill-current')} />

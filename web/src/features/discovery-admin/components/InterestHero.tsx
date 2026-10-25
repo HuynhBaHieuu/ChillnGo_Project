@@ -2,6 +2,7 @@ import { Pause, Play } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 const SLIDE_MS = 5000
 
@@ -64,7 +65,7 @@ export function InterestHero({ title, subtitle, images }: InterestHeroProps) {
           <button
             type="button"
             onClick={() => setPlaying((p) => !p)}
-            aria-label={playing ? 'Tạm dừng trình chiếu' : 'Phát trình chiếu'}
+            aria-label={playing ? t('Tạm dừng trình chiếu') : t('Phát trình chiếu')}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-white/70 text-white transition-colors hover:bg-white/15"
           >
             {playing ? <Pause className="size-4" /> : <Play className="size-4" />}

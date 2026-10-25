@@ -15,16 +15,17 @@ import { LiveHistory } from '@/features/livestream/LiveHistory'
 import { FollowButton } from '@/features/social/components/FollowButton'
 import { useBookmarkedPosts, useUser } from '@/features/social/hooks'
 import { usePostsByAuthor } from '@/features/trip-post/hooks'
+import { t, translatedList } from '@/i18n'
 import { formatCount, formatShortDate, formatVnd, tripLengthLabel } from '@/lib/format'
 import type { ProfileTab } from '@/services/types'
 import { useAuthStore } from '@/store'
 
-const TABS: { value: ProfileTab; label: string }[] = [
+const TABS = translatedList<{ value: ProfileTab; label: string }, 'label'>([
   { value: 'posts', label: 'Bài viết' },
   { value: 'saved', label: 'Đã lưu' },
   { value: 'cloned', label: 'Lịch trình đã clone' },
   { value: 'live', label: 'Livestream' },
-]
+], ['label'])
 
 export function ProfilePage() {
   const { id } = useParams<{ id: string }>()
@@ -49,10 +50,10 @@ export function ProfilePage() {
     return (
       <PageContainer>
         <EmptyState
-          title="Không tìm thấy người dùng"
+          title={t('Không tìm thấy người dùng')}
           action={
             <Button asChild variant="outline">
-              <Link to="/discover">Về trang Khám phá</Link>
+              <Link to="/discover">{t('Về trang Khám phá')}</Link>
             </Button>
           }
         />
@@ -97,10 +98,10 @@ export function ProfilePage() {
             {isOwnProfile ? (
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline">
-                  <Link to="/profile/edit">Chỉnh sửa hồ sơ</Link>
+                  <Link to="/profile/edit">{t('Chỉnh sửa hồ sơ')}</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/posts/new">Đăng bài mới</Link>
+                  <Link to="/posts/new">{t('Đăng bài mới')}</Link>
                 </Button>
               </div>
             ) : (
@@ -121,9 +122,9 @@ export function ProfilePage() {
         </div>
 
         <dl className="flex gap-8">
-          <Stat label="Bài viết" value={formatCount(user.postCount)} />
-          <Stat label="Người theo dõi" value={formatCount(user.followerCount)} />
-          <Stat label="Đang theo dõi" value={formatCount(user.followingCount)} />
+          <Stat label={t('Bài viết')} value={formatCount(user.postCount)} />
+          <Stat label={t('Người theo dõi')} value={formatCount(user.followerCount)} />
+          <Stat label={t('Đang theo dõi')} value={formatCount(user.followingCount)} />
         </dl>
       </div>
 
@@ -153,11 +154,11 @@ export function ProfilePage() {
           {posts?.length === 0 && (
             <EmptyState
               icon={FileText}
-              title="Chưa có bài viết nào"
+              title={t('Chưa có bài viết nào')}
               description={
                 isOwnProfile
-                  ? 'Hành trình đầu tiên của bạn sẽ xuất hiện ở đây.'
-                  : 'Người dùng này chưa chia sẻ hành trình nào.'
+                  ? t('Hành trình đầu tiên của bạn sẽ xuất hiện ở đây.')
+                  : t('Người dùng này chưa chia sẻ hành trình nào.')
               }
             />
           )}
@@ -181,8 +182,8 @@ export function ProfilePage() {
           {saved?.length === 0 && (
             <EmptyState
               icon={Bookmark}
-              title="Chưa lưu hành trình nào"
-              description="Bấm biểu tượng dấu trang trên một bài viết để lưu lại đọc sau."
+              title={t('Chưa lưu hành trình nào')}
+              description={t('Bấm biểu tượng dấu trang trên một bài viết để lưu lại đọc sau.')}
             />
           )}
           {saved && saved.length > 0 && (
@@ -198,8 +199,8 @@ export function ProfilePage() {
           {!isOwnProfile ? (
             <EmptyState
               icon={Copy}
-              title="Lịch trình riêng tư"
-              description="Chỉ chủ tài khoản mới xem được những lịch trình đã clone."
+              title={t('Lịch trình riêng tư')}
+              description={t('Chỉ chủ tài khoản mới xem được những lịch trình đã clone.')}
             />
           ) : (
             <>
@@ -213,8 +214,8 @@ export function ProfilePage() {
               {itineraries?.length === 0 && (
                 <EmptyState
                   icon={Copy}
-                  title="Chưa clone lịch trình nào"
-                  description="Khi bạn clone một hành trình, nó sẽ xuất hiện ở đây."
+                  title={t('Chưa clone lịch trình nào')}
+                  description={t('Khi bạn clone một hành trình, nó sẽ xuất hiện ở đây.')}
                 />
               )}
               {itineraries && itineraries.length > 0 && (

@@ -1,3 +1,5 @@
+import { t, tx } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import type { TripPostWithAuthor } from '@/services/types'
 
 export interface InterestTile {
@@ -11,7 +13,7 @@ export function interestPath(tag: string): string {
 }
 
 /** Hero titles for the common interests; anything else gets the generic line. */
-const HEADLINES: Record<string, string> = {
+const HEADLINES: Record<string, MessageKey> = {
   'ẩm thực': 'Đi để ăn',
   biển: 'Ra biển thôi',
   núi: 'Lên núi thôi',
@@ -24,7 +26,8 @@ const HEADLINES: Record<string, string> = {
 }
 
 export function interestHeadline(tag: string): string {
-  return HEADLINES[tag] ?? `Dành cho người mê ${tag}`
+  const headline = HEADLINES[tag]
+  return headline ? t(headline) : t('Dành cho người mê {tag}', { tag: tx(tag) })
 }
 
 /**

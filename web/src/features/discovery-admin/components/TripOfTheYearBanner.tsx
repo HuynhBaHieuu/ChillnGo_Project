@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/GlassCard'
 import { formatCount } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
+import { t } from '@/i18n'
 
 /**
  * The award band: the pitch on the left, the community's most-saved trip on
@@ -26,13 +27,13 @@ export function TripOfTheYearBanner({
             <Trophy className="size-8" />
           </span>
           <h2 className="mt-6 font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
-            Hành trình của năm
+            {t('Hành trình của năm')}
           </h2>
           <p className="mt-5 max-w-md text-base font-medium leading-relaxed">
-            Được lưu nhiều nhất trên ChillnGo — do chính cộng đồng bình chọn bằng từng lượt lưu.
+            {t('Được lưu nhiều nhất trên ChillnGo — do chính cộng đồng bình chọn bằng từng lượt lưu.')}
           </p>
           <GlassButton asChild tone="sunset" size="lg" className="mt-8">
-            <Link to={`/posts/${post._id}`}>Xem hành trình</Link>
+            <Link to={`/posts/${post._id}`}>{t('Xem hành trình')}</Link>
           </GlassButton>
         </div>
 

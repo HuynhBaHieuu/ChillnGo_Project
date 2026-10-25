@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { localeTag, t } from '@/i18n'
 import { ROLE_LABELS } from '@/lib/roles'
 import type { Role } from '@/lib/roles'
 import { cn } from '@/lib/utils'
@@ -42,12 +43,12 @@ export function StatusBadge({ status }: { status: AdminUser['status'] }) {
   return status === 'locked' ? (
     <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-semibold text-destructive">
       <CircleAlert aria-hidden className="size-3" />
-      Đã khoá
+      {t('Đã khoá')}
     </span>
   ) : (
     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">
       <CircleCheck aria-hidden className="size-3" />
-      Hoạt động
+      {t('Hoạt động')}
     </span>
   )
 }
@@ -72,7 +73,7 @@ export function NoticeBar({ notice, onClose }: { notice: Notice | null; onClose:
     >
       <span>{notice.text}</span>
       <button type="button" onClick={onClose} className="text-xs font-semibold underline">
-        Đóng
+        {t('Đóng')}
       </button>
     </div>
   )
@@ -92,16 +93,16 @@ export function Pagination({
   const pages = Math.max(1, Math.ceil(total / pageSize))
   if (pages <= 1) return null
   return (
-    <nav aria-label="Phân trang" className="flex items-center justify-end gap-2 text-sm">
+    <nav aria-label={t('Phân trang')} className="flex items-center justify-end gap-2 text-sm">
       <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>
         <ChevronLeft className="size-4" aria-hidden />
-        Trước
+        {t('Trước')}
       </Button>
       <span className="px-2 text-muted-foreground">
-        Trang {page} / {pages}
+        {t('Trang {page} / {pages}', { page, pages })}
       </span>
       <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => onPage(page + 1)}>
-        Sau
+        {t('Sau')}
         <ChevronRight className="size-4" aria-hidden />
       </Button>
     </nav>
@@ -114,7 +115,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
-  cancelLabel = 'Huỷ',
+  cancelLabel = t('Huỷ'),
   destructive = false,
   pending = false,
   onConfirm,
@@ -157,16 +158,15 @@ export function ConfirmDialog({
   )
 }
 
-const dateTime = new Intl.DateTimeFormat('vi-VN', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
 export function formatDateTime(iso: string | null): string {
-  return iso ? dateTime.format(new Date(iso)) : 'Chưa từng'
+  if (!iso) return t('Chưa từng')
+  return new Intl.DateTimeFormat(localeTag(), {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
 }
 
 export function Avatar({ user }: { user: Pick<AdminUser, 'avatarUrl' | 'displayName'> }) {

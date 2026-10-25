@@ -3,6 +3,7 @@ import type * as React from 'react'
 
 import { formatClock, useElapsed } from '@/features/livestream/live-format'
 import { cn } from '@/lib/utils'
+import { localeTag, t } from '@/i18n'
 
 /**
  * "● LIVE 12:34": the badge with the time since the stream began, ticking.
@@ -12,7 +13,7 @@ export function LiveClock({ baseSec, baseAt, className }: { baseSec: number; bas
   const elapsed = useElapsed(baseSec, baseAt)
   return (
     <LiveBadge className={className}>
-      <span className="tabular-nums" aria-label={`Đã phát ${formatClock(elapsed)}`}>
+      <span className="tabular-nums" aria-label={t('Đã phát {time}', { time: formatClock(elapsed) })}>
         {formatClock(elapsed)}
       </span>
     </LiveBadge>
@@ -44,9 +45,9 @@ export function ViewerCount({ count, className }: { count: number; className?: s
     <span className={cn('inline-flex items-center gap-1.5 text-xs font-semibold', className)} aria-live="polite">
       <Eye className="size-3.5" aria-hidden />
       <span key={count} className="animate-fade-rise tabular-nums">
-        {count.toLocaleString('vi-VN')}
+        {count.toLocaleString(localeTag())}
       </span>
-      <span>người đang xem</span>
+      <span>{t('người đang xem')}</span>
     </span>
   )
 }

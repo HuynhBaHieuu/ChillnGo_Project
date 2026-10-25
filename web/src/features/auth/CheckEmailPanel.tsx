@@ -1,6 +1,8 @@
 import { MailCheck, MailWarning } from 'lucide-react'
 
 import { ResendVerificationButton } from '@/features/auth/ResendVerificationButton'
+import { t } from '@/i18n'
+import { tr } from '@/i18n/rich'
 
 interface CheckEmailPanelProps {
   email: string
@@ -21,15 +23,16 @@ export function CheckEmailPanel({ email, emailSent }: CheckEmailPanelProps) {
         <div className="min-w-0 text-sm leading-relaxed">
           {emailSent ? (
             <>
-              <p>Chúng tôi đã gửi email xác nhận tới</p>
+              <p>{t('Chúng tôi đã gửi email xác nhận tới')}</p>
               <p className="break-all font-semibold text-foreground">{email}</p>
             </>
           ) : (
             <>
-              <p className="font-semibold text-foreground">Chưa gửi được email xác nhận</p>
+              <p className="font-semibold text-foreground">{t('Chưa gửi được email xác nhận')}</p>
               <p>
-                Tài khoản <span className="break-all font-semibold">{email}</span> đã được tạo. Bấm
-                nút bên dưới để gửi lại email.
+                {tr('Tài khoản {email} đã được tạo. Bấm nút bên dưới để gửi lại email.', {
+                  email: <span className="break-all font-semibold">{email}</span>,
+                })}
               </p>
             </>
           )}
@@ -37,15 +40,16 @@ export function CheckEmailPanel({ email, emailSent }: CheckEmailPanelProps) {
       </div>
 
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground marker:font-semibold marker:text-foreground">
-        <li>Mở email có tiêu đề “Xác nhận email đăng ký tài khoản ChillnGo”.</li>
+        <li>{t('Mở email có tiêu đề “Xác nhận email đăng ký tài khoản ChillnGo”.')}</li>
         <li>
-          Bấm nút <span className="font-semibold text-foreground">Xác nhận email</span>. Bạn sẽ được
-          đưa về ChillnGo và đăng nhập ngay.
+          {tr('Bấm nút {button}. Bạn sẽ được đưa về ChillnGo và đăng nhập ngay.', {
+            button: <span className="font-semibold text-foreground">{t('Xác nhận email')}</span>,
+          })}
         </li>
       </ol>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 24 giờ.
+        {t('Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 24 giờ.')}
       </p>
 
       <ResendVerificationButton email={email} justSent={emailSent} />

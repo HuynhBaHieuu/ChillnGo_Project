@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { t } from '@/i18n'
 import { adminService } from '@/services'
 import type { AppSettings } from '@/services/admin.service'
 
@@ -22,7 +23,7 @@ export function SettingsPanel({ onNotice }: { onNotice: (notice: Notice) => void
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
         <Loader2 className="size-4 animate-spin" aria-hidden />
-        Đang tải cấu hình…
+        {t('Đang tải cấu hình…')}
       </p>
     )
   }
@@ -40,7 +41,7 @@ function SettingsForm({ saved, onNotice }: { saved: AppSettings; onNotice: (noti
   const save = useMutation({
     mutationFn: (settings: AppSettings) => adminService.saveSettings(settings),
     onSuccess: () => {
-      onNotice({ kind: 'success', text: 'Đã lưu cấu hình hệ thống.' })
+      onNotice({ kind: 'success', text: t('Đã lưu cấu hình hệ thống.') })
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
       void queryClient.invalidateQueries({ queryKey: ['public-settings'] })
     },
@@ -68,20 +69,19 @@ function SettingsForm({ saved, onNotice }: { saved: AppSettings; onNotice: (noti
           className="mt-0.5"
         />
         <span>
-          <span className="block text-sm font-semibold">Cho phép đăng ký tài khoản mới</span>
+          <span className="block text-sm font-semibold">{t('Cho phép đăng ký tài khoản mới')}</span>
           <span className="mt-1 block text-sm text-muted-foreground">
-            Khi tắt, trang đăng ký báo tạm ngừng, và đăng nhập Google lần đầu không tạo được tài khoản mới. Người
-            đã có tài khoản vẫn đăng nhập bình thường.
+            {t('Khi tắt, trang đăng ký báo tạm ngừng, và đăng nhập Google lần đầu không tạo được tài khoản mới. Người đã có tài khoản vẫn đăng nhập bình thường.')}
           </span>
         </span>
       </label>
 
       <div className="space-y-2 rounded-2xl border border-foreground/15 bg-card p-5">
         <Label htmlFor="setting-announcement" className="text-sm font-semibold">
-          Thông báo toàn trang
+          {t('Thông báo toàn trang')}
         </Label>
         <p className="text-sm text-muted-foreground">
-          Hiện thành một dải thông báo phía trên mọi trang, ví dụ lịch bảo trì. Để trống để tắt.
+          {t('Hiện thành một dải thông báo phía trên mọi trang, ví dụ lịch bảo trì. Để trống để tắt.')}
         </p>
         <Textarea
           id="setting-announcement"
@@ -98,11 +98,11 @@ function SettingsForm({ saved, onNotice }: { saved: AppSettings; onNotice: (noti
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={!dirty || save.isPending}>
           {save.isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          Lưu cấu hình
+          {t('Lưu cấu hình')}
         </Button>
         {dirty && (
           <Button type="button" variant="ghost" onClick={() => setDraft(saved)} disabled={save.isPending}>
-            Huỷ thay đổi
+            {t('Huỷ thay đổi')}
           </Button>
         )}
       </div>

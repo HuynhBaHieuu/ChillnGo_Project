@@ -5,49 +5,50 @@ import { Button } from '@/components/ui/button'
 import { ActivityTabs, Empty, ErrorPanel, ListSkeleton, NotAvailable, Row, SectionHeader, Thumb } from '@/features/activity/components'
 import { journeyStats, timeAgo } from '@/features/activity/format'
 import { useJourneyComments, useLikedJourneys, useLiveComments, useUnlike } from '@/features/activity/hooks'
+import { t } from '@/i18n'
 
 export function InteractionsSection() {
   return (
     <>
       <SectionHeader
-        title="Lượt tương tác"
-        description="Xem lại những hành trình bạn đã thích và các bình luận bạn đã để lại trên ChillnGo."
+        title={t('Lượt tương tác')}
+        description={t('Xem lại những hành trình bạn đã thích và các bình luận bạn đã để lại trên ChillnGo.')}
       />
       <ActivityTabs
-        label="Loại tương tác"
+        label={t('Loại tương tác')}
         tabs={[
-          { value: 'likes', label: 'Lượt thích', content: <Likes /> },
-          { value: 'comments', label: 'Bình luận', content: <Comments /> },
+          { value: 'likes', label: t('Lượt thích'), content: <Likes /> },
+          { value: 'comments', label: t('Bình luận'), content: <Comments /> },
           {
             value: 'reposts',
-            label: 'Chia sẻ lại',
+            label: t('Chia sẻ lại'),
             content: (
               <NotAvailable
                 icon={Repeat2}
-                feature="tính năng chia sẻ lại"
-                description="Khi có tính năng này, những hành trình bạn chia sẻ lại cho người theo dõi sẽ hiện ở đây."
+                feature={t('tính năng chia sẻ lại')}
+                description={t('Khi có tính năng này, những hành trình bạn chia sẻ lại cho người theo dõi sẽ hiện ở đây.')}
               />
             ),
           },
           {
             value: 'story-replies',
-            label: 'Phản hồi tin',
+            label: t('Phản hồi tin'),
             content: (
               <NotAvailable
                 icon={MessageSquareQuote}
-                feature="tính năng tin (story)"
-                description="Khi có tính năng tin, các phản hồi và cảm xúc bạn gửi cho tin của người khác sẽ hiện ở đây."
+                feature={t('tính năng tin (story)')}
+                description={t('Khi có tính năng tin, các phản hồi và cảm xúc bạn gửi cho tin của người khác sẽ hiện ở đây.')}
               />
             ),
           },
           {
             value: 'reviews',
-            label: 'Đánh giá',
+            label: t('Đánh giá'),
             content: (
               <NotAvailable
                 icon={Star}
-                feature="tính năng đánh giá"
-                description="Khi có tính năng đánh giá, những đánh giá bạn viết cho địa điểm và hành trình sẽ được gom lại ở đây."
+                feature={t('tính năng đánh giá')}
+                description={t('Khi có tính năng đánh giá, những đánh giá bạn viết cho địa điểm và hành trình sẽ được gom lại ở đây.')}
               />
             ),
           },
@@ -67,11 +68,11 @@ function Likes() {
     return (
       <Empty
         icon={Heart}
-        title="Chưa có lượt thích nào"
-        description="Bấm vào trái tim ở hành trình bạn thích, hành trình đó sẽ hiện ở đây."
+        title={t('Chưa có lượt thích nào')}
+        description={t('Bấm vào trái tim ở hành trình bạn thích, hành trình đó sẽ hiện ở đây.')}
         action={
           <Button asChild variant="outline" size="sm" className="rounded-full">
-            <Link to="/discover">Khám phá hành trình</Link>
+            <Link to="/discover">{t('Khám phá hành trình')}</Link>
           </Button>
         }
       />
@@ -87,7 +88,7 @@ function Likes() {
             <div className="min-w-0">
               <p className="truncate font-display text-lg leading-snug text-np-cream group-hover:underline">{post.title}</p>
               <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
-                của {post.author.displayName} · {journeyStats(post)}
+                {t('của {name}', { name: post.author.displayName })} · {journeyStats(post)}
               </p>
             </div>
           </Link>
@@ -97,10 +98,10 @@ function Likes() {
             className="shrink-0 rounded-full text-np-social hover:text-np-social"
             disabled={unlike.isPending && unlike.variables === post._id}
             onClick={() => unlike.mutate(post._id)}
-            aria-label={`Bỏ thích ${post.title}`}
+            aria-label={t('Bỏ thích {title}', { title: post.title })}
           >
             <Heart className="fill-current" aria-hidden />
-            <span className="hidden sm:inline">Bỏ thích</span>
+            <span className="hidden sm:inline">{t('Bỏ thích')}</span>
           </Button>
         </Row>
       ))}
@@ -123,7 +124,7 @@ function Comments() {
       text: c.content,
       at: c.createdAt,
       href: c.post ? `/posts/${c.post._id}` : null,
-      where: c.post?.title ?? 'một hành trình đã bị xoá',
+      where: c.post?.title ?? t('một hành trình đã bị xoá'),
       thumb: c.post?.coverUrl ?? null,
       live: false,
     })),
@@ -133,8 +134,8 @@ function Comments() {
       at: c.createdAt,
       href: c.livestream ? `/live/${c.livestream._id}` : null,
       where: c.livestream
-        ? `${c.livestream.title}${c.livestream.host ? ` · live của ${c.livestream.host.displayName}` : ''}`
-        : 'một buổi live không còn tồn tại',
+        ? `${c.livestream.title}${c.livestream.host ? ` · ${t('live của {name}', { name: c.livestream.host.displayName })}` : ''}`
+        : t('một buổi live không còn tồn tại'),
       thumb: c.livestream?.host?.avatarUrl ?? null,
       live: true,
     })),
@@ -144,8 +145,8 @@ function Comments() {
     return (
       <Empty
         icon={MessageCircle}
-        title="Chưa có bình luận nào"
-        description="Bình luận bạn viết trên hành trình và trong các buổi livestream sẽ được liệt kê ở đây."
+        title={t('Chưa có bình luận nào')}
+        description={t('Bình luận bạn viết trên hành trình và trong các buổi livestream sẽ được liệt kê ở đây.')}
       />
     )
   }
@@ -167,7 +168,7 @@ function Comments() {
               <p className="mt-1 flex items-center gap-1.5 truncate text-[13px] text-muted-foreground">
                 {item.live && <Radio className="size-3.5 shrink-0 text-np-social" aria-hidden />}
                 <span className="truncate">
-                  Tại {item.where} · {timeAgo(item.at)}
+                  {t('Tại {place}', { place: item.where })} · {timeAgo(item.at)}
                 </span>
               </p>
             </div>

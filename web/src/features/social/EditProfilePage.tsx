@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { t } from '@/i18n'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE } from '@/lib/images'
 import { travelAvatar, travelBanner } from '@/lib/photos'
 import { cn } from '@/lib/utils'
@@ -69,15 +70,15 @@ function EditProfileForm({ user }: { user: User }) {
   const save = useMutation({
     mutationFn: async () => {
       const uploads: [ImageKind, File | null, string][] = [
-        ['avatar', avatar.file, 'ảnh đại diện'],
-        ['cover', cover.file, 'ảnh bìa'],
+        ['avatar', avatar.file, t('ảnh đại diện')],
+        ['cover', cover.file, t('ảnh bìa')],
       ]
       for (const [kind, file, name] of uploads) {
         if (!file) continue
-        setProgress(`Đang tải ${name} lên… 0%`)
-        await profileService.uploadImage(kind, file, (p) => setProgress(`Đang tải ${name} lên… ${p}%`))
+        setProgress(t('Đang tải {name} lên… {progress}%', { name, progress: 0 }))
+        await profileService.uploadImage(kind, file, (p) => setProgress(t('Đang tải {name} lên… {progress}%', { name, progress: p })))
       }
-      setProgress('Đang lưu hồ sơ…')
+      setProgress(t('Đang lưu hồ sơ…'))
 
       const update: ProfileUpdate = {}
       if (changed.displayName) update.displayName = displayName.trim()
@@ -107,16 +108,16 @@ function EditProfileForm({ user }: { user: User }) {
   return (
     <PageContainer>
       <div className="mx-auto max-w-3xl">
-      <PageHeader title="Chỉnh sửa hồ sơ" description="Thông tin này hiện trên trang cá nhân của bạn." />
+      <PageHeader title={t('Chỉnh sửa hồ sơ')} description={t('Thông tin này hiện trên trang cá nhân của bạn.')} />
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <section className="space-y-4 rounded-2xl border border-foreground/15 bg-card p-5 sm:p-6">
-          <h2 className="text-sm font-semibold">Ảnh</h2>
+          <h2 className="text-sm font-semibold">{t('Ảnh')}</h2>
 
           <ImagePicker
             kind="cover"
-            label="Ảnh bìa"
-            hint={`Ảnh ngang, tỉ lệ khoảng 3:1. ${ACCEPTED_LABEL}, tối đa 15 MB. Ảnh được tự nén trước khi tải lên.`}
+            label={t('Ảnh bìa')}
+            hint={t('Ảnh ngang, tỉ lệ khoảng 3:1. {formats}, tối đa 15 MB. Ảnh được tự nén trước khi tải lên.', { formats: ACCEPTED_LABEL })}
             currentUrl={user.coverUrl}
             defaultUrl={travelBanner(user.username)}
             draft={cover}
@@ -126,8 +127,8 @@ function EditProfileForm({ user }: { user: User }) {
 
           <ImagePicker
             kind="avatar"
-            label="Ảnh đại diện"
-            hint={`Ảnh vuông sẽ đẹp nhất. ${ACCEPTED_LABEL}, tối đa 15 MB. Ảnh được tự nén trước khi tải lên.`}
+            label={t('Ảnh đại diện')}
+            hint={t('Ảnh vuông sẽ đẹp nhất. {formats}, tối đa 15 MB. Ảnh được tự nén trước khi tải lên.', { formats: ACCEPTED_LABEL })}
             currentUrl={user.avatarUrl}
             defaultUrl={travelAvatar(user.username)}
             draft={avatar}
@@ -137,10 +138,10 @@ function EditProfileForm({ user }: { user: User }) {
         </section>
 
         <section className="space-y-5 rounded-2xl border border-foreground/15 bg-card p-5 sm:p-6">
-          <h2 className="text-sm font-semibold">Thông tin</h2>
+          <h2 className="text-sm font-semibold">{t('Thông tin')}</h2>
 
           <div className="space-y-2">
-            <Label htmlFor="displayName">Tên hiển thị</Label>
+            <Label htmlFor="displayName">{t('Tên hiển thị')}</Label>
             <Input
               id="displayName"
               required
@@ -152,26 +153,26 @@ function EditProfileForm({ user }: { user: User }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Tên người dùng</Label>
+            <Label htmlFor="username">{t('Tên người dùng')}</Label>
             <Input
               id="username"
               required
               minLength={3}
               maxLength={30}
               pattern="[A-Za-z0-9._]+"
-              title="Chữ không dấu, số, dấu chấm hoặc gạch dưới"
+              title={t('Chữ không dấu, số, dấu chấm hoặc gạch dưới')}
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               aria-describedby="username-hint"
             />
             <p id="username-hint" className="text-xs text-muted-foreground">
-              3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @{username.trim().toLowerCase() || '…'}
+              {t('3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @{username}', { username: username.trim().toLowerCase() || '…' })}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bio">Giới thiệu</Label>
+            <Label htmlFor="bio">{t('Giới thiệu')}</Label>
             <Textarea
               id="bio"
               rows={4}
@@ -186,7 +187,7 @@ function EditProfileForm({ user }: { user: User }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Nơi sống</Label>
+            <Label htmlFor="location">{t('Nơi sống')}</Label>
             <Input
               id="location"
               maxLength={LOCATION_MAX}
@@ -211,11 +212,11 @@ function EditProfileForm({ user }: { user: User }) {
           )}
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button asChild variant="outline" className="rounded-full">
-              <Link to={`/users/${user._id}`}>Huỷ</Link>
+              <Link to={`/users/${user._id}`}>{t('Huỷ')}</Link>
             </Button>
             <GlassButton type="submit" tone="sunset" size="lg" disabled={!dirty || save.isPending}>
               {save.isPending && <Loader2 className="animate-spin" />}
-              Lưu thay đổi
+              {t('Lưu thay đổi')}
             </GlassButton>
           </div>
         </div>
@@ -266,7 +267,7 @@ function ImagePicker({ kind, label, hint, currentUrl, defaultUrl, draft, onChang
           <img src={shown} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
           {changedHere && (
             <span className="absolute left-2 top-2 rounded-full bg-foreground px-2 py-0.5 text-[11px] font-semibold text-background">
-              Chưa lưu
+              {t('Chưa lưu')}
             </span>
           )}
         </div>
@@ -282,7 +283,7 @@ function ImagePicker({ kind, label, hint, currentUrl, defaultUrl, draft, onChang
               onClick={() => input.current?.click()}
             >
               {kind === 'avatar' ? <Camera className="size-4" aria-hidden /> : <ImageUp className="size-4" aria-hidden />}
-              Chọn ảnh mới
+              {t('Chọn ảnh mới')}
             </Button>
             {changedHere ? (
               <Button
@@ -297,7 +298,7 @@ function ImagePicker({ kind, label, hint, currentUrl, defaultUrl, draft, onChang
                 }}
               >
                 <RotateCcw className="size-4" aria-hidden />
-                Hoàn tác
+                {t('Hoàn tác')}
               </Button>
             ) : (
               hasOwnImage && (
@@ -310,7 +311,7 @@ function ImagePicker({ kind, label, hint, currentUrl, defaultUrl, draft, onChang
                   onClick={() => onChange({ file: null, preview: null, remove: true })}
                 >
                   <Trash2 className="size-4" aria-hidden />
-                  Dùng ảnh mặc định
+                  {t('Dùng ảnh mặc định')}
                 </Button>
               )
             )}
@@ -330,7 +331,7 @@ function ImagePicker({ kind, label, hint, currentUrl, defaultUrl, draft, onChang
         accept={ACCEPT_ATTRIBUTE}
         className="sr-only"
         tabIndex={-1}
-        aria-label={`Chọn ${label.toLowerCase()}`}
+        aria-label={t('Chọn {thing}', { thing: label.toLowerCase() })}
         onChange={(e) => {
           pick(e.target.files?.[0])
           e.target.value = ''

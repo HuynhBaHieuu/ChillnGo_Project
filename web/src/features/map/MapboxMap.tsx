@@ -10,6 +10,7 @@ import type { MapPin, MapStop } from '@/features/map/geometry'
 import { useDrawnSegments } from '@/features/map/legs'
 import type { DrawnSegment } from '@/features/map/legs'
 import { MODE_ICON } from '@/features/map/modeIcons'
+import { mapLanguage, t } from '@/i18n'
 import { MODE_LABEL, formatDistance, formatDuration } from '@/lib/travel'
 import { cn } from '@/lib/utils'
 import type { RouteGeoJson } from '@/services/types'
@@ -151,7 +152,7 @@ export default function MapboxMap({
         mapboxAccessToken={MAPBOX_TOKEN}
         mapStyle={MAP_STYLE}
         // Place names in Vietnamese where Mapbox has them, local names otherwise.
-        language="vi"
+        language={mapLanguage()}
         initialViewState={{ bounds, fitBoundsOptions: { padding: 56 } }}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
@@ -307,8 +308,12 @@ export default function MapboxMap({
                   event.stopPropagation()
                   setSelectedDay(stop.day)
                 }}
-                title={`Ngày ${stop.day} · ${stop.order}. ${stop.name || 'Điểm dừng'}`}
-                aria-label={`Ngày ${stop.day}, điểm ${stop.order}: ${stop.name || 'Điểm dừng'}. Xem đường đi ngày ${stop.day}`}
+                title={`${t('Ngày {n}', { n: stop.day })} · ${stop.order}. ${stop.name || t('Điểm dừng#one')}`}
+                aria-label={t('Ngày {day}, điểm {order}: {name}. Xem đường đi ngày {day}', {
+                  day: stop.day,
+                  order: stop.order,
+                  name: stop.name || t('Điểm dừng#one'),
+                })}
                 aria-pressed={stop.day === activeDay}
                 className={cn(
                   'flex size-7 cursor-pointer items-center justify-center rounded-full border-2 border-white text-[11px] font-semibold text-white shadow-md transition-[opacity,transform] hover:scale-110',
@@ -338,14 +343,14 @@ export default function MapboxMap({
         // The navbar's pills; 0 stands for "every day". Clear of the zoom buttons on the right.
         <div className="absolute left-2 right-12 top-2 z-10 flex">
           <PillTabs
-            label="Chọn ngày để xem đường đi"
+            label={t('Chọn ngày để xem đường đi')}
             value={activeDay ?? 0}
             onChange={(day) => setSelectedDay(day || null)}
             items={[
-              { value: 0, label: 'Tất cả' },
+              { value: 0, label: t('Tất cả') },
               ...stopDays.map((day) => ({
                 value: day,
-                label: `Ngày ${day}`,
+                label: t('Ngày {n}', { n: day }),
                 leading: <span className="size-2 rounded-full" style={{ backgroundColor: dayColor(day) }} aria-hidden />,
               })),
             ]}
@@ -356,7 +361,7 @@ export default function MapboxMap({
 
       {stopDays.length > 0 && activeDay === null && (
         <p className="pointer-events-none absolute inset-x-0 bottom-2 z-10 mx-auto w-fit rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-neutral-700 shadow">
-          Chọn một ngày hoặc một điểm để xem đường đi
+          {t('Chọn một ngày hoặc một điểm để xem đường đi')}
         </p>
       )}
     </div>
@@ -403,7 +408,7 @@ function ModeIcon({ segment, color, onClick }: { segment: DrawnSegment; color: s
           event.stopPropagation()
           onClick()
         }}
-        aria-label={`${MODE_LABEL[segment.mode]}: xem thời gian`}
+        aria-label={t('{mode}: xem thời gian', { mode: MODE_LABEL[segment.mode] })}
         className="flex size-7 cursor-pointer items-center justify-center rounded-full border-2 bg-white shadow-md"
         style={{ borderColor: color, color }}
       >
@@ -423,7 +428,9 @@ function SegmentLabel({ segment }: { segment: DrawnSegment }) {
   const time =
     segment.duration === null
       ? null
-      : `${segment.estimated ? 'khoảng ' : ''}${formatDuration(segment.duration, segment.estimated)}${segment.estimated ? ' (ước tính)' : ''}`
+      : segment.estimated
+        ? t('khoảng {time} (ước tính)', { time: formatDuration(segment.duration, true) })
+        : formatDuration(segment.duration, false)
   return (
     <div className="flex items-start gap-2 text-neutral-800">
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -431,7 +438,7 @@ function SegmentLabel({ segment }: { segment: DrawnSegment }) {
         <p className="font-semibold">{MODE_LABEL[segment.mode]}</p>
         {time && <p>{time}</p>}
         {segment.distance !== null && <p className="text-neutral-500">{formatDistance(segment.distance)}</p>}
-        {segment.duration === null && <p className="text-neutral-500">Chưa có dữ liệu thời gian</p>}
+        {segment.duration === null && <p className="text-neutral-500">{t('Chưa có dữ liệu thời gian')}</p>}
       </div>
     </div>
   )

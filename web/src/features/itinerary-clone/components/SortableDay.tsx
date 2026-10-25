@@ -4,6 +4,7 @@ import { GripVertical, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { dayCostOf } from '@/lib/itinerary'
+import { localeTag, t } from '@/i18n'
 import { formatLongDate, formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripDay } from '@/services/types'
@@ -33,7 +34,7 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
       <header className="relative z-[1] flex items-start gap-3">
         <button
           type="button"
-          aria-label={`Kéo để đổi thứ tự ngày ${day.dayNumber}`}
+          aria-label={t('Kéo để đổi thứ tự ngày {n}', { n: day.dayNumber })}
           className="mt-0.5 cursor-grab touch-none rounded-2xl p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground active:cursor-grabbing"
           {...attributes}
           {...listeners}
@@ -43,10 +44,10 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
 
         <div className="min-w-0 flex-1">
           <p className="text-sm text-muted-foreground">
-            Ngày {day.dayNumber}
+            {t('Ngày {n}', { n: day.dayNumber })}
           </p>
           <h3 className="mt-1 font-display text-xl">
-            {day.title || 'Chưa đặt tên'}
+            {day.title || t('Chưa đặt tên')}
           </h3>
           <time dateTime={day.date} className="text-sm text-muted-foreground">
             {formatLongDate(day.date)}
@@ -63,7 +64,7 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
               variant="ghost"
               size="icon"
               onClick={onRemove}
-              aria-label={`Xoá ngày ${day.dayNumber}`}
+              aria-label={t('Xoá ngày {n}', { n: day.dayNumber })}
               className="text-muted-foreground hover:text-destructive"
             >
               <Trash2 />
@@ -92,12 +93,12 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
               )}
               {location.planB && (
                 <span className="block truncate text-xs text-muted-foreground">
-                  Plan B: {location.planB.name} · cách khoảng {String(location.planB.distanceKm).replace('.', ',')} km
+                  {t('Plan B: {name} · cách khoảng {km} km', { name: location.planB.name, km: location.planB.distanceKm.toLocaleString(localeTag()) })}
                 </span>
               )}
             </span>
             <span className="shrink-0 text-muted-foreground">
-              {location.costUnknown ? 'Chưa có dữ liệu' : location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí'}
+              {location.costUnknown ? t('Chưa có dữ liệu') : location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí')}
             </span>
           </li>
         ))}

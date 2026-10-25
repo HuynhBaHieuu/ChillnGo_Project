@@ -3,6 +3,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox'
 
 import { MAPBOX_TOKEN } from '@/features/map/geometry'
+import { mapLanguage } from '@/i18n'
 
 interface LocationPickerMapProps {
   value: { lat: number; lng: number } | null
@@ -24,7 +25,7 @@ export default function LocationPickerMap({ value, onChange }: LocationPickerMap
     <Map
       mapboxAccessToken={MAPBOX_TOKEN}
       mapStyle="mapbox://styles/mapbox/streets-v12"
-      language="vi"
+      language={mapLanguage()}
       initialViewState={value ? { longitude: value.lng, latitude: value.lat, zoom: 14 } : VIETNAM}
       attributionControl={false}
       cursor="crosshair"

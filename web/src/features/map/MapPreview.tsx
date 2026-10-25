@@ -3,6 +3,7 @@ import { Suspense, lazy, useMemo } from 'react'
 import { MAPBOX_TOKEN, boundsOf, routeCoordinates, stopsOfDays } from '@/features/map/geometry'
 import type { MapPin } from '@/features/map/geometry'
 import { StaticRouteFallback } from '@/features/map/StaticRouteFallback'
+import { t } from '@/i18n'
 import type { RouteGeoJson, TripDay } from '@/services/types'
 
 export type { MapPin }
@@ -40,7 +41,7 @@ export function MapPreview({
   cluster = false,
   days,
   className,
-  label = 'Bản đồ hành trình',
+  label = t('Bản đồ hành trình'),
 }: MapPreviewProps) {
   const stops = useMemo(() => (days ? stopsOfDays(days) : []), [days])
   const allCoords = useMemo<[number, number][]>(

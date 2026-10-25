@@ -14,8 +14,9 @@ import {
   SectionHeader,
   Thumb,
 } from '@/features/activity/components'
-import { daysUntil, journeyStats, plural, timeAgo } from '@/features/activity/format'
+import { daysUntil, journeyStats, timeAgo } from '@/features/activity/format'
 import { useDeletedAction, useDeletedItems } from '@/features/activity/hooks'
+import { t } from '@/i18n'
 import { themeFromText, travelCover } from '@/lib/photos'
 import { checkinService, postService } from '@/services'
 
@@ -23,32 +24,32 @@ export function RecentlyDeletedSection() {
   return (
     <>
       <SectionHeader
-        title="Đã xoá gần đây"
-        description="Nội dung đã xoá được giữ ở đây 30 ngày. Bạn có thể khôi phục, hoặc xoá vĩnh viễn trước thời hạn đó."
+        title={t('Đã xoá gần đây')}
+        description={t('Nội dung đã xoá được giữ ở đây 30 ngày. Bạn có thể khôi phục, hoặc xoá vĩnh viễn trước thời hạn đó.')}
       />
       <ActivityTabs
-        label="Loại nội dung đã xoá"
+        label={t('Loại nội dung đã xoá')}
         tabs={[
-          { value: 'posts', label: 'Bài viết', content: <DeletedCheckIns /> },
+          { value: 'posts', label: t('Bài viết'), content: <DeletedCheckIns /> },
           {
             value: 'stories',
-            label: 'Tin',
+            label: t('Tin'),
             content: (
-              <NotAvailable icon={Clapperboard} feature="tính năng tin (story)" description="Khi có tính năng tin, những tin bạn xoá sẽ được giữ ở đây 30 ngày." />
+              <NotAvailable icon={Clapperboard} feature={t('tính năng tin (story)')} description={t('Khi có tính năng tin, những tin bạn xoá sẽ được giữ ở đây 30 ngày.')} />
             ),
           },
           {
             value: 'videos',
-            label: 'Video',
+            label: t('Video'),
             content: (
               <Empty
                 icon={Film}
-                title="Chưa xoá được video"
-                description="Bản ghi livestream được giữ cùng buổi phát. Khi có chức năng xoá, những video bạn xoá sẽ hiện ở đây."
+                title={t('Chưa xoá được video')}
+                description={t('Bản ghi livestream được giữ cùng buổi phát. Khi có chức năng xoá, những video bạn xoá sẽ hiện ở đây.')}
               />
             ),
           },
-          { value: 'journeys', label: 'Hành trình', content: <DeletedJourneys /> },
+          { value: 'journeys', label: t('Hành trình'), content: <DeletedJourneys /> },
         ]}
       />
     </>
@@ -75,12 +76,12 @@ function DeletedCheckIns() {
   return (
     <DeletedList
       icon={Camera}
-      noun="bài viết"
-      emptyText="Những check-in bạn xoá sẽ được giữ ở đây 30 ngày."
+      confirmTitle={t('Xoá vĩnh viễn bài viết này?')}
+      emptyText={t('Những check-in bạn xoá sẽ được giữ ở đây 30 ngày.')}
       items={checkins.data.map((c) => ({
         id: c._id,
-        title: c.caption || c.location?.name || 'Check-in',
-        subtitle: [c.photos.length ? plural(c.photos.length, 'ảnh') : null, c.location?.name].filter(Boolean).join(' · ') || 'Check-in',
+        title: c.caption || c.location?.name || t('Check-in'),
+        subtitle: [c.photos.length ? t('{n} ảnh', { n: c.photos.length }) : null, c.location?.name].filter(Boolean).join(' · ') || t('Check-in'),
         image: c.photos[0]?.url ?? null,
         deletedAt: c.deletedAt ?? c.createdAt,
         purgeAt: c.purgeAt ?? c.createdAt,
@@ -102,12 +103,12 @@ function DeletedJourneys() {
   return (
     <DeletedList
       icon={MapIcon}
-      noun="hành trình"
-      emptyText="Những hành trình và bản nháp bạn xoá sẽ được giữ ở đây 30 ngày."
+      confirmTitle={t('Xoá vĩnh viễn hành trình này?')}
+      emptyText={t('Những hành trình và bản nháp bạn xoá sẽ được giữ ở đây 30 ngày.')}
       items={journeys.data.map((p) => ({
         id: p._id,
-        title: p.title.trim() || 'Hành trình chưa đặt tên',
-        subtitle: `${p.status === 'draft' ? 'Bản nháp' : 'Đã đăng'} · ${journeyStats(p)}`,
+        title: p.title.trim() || t('Hành trình chưa đặt tên'),
+        subtitle: `${p.status === 'draft' ? t('Bản nháp') : t('Đã đăng')} · ${journeyStats(p)}`,
         image: p.coverUrl || travelCover(p.title.slice(0, 30) || 'chillngo', themeFromText(p.title)),
         deletedAt: p.deletedAt ?? p.updatedAt,
         purgeAt: p.purgeAt ?? p.updatedAt,
@@ -122,14 +123,14 @@ type Action = ReturnType<typeof useDeletedAction<unknown>>
 
 function DeletedList({
   icon,
-  noun,
+  confirmTitle,
   emptyText,
   items,
   restore,
   purge,
 }: {
   icon: LucideIcon
-  noun: string
+  confirmTitle: string
   emptyText: string
   items: DeletedItem[]
   restore: Action
@@ -137,7 +138,7 @@ function DeletedList({
 }) {
   const [confirm, setConfirm] = useState<DeletedItem | null>(null)
 
-  if (items.length === 0) return <Empty icon={icon} title="Không có gì trong mục này" description={emptyText} />
+  if (items.length === 0) return <Empty icon={icon} title={t('Không có gì trong mục này')} description={emptyText} />
 
   const error = restore.error ?? purge.error
 
@@ -154,9 +155,9 @@ function DeletedList({
                   <p className="truncate font-display text-lg leading-snug text-np-cream">{item.title}</p>
                   <p className="truncate text-[13px] text-muted-foreground">{item.subtitle}</p>
                   <p className="mt-0.5 text-xs text-np-meta">
-                    Đã xoá {timeAgo(item.deletedAt)} ·{' '}
+                    {t('Đã xoá {time}', { time: timeAgo(item.deletedAt) })} ·{' '}
                     <span className={left <= 3 ? 'text-np-social' : undefined}>
-                      {left === 0 ? 'sẽ bị xoá hôm nay' : `còn ${plural(left, 'ngày')}`}
+                      {left === 0 ? t('sẽ bị xoá hôm nay') : t('còn {n} ngày', { n: left })}
                     </span>
                   </p>
                 </div>
@@ -170,7 +171,7 @@ function DeletedList({
                   onClick={() => restore.mutate(item.id)}
                 >
                   <RotateCcw aria-hidden />
-                  Khôi phục
+                  {t('Khôi phục')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -179,7 +180,7 @@ function DeletedList({
                   onClick={() => setConfirm(item)}
                 >
                   <Trash2 aria-hidden />
-                  Xoá
+                  {t('Xoá')}
                 </Button>
               </div>
             </Row>
@@ -196,14 +197,14 @@ function DeletedList({
       <Confirm
         open={confirm !== null}
         onOpenChange={(open) => !open && setConfirm(null)}
-        title={`Xoá vĩnh viễn ${noun} này?`}
+        title={confirmTitle}
         description={
           <>
-            {`“${confirm?.title ?? ''}” sẽ bị xoá vĩnh viễn, kèm cả ảnh. Không thể hoàn tác.`}
+            {t('“{title}” sẽ bị xoá vĩnh viễn, kèm cả ảnh. Không thể hoàn tác.', { title: confirm?.title ?? '' })}
             {purge.isError && error && <span className="mt-2 block text-destructive">{(error as Error).message}</span>}
           </>
         }
-        confirmLabel="Xoá vĩnh viễn"
+        confirmLabel={t('Xoá vĩnh viễn')}
         destructive
         pending={purge.isPending}
         onConfirm={() => confirm && purge.mutate(confirm.id, { onSuccess: () => setConfirm(null) })}

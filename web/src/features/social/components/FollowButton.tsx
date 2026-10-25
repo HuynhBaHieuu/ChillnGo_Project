@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { GlassButton } from '@/components/Button'
 import { useIsFollowing, useToggleFollow } from '@/features/social/hooks'
 import { useAuthStore } from '@/store'
+import { t } from '@/i18n'
 
 interface FollowButtonProps {
   userId: string
@@ -39,7 +40,7 @@ export function FollowButton({ userId }: FollowButtonProps) {
       ) : (
         <UserPlus />
       )}
-      {following ? 'Đang theo dõi' : 'Theo dõi'}
+      {following ? t('Đang theo dõi') : t('Theo dõi')}
     </GlassButton>
   )
 }

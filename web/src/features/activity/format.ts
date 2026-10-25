@@ -3,9 +3,8 @@
  * hành trình. Cùng tiếng Việt với phần còn lại của site (lib/format.ts).
  */
 
+import { localeTag, t } from '@/i18n'
 import type { TripPost } from '@/services/types'
-
-const relative = new Intl.RelativeTimeFormat('vi', { numeric: 'auto' })
 
 const STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
   ['year', 365 * 24 * 3600],
@@ -20,22 +19,22 @@ const STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
 export function timeAgo(iso: string): string {
   const seconds = (Date.parse(iso) - Date.now()) / 1000
   for (const [unit, size] of STEPS) {
-    if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit)
+    if (Math.abs(seconds) >= size) {
+      return new Intl.RelativeTimeFormat(localeTag(), { numeric: 'auto' }).format(Math.round(seconds / size), unit)
+    }
   }
-  return 'vừa xong'
+  return t('vừa xong')
 }
-
-const dateTimeFormat = new Intl.DateTimeFormat('vi-VN', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
 
 /** "14:05 12 thg 3, 2026" */
 export function dateTime(iso: string): string {
-  return dateTimeFormat.format(new Date(iso))
+  return new Intl.DateTimeFormat(localeTag(), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
 }
 
 /** Whole days until `iso`, at least 0. */
@@ -43,15 +42,10 @@ export function daysUntil(iso: string): number {
   return Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / (24 * 3600 * 1000)))
 }
 
-/** "3 ngày". Tiếng Việt không chia số nhiều, nên chỉ ghép số với đơn vị. */
-export function plural(count: number, unit: string): string {
-  return `${count} ${unit}`
-}
-
 /** "3 ngày · 5 địa điểm" */
 export function journeyStats(post: Pick<TripPost, 'days'>): string {
   const places = post.days.reduce((sum, day) => sum + day.locations.length, 0)
-  return `${plural(post.days.length, 'ngày')} · ${plural(places, 'địa điểm')}`
+  return `${t('{n} ngày', { n: post.days.length })} · ${t('{n} địa điểm', { n: places })}`
 }
 
 /** "Đà Nẵng → Hội An", từ điểm dừng đầu và cuối có tên; null khi có ít hơn hai. */

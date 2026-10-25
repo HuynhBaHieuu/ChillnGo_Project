@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { formatShortDate } from '@/lib/format'
 import type { TripPostWithAuthor } from '@/services/types'
+import { t } from '@/i18n'
 
 /** A trip read as a journal entry: photo, title, date and length, byline. */
 export function StoryCard({ post }: { post: TripPostWithAuthor }) {
@@ -19,9 +20,9 @@ export function StoryCard({ post }: { post: TripPostWithAuthor }) {
         {post.title}
       </h3>
       <p className="mt-2 text-sm text-muted-foreground">
-        {formatShortDate(post.startDate)} • {post.days.length} ngày
+        {formatShortDate(post.startDate)} • {t('{n} ngày', { n: post.days.length })}
       </p>
-      <p className="mt-1 text-sm text-muted-foreground">Bởi {post.author.displayName}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t('Bởi {name}', { name: post.author.displayName })}</p>
     </Link>
   )
 }

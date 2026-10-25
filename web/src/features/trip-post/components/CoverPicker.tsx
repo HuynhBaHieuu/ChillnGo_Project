@@ -4,6 +4,7 @@ import type { DragEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ACCEPT_ATTRIBUTE, ACCEPTED_LABEL, checkImageFile } from '@/lib/images'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { postService } from '@/services'
 
@@ -39,11 +40,11 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
   async function pick(files: File[]) {
     if (files.length === 0) return
     if (full) {
-      setError(`Tối đa ${MAX_COVER_IMAGES} ảnh.`)
+      setError(t('Tối đa {n} ảnh.', { n: MAX_COVER_IMAGES }))
       return
     }
     const problems: string[] = []
-    if (files.length > remaining) problems.push(`Chỉ thêm được ${remaining} ảnh nữa (tối đa ${MAX_COVER_IMAGES}).`)
+    if (files.length > remaining) problems.push(t('Chỉ thêm được {n} ảnh nữa (tối đa {max}).', { n: remaining, max: MAX_COVER_IMAGES }))
     const accepted = files.slice(0, remaining).filter((file) => {
       const problem = checkImageFile(file)
       if (problem) problems.push(`${file.name}: ${problem}`)
@@ -83,7 +84,9 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
   }
 
   const status = processing
-    ? `Đang tải ảnh${processing.total > 1 ? ` ${processing.index}/${processing.total}` : ''}… ${progress}%`
+    ? processing.total > 1
+      ? t('Đang tải ảnh {index}/{total}… {progress}%', { index: processing.index, total: processing.total, progress })
+      : t('Đang tải ảnh… {progress}%', { progress })
     : null
 
   return (
@@ -117,14 +120,14 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
             <span className="grid size-12 place-items-center rounded-full border border-np-beige/20 bg-np-surface/80">
               {processing ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <ImageUp className="size-5" aria-hidden />}
             </span>
-            <span className="text-sm font-semibold">{status ?? `Bấm hoặc kéo tối đa ${MAX_COVER_IMAGES} ảnh vào đây`}</span>
-            <span className="text-xs text-np-meta">Chưa chọn ảnh, bài viết sẽ dùng ảnh tự động này</span>
+            <span className="text-sm font-semibold">{status ?? t('Bấm hoặc kéo tối đa {n} ảnh vào đây', { n: MAX_COVER_IMAGES })}</span>
+            <span className="text-xs text-np-meta">{t('Chưa chọn ảnh, bài viết sẽ dùng ảnh tự động này')}</span>
           </button>
         )}
 
         {hasOwn && (
           <span className="absolute left-3 top-3 rounded-full bg-np-canopy/75 px-2.5 py-1 text-xs font-semibold text-np-cream">
-            Ảnh bìa
+            {t('Ảnh bìa')}
           </span>
         )}
 
@@ -137,26 +140,26 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
       </div>
 
       {hasOwn && (
-        <ul className="grid grid-cols-5 gap-2 sm:grid-cols-10" aria-label="Ảnh của hành trình">
+        <ul className="grid grid-cols-5 gap-2 sm:grid-cols-10" aria-label={t('Ảnh của hành trình')}>
           {value.map((url, index) => (
             <li key={url} className="group relative aspect-square overflow-hidden rounded-lg">
               <img
                 src={url}
-                alt={`Ảnh ${index + 1}`}
+                alt={t('Ảnh {n}', { n: index + 1 })}
                 referrerPolicy="no-referrer"
                 className={cn('size-full object-cover', index === 0 && 'ring-2 ring-inset ring-primary')}
               />
               <div className="absolute inset-0 flex items-start justify-between gap-1 bg-gradient-to-b from-black/50 to-transparent p-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                 {index === 0 ? (
-                  <Star className="size-4 fill-current text-np-cream" aria-label="Ảnh bìa" />
+                  <Star className="size-4 fill-current text-np-cream" aria-label={t('Ảnh bìa')} />
                 ) : (
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => makeCover(index)}
                     className="grid size-6 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80 disabled:cursor-not-allowed"
-                    aria-label={`Đặt ảnh ${index + 1} làm ảnh bìa`}
-                    title="Đặt làm ảnh bìa"
+                    aria-label={t('Đặt ảnh {n} làm ảnh bìa', { n: index + 1 })}
+                    title={t('Đặt làm ảnh bìa')}
                   >
                     <Star className="size-3.5" aria-hidden />
                   </button>
@@ -166,8 +169,8 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
                   disabled={busy}
                   onClick={() => remove(index)}
                   className="grid size-6 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80 disabled:cursor-not-allowed"
-                  aria-label={`Xoá ảnh ${index + 1}`}
-                  title="Xoá ảnh"
+                  aria-label={t('Xoá ảnh {n}', { n: index + 1 })}
+                  title={t('Xoá ảnh')}
                 >
                   <X className="size-3.5" aria-hidden />
                 </button>
@@ -181,7 +184,7 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
                 disabled={busy}
                 onClick={() => input.current?.click()}
                 className="grid size-full place-items-center rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:cursor-not-allowed"
-                aria-label="Thêm ảnh"
+                aria-label={t('Thêm ảnh')}
               >
                 {processing ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <ImagePlus className="size-5" aria-hidden />}
               </button>
@@ -201,7 +204,7 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
           onClick={() => input.current?.click()}
         >
           <ImageUp className="size-4" aria-hidden />
-          {hasOwn ? `Thêm ảnh (${value.length}/${MAX_COVER_IMAGES})` : 'Chọn ảnh'}
+          {hasOwn ? t('Thêm ảnh ({n}/{max})', { n: value.length, max: MAX_COVER_IMAGES }) : t('Chọn ảnh')}
         </Button>
         {hasOwn && (
           <Button
@@ -216,11 +219,11 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
             }}
           >
             <RotateCcw className="size-4" aria-hidden />
-            Dùng ảnh tự động
+            {t('Dùng ảnh tự động')}
           </Button>
         )}
         <p className="text-xs text-muted-foreground">
-          Tối đa {MAX_COVER_IMAGES} ảnh, ảnh đầu tiên là ảnh bìa. {ACCEPTED_LABEL}, mỗi ảnh tối đa 15 MB. Ảnh được tự nén.
+          {t('Tối đa {n} ảnh, ảnh đầu tiên là ảnh bìa. {formats}, mỗi ảnh tối đa 15 MB. Ảnh được tự nén.', { n: MAX_COVER_IMAGES, formats: ACCEPTED_LABEL })}
         </p>
       </div>
 
@@ -237,7 +240,7 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
         accept={ACCEPT_ATTRIBUTE}
         className="sr-only"
         tabIndex={-1}
-        aria-label="Chọn ảnh cho hành trình"
+        aria-label={t('Chọn ảnh cho hành trình')}
         onChange={(e) => {
           void pick([...(e.target.files ?? [])])
           e.target.value = ''

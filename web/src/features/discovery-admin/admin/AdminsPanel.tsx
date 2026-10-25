@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PasswordChecklist } from '@/features/auth/PasswordChecklist'
+import { t } from '@/i18n'
 import { passwordMeetsRules } from '@/lib/password'
 import type { AdminModule } from '@/lib/roles'
 import { adminService } from '@/services'
@@ -33,12 +34,11 @@ export function AdminsPanel({ actor, onNotice }: { actor: User; onNotice: (notic
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Muốn nâng một người dùng có sẵn lên Admin? Vào mục Người dùng, mở menu của tài khoản đó và chọn
-          “Đặt làm Admin”.
+          {t('Muốn nâng một người dùng có sẵn lên Admin? Vào mục Người dùng, mở menu của tài khoản đó và chọn “Đặt làm Admin”.')}
         </p>
         <Button onClick={() => setCreating(true)} className="shrink-0">
           <UserPlus className="size-4" aria-hidden />
-          Tạo Admin mới
+          {t('Tạo Admin mới')}
         </Button>
       </div>
 
@@ -80,7 +80,10 @@ function CreateAdminDialog({
     onSuccess: ({ user }) => {
       onNotice({
         kind: 'success',
-        text: `Đã tạo Admin ${user.displayName} (@${user.username}). Hãy gửi email và mật khẩu cho họ qua kênh an toàn.`,
+        text: t('Đã tạo Admin {name} (@{username}). Hãy gửi email và mật khẩu cho họ qua kênh an toàn.', {
+          name: user.displayName,
+          username: user.username,
+        }),
       })
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
       reset()
@@ -92,7 +95,7 @@ function CreateAdminDialog({
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!passwordMeetsRules(password)) {
-      setFormError('Mật khẩu chưa đạt đủ yêu cầu.')
+      setFormError(t('Mật khẩu chưa đạt đủ yêu cầu.'))
       return
     }
     setFormError(null)
@@ -109,37 +112,36 @@ function CreateAdminDialog({
     >
       <DialogContent className="max-h-[90vh] overflow-y-auto bg-card">
         <DialogHeader>
-          <DialogTitle>Tạo Admin mới</DialogTitle>
+          <DialogTitle>{t('Tạo Admin mới')}</DialogTitle>
           <DialogDescription>
-            Tài khoản được kích hoạt ngay, không cần xác nhận email. Admin nên đổi mật khẩu sau lần đăng nhập
-            đầu tiên.
+            {t('Tài khoản được kích hoạt ngay, không cần xác nhận email. Admin nên đổi mật khẩu sau lần đăng nhập đầu tiên.')}
           </DialogDescription>
         </DialogHeader>
 
         <form id="create-admin" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ca-name">Tên hiển thị</Label>
+            <Label htmlFor="ca-name">{t('Tên hiển thị')}</Label>
             <Input id="ca-name" required maxLength={60} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ca-username">Tên người dùng</Label>
+            <Label htmlFor="ca-username">{t('Tên người dùng')}</Label>
             <Input
               id="ca-username"
               required
               minLength={3}
               maxLength={30}
               pattern="[A-Za-z0-9._]+"
-              title="Chữ không dấu, số, dấu chấm hoặc gạch dưới"
+              title={t('Chữ không dấu, số, dấu chấm hoặc gạch dưới')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ca-email">Email</Label>
+            <Label htmlFor="ca-email">{t('Email')}</Label>
             <Input id="ca-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ca-password">Mật khẩu ban đầu</Label>
+            <Label htmlFor="ca-password">{t('Mật khẩu ban đầu')}</Label>
             <PasswordInput
               id="ca-password"
               required
@@ -162,11 +164,11 @@ function CreateAdminDialog({
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>
-            Huỷ
+            {t('Huỷ')}
           </Button>
           <Button type="submit" form="create-admin" disabled={mutation.isPending}>
             {mutation.isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-            Tạo Admin
+            {t('Tạo Admin')}
           </Button>
         </DialogFooter>
       </DialogContent>

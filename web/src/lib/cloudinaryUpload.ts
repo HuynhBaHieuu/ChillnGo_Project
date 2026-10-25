@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { ApiError } from '@/services/client'
 
 /** What Cloudinary answers after an upload (the fields this app reads). */
@@ -48,9 +49,9 @@ export function uploadToCloudinary(
       } catch {
         // not JSON
       }
-      reject(new ApiError(`Không tải được ảnh lên${detail ? `: ${detail}` : ''}.`, xhr.status))
+      reject(new ApiError(detail ? t('Không tải được ảnh lên: {detail}.', { detail }) : t('Không tải được ảnh lên.'), xhr.status))
     }
-    xhr.onerror = () => reject(new ApiError('Không kết nối được tới máy chủ ảnh. Vui lòng thử lại.', 0))
+    xhr.onerror = () => reject(new ApiError(t('Không kết nối được tới máy chủ ảnh. Vui lòng thử lại.'), 0))
     xhr.send(form)
   })
 }

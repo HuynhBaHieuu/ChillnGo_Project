@@ -11,6 +11,7 @@ import { MediaSection } from '@/features/activity/sections/MediaSection'
 import { RecentlyDeletedSection } from '@/features/activity/sections/RecentlyDeletedSection'
 import { SavedSection } from '@/features/activity/sections/SavedSection'
 import { SearchHistorySection } from '@/features/activity/sections/SearchHistorySection'
+import { t, translatedList } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 interface Section {
@@ -22,7 +23,7 @@ interface Section {
 }
 
 /** The page's own navigation. Not part of the site's main navigation. */
-const SECTIONS: Section[] = [
+const SECTIONS: Section[] = translatedList<Section, 'label' | 'hint'>([
   { slug: 'interactions', label: 'Lượt tương tác', hint: 'Lượt thích, bình luận, chia sẻ lại, phản hồi tin và đánh giá', icon: Heart, render: () => <InteractionsSection /> },
   { slug: 'media', label: 'Ảnh và video', hint: 'Bài viết, video, tin và phát trực tiếp', icon: Images, render: () => <MediaSection /> },
   { slug: 'journeys', label: 'Hành trình', hint: 'Hành trình nháp chưa đăng', icon: MapIcon, render: () => <JourneysSection /> },
@@ -30,7 +31,7 @@ const SECTIONS: Section[] = [
   { slug: 'account-history', label: 'Lịch sử tài khoản', hint: 'Các thay đổi trên tài khoản', icon: Clock, render: () => <AccountHistorySection /> },
   { slug: 'recently-deleted', label: 'Đã xoá gần đây', hint: 'Khôi phục trong 30 ngày', icon: Trash2, render: () => <RecentlyDeletedSection /> },
   { slug: 'saved', label: 'Đã lưu', hint: 'Hành trình bạn đã lưu', icon: Bookmark, render: () => <SavedSection /> },
-]
+], ['label', 'hint'])
 
 /**
  * /activity/:section — Hoạt động của bạn, mở từ menu avatar.
@@ -56,12 +57,12 @@ export function ActivityPage() {
         <aside className={cn('min-w-0 lg:block', section && 'hidden')}>
           <div className="lg:sticky lg:top-28">
             <div className="animate-fade-rise mb-6 lg:mb-5 lg:px-2">
-              <h1 className="font-display text-4xl leading-[1.05] tracking-tight lg:text-3xl">Hoạt động của bạn</h1>
+              <h1 className="font-display text-4xl leading-[1.05] tracking-tight lg:text-3xl">{t('Hoạt động của bạn')}</h1>
               <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground lg:text-[13px]">
-                Xem lại và quản lý mọi hoạt động của bạn trên ChillnGo.
+                {t('Xem lại và quản lý mọi hoạt động của bạn trên ChillnGo.')}
               </p>
             </div>
-            <nav aria-label="Các mục trong Hoạt động của bạn" className="liquid-glass np-surface rounded-2xl p-2">
+            <nav aria-label={t('Các mục trong Hoạt động của bạn')} className="liquid-glass np-surface rounded-2xl p-2">
               <ul className="space-y-0.5">
                 {SECTIONS.map((s) => (
                   <li key={s.slug}>
@@ -80,7 +81,7 @@ export function ActivityPage() {
             className="mb-5 inline-flex items-center gap-1 rounded-full py-1 pr-3 text-sm font-medium text-muted-foreground transition-colors hover:text-np-cream lg:hidden"
           >
             <ChevronLeft className="size-4" aria-hidden />
-            Hoạt động của bạn
+            {t('Hoạt động của bạn')}
           </Link>
           <div key={shown.slug} className="animate-fade-rise">
             {shown.render()}

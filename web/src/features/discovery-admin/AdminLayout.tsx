@@ -3,9 +3,11 @@ import { useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ADMIN_SECTIONS, sectionsFor } from '@/features/discovery-admin/admin/sections'
 import { Avatar, NoticeBar, RoleBadge } from '@/features/discovery-admin/admin/shared'
 import type { Notice } from '@/features/discovery-admin/admin/shared'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store'
 
@@ -41,11 +43,11 @@ export function AdminLayout() {
         <Link to="/admin" className="px-4">
           <span className="block font-display text-2xl tracking-tight">ChillnGo</span>
           <span className="block text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Quản trị hệ thống
+            {t('Quản trị hệ thống')}
           </span>
         </Link>
 
-        <nav aria-label="Mục quản trị" className="mt-8 flex flex-col gap-1">
+        <nav aria-label={t('Mục quản trị')} className="mt-8 flex flex-col gap-1">
           {sections.map(({ path, label, icon: Icon }) => (
             <NavLink key={path} to={`/admin/${path}`} className={navLinkClass}>
               <Icon className="size-4" aria-hidden />
@@ -55,6 +57,7 @@ export function AdminLayout() {
         </nav>
 
         <div className="mt-auto space-y-3">
+          <LanguageSwitcher className="w-full justify-start" />
           <div className="flex items-center gap-3 rounded-2xl bg-muted p-3">
             <Avatar user={user} />
             <div className="min-w-0">
@@ -68,7 +71,7 @@ export function AdminLayout() {
             className="flex w-full items-center gap-3 rounded-full px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <LogOut className="size-4" aria-hidden />
-            Đăng xuất
+            {t('Đăng xuất')}
           </button>
         </div>
       </aside>
@@ -80,17 +83,18 @@ export function AdminLayout() {
             <Link to="/admin">
               <span className="block font-display text-xl tracking-tight">ChillnGo</span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                Quản trị hệ thống
+                {t('Quản trị hệ thống')}
               </span>
             </Link>
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <RoleBadge role={user.role} />
-              <button type="button" onClick={handleSignOut} aria-label="Đăng xuất" className="grid size-9 place-items-center rounded-full hover:bg-muted">
+              <button type="button" onClick={handleSignOut} aria-label={t('Đăng xuất')} className="grid size-9 place-items-center rounded-full hover:bg-muted">
                 <LogOut className="size-4" aria-hidden />
               </button>
             </div>
           </div>
-          <nav aria-label="Mục quản trị" className="flex gap-1 overflow-x-auto px-3 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <nav aria-label={t('Mục quản trị')} className="flex gap-1 overflow-x-auto px-3 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {sections.map(({ path, label, icon: Icon }) => (
               <NavLink key={path} to={`/admin/${path}`} className={(s) => cn(navLinkClass(s), 'shrink-0 px-3 py-2')}>
                 <Icon className="size-4" aria-hidden />
@@ -117,8 +121,8 @@ export function AdminIndex() {
   return (
     <EmptyState
       icon={ShieldOff}
-      title="Chưa được cấp quyền"
-      description="Tài khoản Admin của bạn chưa được Super Admin cấp quyền cho mục nào."
+      title={t('Chưa được cấp quyền')}
+      description={t('Tài khoản Admin của bạn chưa được Super Admin cấp quyền cho mục nào.')}
     />
   )
 }

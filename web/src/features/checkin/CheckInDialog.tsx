@@ -20,6 +20,8 @@ import { FEELING_OPTIONS, feelingOption } from '@/lib/feelings'
 import type { FeelingKind } from '@/lib/feelings'
 import { canSearchPlaces, getDevicePosition, placeAt, searchPlaces } from '@/lib/geo'
 import type { Place } from '@/lib/geo'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, checkImageFile } from '@/lib/images'
 import { cn } from '@/lib/utils'
 import { activityService, checkinService } from '@/services'
@@ -100,7 +102,7 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
 
     setPhotoError(
       problems[0] ??
-        (files.length - problems.length > room ? `Mỗi check-in tối đa ${MAX_CHECKIN_PHOTOS} ảnh.` : null),
+        (files.length - problems.length > room ? t('Mỗi check-in tối đa {n} ảnh.', { n: MAX_CHECKIN_PHOTOS }) : null),
     )
     setPhotos((current) => [...current, ...usable.map((file) => ({ file, preview: URL.createObjectURL(file) }))])
   }
@@ -136,15 +138,15 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <DialogHeader>
-        <DialogTitle>Check-in</DialogTitle>
+        <DialogTitle>{t('Check-in')}</DialogTitle>
         <DialogDescription>
-          Chia sẻ nơi bạn đang đến và cảm xúc lúc này, {user.displayName}.
+          {t('Chia sẻ nơi bạn đang đến và cảm xúc lúc này, {name}.', { name: user.displayName })}
         </DialogDescription>
       </DialogHeader>
 
       {/* Photos */}
       <section className="space-y-2">
-        <p className="text-sm font-medium">Ảnh</p>
+        <p className="text-sm font-medium">{t('Ảnh')}</p>
         <div className="grid grid-cols-4 gap-2">
           {photos.map((photo, index) => (
             <div key={photo.preview} className="relative aspect-square overflow-hidden rounded-xl border border-foreground/10">
@@ -153,7 +155,7 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
                 type="button"
                 onClick={() => removePhoto(index)}
                 disabled={post.isPending}
-                aria-label={`Bỏ ảnh ${index + 1}`}
+                aria-label={t('Bỏ ảnh {n}', { n: index + 1 })}
                 className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-foreground/80 text-background hover:bg-foreground"
               >
                 <X className="size-3.5" aria-hidden />
@@ -168,11 +170,11 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
               className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-foreground/25 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/50 hover:text-foreground"
             >
               <ImagePlus className="size-6 text-emerald-600" aria-hidden />
-              Thêm ảnh
+              {t('Thêm ảnh')}
             </button>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">{ACCEPTED_LABEL}, tối đa 15 MB mỗi ảnh. Ảnh được tự nén trước khi tải lên.</p>
+        <p className="text-xs text-muted-foreground">{t('{formats}, tối đa 15 MB mỗi ảnh. Ảnh được tự nén trước khi tải lên.', { formats: ACCEPTED_LABEL })}</p>
         {photoError && (
           <p role="alert" className="text-xs text-destructive">
             {photoError}
@@ -185,7 +187,7 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
           multiple
           className="sr-only"
           tabIndex={-1}
-          aria-label="Chọn ảnh check-in"
+          aria-label={t('Chọn ảnh check-in')}
           onChange={(e) => {
             addFiles(e.target.files)
             e.target.value = ''
@@ -195,7 +197,7 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
 
       {/* Caption */}
       <section className="space-y-2">
-        <Label htmlFor="checkin-caption">Bạn thấy nơi này thế nào?</Label>
+        <Label htmlFor="checkin-caption">{t('Bạn thấy nơi này thế nào?')}</Label>
         <Textarea
           id="checkin-caption"
           rows={3}
@@ -223,21 +225,21 @@ function CheckInForm({ user, start, onDone }: { user: User; start: CheckInStart;
 
       <DialogFooter className="gap-2">
         <Button type="button" variant="outline" onClick={onDone} disabled={post.isPending}>
-          Huỷ
+          {t('Huỷ')}
         </Button>
         <Button type="submit" disabled={!hasContent || post.isPending}>
           {post.isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-          {progress !== null && progress < 100 ? `Đang tải ảnh… ${progress}%` : 'Đăng check-in'}
+          {progress !== null && progress < 100 ? t('Đang tải ảnh… {progress}%', { progress }) : t('Đăng check-in')}
         </Button>
       </DialogFooter>
       {!hasContent && (
-        <p className="text-right text-xs text-muted-foreground">Thêm ảnh, cảm xúc hoặc vài dòng chia sẻ để đăng.</p>
+        <p className="text-right text-xs text-muted-foreground">{t('Thêm ảnh, cảm xúc hoặc vài dòng chia sẻ để đăng.')}</p>
       )}
     </form>
   )
 }
 
-const KIND_LABELS: Record<FeelingKind, string> = { feeling: 'Cảm xúc', activity: 'Hoạt động' }
+const KIND_LABELS: Record<FeelingKind, MessageKey> = { feeling: 'Cảm xúc', activity: 'Hoạt động#activity' }
 
 /** Pick one feeling or activity; shown as "… đang cảm thấy thư giãn". */
 function FeelingPicker({
@@ -258,16 +260,16 @@ function FeelingPicker({
     <section ref={ref} className="space-y-2" aria-labelledby="checkin-feeling-heading">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p id="checkin-feeling-heading" className="text-sm font-medium">
-          Cảm xúc / Hoạt động
+          {t('Cảm xúc / Hoạt động')}
         </p>
         {chosen && (
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)} disabled={disabled}>
-            Bỏ chọn
+            {t('Bỏ chọn')}
           </Button>
         )}
       </div>
 
-      <div role="tablist" aria-label="Loại" className="inline-flex rounded-full bg-muted p-1 text-xs font-semibold">
+      <div role="tablist" aria-label={t('Loại')} className="inline-flex rounded-full bg-muted p-1 text-xs font-semibold">
         {(Object.keys(KIND_LABELS) as FeelingKind[]).map((k) => (
           <button
             key={k}
@@ -280,7 +282,7 @@ function FeelingPicker({
               kind === k ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            {KIND_LABELS[k]}
+            {t(KIND_LABELS[k])}
           </button>
         ))}
       </div>
@@ -363,7 +365,7 @@ function PlacePicker({
     try {
       const { lat, lng } = await getDevicePosition()
       const named = await placeAt(lat, lng).catch(() => null)
-      onChange(named ?? { name: 'Vị trí hiện tại', address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`, lat, lng })
+      onChange(named ?? { name: t('Vị trí hiện tại'), address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`, lat, lng })
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -374,7 +376,7 @@ function PlacePicker({
   if (value) {
     return (
       <section className="space-y-2">
-        <p className="text-sm font-medium">Địa điểm</p>
+        <p className="text-sm font-medium">{t('Địa điểm#place')}</p>
         <div className="flex items-start gap-3 rounded-2xl bg-muted p-3">
           <MapPin className="mt-0.5 size-5 shrink-0 text-orange-500" aria-hidden />
           <div className="min-w-0 flex-1 text-sm">
@@ -382,7 +384,7 @@ function PlacePicker({
             {value.address && <p className="text-xs text-muted-foreground">{value.address}</p>}
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)} disabled={disabled}>
-            Đổi
+            {t('Đổi')}
           </Button>
         </div>
       </section>
@@ -392,17 +394,17 @@ function PlacePicker({
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium">Địa điểm</p>
+        <p className="text-sm font-medium">{t('Địa điểm#place')}</p>
         <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={useMyLocation} disabled={disabled || locating}>
           {locating ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <LocateFixed className="size-4" aria-hidden />}
-          Dùng vị trí hiện tại
+          {t('Dùng vị trí hiện tại')}
         </Button>
       </div>
 
       {canSearchPlaces && (
         <div className="space-y-1.5">
           <Label htmlFor="checkin-place-search" className="text-xs">
-            Hoặc tìm theo tên địa điểm
+            {t('Hoặc tìm theo tên địa điểm')}
           </Label>
           <div className="relative">
             <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -451,7 +453,7 @@ function PlacePicker({
             </ul>
           )}
           {query.trim().length >= 2 && !searching && shown.length === 0 && !error && (
-            <p className="text-xs text-muted-foreground">Không tìm thấy địa điểm phù hợp.</p>
+            <p className="text-xs text-muted-foreground">{t('Không tìm thấy địa điểm phù hợp.')}</p>
           )}
         </div>
       )}
@@ -461,7 +463,7 @@ function PlacePicker({
           {error}
         </p>
       )}
-      <p className="text-xs text-muted-foreground">Không bắt buộc. Check-in vẫn đăng được khi không có địa điểm.</p>
+      <p className="text-xs text-muted-foreground">{t('Không bắt buộc. Check-in vẫn đăng được khi không có địa điểm.')}</p>
     </section>
   )
 }

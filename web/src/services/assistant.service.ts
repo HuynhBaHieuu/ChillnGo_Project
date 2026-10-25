@@ -9,6 +9,8 @@ import { useAuthStore } from '@/store/auth.store'
 
 import { ApiError } from './client'
 import { apiUrl } from './http'
+import { t } from '@/i18n'
+import { translateServerMessage } from '@/i18n/server'
 
 export interface AssistantMessage {
   role: 'user' | 'assistant'
@@ -30,14 +32,18 @@ export async function streamReply(messages: AssistantMessage[], onText: (text: s
     })
   } catch (error) {
     if (signal.aborted) throw error
-    throw new ApiError('Không kết nối được máy chủ. Vui lòng thử lại sau.', 0)
+    throw new ApiError(t('Không kết nối được máy chủ. Vui lòng thử lại sau.'), 0)
   }
 
   if (!response.ok || !response.body) {
     const data = (await response.json().catch(() => null)) as { message?: string; code?: string } | null
     // Same as http(): a rejected token means the stored session is dead.
     if (response.status === 401 && token) useAuthStore.getState().signOut()
-    throw new ApiError(data?.message ?? `Máy chủ trả về lỗi ${response.status}`, response.status, data?.code)
+    throw new ApiError(
+      data?.message ? translateServerMessage(data.message) : t('Máy chủ trả về lỗi {status}', { status: response.status }),
+      response.status,
+      data?.code,
+    )
   }
 
   const reader = response.body.getReader()

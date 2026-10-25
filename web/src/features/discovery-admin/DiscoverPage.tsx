@@ -19,6 +19,7 @@ import { PhotoTile } from '@/features/discovery-admin/components/PhotoTile'
 import { ShareTripBanner } from '@/features/discovery-admin/components/ShareTripBanner'
 import { TripOfTheYearBanner } from '@/features/discovery-admin/components/TripOfTheYearBanner'
 import { pickInterestTiles } from '@/features/discovery-admin/interests'
+import { t, tx } from '@/i18n'
 import { REGIONS, REGION_LABELS, SEASON_LABELS } from '@/lib/format'
 import { qk } from '@/lib/queryKeys'
 import { activityService, discoveryService } from '@/services'
@@ -127,11 +128,11 @@ export function DiscoverPage() {
   }
 
   const resultsTitle = filters.query.trim()
-    ? `Kết quả cho “${filters.query.trim()}”`
-    : 'Hành trình phù hợp'
+    ? t('Kết quả cho “{query}”', { query: filters.query.trim() })
+    : t('Hành trình phù hợp')
   const resultsDescription = [
     filters.region !== 'all' && REGION_LABELS[filters.region],
-    ...filters.tags,
+    ...filters.tags.map((tag) => tx(tag)),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -154,13 +155,13 @@ export function DiscoverPage() {
           title={resultsTitle}
           description={
             resultsPending
-              ? 'Đang tìm hành trình…'
-              : `${results?.length ?? 0} hành trình${resultsDescription ? ` · ${resultsDescription}` : ''}`
+              ? t('Đang tìm hành trình…')
+              : `${t('{n} hành trình', { n: results?.length ?? 0 })}${resultsDescription ? ` · ${resultsDescription}` : ''}`
           }
           action={
             <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
               <X />
-              Xóa bộ lọc
+              {t('Xóa bộ lọc')}
             </Button>
           }
           className="animate-fade-rise mt-16"
@@ -180,8 +181,8 @@ export function DiscoverPage() {
           ) : (
             <EmptyState
               icon={SearchX}
-              title="Không có hành trình nào khớp"
-              description="Thử một từ khóa khác hoặc chọn khu vực “Tất cả”."
+              title={t('Không có hành trình nào khớp')}
+              description={t('Thử một từ khóa khác hoặc chọn khu vực “Tất cả”.')}
             />
           )}
         </DiscoverSection>
@@ -203,7 +204,7 @@ export function DiscoverPage() {
       )}
 
       {bands.food.length >= MIN_ROW && (
-        <DiscoverSection title="Ăn ngon khắp ba miền" className="mt-20">
+        <DiscoverSection title={t('Ăn ngon khắp ba miền')} className="mt-20">
           <CardCarousel
             items={bands.food}
             getKey={(p) => p._id}
@@ -214,8 +215,8 @@ export function DiscoverPage() {
 
       {bands.loved.length >= MIN_ROW && (
         <DiscoverSection
-          title="Hành trình được yêu thích"
-          description="Được cộng đồng thả tim nhiều nhất"
+          title={t('Hành trình được yêu thích')}
+          description={t('Được cộng đồng thả tim nhiều nhất')}
           className="mt-20"
         >
           <CardCarousel
@@ -230,7 +231,7 @@ export function DiscoverPage() {
 
       {bands.inspiration.length >= MIN_ROW && (
         <GlassCard className="np-surface mt-20 px-5 py-10 sm:px-10">
-          <DiscoverSection title="Cảm hứng cho chuyến đi tới">
+          <DiscoverSection title={t('Cảm hứng cho chuyến đi tới')}>
             <CardCarousel
               items={bands.inspiration}
               getKey={(p) => p._id}
@@ -244,8 +245,8 @@ export function DiscoverPage() {
 
       {bands.seasonal.length >= MIN_ROW && (
         <DiscoverSection
-          title={`Đi đâu ${SEASON_LABELS[season].toLowerCase()} này?`}
-          description={`Những hành trình hợp nhất với ${SEASON_LABELS[season].toLowerCase()}`}
+          title={t('Đi đâu {season} này?', { season: SEASON_LABELS[season].toLowerCase() })}
+          description={t('Những hành trình hợp nhất với {season}', { season: SEASON_LABELS[season].toLowerCase() })}
           className="mt-20"
         >
           <CardCarousel
@@ -257,7 +258,7 @@ export function DiscoverPage() {
       )}
 
       {regions.length >= MIN_ROW && (
-        <DiscoverSection title="Điểm đến không thể bỏ lỡ" className="mt-20">
+        <DiscoverSection title={t('Điểm đến không thể bỏ lỡ')} className="mt-20">
           <CardCarousel
             items={regions}
             getKey={(r) => r.region}
@@ -278,13 +279,10 @@ export function DiscoverPage() {
 
       <section className="mt-20 max-w-5xl">
         <h2 className="font-display text-2xl leading-tight tracking-tight md:text-3xl">
-          ChillnGo: cộng đồng của những người mê xê dịch
+          {t('ChillnGo: cộng đồng của những người mê xê dịch')}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-          ChillnGo giúp bạn đi những chuyến đi trọn vẹn hơn: đọc lịch trình thật từ người đã đi,
-          xem chi phí từng điểm dừng, lưu lại những hành trình bạn thích và sao chép thành lịch
-          trình của riêng mình chỉ với một chạm. Mỗi hành trình bạn chia sẻ lại trở thành cảm hứng
-          cho chuyến đi tiếp theo của ai đó.
+          {t('ChillnGo giúp bạn đi những chuyến đi trọn vẹn hơn: đọc lịch trình thật từ người đã đi, xem chi phí từng điểm dừng, lưu lại những hành trình bạn thích và sao chép thành lịch trình của riêng mình chỉ với một chạm. Mỗi hành trình bạn chia sẻ lại trở thành cảm hứng cho chuyến đi tiếp theo của ai đó.')}
         </p>
       </section>
     </PageContainer>

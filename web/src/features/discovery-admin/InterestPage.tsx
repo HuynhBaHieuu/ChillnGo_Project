@@ -18,6 +18,7 @@ import { InterestHero } from '@/features/discovery-admin/components/InterestHero
 import { PhotoTile } from '@/features/discovery-admin/components/PhotoTile'
 import { StoryCard } from '@/features/discovery-admin/components/StoryCard'
 import { interestHeadline, pickInterestTiles } from '@/features/discovery-admin/interests'
+import { t, tx } from '@/i18n'
 import { REGIONS, REGION_LABELS } from '@/lib/format'
 import { qk } from '@/lib/queryKeys'
 import { discoveryService } from '@/services'
@@ -79,7 +80,7 @@ export function InterestPage() {
       className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
       <ArrowLeft className="size-4" />
-      Khám phá
+      {t('Khám phá')}
     </Link>
   )
 
@@ -103,11 +104,11 @@ export function InterestPage() {
         {back}
         <EmptyState
           icon={SearchX}
-          title={`Chưa có hành trình nào về “${tag}”`}
-          description="Thử một sở thích khác bên dưới, hoặc là người đầu tiên chia sẻ."
+          title={t('Chưa có hành trình nào về “{tag}”', { tag: tx(tag) })}
+          description={t('Thử một sở thích khác bên dưới, hoặc là người đầu tiên chia sẻ.')}
         />
         {view.others.length > 0 && (
-          <InterestGrid tiles={view.others} title="Sở thích khác" className="mt-16" />
+          <InterestGrid tiles={view.others} title={t('Sở thích khác')} className="mt-16" />
         )}
       </PageContainer>
     )
@@ -119,7 +120,7 @@ export function InterestPage() {
 
       <InterestHero
         title={interestHeadline(tag)}
-        subtitle={`${view.trips.length} hành trình gắn thẻ “${tag}”`}
+        subtitle={t('{n} hành trình gắn thẻ “{tag}”', { n: view.trips.length, tag: tx(tag) })}
         images={view.covers}
       />
 
@@ -131,10 +132,10 @@ export function InterestPage() {
           </span>
           <div>
             <h2 className="font-display text-2xl leading-tight tracking-tight md:text-3xl">
-              Bảng xếp hạng cộng đồng
+              {t('Bảng xếp hạng cộng đồng')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Những hành trình “{tag}” được lưu nhiều nhất
+              {t('Những hành trình “{tag}” được lưu nhiều nhất', { tag: tx(tag) })}
             </p>
           </div>
         </div>
@@ -149,8 +150,8 @@ export function InterestPage() {
 
       {view.featured && view.newest.length >= MIN_ROW && (
         <DiscoverSection
-          title="Câu chuyện nổi bật"
-          description="Được thả tim nhiều nhất, cùng những chuyến mới đăng"
+          title={t('Câu chuyện nổi bật')}
+          description={t('Được thả tim nhiều nhất, cùng những chuyến mới đăng')}
           className="mt-20"
         >
           <FeaturedStory post={view.featured} className="aspect-[4/3] sm:aspect-[16/7] lg:aspect-[16/5]" />
@@ -166,7 +167,7 @@ export function InterestPage() {
       {view.spreadPhoto && view.cheapest.length >= MIN_ROW && (
         <section className="mt-20 grid gap-8 lg:grid-cols-2">
           <FeaturedStory post={view.spreadPhoto} className="aspect-[4/3] lg:aspect-auto lg:min-h-[36rem]" />
-          <DiscoverSection title="Đi vừa túi tiền" description="Từ chuyến rẻ nhất trở lên">
+          <DiscoverSection title={t('Đi vừa túi tiền')} description={t('Từ chuyến rẻ nhất trở lên')}>
             <div className="grid grid-cols-2 gap-x-4 gap-y-8">
               {view.cheapest.map((p) => (
                 <DiscoverCard key={p._id} post={p} chip={REGION_LABELS[p.region]} />
@@ -177,7 +178,7 @@ export function InterestPage() {
       )}
 
       {view.regions.length > 0 && (
-        <DiscoverSection title={`Đi đâu để “${tag}”`} className="mt-20">
+        <DiscoverSection title={t('Đi đâu để “{tag}”', { tag: tx(tag) })} className="mt-20">
           <CardCarousel
             items={view.regions}
             getKey={(r) => r.region}
@@ -193,8 +194,8 @@ export function InterestPage() {
       )}
 
       <DiscoverSection
-        title="Nhật ký hành trình"
-        description="Lên kế hoạch cho chuyến tới, đọc từ người đã đi"
+        title={t('Nhật ký hành trình')}
+        description={t('Lên kế hoạch cho chuyến tới, đọc từ người đã đi')}
         className="mt-20"
       >
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,8 +211,8 @@ export function InterestPage() {
       {view.others.length > 0 && (
         <InterestGrid
           tiles={view.others}
-          title="Sở thích khác"
-          description="Còn nhiều cách khác để lên đường."
+          title={t('Sở thích khác')}
+          description={t('Còn nhiều cách khác để lên đường.')}
           className="mt-20"
         />
       )}

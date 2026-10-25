@@ -1,19 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { localeTag, t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
 import { REACTION_KINDS } from '@/services/livestream.service'
 import type { Livestream, ReactionKind } from '@/services/livestream.service'
 
-export const REACTIONS: Record<ReactionKind, { emoji: string; label: string }> = {
-  heart: { emoji: '❤️', label: 'Thả tim' },
-  fire: { emoji: '🔥', label: 'Cháy quá' },
-  clap: { emoji: '👏', label: 'Vỗ tay' },
-  wow: { emoji: '😮', label: 'Wow' },
-  haha: { emoji: '😂', label: 'Haha' },
+/** A reaction whose label translates on every read. */
+function reaction(emoji: string, label: MessageKey): { readonly emoji: string; readonly label: string } {
+  return {
+    emoji,
+    get label() {
+      return t(label)
+    },
+  }
+}
+
+export const REACTIONS: Record<ReactionKind, { readonly emoji: string; readonly label: string }> = {
+  heart: reaction('❤️', 'Thả tim'),
+  fire: reaction('🔥', 'Cháy quá'),
+  clap: reaction('👏', 'Vỗ tay'),
+  wow: reaction('😮', 'Wow'),
+  haha: reaction('😂', 'Haha'),
 }
 
 /** 1234 → "1,2 N" (Vietnamese compact notation). */
 export function compact(n: number): string {
-  return new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
+  return new Intl.NumberFormat(localeTag(), { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 }
 
 /** 3725 → "1 giờ 2 phút", 185 → "3 phút 5 giây". */
@@ -21,9 +33,9 @@ export function formatDuration(totalSec: number): string {
   const h = Math.floor(totalSec / 3600)
   const m = Math.floor((totalSec % 3600) / 60)
   const s = totalSec % 60
-  if (h) return m ? `${h} giờ ${m} phút` : `${h} giờ`
-  if (m) return s ? `${m} phút ${s} giây` : `${m} phút`
-  return `${s} giây`
+  if (h) return m ? t('{h} giờ {n} phút', { h, n: m }) : t('{n} giờ', { n: h })
+  if (m) return s ? t('{m} phút {s} giây', { m, s }) : t('{n} phút', { n: m })
+  return t('{n} giây', { n: s })
 }
 
 /** A running time: 754 → "12:34", 3725 → "1:02:05". */
@@ -59,12 +71,11 @@ export function useElapsed(baseSec: number, baseAt: number): number {
   return Math.max(0, baseSec + (now - baseAt) / 1000)
 }
 
-const clock = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit' })
-const day = new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-
 /** "18:01, 26/09/2026". (vi-VN's long style adds its own "lúc", which reads badly after "phát lúc".) */
 export function formatStart(iso: string): string {
   const date = new Date(iso)
+  const clock = new Intl.DateTimeFormat(localeTag(), { hour: '2-digit', minute: '2-digit' })
+  const day = new Intl.DateTimeFormat(localeTag(), { day: '2-digit', month: '2-digit', year: 'numeric' })
   return `${clock.format(date)}, ${day.format(date)}`
 }
 

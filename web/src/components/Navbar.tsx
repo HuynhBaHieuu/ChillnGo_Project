@@ -13,7 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { useLiveNow } from '@/features/livestream/useLiveNow'
+import { t, translatedList } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { useAuthStore, useUiStore } from '@/store'
 
@@ -21,13 +23,13 @@ import { useAuthStore, useUiStore } from '@/store'
  * "Về ChillnGo" points at the landing page — the hero is where the product's
  * mission is stated, so there is no separate about route.
  */
-const NAV_LINKS = [
+const NAV_LINKS = translatedList([
   { to: '/discover', label: 'Khám phá' },
   { to: '/feed', label: 'Newsfeed' },
   { to: '/live', label: 'Đang live' },
   { to: '/itineraries', label: 'Hành trình của tôi' },
   { to: '/', label: 'Về ChillnGo' },
-] as const
+] as const, ['label'])
 
 /**
  * The home page alternates forest and paper sections, so it gets a transparent
@@ -113,7 +115,7 @@ function LiveCount({ className }: { className?: string }) {
   if (!data?.length) return null
   return (
     <span
-      aria-label={`${data.length} người đang phát trực tiếp`}
+      aria-label={t('{n} người đang phát trực tiếp', { n: data.length })}
       className={cn('inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold leading-5 text-white', className)}
     >
       {data.length}
@@ -138,6 +140,8 @@ function NavControls() {
 
   return (
     <div className="flex items-center gap-3">
+      <LanguageSwitcher />
+
       {isAuthenticated && user ? (
         <>
           <NotificationBell />
@@ -150,10 +154,10 @@ function NavControls() {
             to="/login"
             className="nav-login hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
-            Đăng nhập
+            {t('Đăng nhập')}
           </Link>
           <GlassButton asChild size="md" tone="beam">
-            <Link to="/register">Bắt đầu ngay</Link>
+            <Link to="/register">{t('Bắt đầu ngay')}</Link>
           </GlassButton>
         </>
       )}
@@ -163,7 +167,7 @@ function NavControls() {
         <SheetTrigger asChild>
           <button
             type="button"
-            aria-label="Mở menu"
+            aria-label={t('Mở menu')}
             className="liquid-glass liquid-glass-interactive flex size-10 items-center justify-center rounded-full text-foreground xl:hidden"
           >
             <Menu className="relative z-[1] size-4" />
@@ -178,7 +182,7 @@ function NavControls() {
           <div className="flex flex-col gap-1">
             {NAV_LINKS.map((link) => (
               <NavLink
-                key={link.label}
+                key={link.to}
                 to={link.to}
                 end={link.to === '/'}
                 onClick={() => setMobileNavOpen(false)}
@@ -201,7 +205,7 @@ function NavControls() {
                 <GlassButton asChild size="lg" className="w-full">
                   <Link to="/posts/new" onClick={() => setMobileNavOpen(false)}>
                     <PenSquare />
-                    Đăng bài mới
+                    {t('Đăng bài mới')}
                   </Link>
                 </GlassButton>
                 <button
@@ -209,14 +213,14 @@ function NavControls() {
                   onClick={handleSignOut}
                   className="rounded-xl px-3 py-3 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Đăng xuất
+                  {t('Đăng xuất')}
                 </button>
               </>
             ) : (
               <>
                 <GlassButton asChild size="lg" tone="beam" className="w-full">
                   <Link to="/register" onClick={() => setMobileNavOpen(false)}>
-                    Bắt đầu ngay
+                    {t('Bắt đầu ngay')}
                   </Link>
                 </GlassButton>
                 <Link
@@ -224,7 +228,7 @@ function NavControls() {
                   onClick={() => setMobileNavOpen(false)}
                   className="rounded-xl px-3 py-3 text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Đăng nhập
+                  {t('Đăng nhập')}
                 </Link>
               </>
             )}

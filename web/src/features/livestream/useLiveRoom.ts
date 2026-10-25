@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { mediaErrorMessage } from '@/features/livestream/media'
 import type { DevicePick } from '@/features/livestream/media'
 import type { LiveComment, LiveConnection, ReactionKind } from '@/services/livestream.service'
+import { t } from '@/i18n'
 
 /** Same topic the server sends on (server/src/lib/livekit.ts). */
 const DATA_TOPIC = 'chillngo'
@@ -189,9 +190,9 @@ export function useLiveRoom({ connection, hostId, devices, ...handlers }: Option
         else if (reason === DisconnectReason.PARTICIPANT_REMOVED) callbacks.current.onRemoved()
         else if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
           // Only the host has a fixed identity: viewers can watch from as many tabs as they like.
-          setError('Bạn đang phát livestream này ở một thẻ hoặc thiết bị khác.')
+          setError(t('Bạn đang phát livestream này ở một thẻ hoặc thiết bị khác.'))
         } else if (reason !== DisconnectReason.CLIENT_INITIATED) {
-          setError('Mất kết nối tới livestream. Kiểm tra mạng rồi tải lại trang.')
+          setError(t('Mất kết nối tới livestream. Kiểm tra mạng rồi tải lại trang.'))
         }
       })
       .on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room.canPlaybackAudio))
@@ -225,7 +226,7 @@ export function useLiveRoom({ connection, hostId, devices, ...handlers }: Option
             await publishCamera(room, devices?.videoDeviceId ? { deviceId: devices.videoDeviceId } : undefined).catch(
               (e: unknown) => {
                 setCamOn(false)
-                setError(`${mediaErrorMessage(e)} Livestream tiếp tục với âm thanh.`)
+                setError(`${mediaErrorMessage(e)} ${t('Livestream tiếp tục với âm thanh.')}`)
               },
             )
           } else setCamOn(false)
@@ -234,7 +235,7 @@ export function useLiveRoom({ connection, hostId, devices, ...handlers }: Option
       } catch {
         if (!disposed) {
           setState('disconnected')
-          setError('Không kết nối được tới livestream. Vui lòng thử lại.')
+          setError(t('Không kết nối được tới livestream. Vui lòng thử lại.'))
         }
       }
     }
@@ -327,7 +328,7 @@ export function useLiveRoom({ connection, hostId, devices, ...handlers }: Option
         feed = undefined
       }
       if (!feed) {
-        setError('Không chuyển được sang camera khác.')
+        setError(t('Không chuyển được sang camera khác.'))
         feed = await openCamera(current ? { deviceId: { exact: current } } : {}).catch(() => openCamera())
       }
       await track.replaceTrack(feed, true)

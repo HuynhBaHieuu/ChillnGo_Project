@@ -8,10 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import type { LiveComment } from '@/services/livestream.service'
+import { localeTag, t } from '@/i18n'
 
 const COMMENT_MAX = 300
 
-const time = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit' })
+const time = { format: (date: Date) => new Intl.DateTimeFormat(localeTag(), { hour: '2-digit', minute: '2-digit' }).format(date) }
 
 interface LiveCommentsProps {
   comments: LiveComment[]
@@ -74,10 +75,10 @@ export function LiveComments({
 
   return (
     <section
-      aria-label="Bình luận trực tiếp"
+      aria-label={t('Bình luận trực tiếp')}
       className={cn('flex min-h-0 flex-col overflow-hidden rounded-2xl border-2 border-foreground bg-card', className)}
     >
-      <h2 className="border-b border-foreground/10 px-4 py-3 text-sm font-semibold">Bình luận</h2>
+      <h2 className="border-b border-foreground/10 px-4 py-3 text-sm font-semibold">{t('Bình luận')}</h2>
 
       <ol
         ref={list}
@@ -89,7 +90,7 @@ export function LiveComments({
         aria-live="polite"
       >
         {comments.length === 0 && (
-          <li className="py-8 text-center text-xs text-muted-foreground">Chưa có bình luận nào. Hãy là người đầu tiên!</li>
+          <li className="py-8 text-center text-xs text-muted-foreground">{t('Chưa có bình luận nào. Hãy là người đầu tiên!')}</li>
         )}
         {comments.map((c) => (
           <li key={c._id} className="animate-fade-rise group flex gap-2.5">
@@ -102,7 +103,7 @@ export function LiveComments({
                 <span className="font-semibold">{c.author.displayName}</span>
                 {c.author._id === hostId && (
                   <span className="ml-1.5 rounded-full bg-sunset/20 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
-                    Người phát
+                    {t('Người phát')}
                   </span>
                 )}
                 <time dateTime={c.createdAt} className="ml-1.5 text-[11px] text-muted-foreground">
@@ -116,7 +117,7 @@ export function LiveComments({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    aria-label={`Tuỳ chọn bình luận của ${c.author.displayName}`}
+                    aria-label={t('Tuỳ chọn bình luận của {name}', { name: c.author.displayName })}
                     className="ml-auto grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground opacity-60 hover:bg-muted hover:text-foreground hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100"
                   >
                     <MoreHorizontal className="size-4" aria-hidden />
@@ -125,12 +126,12 @@ export function LiveComments({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onSelect={() => onDelete(c)}>
                     <Trash2 />
-                    Xoá bình luận
+                    {t('Xoá bình luận')}
                   </DropdownMenuItem>
                   {isHost && onBlock && c.author._id !== hostId && (
                     <DropdownMenuItem onSelect={() => onBlock(c)} className="text-destructive focus:text-destructive">
                       <Ban />
-                      Chặn {c.author.displayName}
+                      {t('Chặn {name}', { name: c.author.displayName })}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -149,10 +150,10 @@ export function LiveComments({
               value={text}
               onChange={(e) => setText(e.target.value)}
               maxLength={COMMENT_MAX}
-              aria-label="Viết bình luận"
+              aria-label={t('Viết bình luận')}
               autoComplete="off"
             />
-            <Button type="submit" size="icon" className="size-10 shrink-0 rounded-full" disabled={!text.trim() || sending} aria-label="Gửi bình luận">
+            <Button type="submit" size="icon" className="size-10 shrink-0 rounded-full" disabled={!text.trim() || sending} aria-label={t('Gửi bình luận')}>
               {sending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Send className="size-4" aria-hidden />}
             </Button>
           </div>
