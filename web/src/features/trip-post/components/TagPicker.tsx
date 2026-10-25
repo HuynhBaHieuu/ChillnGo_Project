@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { useQuery } from '@tanstack/react-query'
 
 import { qk } from '@/lib/queryKeys'
+import { t, tx } from '@/i18n'
 import { discoveryService } from '@/services'
 
 interface TagPickerProps {
@@ -61,11 +62,11 @@ export function TagPicker({ value, onChange, max = 6 }: TagPickerProps) {
               key={tag}
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground"
             >
-              {tag}
+              {tx(tag)}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                aria-label={`Bỏ thẻ ${tag}`}
+                aria-label={t('Bỏ thẻ {tag}', { tag: tx(tag) })}
                 className="-mr-1 rounded-full p-0.5 transition-colors hover:bg-white/5"
               >
                 <X className="size-3" />
@@ -81,7 +82,7 @@ export function TagPicker({ value, onChange, max = 6 }: TagPickerProps) {
         onKeyDown={handleKeyDown}
         onBlur={() => addTag(draft)}
         disabled={value.length >= max}
-        aria-label={value.length >= max ? `Đã đủ tối đa ${max} thẻ` : 'Thêm thẻ, nhấn Enter để thêm'}
+        aria-label={value.length >= max ? t('Đã đủ tối đa {n} thẻ', { n: max }) : t('Thêm thẻ, nhấn Enter để thêm')}
       />
 
       {unused.length > 0 && value.length < max && (

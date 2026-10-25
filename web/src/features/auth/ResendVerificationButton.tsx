@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
+import { t } from '@/i18n'
+import { translateServerMessage } from '@/i18n/server'
 import { ApiError, authService } from '@/services'
 
 /** Matches RESEND_COOLDOWN_MS on the server. */
@@ -43,14 +45,14 @@ export function ResendVerificationButton({ email, justSent = false }: ResendVeri
         onClick={() => mutation.mutate()}
       >
         {mutation.isPending ? <Loader2 className="animate-spin" /> : <Mail />}
-        {waiting ? `Gửi lại email sau ${secondsLeft} giây` : 'Gửi lại email xác nhận'}
+        {waiting ? t('Gửi lại email sau {n} giây', { n: secondsLeft }) : t('Gửi lại email xác nhận')}
       </GlassButton>
 
       <p aria-live="polite" className="text-center text-xs">
         {mutation.isSuccess && (
           <span className="text-muted-foreground">
-            {mutation.data.message} Hãy mở email mới nhất, liên kết cũ không còn dùng được. Gmail có
-            thể gộp email mới vào cùng cuộc hội thoại với email trước.
+            {translateServerMessage(mutation.data.message)}{' '}
+            {t('Hãy mở email mới nhất, liên kết cũ không còn dùng được. Gmail có thể gộp email mới vào cùng cuộc hội thoại với email trước.')}
           </span>
         )}
         {mutation.isError && (
@@ -58,7 +60,7 @@ export function ResendVerificationButton({ email, justSent = false }: ResendVeri
             {(mutation.error as Error).message}{' '}
             {alreadyVerified && (
               <Link to="/login" className="font-semibold underline">
-                Đăng nhập
+                {t('Đăng nhập')}
               </Link>
             )}
           </span>

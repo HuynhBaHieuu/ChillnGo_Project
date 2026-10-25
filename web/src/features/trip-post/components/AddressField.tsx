@@ -9,6 +9,7 @@ import type { Place } from '@/lib/geo'
 import { UNPINNED, isPinned } from '@/lib/itinerary'
 import { googleMapsSearchUrl, looksLikeLinkOrCoordinates, resolveLinkOrCoordinates } from '@/lib/mapsLink'
 import type { ResolvedPlace } from '@/lib/mapsLink'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import type { TripLocation } from '@/services/types'
 
@@ -109,7 +110,7 @@ export function AddressField({ id, label, location, onChange }: AddressFieldProp
             aria-expanded={open}
             aria-controls={listId}
             aria-autocomplete="list"
-            placeholder="Gõ địa chỉ, hoặc dán link Google Maps / toạ độ"
+            placeholder={t('Gõ địa chỉ, hoặc dán link Google Maps / toạ độ')}
             className="pl-9 pr-9"
             onChange={(e) => {
               const text = e.target.value
@@ -168,12 +169,12 @@ export function AddressField({ id, label, location, onChange }: AddressFieldProp
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={() => setPicking(true)}>
           <MapIcon />
-          Chọn trên bản đồ
+          {t('Chọn trên bản đồ')}
         </Button>
         <Button type="button" variant="ghost" size="sm" asChild>
           <a href={googleMapsSearchUrl(address || location.name)} target="_blank" rel="noreferrer">
             <ExternalLink />
-            Mở Google Maps
+            {t('Mở Google Maps')}
           </a>
         </Button>
       </div>
@@ -181,17 +182,17 @@ export function AddressField({ id, label, location, onChange }: AddressFieldProp
       {pinned ? (
         <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-np-sage">
           <MapPin className="size-3.5 shrink-0" aria-hidden />
-          Đã ghim trên bản đồ · {location.lat.toFixed(5)}, {location.lng.toFixed(5)} ·
+          {t('Đã ghim trên bản đồ')} · {location.lat.toFixed(5)}, {location.lng.toFixed(5)} ·
           <a href={googleMapsUrl(location.lat, location.lng)} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-np-cream">
-            Xem trên Google Maps
+            {t('Xem trên Google Maps')}
           </a>
         </p>
       ) : (
         <p className={cn('flex items-start gap-1.5 text-xs', address.trim() ? 'text-[hsl(var(--np-ochre))]' : 'text-muted-foreground')}>
           <AlertCircle className="mt-px size-3.5 shrink-0" aria-hidden />
           {address.trim()
-            ? 'Chưa ghim. Chọn một gợi ý, dán link Google Maps, hoặc chọn trên bản đồ. Nếu không, khi lưu ChillnGo sẽ tự tìm theo địa chỉ.'
-            : 'Trên Google Maps: mở địa điểm → Chia sẻ → Sao chép đường liên kết, rồi dán vào đây.'}
+            ? t('Chưa ghim. Chọn một gợi ý, dán link Google Maps, hoặc chọn trên bản đồ. Nếu không, khi lưu ChillnGo sẽ tự tìm theo địa chỉ.')
+            : t('Trên Google Maps: mở địa điểm → Chia sẻ → Sao chép đường liên kết, rồi dán vào đây.')}
         </p>
       )}
 

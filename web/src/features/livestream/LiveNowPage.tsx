@@ -16,6 +16,7 @@ import { useLiveNow } from '@/features/livestream/useLiveNow'
 import { livestreamService, socialService } from '@/services'
 import type { Livestream } from '@/services/livestream.service'
 import { useAuthStore, useViewerId } from '@/store'
+import { t } from '@/i18n'
 
 type LiveTab = 'all' | 'following'
 
@@ -53,22 +54,22 @@ export function LiveNowPage() {
   const goLive = user && (
     <GlassButton size="md" tone="sunset" onClick={() => setGoingLive(true)}>
       <Video />
-      Phát trực tiếp
+      {t('Phát trực tiếp')}
     </GlassButton>
   )
 
   const noFollows = tab === 'following' && following.isSuccess && followingIds.length === 0
   const showAll = (
     <Button variant="outline" onClick={() => setParams({}, { replace: true })}>
-      Xem đề xuất
+      {t('Xem đề xuất')}
     </Button>
   )
 
   return (
     <PageContainer>
       <PageHeader
-        title="Đang live"
-        description="Những chuyến đi đang được phát trực tiếp trên ChillnGo, và các buổi đã phát để xem lại."
+        title={t('Đang live')}
+        description={t('Những chuyến đi đang được phát trực tiếp trên ChillnGo, và các buổi đã phát để xem lại.')}
         action={goLive}
       />
 
@@ -78,12 +79,12 @@ export function LiveNowPage() {
       >
         <TabsList className="max-w-full overflow-x-auto">
           <TabsTrigger value="all">
-            Đề xuất
+            {t('Đề xuất')}
             <Count n={everyone.data?.length ?? 0} />
           </TabsTrigger>
           {viewerId && (
             <TabsTrigger value="following">
-              Đang theo dõi
+              {t('Đang theo dõi')}
               <Count n={followedLiveCount} />
             </TabsTrigger>
           )}
@@ -97,8 +98,8 @@ export function LiveNowPage() {
             empty={
               <EmptyState
                 icon={Radio}
-                title="Chưa có ai đang live"
-                description="Khi có người bắt đầu phát trực tiếp, buổi phát sẽ hiện ở đây. Trang tự cập nhật, bạn không cần tải lại."
+                title={t('Chưa có ai đang live')}
+                description={t('Khi có người bắt đầu phát trực tiếp, buổi phát sẽ hiện ở đây. Trang tự cập nhật, bạn không cần tải lại.')}
                 action={goLive}
               />
             }
@@ -111,13 +112,13 @@ export function LiveNowPage() {
             {noFollows ? (
               <EmptyState
                 icon={Users}
-                title="Bạn chưa theo dõi ai"
-                description="Theo dõi những người đi cùng gu để thấy ngay khi họ phát trực tiếp."
+                title={t('Bạn chưa theo dõi ai')}
+                description={t('Theo dõi những người đi cùng gu để thấy ngay khi họ phát trực tiếp.')}
                 action={
                   <div className="flex flex-wrap justify-center gap-2">
                     {showAll}
                     <Button asChild variant="outline">
-                      <Link to="/discover">Khám phá</Link>
+                      <Link to="/discover">{t('Khám phá')}</Link>
                     </Button>
                   </div>
                 }
@@ -131,8 +132,8 @@ export function LiveNowPage() {
                   empty={
                     <EmptyState
                       icon={Radio}
-                      title="Chưa có ai bạn theo dõi đang live"
-                      description="Bạn sẽ nhận thông báo khi họ bắt đầu phát. Trong lúc chờ, xem những buổi đang phát khác nhé."
+                      title={t('Chưa có ai bạn theo dõi đang live')}
+                      description={t('Bạn sẽ nhận thông báo khi họ bắt đầu phát. Trong lúc chờ, xem những buổi đang phát khác nhé.')}
                       action={showAll}
                     />
                   }
@@ -173,11 +174,11 @@ function LiveSection({
     <section aria-labelledby="live-now-heading" className="space-y-5">
       <h2 id="live-now-heading" className="flex items-center gap-2 font-display text-2xl">
         <Radio className="size-5 text-np-social" aria-hidden />
-        Đang phát
+        {t('Đang phát')}
       </h2>
 
       {error ? (
-        <EmptyState title="Không tải được danh sách livestream" description={(error as Error).message} />
+        <EmptyState title={t('Không tải được danh sách livestream')} description={(error as Error).message} />
       ) : pending ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {[0, 1].map((i) => (
@@ -211,7 +212,7 @@ function ReplaySection({ authors }: { authors?: string[] }) {
     <section aria-labelledby="replays-heading" className="mt-14 space-y-5">
       <h2 id="replays-heading" className="flex items-center gap-2 font-display text-2xl">
         <Film className="size-5" aria-hidden />
-        Xem lại
+        {t('Xem lại')}
       </h2>
 
       {replays.isPending && (
@@ -222,13 +223,13 @@ function ReplaySection({ authors }: { authors?: string[] }) {
         </div>
       )}
 
-      {replays.isError && <EmptyState title="Không tải được các buổi xem lại" description={(replays.error as Error).message} />}
+      {replays.isError && <EmptyState title={t('Không tải được các buổi xem lại')} description={(replays.error as Error).message} />}
 
       {replays.isSuccess && past.length === 0 && (
         <EmptyState
           icon={Film}
-          title="Chưa có buổi nào để xem lại"
-          description='Buổi phát có bật "Lưu lại buổi phát" sẽ xuất hiện ở đây sau khi kết thúc.'
+          title={t('Chưa có buổi nào để xem lại')}
+          description={t('Buổi phát có bật "Lưu lại buổi phát" sẽ xuất hiện ở đây sau khi kết thúc.')}
         />
       )}
 
@@ -244,7 +245,7 @@ function ReplaySection({ authors }: { authors?: string[] }) {
         <div className="flex justify-center">
           <Button variant="outline" onClick={() => void replays.fetchNextPage()} disabled={replays.isFetchingNextPage}>
             {replays.isFetchingNextPage && <Loader2 className="size-4 animate-spin" aria-hidden />}
-            Xem thêm
+            {t('Xem thêm')}
           </Button>
         </div>
       )}

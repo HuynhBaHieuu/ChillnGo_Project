@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { GlassCard } from '@/components/GlassCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useLiveNow } from '@/features/livestream/useLiveNow'
+import { t } from '@/i18n'
 
 /**
  * A row of everyone live right now, at the top of the Newsfeed. Unlike the
@@ -14,17 +15,17 @@ export function LiveNowStrip() {
   if (!data?.length) return null
 
   return (
-    <GlassCard as="section" aria-label="Đang phát trực tiếp" className="np-surface animate-fade-rise mb-6 p-4 sm:p-5">
+    <GlassCard as="section" aria-label={t('Đang phát trực tiếp')} className="np-surface animate-fade-rise mb-6 p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.12em]">
           <span className="relative flex size-2.5" aria-hidden>
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-np-social/70 motion-reduce:animate-none" />
             <span className="relative inline-flex size-2.5 rounded-full bg-np-social" />
           </span>
-          Đang live · {data.length}
+          {t('Đang live')} · {data.length}
         </h2>
         <Link to="/live" className="flex items-center gap-0.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
-          Xem tất cả
+          {t('Xem tất cả')}
           <ChevronRight className="size-3.5" aria-hidden />
         </Link>
       </div>

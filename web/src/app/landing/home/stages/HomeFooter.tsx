@@ -7,14 +7,15 @@ import type { MediaConditions } from '@/app/landing/home/gsap'
 import { scrollToTop } from '@/app/landing/home/lenis'
 import { Magnetic } from '@/app/landing/home/parts/Magnetic'
 import { slideInWords } from '@/app/landing/home/parts/slideInWords'
+import { t, translatedList } from '@/i18n'
 import { useAuthStore } from '@/store'
 
-const LINKS = [
+const LINKS = translatedList([
   { to: '/discover', label: 'Khám phá' },
   { to: '/feed', label: 'Newsfeed' },
   { to: '/itineraries', label: 'Hành trình của tôi' },
   { to: '/posts/new', label: 'Đăng bài mới' },
-]
+], ['label'])
 
 /**
  * Stage F — footer.
@@ -57,14 +58,14 @@ export function HomeFooter() {
           data-heading
           className="max-w-[14ch] font-display text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.035em]"
         >
-          Chuyến tiếp theo bắt đầu từ đây
+          {t('Chuyến tiếp theo bắt đầu từ đây')}
         </h2>
         <Magnetic>
           <Link
             to={isAuthenticated ? '/posts/new' : '/register'}
             className="inline-grid place-items-center rounded-full bg-foreground px-9 py-[18px] font-display text-[15px] font-bold tracking-[-0.01em] text-background transition-transform active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
           >
-            {isAuthenticated ? 'Đăng hành trình' : 'Bắt đầu ngay'}
+            {isAuthenticated ? t('Đăng hành trình') : t('Bắt đầu ngay')}
           </Link>
         </Magnetic>
       </div>
@@ -81,14 +82,14 @@ export function HomeFooter() {
 
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 pb-28 pt-10 text-sm text-muted-foreground md:px-14 md:pb-10">
         <span>© 2026 ChillnGo</span>
-        <nav aria-label="Liên kết cuối trang" className="flex flex-wrap gap-x-[1.4286rem] gap-y-2">
+        <nav aria-label={t('Liên kết cuối trang')} className="flex flex-wrap gap-x-[1.4286rem] gap-y-2">
           {LINKS.map((link) => (
             <Link key={link.to} to={link.to} className="transition-colors hover:text-foreground">
               {link.label}
             </Link>
           ))}
           <button type="button" onClick={scrollToTop} className="transition-colors hover:text-foreground">
-            Về đầu trang ↑
+            {t('Về đầu trang')} ↑
           </button>
         </nav>
       </div>

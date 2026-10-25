@@ -6,6 +6,7 @@ import { useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import type { User } from '@/services/types'
 
@@ -29,10 +30,10 @@ export function AccountMenu({ user, onSignOut }: { user: User; onSignOut: () => 
   const [open, setOpen] = useState(false)
 
   const links = [
-    { to: `/users/${user._id}`, label: 'Profile' },
-    { to: '/profile/edit', label: 'Chỉnh sửa hồ sơ' },
-    { to: '/posts/new', label: 'Đăng bài mới' },
-    { to: '/activity', label: 'Hoạt động của bạn' },
+    { to: `/users/${user._id}`, label: t('Profile') },
+    { to: '/profile/edit', label: t('Chỉnh sửa hồ sơ') },
+    { to: '/posts/new', label: t('Đăng bài mới') },
+    { to: '/activity', label: t('Hoạt động của bạn') },
   ]
 
   return (
@@ -40,7 +41,7 @@ export function AccountMenu({ user, onSignOut }: { user: User; onSignOut: () => 
       <Dialog.Trigger asChild>
         <button
           type="button"
-          aria-label="Tài khoản"
+          aria-label={t('Tài khoản')}
           className="rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <Avatar className="size-10">
@@ -168,7 +169,7 @@ function AccountPanel({
             <button
               type="button"
               onClick={requestClose}
-              aria-label="Đóng"
+              aria-label={t('Đóng')}
               className="relative flex size-10 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {/* Two stacked bars read as a dash, then open into an X. */}
@@ -177,7 +178,7 @@ function AccountPanel({
             </button>
           </div>
 
-          <nav aria-label="Tài khoản" className="mt-16 flex-1">
+          <nav aria-label={t('Tài khoản')} className="mt-16 flex-1">
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {links.map((link, i) => (
                 <li key={link.to} className="overflow-hidden pb-1 pt-2">
@@ -216,7 +217,7 @@ function AccountPanel({
               className="flex items-center gap-2 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <LogOut className="size-4" />
-              Đăng xuất
+              {t('Đăng xuất')}
             </button>
           </div>
         </div>

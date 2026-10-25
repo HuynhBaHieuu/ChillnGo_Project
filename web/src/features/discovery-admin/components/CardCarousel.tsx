@@ -9,6 +9,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 interface CardCarouselProps<T> {
   items: T[]
@@ -74,7 +75,7 @@ export function CardCarousel<T>({
         <button
           type="button"
           onClick={() => api?.scrollPrev()}
-          aria-label="Trước"
+          aria-label={t('Trước')}
           className={cn(arrow, '-left-5', arrowClassName)}
         >
           <ArrowLeft className="size-5" />
@@ -84,7 +85,7 @@ export function CardCarousel<T>({
         <button
           type="button"
           onClick={() => api?.scrollNext()}
-          aria-label="Sau"
+          aria-label={t('Sau')}
           className={cn(arrow, '-right-5', arrowClassName)}
         >
           <ArrowRight className="size-5" />

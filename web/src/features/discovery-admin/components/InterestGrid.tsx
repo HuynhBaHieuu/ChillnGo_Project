@@ -1,6 +1,7 @@
 import { DiscoverSection } from '@/features/discovery-admin/components/DiscoverSection'
 import { PhotoTile } from '@/features/discovery-admin/components/PhotoTile'
 import { type InterestTile, interestPath } from '@/features/discovery-admin/interests'
+import { t, tx } from '@/i18n'
 
 interface InterestGridProps {
   tiles: InterestTile[]
@@ -16,8 +17,8 @@ interface InterestGridProps {
  */
 export function InterestGrid({
   tiles,
-  title = 'Khám phá theo sở thích',
-  description = 'Bạn mê gì, cộng đồng đều đã đi qua.',
+  title = t('Khám phá theo sở thích'),
+  description = t('Bạn mê gì, cộng đồng đều đã đi qua.'),
   className,
 }: InterestGridProps) {
   return (
@@ -27,7 +28,7 @@ export function InterestGrid({
           <PhotoTile
             key={tile.tag}
             to={interestPath(tile.tag)}
-            label={tile.tag}
+            label={tx(tile.tag)}
             image={tile.image}
             className="w-[215px] shrink-0 snap-start lg:w-full"
           />

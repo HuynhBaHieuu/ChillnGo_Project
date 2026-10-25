@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { MEDIA, ScrollTrigger, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
 import { slideInWords } from '@/app/landing/home/parts/slideInWords'
+import { t } from '@/i18n'
 import { landingPhoto } from '@/lib/photos'
 
 /**
@@ -125,7 +126,7 @@ export function HowItWorksStage() {
           data-heading
           className="font-display text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em]"
         >
-          Cách ChillnGo hoạt động
+          {t('Cách ChillnGo hoạt động')}
         </h2>
 
         <div aria-hidden className="relative hidden pl-[18px] md:block motion-reduce:hidden">
@@ -143,7 +144,7 @@ export function HowItWorksStage() {
                 className="flex h-[52px] items-center gap-3.5 font-display text-[clamp(1.2rem,2vw,1.6rem)] font-semibold tracking-[-0.02em] text-foreground/30 transition-colors duration-500 data-[active=true]:text-foreground"
               >
                 <small className="font-mono text-xs font-normal text-muted-foreground">0{i + 1}</small>
-                {step.name}
+                {t(step.name)}
               </li>
             ))}
           </ol>
@@ -169,7 +170,7 @@ export function HowItWorksStage() {
               data-copy
               className="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-bold leading-[1.1] tracking-[-0.03em]"
             >
-              {step.title}
+              {t(step.title)}
             </h3>
             <ul className="grid max-w-[52ch] gap-2.5">
               {step.points.map(([lead, rest]) => (
@@ -178,8 +179,8 @@ export function HowItWorksStage() {
                   data-copy
                   className="relative pl-[18px] text-muted-foreground before:absolute before:left-0 before:top-[0.72em] before:h-px before:w-2 before:bg-primary"
                 >
-                  <b className="font-medium text-foreground">{lead}</b>
-                  {rest}
+                  <b className="font-medium text-foreground">{t(lead)}</b>
+                  {t(rest)}
                 </li>
               ))}
             </ul>

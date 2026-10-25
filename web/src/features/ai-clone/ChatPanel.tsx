@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAiChat } from '@/features/ai-clone/hooks'
 import { cn } from '@/lib/utils'
 import type { AiDraft } from '@/services/types'
+import { t } from '@/i18n'
 
 interface ChatPanelProps {
   draft: AiDraft
@@ -47,15 +48,15 @@ export function ChatPanel({ draft, busy }: ChatPanelProps) {
   }
 
   return (
-    <GlassCard as="section" className="flex flex-col p-5" aria-label="Chỉnh lịch trình bằng lời">
-      <h2 className="font-display text-xl">Chỉnh bằng lời</h2>
+    <GlassCard as="section" className="flex flex-col p-5" aria-label={t('Chỉnh lịch trình bằng lời')}>
+      <h2 className="font-display text-xl">{t('Chỉnh bằng lời')}</h2>
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-        Ví dụ: “Bỏ chợ đêm, thêm một quán cà phê sáng ngày 2”. AI chỉ chọn địa điểm có trong dữ liệu ChillnGo.
+        {t('Ví dụ: “Bỏ chợ đêm, thêm một quán cà phê sáng ngày 2”. AI chỉ chọn địa điểm có trong dữ liệu ChillnGo.')}
       </p>
 
       <ol ref={listRef} className="mt-4 max-h-[24rem] min-h-24 space-y-3 overflow-y-auto pr-1" aria-live="polite">
         {draft.chat.length === 0 && !chat.isPending && (
-          <li className="py-6 text-center text-sm text-muted-foreground">Chưa có tin nhắn nào.</li>
+          <li className="py-6 text-center text-sm text-muted-foreground">{t('Chưa có tin nhắn nào.')}</li>
         )}
         {draft.chat.map((m, i) => (
           <Bubble key={`${m.at}-${i}`} mine={m.role === 'user'}>
@@ -67,7 +68,7 @@ export function ChatPanel({ draft, busy }: ChatPanelProps) {
             <Bubble mine>{chat.variables}</Bubble>
             <li className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
-              AI đang sửa lịch trình…
+              {t('AI đang sửa lịch trình…')}
             </li>
           </>
         )}
@@ -86,10 +87,10 @@ export function ChatPanel({ draft, busy }: ChatPanelProps) {
         }}
       >
         <Textarea
-          aria-label="Yêu cầu chỉnh sửa"
+          aria-label={t('Yêu cầu chỉnh sửa')}
           rows={2}
           maxLength={500}
-          placeholder={closed ? 'Bản nháp đã được lưu.' : 'Bạn muốn đổi gì?'}
+          placeholder={closed ? t('Bản nháp đã được lưu.') : t('Bạn muốn đổi gì?')}
           value={message}
           disabled={closed}
           onChange={(e) => setMessage(e.target.value)}
@@ -101,12 +102,12 @@ export function ChatPanel({ draft, busy }: ChatPanelProps) {
           }}
           className="min-h-0 resize-none"
         />
-        <Button type="submit" size="icon" disabled={disabled || !message.trim()} aria-label="Gửi">
+        <Button type="submit" size="icon" disabled={disabled || !message.trim()} aria-label={t('Gửi')}>
           {chat.isPending ? <Loader2 className="animate-spin" /> : <Send />}
         </Button>
       </form>
       <p className="mt-2 text-xs text-muted-foreground">
-        Mỗi tin nhắn dùng một lượt AI · còn {draft.callsLeft}/{draft.dailyLimit} lượt hôm nay.
+        {t('Mỗi tin nhắn dùng một lượt AI · còn {left}/{limit} lượt hôm nay.', { left: draft.callsLeft, limit: draft.dailyLimit })}
       </p>
     </GlassCard>
   )

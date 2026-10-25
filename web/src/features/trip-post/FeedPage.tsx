@@ -13,6 +13,7 @@ import { LiveNowStrip } from '@/features/livestream/LiveNowStrip'
 import { ReplayCard } from '@/features/livestream/ReplayCard'
 import { PostComposer } from '@/features/trip-post/components/PostComposer'
 import { useFeed } from '@/features/trip-post/hooks'
+import { t } from '@/i18n'
 import { checkinService, livestreamService, socialService } from '@/services'
 import type { CheckIn } from '@/services/checkin.service'
 import type { Livestream } from '@/services/livestream.service'
@@ -74,17 +75,17 @@ export function FeedPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Newsfeed"
+        title={t('Newsfeed')}
         description={
           isAuthenticated
-            ? 'Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.'
-            : 'Những hành trình và check-in mới nhất trên ChillnGo. Đăng nhập để chỉ xem người bạn theo dõi.'
+            ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.')
+            : t('Những hành trình và check-in mới nhất trên ChillnGo. Đăng nhập để chỉ xem người bạn theo dõi.')
         }
         action={
           <GlassButton asChild size="md" tone="sunset">
             <Link to="/discover">
               <Compass />
-              Khám phá thêm
+              {t('Khám phá thêm')}
             </Link>
           </GlassButton>
         }
@@ -106,7 +107,7 @@ export function FeedPage() {
         </div>
       )}
 
-      {isError && <EmptyState title="Không tải được newsfeed" description={(error as Error).message} />}
+      {isError && <EmptyState title={t('Không tải được newsfeed')} description={(error as Error).message} />}
 
       {live.data && live.data.length > 0 && (
         <div className="mb-6 flex flex-col gap-6">
@@ -119,11 +120,11 @@ export function FeedPage() {
       {posts && items.length === 0 && !live.data?.length && (
         <EmptyState
           icon={Users}
-          title="Newsfeed đang trống"
-          description="Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá."
+          title={t('Newsfeed đang trống')}
+          description={t('Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá.')}
           action={
             <GlassButton asChild size="lg">
-              <Link to="/discover">Khám phá hành trình</Link>
+              <Link to="/discover">{t('Khám phá hành trình')}</Link>
             </GlassButton>
           }
         />

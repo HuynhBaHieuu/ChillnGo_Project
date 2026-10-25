@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { formatClock, useElapsed } from '@/features/livestream/live-format'
 import type { DvrMode } from '@/features/livestream/useDvr'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 /** The recording trails live by roughly this much: aiming closer means "live". */
 const LIVE_MARGIN_SEC = 12
@@ -63,8 +64,8 @@ export function DvrBar({ baseSec, baseAt, mode, loading, paused, position, avail
       <button
         type="button"
         onClick={() => onRewind((mode === 'dvr' ? position : total - LIVE_MARGIN_SEC) - 10)}
-        aria-label="Tua lại 10 giây"
-        title="Tua lại 10 giây"
+        aria-label={t('Tua lại 10 giây')}
+        title={t('Tua lại 10 giây')}
         className="grid size-9 shrink-0 place-items-center rounded-full bg-black/40 hover:bg-black/60"
       >
         <RotateCcw className="size-4" aria-hidden />
@@ -74,7 +75,7 @@ export function DvrBar({ baseSec, baseAt, mode, loading, paused, position, avail
         <button
           type="button"
           onClick={onTogglePause}
-          aria-label={paused ? 'Phát' : 'Tạm dừng'}
+          aria-label={paused ? t('Phát') : t('Tạm dừng')}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-black/40 hover:bg-black/60"
         >
           {paused ? <Play className="size-4" aria-hidden /> : <Pause className="size-4" aria-hidden />}
@@ -94,8 +95,12 @@ export function DvrBar({ baseSec, baseAt, mode, loading, paused, position, avail
           step={1}
           value={Math.round(shown)}
           onChange={(e) => change(Number(e.target.value))}
-          aria-label="Tua thời gian livestream"
-          aria-valuetext={mode === 'live' && scrub === null ? `Trực tiếp, đã phát ${formatClock(total)}` : `${formatClock(shown)} trên ${formatClock(total)}`}
+          aria-label={t('Tua thời gian livestream')}
+          aria-valuetext={
+            mode === 'live' && scrub === null
+              ? t('Trực tiếp, đã phát {time}', { time: formatClock(total) })
+              : t('{shown} trên {total}', { shown: formatClock(shown), total: formatClock(total) })
+          }
           className="dvr-range relative w-full"
         />
       </div>
@@ -108,7 +113,7 @@ export function DvrBar({ baseSec, baseAt, mode, loading, paused, position, avail
         type="button"
         onClick={onGoLive}
         disabled={mode === 'live'}
-        aria-label={mode === 'live' ? 'Đang xem trực tiếp' : 'Về trực tiếp'}
+        aria-label={mode === 'live' ? t('Đang xem trực tiếp') : t('Về trực tiếp')}
         className={cn(
           'flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold uppercase tracking-wider',
           mode === 'live' ? 'bg-rose-600 text-white' : 'bg-white/90 text-foreground hover:bg-white',
@@ -119,7 +124,7 @@ export function DvrBar({ baseSec, baseAt, mode, loading, paused, position, avail
         ) : (
           <span className={cn('size-2 rounded-full', mode === 'live' ? 'bg-white' : 'bg-rose-600')} aria-hidden />
         )}
-        Trực tiếp
+        {t('Trực tiếp')}
       </button>
     </div>
   )

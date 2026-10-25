@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { ApiError, livestreamService } from '@/services'
 import { REACTION_KINDS } from '@/services/livestream.service'
 import type { ReactionKind } from '@/services/livestream.service'
+import { t } from '@/i18n'
 
 export function FloatingReactions({ floats, onDone }: { floats: Float[]; onDone: (id: number) => void }) {
   return (
@@ -58,7 +59,7 @@ export function ReactionBar({
       if (!count) continue
       livestreamService.sendReaction(streamId, kind, count).catch((error: unknown) => {
         const tooFast = error instanceof ApiError && error.code === 'REACTION_RATE_LIMIT'
-        setNote(tooFast ? 'Bạn thả nhanh quá, nghỉ tay một chút nhé.' : (error as Error).message)
+        setNote(tooFast ? t('Bạn thả nhanh quá, nghỉ tay một chút nhé.') : (error as Error).message)
         window.setTimeout(() => setNote(null), 3000)
       })
     }
@@ -77,7 +78,7 @@ export function ReactionBar({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Thả cảm xúc">
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('Thả cảm xúc')}>
         {REACTION_KINDS.map((kind) => (
           <button
             key={kind}

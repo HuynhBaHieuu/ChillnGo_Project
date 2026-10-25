@@ -2,6 +2,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import type * as React from 'react'
 
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 const Dialog = DialogPrimitive.Root
@@ -52,7 +53,7 @@ function DialogContent({
         <div className="relative z-[1] grid gap-4">{children}</div>
         <DialogPrimitive.Close className="absolute right-4 top-4 z-[2] rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground focus:outline-none">
           <X className="size-4" />
-          <span className="sr-only">Đóng</span>
+          <span className="sr-only">{t('Đóng')}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>

@@ -31,6 +31,10 @@ import {
   useRemoveDay,
   useReorderDays,
 } from '@/features/itinerary-clone/hooks'
+import { t } from '@/i18n'
+import type { MessageKey } from '@/i18n'
+import { tr } from '@/i18n/rich'
+import { translateServerMessage } from '@/i18n/server'
 import { formatShortDate, formatVnd, tripLengthLabel } from '@/lib/format'
 import { moveItem, totalCostOf } from '@/lib/itinerary'
 import type {
@@ -39,7 +43,7 @@ import type {
   TripDay,
 } from '@/services/types'
 
-const STATUS_LABELS: Record<ItineraryStatus, string> = {
+const STATUS_LABELS: Record<ItineraryStatus, MessageKey> = {
   planning: 'Đang lên kế hoạch',
   confirmed: 'Đã chốt',
   completed: 'Đã đi',
@@ -107,11 +111,11 @@ export function ItineraryDetailPage() {
     return (
       <PageContainer>
         <EmptyState
-          title="Không tìm thấy lịch trình"
-          description="Lịch trình này có thể đã bị xoá."
+          title={t('Không tìm thấy lịch trình')}
+          description={t('Lịch trình này có thể đã bị xoá.')}
           action={
             <Button asChild variant="outline">
-              <Link to="/itineraries">Về danh sách</Link>
+              <Link to="/itineraries">{t('Về danh sách')}</Link>
             </Button>
           }
         />
@@ -126,22 +130,21 @@ export function ItineraryDetailPage() {
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Hành trình của tôi
+        {t('Hành trình của tôi')}
       </Link>
 
       <header className="animate-fade-rise mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">{STATUS_LABELS[itinerary.status]}</Badge>
+            <Badge variant="outline">{t(STATUS_LABELS[itinerary.status])}</Badge>
             {(itinerary.cloneType === 'ai' || itinerary.cloneType === 'merge') && (
               <Badge variant="outline" className="gap-1 border-np-teal/50 text-np-teal">
                 <Sparkles className="size-3" />
-                Điều chỉnh bằng AI
+                {t('Điều chỉnh bằng AI')}
               </Badge>
             )}
             <span className="text-xs text-muted-foreground">
-              {tripLengthLabel(days.length)} · khởi hành{' '}
-              {formatShortDate(itinerary.startDate)}
+              {tripLengthLabel(days.length)} · {t('khởi hành {date}', { date: formatShortDate(itinerary.startDate) })}
             </span>
           </div>
 
@@ -153,14 +156,14 @@ export function ItineraryDetailPage() {
 
           {itinerary.note && (
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              {itinerary.note}
+              {translateServerMessage(itinerary.note)}
             </p>
           )}
         </div>
 
         <GlassButton size="lg" onClick={() => setMergeOpen(true)} className="shrink-0">
           <GitMerge />
-          Ghép từ bài khác
+          {t('Ghép từ bài khác')}
         </GlassButton>
       </header>
 
@@ -168,18 +171,17 @@ export function ItineraryDetailPage() {
         {/* Draggable days */}
         <section>
           <div className="flex items-center justify-between gap-4">
-            <h2 className="font-display text-2xl">Các ngày</h2>
+            <h2 className="font-display text-2xl">{t('Các ngày')}</h2>
             {reorder.isPending && (
               <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="size-3 animate-spin" />
-                Đang lưu thứ tự…
+                {t('Đang lưu thứ tự…')}
               </span>
             )}
           </div>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Kéo thẻ để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại
-            theo thứ tự mới.
+            {t('Kéo thẻ để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại theo thứ tự mới.')}
           </p>
 
           <DndContext
@@ -212,43 +214,43 @@ export function ItineraryDetailPage() {
         <aside className="space-y-6 lg:sticky lg:top-32">
           <GlassCard className="p-6">
             <p className="text-sm text-muted-foreground">
-              Tổng chi phí
+              {t('Tổng chi phí')}
             </p>
             <p className="mt-1 font-display text-4xl tracking-tight">
               {formatVnd(liveTotal)}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Tính lại tức thì mỗi khi bạn đổi thứ tự, xoá hoặc ghép thêm ngày.
+              {t('Tính lại tức thì mỗi khi bạn đổi thứ tự, xoá hoặc ghép thêm ngày.')}
             </p>
 
             <dl className="mt-6 space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Số ngày</dt>
+                <dt className="text-muted-foreground">{t('Số ngày')}</dt>
                 <dd>{days.length}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Số điểm dừng</dt>
+                <dt className="text-muted-foreground">{t('Số điểm dừng')}</dt>
                 <dd>{days.reduce((n, d) => n + d.locations.length, 0)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Nguồn</dt>
-                <dd>{itinerary.sourcePostIds.length} bài viết</dd>
+                <dt className="text-muted-foreground">{t('Nguồn')}</dt>
+                <dd>{t('{n} bài viết', { n: itinerary.sourcePostIds.length })}</dd>
               </div>
             </dl>
           </GlassCard>
 
           <div>
-            <h2 className="font-display text-2xl">Bản đồ tuyến</h2>
+            <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
             <MapPreview
               days={days}
               className="mt-4 h-72 w-full"
-              label={`Bản đồ tuyến đường của ${itinerary.title}`}
+              label={t('Bản đồ tuyến đường của {title}', { title: itinerary.title })}
             />
           </div>
 
           {itinerary.checklist && itinerary.checklist.groups.length > 0 && (
             <div>
-              <h2 className="font-display text-2xl">Chuẩn bị</h2>
+              <h2 className="font-display text-2xl">{t('Chuẩn bị')}</h2>
               <div className="mt-4 space-y-4">
                 {itinerary.checklist.groups.map((group) => (
                   <div key={group.group}>
@@ -268,7 +270,7 @@ export function ItineraryDetailPage() {
           )}
 
           <div>
-            <h2 className="font-display text-2xl">Bài viết gốc</h2>
+            <h2 className="font-display text-2xl">{t('Bài viết gốc')}</h2>
             <ul className="mt-4 space-y-2">
               {itinerary.sourcePostIds.map((postId) => {
                 const source = itinerary.sources?.find((s) => s.postId === postId)
@@ -278,9 +280,9 @@ export function ItineraryDetailPage() {
                       to={`/posts/${postId}`}
                       className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
                     >
-                      {source?.title ? `“${source.title}”` : 'Xem bài viết gốc'} →
+                      {source?.title ? `“${source.title}”` : t('Xem bài viết gốc')} →
                     </Link>
-                    {source?.author && <span> của @{source.author.username}</span>}
+                    {source?.author && <span> {t('của {name}', { name: `@${source.author.username}` })}</span>}
                   </li>
                 )
               })}
@@ -307,15 +309,16 @@ function SourceCredit({ itinerary }: { itinerary: ClonedItinerary }) {
   if (authors.length === 0) return null
   return (
     <p className="mt-3 text-sm text-muted-foreground">
-      Phỏng theo hành trình của{' '}
-      {authors.map((source, i) => (
-        <span key={source.postId}>
-          {i > 0 && ', '}
-          <Link to={`/posts/${source.postId}`} className="text-foreground underline-offset-4 hover:underline">
-            @{source.author?.username}
-          </Link>
-        </span>
-      ))}
+      {tr('Phỏng theo hành trình của {authors}', {
+        authors: authors.map((source, i) => (
+          <span key={source.postId}>
+            {i > 0 && ', '}
+            <Link to={`/posts/${source.postId}`} className="text-foreground underline-offset-4 hover:underline">
+              @{source.author?.username}
+            </Link>
+          </span>
+        )),
+      })}
     </p>
   )
 }

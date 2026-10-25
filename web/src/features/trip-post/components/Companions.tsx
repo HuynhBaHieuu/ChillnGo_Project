@@ -14,6 +14,7 @@ import {
   useRemoveCompanion,
   useRespondToInvite,
 } from '@/features/trip-post/hooks'
+import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
 
@@ -33,7 +34,7 @@ export function CompanionsRow({ post, viewerId }: { post: TripPostWithAuthor; vi
 
   return (
     <div className="mt-5 flex flex-wrap items-center gap-2">
-      <span className="text-xs text-muted-foreground">Đi cùng</span>
+      <span className="text-xs text-muted-foreground">{t('Đi cùng')}</span>
       {shown.map(({ user, status }) => {
         const canRemove = isAuthor || user._id === viewerId
         return (
@@ -51,12 +52,12 @@ export function CompanionsRow({ post, viewerId }: { post: TripPostWithAuthor; vi
               </Avatar>
               {user.displayName}
             </Link>
-            {status === 'pending' && <span className="text-muted-foreground">· đang chờ</span>}
+            {status === 'pending' && <span className="text-muted-foreground">· {t('đang chờ')}</span>}
             {canRemove && (
               <button
                 type="button"
-                aria-label={user._id === viewerId ? 'Rời hành trình' : `Gỡ ${user.displayName}`}
-                title={user._id === viewerId ? 'Rời hành trình' : 'Gỡ khỏi hành trình'}
+                aria-label={user._id === viewerId ? t('Rời hành trình') : t('Gỡ {name}', { name: user.displayName })}
+                title={user._id === viewerId ? t('Rời hành trình') : t('Gỡ khỏi hành trình')}
                 disabled={remove.isPending}
                 onClick={() => remove.mutate(user._id)}
                 className="rounded-full p-0.5 text-muted-foreground hover:bg-white/10 hover:text-foreground"
@@ -92,14 +93,14 @@ export function InviteBanner({ post, viewerId }: { post: TripPostWithAuthor; vie
     <div className="animate-fade-rise mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-border p-4">
       <p className="min-w-0 flex-1 text-sm">
         <span className="font-medium">{post.author.displayName}</span>{' '}
-        <span className="text-muted-foreground">mời bạn đi cùng hành trình này.</span>
+        <span className="text-muted-foreground">{t('mời bạn đi cùng hành trình này.')}</span>
       </p>
       <Button variant="ghost" size="sm" disabled={respond.isPending} onClick={() => answer(false)}>
-        Từ chối
+        {t('Từ chối')}
       </Button>
       <GlassButton size="sm" disabled={respond.isPending} onClick={() => answer(true)}>
         {respond.isPending && <Loader2 className="animate-spin" />}
-        Đi cùng
+        {t('Đi cùng')}
       </GlassButton>
       {respond.isError && <p className="w-full text-xs text-destructive">{(respond.error as Error).message}</p>}
     </div>
@@ -145,19 +146,19 @@ export function InviteFriendsDialog({ post, open, onOpenChange }: InviteFriendsD
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Mời bạn đi cùng"
-      description={`Bạn bè là những người bạn theo dõi và cũng theo dõi bạn. Còn mời được ${left} người.`}
+      title={t('Mời bạn đi cùng')}
+      description={t('Bạn bè là những người bạn theo dõi và cũng theo dõi bạn. Còn mời được {n} người.', { n: left })}
       footer={
         <>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Huỷ
+            {t('Huỷ')}
           </Button>
           <GlassButton
             disabled={picked.length === 0 || picked.length > left || invite.isPending}
             onClick={() => invite.mutate(picked, { onSuccess: () => onOpenChange(false) })}
           >
             {invite.isPending && <Loader2 className="animate-spin" />}
-            Gửi lời mời{picked.length > 0 && ` (${picked.length})`}
+            {t('Gửi lời mời')}{picked.length > 0 && ` (${picked.length})`}
           </GlassButton>
         </>
       }
@@ -168,8 +169,8 @@ export function InviteFriendsDialog({ post, open, onOpenChange }: InviteFriendsD
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Tìm bạn bè"
-            aria-label="Tìm bạn bè"
+            placeholder={t('Tìm bạn bè')}
+            aria-label={t('Tìm bạn bè')}
             className="pl-9"
           />
         </div>
@@ -183,7 +184,7 @@ export function InviteFriendsDialog({ post, open, onOpenChange }: InviteFriendsD
           {friends.isError && <li className="text-sm text-destructive">{(friends.error as Error).message}</li>}
           {friends.isSuccess && candidates.length === 0 && (
             <li className="py-6 text-center text-sm text-muted-foreground">
-              {needle ? 'Không tìm thấy ai.' : 'Chưa có bạn bè nào để mời.'}
+              {needle ? t('Không tìm thấy ai.') : t('Chưa có bạn bè nào để mời.')}
             </li>
           )}
           {candidates.map((friend) => (
@@ -203,7 +204,7 @@ export function InviteFriendsDialog({ post, open, onOpenChange }: InviteFriendsD
           ))}
         </ul>
 
-        {picked.length > left && <p className="text-sm text-destructive">Chỉ còn mời được {left} người.</p>}
+        {picked.length > left && <p className="text-sm text-destructive">{t('Chỉ còn mời được {n} người.', { n: left })}</p>}
         {invite.isError && <p className="text-sm text-destructive">{(invite.error as Error).message}</p>}
       </div>
     </Modal>

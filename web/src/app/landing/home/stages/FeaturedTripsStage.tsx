@@ -6,6 +6,7 @@ import type { MediaConditions } from '@/app/landing/home/gsap'
 import { ArrowPill } from '@/app/landing/home/parts/ArrowPill'
 import { slideInWords } from '@/app/landing/home/parts/slideInWords'
 import { TiltCard } from '@/components/TiltCard'
+import { t } from '@/i18n'
 import { REGION_LABELS, tripLengthLabel } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
@@ -68,9 +69,9 @@ export function FeaturedTripsStage({ posts }: { posts: TripPostWithAuthor[] }) {
           data-heading
           className="max-w-[14ch] font-display text-[clamp(2rem,4.6vw,3.8rem)] font-bold leading-[1.02] tracking-[-0.035em]"
         >
-          Được lưu nhiều nhất
+          {t('Được lưu nhiều nhất')}
         </h2>
-        <ArrowPill to="/discover">Xem tất cả</ArrowPill>
+        <ArrowPill to="/discover">{t('Xem tất cả')}</ArrowPill>
       </div>
 
       <div className="mt-[8vh] grid grid-cols-2 gap-6 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)]">

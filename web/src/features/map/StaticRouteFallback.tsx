@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 
+import { t } from '@/i18n'
+import { tr } from '@/i18n/rich'
 import { cn } from '@/lib/utils'
 
 /**
@@ -74,18 +76,17 @@ export function StaticRouteFallback({
           </svg>
         ) : (
           <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-            Chưa có dữ liệu bản đồ
+            {t('Chưa có dữ liệu bản đồ')}
           </div>
         )}
 
         <p className="px-4 pb-3 text-center text-xs text-muted-foreground">
           {reason === 'loading' ? (
-            'Đang tải bản đồ…'
+            t('Đang tải bản đồ…')
           ) : (
-            <>
-              Bản đồ tương tác cần <code className="text-foreground">VITE_MAPBOX_TOKEN</code>.
-              Đây là bản phác thảo tuyến đường từ dữ liệu mock.
-            </>
+            tr('Bản đồ tương tác cần {token}. Đây là bản phác thảo tuyến đường từ dữ liệu mock.', {
+              token: <code className="text-foreground">VITE_MAPBOX_TOKEN</code>,
+            })
           )}
         </p>
       </div>

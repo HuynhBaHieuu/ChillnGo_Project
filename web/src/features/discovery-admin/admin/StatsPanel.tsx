@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
+import { localeTag, t } from '@/i18n'
 import { ROLE_LABELS } from '@/lib/roles'
 import { adminService } from '@/services'
 import type { AdminStats } from '@/services/admin.service'
@@ -14,7 +15,7 @@ export function StatsPanel() {
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
         <Loader2 className="size-4 animate-spin" aria-hidden />
-        Đang tải thống kê…
+        {t('Đang tải thống kê…')}
       </p>
     )
   }
@@ -27,24 +28,24 @@ export function StatsPanel() {
   return (
     <div className="space-y-8">
       <dl className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <Tile label="Tổng tài khoản" value={users.total} />
-        <Tile label="Đăng ký mới 7 ngày" value={users.new7} />
-        <Tile label="Đăng ký mới 30 ngày" value={users.new30} />
-        <Tile label="Đã xác nhận email" value={users.verified} of={users.total} />
-        <Tile label="Liên kết Google" value={users.googleLinked} of={users.total} />
-        <Tile label="Đang bị khoá" value={users.locked} of={users.total} />
+        <Tile label={t('Tổng tài khoản')} value={users.total} />
+        <Tile label={t('Đăng ký mới 7 ngày')} value={users.new7} />
+        <Tile label={t('Đăng ký mới 30 ngày')} value={users.new30} />
+        <Tile label={t('Đã xác nhận email')} value={users.verified} of={users.total} />
+        <Tile label={t('Liên kết Google')} value={users.googleLinked} of={users.total} />
+        <Tile label={t('Đang bị khoá')} value={users.locked} of={users.total} />
       </dl>
 
       <SignupChart data={signupsByDay} />
 
       {scope === 'full' && byRole && (
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold">Chỉ dành cho Super Admin</h3>
+          <h3 className="text-sm font-semibold">{t('Chỉ dành cho Super Admin')}</h3>
           <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <Tile label={ROLE_LABELS.user} value={byRole.user ?? 0} />
             <Tile label={ROLE_LABELS.admin} value={byRole.admin ?? 0} />
             <Tile label={ROLE_LABELS.superadmin} value={byRole.superadmin ?? 0} />
-            <Tile label="Thao tác quản trị 7 ngày" value={adminActions7 ?? 0} />
+            <Tile label={t('Thao tác quản trị 7 ngày')} value={adminActions7 ?? 0} />
           </dl>
         </section>
       )}
@@ -58,7 +59,7 @@ function Tile({ label, value, of }: { label: string; value: number; of?: number 
     <div className="rounded-2xl border border-foreground/15 bg-card p-5">
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-2 flex items-baseline gap-2">
-        <span className="font-display text-3xl tabular-nums">{value.toLocaleString('vi-VN')}</span>
+        <span className="font-display text-3xl tabular-nums">{value.toLocaleString(localeTag())}</span>
         {share !== null && <span className="text-xs text-muted-foreground">{share}%</span>}
       </dd>
     </div>
@@ -83,11 +84,11 @@ function SignupChart({ data }: { data: AdminStats['signupsByDay'] }) {
   return (
     <section className="rounded-2xl border border-foreground/15 bg-card p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-sm font-semibold">Đăng ký mới mỗi ngày, 30 ngày qua</h3>
+        <h3 className="text-sm font-semibold">{t('Đăng ký mới mỗi ngày, 30 ngày qua')}</h3>
         <p className="text-xs text-muted-foreground" aria-live="polite">
           {shown
-            ? `${dayLabel(shown.date)}: ${shown.count} tài khoản`
-            : `Tổng ${total} tài khoản · cao nhất ${max === 1 && total === 0 ? 0 : max}/ngày`}
+            ? `${dayLabel(shown.date)}: ${t('{n} tài khoản', { n: shown.count })}`
+            : t('Tổng {n} tài khoản · cao nhất {max}/ngày', { n: total, max: max === 1 && total === 0 ? 0 : max })}
         </p>
       </div>
 
@@ -108,7 +109,7 @@ function SignupChart({ data }: { data: AdminStats['signupsByDay'] }) {
               <button
                 key={d.date}
                 type="button"
-                aria-label={`${dayLabel(d.date)}: ${d.count} tài khoản`}
+                aria-label={`${dayLabel(d.date)}: ${t('{n} tài khoản', { n: d.count })}`}
                 onMouseEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
                 onBlur={() => setActive(null)}
@@ -130,12 +131,12 @@ function SignupChart({ data }: { data: AdminStats['signupsByDay'] }) {
       </div>
 
       <details className="mt-4 text-sm">
-        <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">Xem dạng bảng</summary>
+        <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">{t('Xem dạng bảng')}</summary>
         <table className="mt-3 w-full max-w-xs text-left text-xs">
           <thead>
             <tr className="text-muted-foreground">
-              <th className="py-1 font-medium">Ngày</th>
-              <th className="py-1 text-right font-medium">Đăng ký</th>
+              <th className="py-1 font-medium">{t('Ngày')}</th>
+              <th className="py-1 text-right font-medium">{t('Đăng ký#count')}</th>
             </tr>
           </thead>
           <tbody>

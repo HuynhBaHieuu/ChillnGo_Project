@@ -1,3 +1,4 @@
+import { tx } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 interface TagChipProps {
@@ -21,7 +22,7 @@ export function TagChip({ tag, onClick, active = false, className }: TagChipProp
   if (!onClick) {
     return (
       <span data-tag className={base}>
-        {tag}
+        {tx(tag)}
       </span>
     )
   }
@@ -34,7 +35,7 @@ export function TagChip({ tag, onClick, active = false, className }: TagChipProp
       aria-pressed={active}
       className={cn(base, !active && 'hover:border-white/40 hover:text-foreground')}
     >
-      {tag}
+      {tx(tag)}
     </button>
   )
 }

@@ -5,10 +5,12 @@
  * its service function switches from `db` to `http()` with the same signature.
  */
 
+import { t } from '@/i18n'
 import { optionalEnv } from '@/lib/env'
 import { useAuthStore } from '@/store/auth.store'
 
 import { ApiError } from './client'
+import { translateServerMessage } from '@/i18n/server'
 
 /**
  * Where the API lives. Blank in local dev: requests go to `/api/...` on the
@@ -45,7 +47,7 @@ export async function http<T>(path: string, options: HttpOptions = {}): Promise<
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
-    throw new ApiError('Không kết nối được máy chủ. Vui lòng thử lại sau.', 0)
+    throw new ApiError(t('Không kết nối được máy chủ. Vui lòng thử lại sau.'), 0)
   }
 
   const data = (await response.json().catch(() => null)) as { message?: string; code?: string } | null
@@ -55,7 +57,7 @@ export async function http<T>(path: string, options: HttpOptions = {}): Promise<
     // stops showing a signed-in user the server no longer recognises.
     if (response.status === 401 && token) useAuthStore.getState().signOut()
     throw new ApiError(
-      data?.message ?? `Máy chủ trả về lỗi ${response.status}`,
+      data?.message ? translateServerMessage(data.message) : t('Máy chủ trả về lỗi {status}', { status: response.status }),
       response.status,
       data?.code,
     )
