@@ -3,66 +3,28 @@ import { useRef, useState } from 'react'
 
 import { MEDIA, gsap, useGSAP } from '@/app/landing/home/gsap'
 import type { MediaConditions } from '@/app/landing/home/gsap'
+import { FILMS, HERO_VIDEOS } from '@/app/landing/home/videos'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { t } from '@/i18n'
-import { landingPhoto } from '@/lib/photos'
-
-/*
- * Footage: Mixkit (free licence, no attribution required).
- * 39912 — a rider on an empty mountain road; 12987 — a backpacker at a viewpoint.
- */
-const HERO_VIDEO = 'https://assets.mixkit.co/videos/39912/39912-720.mp4'
-const FILM_VIDEO = 'https://assets.mixkit.co/videos/12987/12987-720.mp4'
-const HERO_POSTER = landingPhoto('mountainRoad', 1920, 1080)
-const FILM_PREVIEW = landingPhoto('riceTerraces', 600, 680)
-
-/** Soft dark puffs along the top edge of a mist layer: [left %, top %, width vw, height vw]. */
-const PUFFS = [
-  [-10, 4, 46, 22],
-  [18, 0, 40, 18],
-  [42, 6, 48, 24],
-  [68, 1, 44, 20],
-  [86, 5, 40, 22],
-  [5, 14, 60, 26],
-  [55, 15, 60, 28],
-] as const
-
-function Mist({ layer, className }: { layer: 'back' | 'front'; className: string }) {
-  return (
-    <div data-mist={layer} aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 z-[3] ${className}`}>
-      {PUFFS.map(([left, top, w, h], i) => (
-        <span
-          key={i}
-          className="absolute"
-          style={{
-            left: `${left}%`,
-            top: `${top}%`,
-            width: `${w}vw`,
-            height: `${h}vw`,
-            background: 'radial-gradient(closest-side, hsl(var(--background)) 30%, hsl(var(--background) / 0.55) 60%, transparent)',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
+import { cn } from '@/lib/utils'
 
 /**
- * Hero — full-screen footage, a giant condensed title, and a dark mist that
- * rises over it on scroll into the statement below.
+ * Hero — full-screen footage and a giant condensed title; on scroll the
+ * footage closes into a rounded card and fades into the statement below.
  *
  * The section is 200svh with a sticky 100svh frame, so the footage holds still
  * (no GSAP pin) while, over that one screen of scroll:
  *   copy + title    rise 60svh, faster than the page
- *   footage         slow push-in
- *   mist (back)     drifts up two-thirds of the way
- *   mist (front)    rises until the frame is solid background
+ *   footage         slow push-in, clipped into a centred rounded card,
+ *                   then faded out so the frame is solid background
  * The load-in fades the inner `[data-hero-reveal]` elements; the scroll moves
  * their parent, so the two never share a transform.
  */
 export function HeroStage() {
   const ref = useRef<HTMLElement>(null)
-  const [filmOpen, setFilmOpen] = useState(false)
+  const [heroIndex, setHeroIndex] = useState(0)
+  const [film, setFilm] = useState<number | null>(null)
+  const hero = HERO_VIDEOS[heroIndex]
 
   useGSAP(
     () => {
@@ -74,15 +36,21 @@ export function HeroStage() {
 
         gsap.from(q('[data-hero-reveal]'), { autoAlpha: 0, y: 40, duration: 1.6, ease: 'expo.out', stagger: 0.12, delay: 0.2 })
 
-        gsap
-          .timeline({
-            defaults: { ease: 'none' },
-            scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom bottom', scrub: true, invalidateOnRefresh: true },
-          })
-          .to(q('[data-hero-content]'), { y: () => -0.6 * window.innerHeight }, 0)
+        const h = () => window.innerHeight
+        const tl = gsap.timeline({
+          defaults: { ease: 'none', duration: 1 },
+          scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom bottom', scrub: true, invalidateOnRefresh: true },
+        })
+
+        tl.to(q('[data-hero-content]'), { y: () => -0.6 * h() }, 0)
           .to(q('[data-hero-video]'), { scale: 1.12 }, 0)
-          .fromTo(q('[data-mist="back"]'), { y: () => window.innerHeight }, { y: () => 0.3 * window.innerHeight }, 0)
-          .fromTo(q('[data-mist="front"]'), { y: () => window.innerHeight }, { y: () => -0.8 * window.innerHeight }, 0)
+          .fromTo(
+            q('[data-hero-clip]'),
+            { clipPath: 'inset(0% 0% 0% 0% round 0em)' },
+            { clipPath: 'inset(28% 32% 28% 32% round 1.5em)', duration: 0.75, ease: 'power2.inOut' },
+            0,
+          )
+          .to(q('[data-hero-clip]'), { autoAlpha: 0, duration: 0.25 }, 0.75)
       })
     },
     { scope: ref },
@@ -91,11 +59,22 @@ export function HeroStage() {
   return (
     <section ref={ref} className="relative h-[200svh] bg-background text-white motion-reduce:h-svh">
       <div className="sticky top-0 h-svh overflow-hidden">
-        <div data-hero-video className="absolute inset-0 will-change-transform">
-          <video autoPlay loop muted playsInline preload="metadata" poster={HERO_POSTER} className="size-full object-cover">
-            <source src={HERO_VIDEO} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-black/20" />
+        <div data-hero-clip className="absolute inset-0">
+          <div data-hero-video className="absolute inset-0 will-change-transform">
+            {/* One video loops; several play in turn (see videos.ts). */}
+            <video
+              src={hero.src}
+              poster={hero.poster}
+              autoPlay
+              loop={HERO_VIDEOS.length === 1}
+              onEnded={() => setHeroIndex((i) => (i + 1) % HERO_VIDEOS.length)}
+              muted
+              playsInline
+              preload="metadata"
+              className="size-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/20" />
+          </div>
         </div>
 
         <div data-hero-content className="absolute inset-0 z-[2] grid grid-rows-2 will-change-transform">
@@ -108,7 +87,7 @@ export function HeroStage() {
             </div>
             <div className="col-span-12 px-[2.5em] md:col-span-3 md:col-start-10 md:px-0">
               <div data-hero-reveal>
-                <FilmButton onClick={() => setFilmOpen(true)} />
+                <FilmButton onClick={() => setFilm(0)} />
               </div>
             </div>
           </div>
@@ -125,15 +104,31 @@ export function HeroStage() {
             </h1>
           </div>
         </div>
-
-        <Mist layer="back" className="h-svh bg-gradient-to-b from-transparent via-background/40 to-background/80 motion-reduce:hidden" />
-        <Mist layer="front" className="h-[180svh] bg-gradient-to-b from-transparent via-background via-[30%] to-background motion-reduce:hidden" />
       </div>
 
-      <Dialog open={filmOpen} onOpenChange={setFilmOpen}>
+      <Dialog open={film !== null} onOpenChange={(open) => !open && setFilm(null)}>
         <DialogContent className="max-w-5xl bg-black p-0">
           <DialogTitle className="sr-only">{t('Phim ChillnGo')}</DialogTitle>
-          {filmOpen && <video src={FILM_VIDEO} autoPlay controls playsInline className="aspect-video w-full rounded-2xl" />}
+          {film !== null && (
+            <video key={film} src={FILMS[film].src} autoPlay controls playsInline className="aspect-video w-full rounded-2xl" />
+          )}
+          {FILMS.length > 1 && (
+            <div className="flex flex-wrap gap-2 px-4 pb-4">
+              {FILMS.map((f, i) => (
+                <button
+                  key={f.src}
+                  type="button"
+                  onClick={() => setFilm(i)}
+                  className={cn(
+                    'rounded-full border border-white/20 px-3 py-1 text-sm text-white/70 transition-colors hover:text-white',
+                    i === film && 'border-white bg-white text-black hover:text-black',
+                  )}
+                >
+                  {f.title}
+                </button>
+              ))}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </section>
@@ -141,8 +136,8 @@ export function HeroStage() {
 }
 
 /**
- * A hairline-bordered bar; on hover a photo opens out of its middle
- * (clip-path inset 50% → 0) and the label pulls in from the edges.
+ * A hairline-bordered bar; on hover a small photo opens out of its middle
+ * (clip-path inset 50% → 0) and the label pulls in onto it.
  */
 function FilmButton({ onClick }: { onClick: () => void }) {
   const ease = 'transition-all duration-300 ease-[cubic-bezier(.5,1,.89,1)]'
@@ -154,11 +149,11 @@ function FilmButton({ onClick }: { onClick: () => void }) {
     >
       <span
         aria-hidden
-        className={`pointer-events-none absolute left-0 top-1/2 aspect-[11.625/13.125] w-full -translate-y-1/2 overflow-hidden rounded-[0.275em] opacity-0 [clip-path:inset(50%_0%)] group-hover:opacity-100 group-hover:[clip-path:inset(0%)] ${ease}`}
+        className={`pointer-events-none absolute left-1/2 top-1/2 aspect-[11.625/13.125] w-[60%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[0.275em] opacity-0 [clip-path:inset(50%_0%)] group-hover:opacity-100 group-hover:[clip-path:inset(0%)] ${ease}`}
       >
-        <img src={FILM_PREVIEW} alt="" loading="lazy" className="size-full object-cover" />
+        <img src={FILMS[0].preview} alt="" loading="lazy" className="size-full object-cover" />
       </span>
-      <span className={`relative z-[1] flex w-full items-center justify-between group-hover:w-[90%] ${ease}`}>
+      <span className={`relative z-[1] flex w-full items-center justify-between group-hover:w-[50%] ${ease}`}>
         <span className="font-body text-[0.875em] font-medium">{t('Xem phim')}</span>
         <Play aria-hidden className="size-[0.7em] fill-current" />
       </span>
