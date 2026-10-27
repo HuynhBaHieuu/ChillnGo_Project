@@ -1,5 +1,5 @@
 /**
- * Itineraries cloned from journeys ("Đã clone về"), private to their owner.
+ * Itineraries cloned from journeys ("Đã sao chép"), private to their owner.
  *
  *   GET    /api/itineraries                  your itineraries, newest first
  *   GET    /api/itineraries/:id              one of yours
@@ -57,7 +57,7 @@ const sourceSchema = z.object({
 /** The days (and title, cover) of the journey `postId`: read here, or as sent for a sample journey. */
 async function journeyFor(postId: string, userId: string, source: z.infer<typeof sourceSchema> | undefined) {
   if (isServerPostId(postId)) return readableJourney(postId, userId)
-  if (!source) throw new HttpError(400, 'Thiếu dữ liệu hành trình để clone.', 'SOURCE_REQUIRED')
+  if (!source) throw new HttpError(400, 'Thiếu dữ liệu hành trình để sao chép.', 'SOURCE_REQUIRED')
   return source
 }
 
@@ -105,7 +105,7 @@ itinerariesRouter.post('/', writeLimiter, async (req, res) => {
     sourcePostIds: [input.postId],
     cloneType: 'manual',
     title: input.title || `${journey.title} (bản của tôi)`,
-    note: `Clone từ hành trình “${journey.title}”.`,
+    note: `Sao chép từ hành trình “${journey.title}”.`,
     coverUrl: journey.coverUrl,
     startDate,
     days,

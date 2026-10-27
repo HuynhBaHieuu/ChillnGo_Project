@@ -34,7 +34,7 @@ export const GUIDE_INDEX: Record<GuideTopic, string> = {
   drafts: 'lưu nháp, tìm lại bản nháp, viết tiếp, đăng, nhân bản',
   edit_delete_journey: 'sửa hoặc xoá hành trình, mục Đã xoá gần đây, khôi phục',
   discover: 'tìm kiếm và lọc hành trình ở trang Khám phá, khám phá theo sở thích',
-  clone_itinerary: 'clone hành trình về làm lịch trình của mình, clone với AI (điều chỉnh theo ngày đi, số người, ngân sách; gộp nhiều hành trình; tối ưu tuyến; Plan B; checklist chuẩn bị), đổi thứ tự ngày, ghép ngày, trạng thái',
+  clone_itinerary: 'sao chép hành trình về làm lịch trình của mình, sao chép bằng AI (điều chỉnh theo ngày đi, số người, ngân sách; gộp nhiều hành trình; tối ưu tuyến; Plan B; checklist chuẩn bị), đổi thứ tự ngày, ghép ngày, trạng thái',
   interact: 'thích, bình luận, lưu bài, theo dõi người khác, Newsfeed, thông báo',
   checkin: 'đăng check-in: ảnh, cảm xúc, địa điểm',
   livestream: 'phát trực tiếp, xem trực tiếp, xem lại',
@@ -46,11 +46,11 @@ export const GUIDE_INDEX: Record<GuideTopic, string> = {
 
 const GUIDE: Record<GuideTopic, string> = {
   overview: [
-    'ChillnGo là mạng xã hội du lịch: mọi người kể lại chuyến đi thành hành trình theo từng ngày, từng điểm dừng kèm chi phí, và người khác có thể clone về làm lịch trình của mình.',
-    'Thanh điều hướng trên cùng: Khám phá (tìm hành trình), Newsfeed (bài mới từ người bạn theo dõi), Đang live (phát trực tiếp), Hành trình của tôi (bài bạn đăng và lịch trình đã clone), Về ChillnGo (trang giới thiệu).',
+    'ChillnGo là mạng xã hội du lịch: mọi người kể lại chuyến đi thành hành trình theo từng ngày, từng điểm dừng kèm chi phí, và người khác có thể sao chép về làm lịch trình của mình.',
+    'Thanh điều hướng trên cùng: Khám phá (tìm hành trình), Newsfeed (bài mới từ người bạn theo dõi), Đang live (phát trực tiếp), Hành trình của tôi (bài bạn đăng và lịch trình đã sao chép), Về ChillnGo (trang giới thiệu).',
     'Góc phải: chuông Thông báo và ảnh đại diện (mở menu Tài khoản: Đăng bài mới, Hoạt động của bạn, Chỉnh sửa hồ sơ, Đăng xuất).',
     'Trên điện thoại có thanh dưới cùng: Home (Newsfeed), Discover (Khám phá), nút + (đăng hành trình), Bookmarks (đã lưu), Profile (trang cá nhân).',
-    'Nhiều trang xem được khi chưa đăng nhập (Khám phá, Newsfeed, bài viết, trang cá nhân); đăng bài, clone, check-in, livestream và trợ lý AI cần đăng nhập.',
+    'Nhiều trang xem được khi chưa đăng nhập (Khám phá, Newsfeed, bài viết, trang cá nhân); đăng bài, sao chép, check-in, livestream và trợ lý AI cần đăng nhập.',
   ].join('\n'),
 
   account: [
@@ -96,24 +96,24 @@ const GUIDE: Record<GuideTopic, string> = {
   ].join('\n'),
 
   clone_itinerary: [
-    'Clone: mở một hành trình bạn thích → bấm "Dùng làm lịch trình của tôi" → đặt Tên lịch trình và Ngày khởi hành (các ngày được đánh lại từ ngày này) → xác nhận. Cần đăng nhập.',
-    'Xem lại: "Hành trình của tôi" trên thanh điều hướng → tab "Đã clone về" (tab "Tôi đăng" là bài bạn tự đăng).',
-    'Trong một lịch trình đã clone: kéo thẻ để đổi thứ tự ngày (ngày và số thứ tự tự đánh lại), xoá ngày, bấm "Ghép từ bài khác" để chọn thêm ngày từ hành trình khác (nối vào cuối), và xem Tổng chi phí, Số ngày, Số điểm dừng tính lại tức thì.',
-    'Clone với AI: trên một số hành trình có nút "Clone với AI" (cạnh "Dùng làm lịch trình của tôi") → điền Ngày khởi hành, Số ngày, Số người, đánh dấu Có trẻ em / Có người lớn tuổi nếu có, Tổng ngân sách (cả nhóm, không bắt buộc), Điểm xuất phát, chọn Sở thích và Nhịp độ (Thong thả, Vừa phải, Dày đặc) → bấm "Tạo bản nháp" (mất khoảng nửa phút đến một phút). AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ thiếu dữ liệu ghi "chưa có dữ liệu".',
-    'Trang bản nháp AI: mỗi điểm có nhãn Giữ nguyên, Thay thế, Thêm mới hoặc Đã bỏ kèm lý do; bấm "Chấp nhận" hoặc "Hoàn tác" từng thay đổi (hoàn tác một điểm bị thay sẽ trả lại điểm gốc), "Khôi phục" điểm đã bỏ, hoặc "Chấp nhận tất cả". Phía trên là tổng chi phí so với ngân sách và các cảnh báo trùng giờ. Ô "Chỉnh bằng lời" bên phải nhận yêu cầu như "bỏ chợ đêm, thêm quán cà phê sáng ngày 2". Bấm "Lưu vào lịch trình của tôi" để lưu vào tab "Đã clone về". Mỗi lần tạo bản nháp hoặc mỗi tin nhắn dùng một lượt AI (có giới hạn lượt mỗi ngày); bản nháp tự xoá sau 24 giờ.',
-    'Gộp hành trình bằng AI: trong form "Clone với AI", mục "Gộp thêm hành trình cùng điểm đến (tối đa 2)" liệt kê các hành trình khác cùng nơi; chọn rồi bấm "Gộp và tạo bản nháp". Chỉ gộp được hành trình cùng một điểm đến.',
+    'Sao chép: mở một hành trình bạn thích → bấm "Dùng làm lịch trình của tôi" → đặt Tên lịch trình và Ngày khởi hành (các ngày được đánh lại từ ngày này) → xác nhận. Cần đăng nhập.',
+    'Xem lại: "Hành trình của tôi" trên thanh điều hướng → tab "Đã sao chép" (tab "Tôi đăng" là bài bạn tự đăng).',
+    'Trong một lịch trình đã sao chép: kéo thẻ để đổi thứ tự ngày (ngày và số thứ tự tự đánh lại), xoá ngày, bấm "Ghép từ bài khác" để chọn thêm ngày từ hành trình khác (nối vào cuối), và xem Tổng chi phí, Số ngày, Số điểm dừng tính lại tức thì.',
+    'Sao chép bằng AI: trên một số hành trình có nút "Sao chép bằng AI" (cạnh "Dùng làm lịch trình của tôi") → mở khung chat, AI hỏi lần lượt Ngày khởi hành, Số ngày, Số người (có trẻ em / người lớn tuổi không), Ngân sách cả nhóm, Điểm xuất phát, Sở thích và Nhịp độ (Thong thả, Vừa phải, Dày đặc). Trả lời bằng nút gợi ý hoặc gõ tự nhiên, ví dụ "3 ngày, 4 người có trẻ em, 5 triệu"; gõ "bỏ qua" để bỏ một câu. Cột "Thông tin chuyến đi" bên phải cho thấy mục nào đã có. Bấm "Tạo bản nháp" lúc nào cũng được, mục chưa trả lời dùng mặc định (mất khoảng nửa phút đến một phút). Chỉ bước tạo bản nháp mới tốn lượt AI. AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ thiếu dữ liệu ghi "chưa có dữ liệu".',
+    'Trang bản nháp AI: mỗi điểm có nhãn Giữ nguyên, Thay thế, Thêm mới hoặc Đã bỏ kèm lý do; bấm "Chấp nhận" hoặc "Hoàn tác" từng thay đổi (hoàn tác một điểm bị thay sẽ trả lại điểm gốc), "Khôi phục" điểm đã bỏ, hoặc "Chấp nhận tất cả". Phía trên là tổng chi phí so với ngân sách và các cảnh báo trùng giờ. Ô "Chỉnh bằng lời" bên phải nhận yêu cầu như "bỏ chợ đêm, thêm quán cà phê sáng ngày 2". Bấm "Lưu vào lịch trình của tôi" để lưu vào tab "Đã sao chép". Mỗi lần tạo bản nháp hoặc mỗi tin nhắn dùng một lượt AI (có giới hạn lượt mỗi ngày); bản nháp tự xoá sau 24 giờ.',
+    'Gộp hành trình bằng AI: trong khung chat "Sao chép bằng AI", câu hỏi cuối liệt kê các hành trình khác cùng nơi (chọn tối đa 2) rồi bấm "Xong" và "Gộp và tạo bản nháp". Chỉ gộp được hành trình cùng một điểm đến.',
     'Trên trang bản nháp AI còn có: dòng mùa mưa, mùa cao điểm, lễ hội (khi ChillnGo có dữ liệu mùa của điểm đến); cảnh báo đến nơi ngoài giờ mở cửa, không đủ thời gian đi lại giữa hai điểm (ước tính), ngày quá dài so với nhịp độ; nút "Tối ưu tuyến" ở mỗi ngày (sắp lại thứ tự cho đường ngắn hơn, giữ nguyên bữa ăn); dòng "Plan B" dưới mỗi điểm (nơi cùng loại gần nhất đang mở cửa, mùa mưa thì ưu tiên trong nhà); và thẻ "Chuẩn bị cho chuyến đi" với nút "Tạo checklist" (đồ cần mang, chỗ cần đặt trước).',
-    'Lịch trình tạo bằng AI có nhãn "Điều chỉnh bằng AI" và dòng "Phỏng theo hành trình của @tác giả"; hành trình gốc hiện số lượt clone. Plan B và checklist được lưu cùng lịch trình.',
+    'Lịch trình tạo bằng AI có nhãn "Điều chỉnh bằng AI" và dòng "Phỏng theo hành trình của @tác giả"; hành trình gốc hiện số lượt sao chép. Plan B và checklist được lưu cùng lịch trình.',
     'Trạng thái lịch trình: Đang lên kế hoạch, Đã chốt, Đã đi.',
-    'Lịch trình đã clone là riêng tư: chỉ chủ tài khoản xem được (tab "Lịch trình đã clone" trên trang cá nhân của mình).',
+    'Lịch trình đã sao chép là riêng tư: chỉ chủ tài khoản xem được (tab "Lịch trình đã sao chép" trên trang cá nhân của mình).',
   ].join('\n'),
 
   interact: [
-    'Trên một hành trình: bấm trái tim để thích, "Bình luận" để viết hoặc trả lời bình luận, biểu tượng dấu trang ("Lưu bài viết") để lưu xem sau, "Dùng làm lịch trình của tôi" để clone.',
+    'Trên một hành trình: bấm trái tim để thích, "Bình luận" để viết hoặc trả lời bình luận, biểu tượng dấu trang ("Lưu bài viết") để lưu xem sau, "Dùng làm lịch trình của tôi" để sao chép.',
     'Bài đã lưu: trang cá nhân của bạn → tab "Đã lưu", hoặc Hoạt động của bạn → "Đã lưu" (chỉ mình bạn thấy).',
     'Theo dõi: mở trang cá nhân của một người → "Theo dõi" (bấm lại "Đang theo dõi" để bỏ).',
     'Newsfeed: hành trình và check-in mới nhất từ bạn và những người bạn theo dõi (chưa đăng nhập thì xem bài mới nhất của mọi người).',
-    'Thông báo (chuông ở góc phải): có người thích, bình luận, theo dõi, lưu hoặc clone bài của bạn, và khi người bạn theo dõi bắt đầu phát trực tiếp.',
+    'Thông báo (chuông ở góc phải): có người thích, bình luận, theo dõi, lưu hoặc sao chép bài của bạn, và khi người bạn theo dõi bắt đầu phát trực tiếp.',
   ].join('\n'),
 
   checkin: [
@@ -132,7 +132,7 @@ const GUIDE: Record<GuideTopic, string> = {
   ].join('\n'),
 
   profile: [
-    'Trang cá nhân: bấm ảnh đại diện của mình (hoặc của người khác). Có số Người theo dõi, Đang theo dõi và các tab Bài viết, Đã lưu, Lịch trình đã clone (hai tab sau chỉ chủ tài khoản thấy nội dung riêng tư).',
+    'Trang cá nhân: bấm ảnh đại diện của mình (hoặc của người khác). Có số Người theo dõi, Đang theo dõi và các tab Bài viết, Đã lưu, Lịch trình đã sao chép (hai tab sau chỉ chủ tài khoản thấy nội dung riêng tư).',
     'Chỉnh sửa hồ sơ: bấm ảnh đại diện ở góc phải → "Chỉnh sửa hồ sơ" (hoặc nút "Chỉnh sửa hồ sơ" trên trang cá nhân của bạn). Đổi được Ảnh đại diện, Ảnh bìa (tối đa 15 MB mỗi ảnh), Tên hiển thị, Tên người dùng, Giới thiệu, Nơi sống → lưu.',
     'Các thay đổi hồ sơ được ghi lại ở Hoạt động của bạn → Lịch sử tài khoản.',
   ].join('\n'),
@@ -152,7 +152,7 @@ const GUIDE: Record<GuideTopic, string> = {
     'Trợ lý AI (nút robot ở góc phải dưới, cần đăng nhập) tư vấn du lịch và hướng dẫn dùng ChillnGo. Nút này tạm ẩn ở trang chi tiết một hành trình và trang xem livestream; quay lại trang khác là thấy, cuộc trò chuyện vẫn còn.',
     'Khi trợ lý nhắc tới một hành trình trên ChillnGo, bên cạnh tên có đường dẫn "Xem hành trình" để mở nó.',
     'Trợ lý tra được dữ liệu thật: các hành trình đã đăng công khai (lịch trình từng ngày, điểm dừng, chi phí ước tính, phương tiện, quãng đường) và các hành trình của chính bạn, kể cả bản nháp.',
-    'Trợ lý không xem được: bản nháp của người khác, lượt thích, bình luận, bài đã lưu, lịch trình đã clone, tin nhắn hay thông tin riêng tư của tài khoản. Trợ lý không tự đăng, sửa hay xoá gì thay bạn.',
+    'Trợ lý không xem được: bản nháp của người khác, lượt thích, bình luận, bài đã lưu, lịch trình đã sao chép, tin nhắn hay thông tin riêng tư của tài khoản. Trợ lý không tự đăng, sửa hay xoá gì thay bạn.',
     'Cuộc trò chuyện không được lưu trên máy chủ: tải lại trang là bắt đầu lại. Mỗi phút hỏi được tối đa 10 câu.',
   ].join('\n'),
 

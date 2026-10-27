@@ -21,11 +21,11 @@ const STEPS = [
     ],
   },
   {
-    name: 'Clone',
-    title: 'Clone về và sửa theo ý bạn',
+    name: 'Sao chép',
+    title: 'Sao chép về và sửa theo ý bạn',
     photo: landingPhoto('mountainRoad', 1200, 900),
     points: [
-      ['Clone một chạm', ' biến chuyến đi của người khác thành bản nháp của bạn.'],
+      ['Sao chép một chạm', ' biến chuyến đi của người khác thành bản nháp của bạn.'],
       ['Kéo thả để đổi thứ tự ngày,', ' ngày tháng tự cập nhật theo.'],
       ['Ghép nhiều chuyến:', ' lấy những ngày hay nhất từ nhiều bài.'],
     ],
@@ -34,7 +34,7 @@ const STEPS = [
     name: 'Chia sẻ',
     title: 'Đi xong, chia sẻ lại',
     photo: landingPhoto('beach', 1200, 900),
-    points: [['Đăng hành trình của bạn', ' cho người đi sau tham khảo và clone tiếp.']],
+    points: [['Đăng hành trình của bạn', ' cho người đi sau tham khảo và sao chép tiếp.']],
   },
 ] as const
 

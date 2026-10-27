@@ -48,7 +48,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
           padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 40),
           children: [
             Text(
-              'Hành trình bạn tự đăng và những lịch trình bạn đã clone về. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.',
+              'Hành trình bạn tự đăng và những lịch trình bạn đã sao chép. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.',
               style: AppText.meta,
             ),
             const SizedBox(height: 14),
@@ -68,7 +68,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
             ),
             const SizedBox(height: 16),
             SegmentTabs<String>(
-              items: const [(value: 'mine', label: 'Tôi đăng', count: null), (value: 'cloned', label: 'Đã clone về', count: null)],
+              items: const [(value: 'mine', label: 'Tôi đăng', count: null), (value: 'cloned', label: 'Đã sao chép', count: null)],
               value: _tab,
               onChanged: (t) => setState(() => _tab = t),
             ),
@@ -79,7 +79,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
                   EmptyState(
                     icon: LucideIcons.squarePen,
                     title: 'Bạn chưa đăng hành trình nào',
-                    description: 'Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể clone về làm lịch trình của họ.',
+                    description: 'Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể sao chép về làm lịch trình của họ.',
                     action: AppButton(label: 'Đăng hành trình đầu tiên', icon: LucideIcons.plus, onPressed: () => context.push('/posts/new')),
                   ),
                 ],
@@ -95,7 +95,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
                   EmptyState(
                     icon: LucideIcons.map,
                     title: 'Chưa có lịch trình nào',
-                    description: 'Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình” để clone nó về đây rồi sửa theo cách bạn muốn đi.',
+                    description: 'Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.',
                     action: AppButton(label: 'Khám phá hành trình', onPressed: () => context.go('/discover')),
                   ),
                 ],
