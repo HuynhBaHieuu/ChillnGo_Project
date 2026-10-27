@@ -23,7 +23,7 @@ import 'follow_button.dart';
 const List<({String value, String label, int? count})> _tabs = [
   (value: 'posts', label: 'Bài viết', count: null),
   (value: 'saved', label: 'Đã lưu', count: null),
-  (value: 'cloned', label: 'Lịch trình đã clone', count: null),
+  (value: 'cloned', label: 'Lịch trình đã sao chép', count: null),
   (value: 'live', label: 'Livestream', count: null),
 ];
 
@@ -280,14 +280,14 @@ class _Cloned extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isOwn) {
-      return const EmptyState(icon: LucideIcons.copy, title: 'Lịch trình riêng tư', description: 'Chỉ chủ tài khoản mới xem được những lịch trình đã clone.');
+      return const EmptyState(icon: LucideIcons.copy, title: 'Lịch trình riêng tư', description: 'Chỉ chủ tài khoản mới xem được những lịch trình đã sao chép.');
     }
     final itineraries = ref.watch(myItinerariesProvider);
     if (itineraries.isLoading && !itineraries.hasValue) return const Skeleton(height: 140, radius: AppRadius.lg);
     if (itineraries.hasError && !itineraries.hasValue) return ErrorPanel(error: itineraries.error);
     final list = itineraries.value ?? const <ClonedItinerary>[];
     if (list.isEmpty) {
-      return const EmptyState(icon: LucideIcons.copy, title: 'Chưa clone lịch trình nào', description: 'Khi bạn clone một hành trình, nó sẽ xuất hiện ở đây.');
+      return const EmptyState(icon: LucideIcons.copy, title: 'Chưa sao chép lịch trình nào', description: 'Khi bạn sao chép một hành trình, nó sẽ xuất hiện ở đây.');
     }
     return Column(
       children: [

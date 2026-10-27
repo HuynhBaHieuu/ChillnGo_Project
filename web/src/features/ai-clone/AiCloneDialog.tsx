@@ -1,20 +1,21 @@
-import { Loader2, Sparkles } from 'lucide-react'
+import { Check, Loader2, Send, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { GlassButton } from '@/components/Button'
 import { Modal } from '@/components/Modal'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Bubble } from '@/features/ai-clone/ChatPanel'
+import { nextWeek, parseReply, SKIP, SLOT_OF, thisWeekend } from '@/features/ai-clone/chatParse'
+import type { Slot, TripAnswers } from '@/features/ai-clone/chatParse'
 import { useAiCloneOptions, useCreateAiDraft } from '@/features/ai-clone/hooks'
 import { t, translatedList, tx } from '@/i18n'
 import type { MessageKey } from '@/i18n'
-import { formatVnd } from '@/lib/format'
-import type { AiPace, TripPostWithAuthor } from '@/services/types'
+import { formatShortDate, formatVnd } from '@/lib/format'
+import { cn } from '@/lib/utils'
+import type { AiCloneForm, AiCloneOptions, AiPace, TripPostWithAuthor } from '@/services/types'
 
 interface AiCloneDialogProps {
   post: TripPostWithAuthor
@@ -36,9 +37,41 @@ const STEPS: MessageKey[] = [
   'Đang kiểm tra chi phí và giờ giấc…',
 ]
 
-function nextWeek(): string {
-  return new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10)
+const QUESTIONS: Record<Slot, MessageKey> = {
+  when: 'Bạn định khởi hành ngày nào?',
+  days: 'Chuyến đi mấy ngày? Hành trình gốc là {n} ngày.',
+  group: 'Đi mấy người? Có trẻ em hay người lớn tuổi không?',
+  budget: 'Tổng ngân sách cho cả nhóm khoảng bao nhiêu?',
+  departure: 'Bạn xuất phát từ đâu?',
+  interests: 'Bạn thích kiểu điểm nào? Chọn một hoặc vài mục rồi bấm Xong.',
+  pace: 'Bạn muốn đi với nhịp độ nào?',
+  merge: 'Có hành trình khác cùng điểm đến. Bạn muốn AI gộp thêm (tối đa 2) không?',
 }
+
+/** What to type when a reply was not understood (chatParse reads Vietnamese and English). */
+const EXAMPLES: Record<Slot, MessageKey | null> = {
+  when: '20/11',
+  days: '3 ngày (1–14)',
+  group: '4 người, có trẻ em',
+  budget: '5 triệu',
+  departure: 'TP.HCM',
+  interests: null,
+  pace: 'thong thả',
+  merge: null,
+}
+
+const LABELS: Record<Slot, MessageKey> = {
+  when: 'Ngày khởi hành',
+  days: 'Số ngày',
+  group: 'Số người',
+  budget: 'Ngân sách',
+  departure: 'Điểm xuất phát',
+  interests: 'Sở thích',
+  pace: 'Nhịp độ',
+  merge: 'Gộp hành trình',
+}
+
+const CITIES = ['TP.HCM', 'Hà Nội', 'Đà Nẵng']
 
 /** The months a trip from `startDate` for `days` days covers. */
 function monthsOf(startDate: string, days: number): number[] {
@@ -51,43 +84,49 @@ function monthsOf(startDate: string, days: number): number[] {
   return [...months]
 }
 
-/** Digits only: "5.000.000" and "5,000,000" both read as 5000000. */
-function digits(value: string): number | null {
-  const clean = value.replace(/\D/g, '')
-  return clean ? Number(clean) : null
+type Message = { mine: boolean; text: string }
+
+interface Chip {
+  label: string
+  /** What the chip answers; a chip with none skips the question. */
+  answers?: TripAnswers
+  /** Your chat bubble, when it should say more than the label ("Xong" → what was picked). */
+  says?: string
+  /** A toggle in a pick-several question. */
+  pressed?: boolean
+  onToggle?: () => void
 }
 
 /**
- * The AI clone form: your dates, group, budget, interests and pace. The AI
- * adapts the journey to them and the result opens as a draft to review.
+ * Clone with AI as a chat: it asks for your dates, group, budget, interests and
+ * pace one question at a time, with quick replies, and reads free text such as
+ * "3 ngày, 4 người có trẻ em, 5 triệu". The questions are asked here, not by
+ * the AI, so only "Tạo bản nháp" spends an AI request; it can be pressed at any
+ * time, and unanswered questions take their defaults.
  */
 export function AiCloneDialog({ post, open, onOpenChange }: AiCloneDialogProps) {
   const options = useAiCloneOptions(post._id, open)
   const create = useCreateAiDraft(post._id)
   const navigate = useNavigate()
 
-  const [startDate, setStartDate] = useState(nextWeek)
-  const [days, setDays] = useState(String(post.days.length))
-  const [groupSize, setGroupSize] = useState('2')
-  const [withChildren, setWithChildren] = useState(false)
-  const [withElderly, setWithElderly] = useState(false)
-  const [budget, setBudget] = useState('')
-  const [departure, setDeparture] = useState('')
-  const [interests, setInterests] = useState<string[]>([])
-  const [pace, setPace] = useState<AiPace>('moderate')
+  const [answers, setAnswers] = useState<TripAnswers>({})
+  const [settled, setSettled] = useState<Slot[]>([])
   const [mergeWith, setMergeWith] = useState<string[]>([])
-  const [formError, setFormError] = useState<string | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [text, setText] = useState('')
   const [step, setStep] = useState(0)
+  const listRef = useRef<HTMLOListElement>(null)
 
-  // A fresh form each time it opens (the same render-time reset as CloneDialog).
+  // A fresh chat each time it opens (the same render-time reset as CloneDialog).
   const [wasOpen, setWasOpen] = useState(open)
   if (open !== wasOpen) {
     setWasOpen(open)
     if (open) {
-      setStartDate(nextWeek())
-      setDays(String(post.days.length))
+      setAnswers({})
+      setSettled([])
       setMergeWith([])
-      setFormError(null)
+      setMessages([])
+      setText('')
     }
   }
 
@@ -103,55 +142,207 @@ export function AiCloneDialog({ post, open, onOpenChange }: AiCloneDialogProps) 
     return () => clearInterval(timer)
   }, [create.isPending])
 
-  const left = options.data?.callsLeft ?? 0
-  const budgetValue = digits(budget)
+  // Keep the newest message in view.
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
+  }, [messages.length, create.isPending, create.isError])
 
-  /** What ChillnGo's season data says about the chosen dates; nothing without data. */
-  const season = options.data?.season
-  const months = monthsOf(startDate, Number(days))
-  const seasonNotes = season
-    ? [
-        months.some((m) => season.rainyMonths.includes(m)) &&
-          t('Theo dữ liệu ChillnGo, {place} đang vào mùa mưa: AI sẽ ưu tiên điểm trong nhà.', { place: options.data?.destination ?? '' }),
-        months.some((m) => season.peakMonths.includes(m)) && t('Đang mùa cao điểm: nên đặt phòng và vé sớm.'),
-        ...season.festivals.filter((f) => months.includes(f.month)).map((f) => t('Có {name} (tháng {month}).', { name: f.name, month: f.month })),
-      ].filter((note): note is string => Boolean(note))
-    : []
+  const data = options.data
+  const slots: Slot[] = [
+    'when', 'days', 'group', 'budget', 'departure',
+    ...(data?.interests.length ? (['interests'] as const) : []),
+    'pace',
+    ...(data?.mergeable.length ? (['merge'] as const) : []),
+  ]
+  const asking = slots.find((s) => !settled.includes(s)) ?? null
+  const left = data?.callsLeft ?? 0
 
-  function toggleMerge(postId: string) {
-    setMergeWith((current) =>
-      current.includes(postId) ? current.filter((id) => id !== postId) : current.length < 2 ? [...current, postId] : current,
-    )
+  const form: AiCloneForm = {
+    startDate: answers.startDate ?? nextWeek(new Date()),
+    days: answers.days ?? post.days.length,
+    groupSize: answers.groupSize ?? 2,
+    withChildren: answers.withChildren ?? false,
+    withElderly: answers.withElderly ?? false,
+    budget: answers.budget ?? null,
+    departure: answers.departure ?? '',
+    interests: answers.interests ?? [],
+    pace: answers.pace ?? 'moderate',
+  }
+
+  function question(slot: Slot | null): string {
+    if (!slot) return t('Đủ thông tin rồi! Bấm “Tạo bản nháp” để AI bắt đầu, hoặc nhắn thêm nếu muốn đổi gì.')
+    return t(QUESTIONS[slot], { n: post.days.length })
+  }
+
+  /** What ChillnGo's season data says about these dates; nothing without data. */
+  function seasonNotes(f: AiCloneForm, opts: AiCloneOptions): string[] {
+    const season = opts.season
+    if (!season) return []
+    const months = monthsOf(f.startDate, f.days)
+    return [
+      months.some((m) => season.rainyMonths.includes(m)) &&
+        t('Theo dữ liệu ChillnGo, {place} đang vào mùa mưa: AI sẽ ưu tiên điểm trong nhà.', { place: opts.destination ?? '' }),
+      months.some((m) => season.peakMonths.includes(m)) && t('Đang mùa cao điểm: nên đặt phòng và vé sớm.'),
+      ...season.festivals.filter((f) => months.includes(f.month)).map((f) => t('Có {name} (tháng {month}).', { name: f.name, month: f.month })),
+    ].filter((note): note is string => Boolean(note))
+  }
+
+  /** A slot's answer as the checklist and the chat show it. */
+  function valueOf(slot: Slot, f: AiCloneForm): string {
+    switch (slot) {
+      case 'when':
+        return formatShortDate(f.startDate)
+      case 'days':
+        return t('{n} ngày', { n: f.days })
+      case 'group':
+        return [
+          String(f.groupSize),
+          f.withChildren && t('Có trẻ em'),
+          f.withElderly && t('Có người lớn tuổi'),
+        ].filter(Boolean).join(' · ')
+      case 'budget':
+        return f.budget === null ? t('Không giới hạn') : formatVnd(f.budget)
+      case 'departure':
+        return f.departure || t('Bỏ qua')
+      case 'interests':
+        return f.interests.length
+          ? f.interests.map((v) => tx(data?.interests.find((i) => i.value === v)?.label ?? v)).join(', ')
+          : t('Tất cả')
+      case 'pace':
+        return PACES.find((p) => p.value === f.pace)?.label ?? ''
+      case 'merge':
+        return mergeWith.length
+          ? mergeWith.map((id) => data?.mergeable.find((j) => j.postId === id)?.title ?? '').join(', ')
+          : t('Không gộp')
+    }
+  }
+
+  /**
+   * One reply: a chip (`given`) or typed text. A chip always settles the
+   * question asked; typed text settles every question it answers, and a
+   * "bỏ qua" skips the one asked.
+   */
+  function reply(raw: string, given?: TripAnswers) {
+    const said = raw.trim()
+    if (!said || !data || create.isPending) return
+    const parsed = given ?? parseReply(said, asking, data.interests, new Date())
+    const skipped = !given && asking !== null && SKIP.test(said.toLowerCase())
+    const nextAnswers = { ...answers, ...parsed }
+    const nextSettled = new Set(settled)
+    for (const key of Object.keys(parsed) as (keyof TripAnswers)[]) nextSettled.add(SLOT_OF[key])
+    if (asking && (given || skipped)) nextSettled.add(asking)
+
+    const bot: string[] = []
+    if (!given && !skipped && Object.keys(parsed).length === 0) {
+      const example = asking && EXAMPLES[asking]
+      bot.push(
+        example
+          ? t('Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới, hoặc nhắn kiểu: “{example}”.', { example: t(example) })
+          : t('Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới.'),
+      )
+    } else {
+      const nextForm: AiCloneForm = { ...form, ...parsed }
+      if (!given && Object.keys(parsed).length) {
+        const touched = [...new Set((Object.keys(parsed) as (keyof TripAnswers)[]).map((k) => SLOT_OF[k]))]
+        bot.push(t('Đã ghi: {items}.', { items: touched.map((s) => `${t(LABELS[s])} ${valueOf(s, nextForm)}`).join('; ') }))
+      }
+      // Only the season notes the chat has not said yet.
+      if (parsed.startDate || parsed.days) {
+        bot.push(...seasonNotes(nextForm, data).filter((note) => !messages.some((m) => m.text === note)))
+      }
+      bot.push(question(slots.find((s) => !nextSettled.has(s)) ?? null))
+    }
+
+    setAnswers(nextAnswers)
+    setSettled([...nextSettled])
+    setMessages((m) => [...m, { mine: true, text: said }, ...bot.map((b) => ({ mine: false, text: b }))])
+    setText('')
+  }
+
+  function chipsFor(slot: Slot | null, opts: AiCloneOptions): Chip[] {
+    const today = new Date()
+    switch (slot) {
+      case 'when': {
+        const week = nextWeek(today)
+        const weekend = thisWeekend(today)
+        return [
+          { label: t('Tuần sau ({date})', { date: formatShortDate(week) }), answers: { startDate: week } },
+          { label: t('Cuối tuần này ({date})', { date: formatShortDate(weekend) }), answers: { startDate: weekend } },
+        ]
+      }
+      case 'days': {
+        const n = post.days.length
+        return [n - 1, n, n + 1]
+          .filter((d) => d >= 1 && d <= 14)
+          .map((d) => ({ label: t('{n} ngày', { n: d }), answers: { days: d } }))
+      }
+      case 'group':
+        return [
+          { label: t('Một mình'), answers: { groupSize: 1, withChildren: false, withElderly: false } },
+          { label: t('Cặp đôi'), answers: { groupSize: 2, withChildren: false, withElderly: false } },
+          { label: t('Gia đình 4 người, có trẻ em'), answers: { groupSize: 4, withChildren: true } },
+          { label: t('Nhóm bạn 4 người'), answers: { groupSize: 4, withChildren: false, withElderly: false } },
+        ]
+      case 'budget':
+        return [
+          { label: t('Không giới hạn'), answers: { budget: null } },
+          ...[3_000_000, 5_000_000, 10_000_000].map((b) => ({ label: formatVnd(b), answers: { budget: b } })),
+        ]
+      case 'departure':
+        return [
+          ...CITIES.map((c) => ({ label: tx(c), answers: { departure: c } })),
+          { label: t('Bỏ qua') },
+        ]
+      case 'interests': {
+        const picked = answers.interests ?? []
+        return [
+          ...opts.interests.map((i) => ({
+            label: tx(i.label),
+            pressed: picked.includes(i.value),
+            onToggle: () =>
+              setAnswers((a) => {
+                const current = a.interests ?? []
+                return { ...a, interests: current.includes(i.value) ? current.filter((v) => v !== i.value) : [...current, i.value] }
+              }),
+          })),
+          {
+            label: picked.length ? t('Xong') : t('Tất cả'),
+            says: valueOf('interests', { ...form, interests: picked }),
+            answers: { interests: picked },
+          },
+        ]
+      }
+      case 'pace':
+        return PACES.map((p) => ({ label: p.label, answers: { pace: p.value } }))
+      case 'merge':
+        return [
+          ...opts.mergeable.map((j) => {
+            const pressed = mergeWith.includes(j.postId)
+            return {
+              label: `${j.title} · ${t('{n} ngày', { n: j.days })}`,
+              pressed,
+              onToggle: () =>
+                setMergeWith((current) =>
+                  pressed ? current.filter((id) => id !== j.postId) : current.length < 2 ? [...current, j.postId] : current,
+                ),
+            }
+          }),
+          { label: mergeWith.length ? t('Xong') : t('Không gộp'), says: valueOf('merge', form), answers: {} },
+        ]
+      default:
+        return []
+    }
   }
 
   /** Each draft costs an AI request: a double click must not start two. */
   const submitting = useRef(false)
 
   function handleSubmit() {
-    if (submitting.current) return
-    const dayCount = Number(days)
-    const people = Number(groupSize)
-    if (!startDate) return setFormError(t('Hãy chọn ngày khởi hành.'))
-    if (!Number.isInteger(dayCount) || dayCount < 1 || dayCount > 14) return setFormError(t('Số ngày từ 1 đến 14.'))
-    if (!Number.isInteger(people) || people < 1 || people > 30) return setFormError(t('Số người từ 1 đến 30.'))
-    setFormError(null)
+    if (submitting.current || !data) return
     setStep(0)
     submitting.current = true
     create.mutate(
-      {
-        form: {
-          startDate,
-          days: dayCount,
-          groupSize: people,
-          withChildren,
-          withElderly,
-          budget: budgetValue,
-          departure: departure.trim(),
-          interests,
-          pace,
-        },
-        mergeWith,
-      },
+      { form, mergeWith },
       {
         onSuccess: (draft) => {
           onOpenChange(false)
@@ -169,16 +360,16 @@ export function AiCloneDialog({ post, open, onOpenChange }: AiCloneDialogProps) 
       open={open}
       // The AI is already working on it: closing now would only hide the result.
       onOpenChange={(next) => !next && !create.isPending && close()}
-      title={t('Clone với AI')}
-      description={t('AI điều chỉnh hành trình này theo ngày đi, số người, ngân sách và sở thích của bạn. Bạn xem lại từng thay đổi trước khi lưu.')}
-      className="max-w-xl"
+      title={t('Sao chép bằng AI')}
+      description={t('Trò chuyện vài câu để AI điều chỉnh hành trình này theo chuyến đi của bạn. Bạn xem lại từng thay đổi trước khi lưu.')}
+      className="max-w-4xl"
       footer={
         create.isPending ? null : (
           <>
             <Button variant="ghost" onClick={close}>
               {t('Huỷ')}
             </Button>
-            <GlassButton tone="sunset" onClick={handleSubmit} disabled={!options.data || left === 0}>
+            <GlassButton tone="sunset" onClick={handleSubmit} disabled={!data || left === 0}>
               <Sparkles />
               {mergeWith.length ? t('Gộp và tạo bản nháp') : t('Tạo bản nháp')}
             </GlassButton>
@@ -186,169 +377,140 @@ export function AiCloneDialog({ post, open, onOpenChange }: AiCloneDialogProps) 
         )
       }
     >
-      {create.isPending ? (
-        <div role="status" aria-live="polite" className="flex flex-col items-center gap-4 py-10 text-center">
-          <Loader2 className="size-8 animate-spin text-primary" />
-          <p className="font-display text-lg">{t(STEPS[step])}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            {t('Thường mất từ 20 giây đến một phút. Đừng đóng cửa sổ này nhé.')}
-          </p>
-        </div>
-      ) : options.isPending ? (
+      {options.isPending ? (
         <div className="space-y-3">
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-10 rounded-xl" />
           ))}
         </div>
-      ) : options.isError ? (
-        <p className="text-sm text-destructive">{(options.error as Error).message}</p>
+      ) : !data ? (
+        <p className="text-sm text-destructive">{(options.error as Error | null)?.message}</p>
       ) : (
-        <div className="space-y-5">
-          {!options.data.destination && (
-            <p className="rounded-xl border border-border p-3 text-sm text-muted-foreground">
-              {t('ChillnGo chưa có dữ liệu địa điểm cho nơi này, nên AI chỉ sắp xếp lại các điểm có sẵn trong hành trình gốc.')}
-            </p>
-          )}
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_15rem]">
+          <div className="flex min-w-0 flex-col">
+            <ol ref={listRef} className="h-[min(24rem,45vh)] space-y-3 overflow-y-auto pr-1" aria-live="polite">
+              <Bubble mine={false}>
+                {t('Chào bạn! Mình sẽ điều chỉnh “{title}” cho chuyến đi của bạn. Cứ nhắn tự nhiên, hoặc chọn gợi ý bên dưới nhé.', { title: post.title })}
+              </Bubble>
+              {!data.destination && (
+                <Bubble mine={false}>
+                  {t('ChillnGo chưa có dữ liệu địa điểm cho nơi này, nên AI chỉ sắp xếp lại các điểm có sẵn trong hành trình gốc.')}
+                </Bubble>
+              )}
+              <Bubble mine={false}>{question(slots[0])}</Bubble>
+              {messages.map((m, i) => (
+                <Bubble key={i} mine={m.mine}>
+                  {m.text}
+                </Bubble>
+              ))}
+              {create.isPending && (
+                <li role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin text-primary" />
+                  {t(STEPS[step])} {t('Thường mất từ 20 giây đến một phút. Đừng đóng cửa sổ này nhé.')}
+                </li>
+              )}
+              {create.isError && (
+                <li role="alert" className="text-sm text-destructive">
+                  {(create.error as Error).message}
+                </li>
+              )}
+            </ol>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2 sm:col-span-1">
-              <Label htmlFor="ai-start">{t('Ngày khởi hành')}</Label>
-              <Input id="ai-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ai-days">{t('Số ngày')}</Label>
-              <Input id="ai-days" type="number" min={1} max={14} value={days} onChange={(e) => setDays(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ai-people">{t('Số người')}</Label>
-              <Input id="ai-people" type="number" min={1} max={30} value={groupSize} onChange={(e) => setGroupSize(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={withChildren} onCheckedChange={(v) => setWithChildren(v === true)} />
-              {t('Có trẻ em')}
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={withElderly} onCheckedChange={(v) => setWithElderly(v === true)} />
-              {t('Có người lớn tuổi')}
-            </label>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="ai-budget">{t('Tổng ngân sách (cả nhóm)')}</Label>
-              <Input
-                id="ai-budget"
-                inputMode="numeric"
-                placeholder={t('Không bắt buộc')}
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              />
-              {budgetValue !== null && <p className="text-xs text-muted-foreground">{formatVnd(budgetValue)}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ai-from">{t('Điểm xuất phát')}</Label>
-              <Input
-                id="ai-from"
-                placeholder={t('Ví dụ: TP.HCM')}
-                maxLength={100}
-                value={departure}
-                onChange={(e) => setDeparture(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {options.data.interests.length > 0 && (
-            <div className="space-y-2">
-              <Label>{t('Sở thích')}</Label>
-              <ToggleGroup
-                type="multiple"
-                aria-label={t('Sở thích')}
-                value={interests}
-                onValueChange={setInterests}
-                className="flex flex-wrap justify-start rounded-2xl"
-              >
-                {options.data.interests.map((interest) => (
-                  <ToggleGroupItem key={interest.value} value={interest.value}>
-                    {tx(interest.label)}
-                  </ToggleGroupItem>
+            {!create.isPending && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {chipsFor(asking, data).map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    aria-pressed={chip.onToggle ? chip.pressed : undefined}
+                    onClick={() => (chip.onToggle ? chip.onToggle() : reply(chip.says ?? chip.label, chip.answers ?? {}))}
+                    className={cn(
+                      'max-w-full truncate rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                      chip.pressed
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border hover:bg-white/10',
+                    )}
+                  >
+                    {chip.pressed && <Check className="-ml-0.5 mr-1 inline size-3" />}
+                    {chip.label}
+                  </button>
                 ))}
-              </ToggleGroup>
-            </div>
-          )}
+                {asking === 'when' && (
+                  <Input
+                    type="date"
+                    aria-label={t('Chọn ngày khác')}
+                    min={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => e.target.value && reply(formatShortDate(e.target.value), { startDate: e.target.value })}
+                    className="h-8 w-auto rounded-full text-xs"
+                  />
+                )}
+              </div>
+            )}
 
-          <div className="space-y-2">
-            <Label>{t('Nhịp độ')}</Label>
-            <ToggleGroup
-              type="single"
-              aria-label={t('Nhịp độ')}
-              value={pace}
-              onValueChange={(v) => v && setPace(v as AiPace)}
-              className="flex w-fit"
+            <form
+              className="mt-3 flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                reply(text)
+              }}
             >
-              {PACES.map((p) => (
-                <ToggleGroupItem key={p.value} value={p.value}>
-                  {p.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+              <Input
+                aria-label={t('Trả lời')}
+                maxLength={300}
+                placeholder={t('Ví dụ: 3 ngày, 4 người có trẻ em, 5 triệu')}
+                value={text}
+                disabled={create.isPending}
+                onChange={(e) => setText(e.target.value)}
+                className="rounded-full"
+              />
+              <Button type="submit" size="icon" className="shrink-0 rounded-full" disabled={create.isPending || !text.trim()} aria-label={t('Gửi')}>
+                <Send />
+              </Button>
+            </form>
+
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              {t('AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ nào thiếu sẽ ghi “chưa có dữ liệu”.')}{' '}
+              {t('Còn {left}/{limit} lượt AI hôm nay.', { left, limit: data.dailyLimit })}
+            </p>
+            {left === 0 && (
+              <p role="alert" className="mt-2 text-sm text-destructive">
+                {t('Bạn đã dùng hết lượt AI hôm nay. Hãy quay lại vào ngày mai nhé.')}
+              </p>
+            )}
           </div>
 
-          {seasonNotes.length > 0 && (
-            <ul className="space-y-1 rounded-xl border border-border p-3 text-sm text-muted-foreground">
-              {seasonNotes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          )}
-
-          {options.data.mergeable.length > 0 && (
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">{t('Gộp thêm hành trình cùng điểm đến (tối đa 2)')}</legend>
-              <p className="text-xs text-muted-foreground">
-                {t('AI lấy những điểm hay nhất của các hành trình và gộp thành một lịch trình.')}
-              </p>
-              <ul className="max-h-40 space-y-1 overflow-y-auto pr-1">
-                {options.data.mergeable.map((journey) => {
-                  const checked = mergeWith.includes(journey.postId)
-                  return (
-                    <li key={journey.postId}>
-                      <label className="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 text-sm hover:bg-white/5">
-                        <Checkbox
-                          checked={checked}
-                          disabled={!checked && mergeWith.length >= 2}
-                          onCheckedChange={() => toggleMerge(journey.postId)}
-                        />
-                        <span className="min-w-0 flex-1 truncate">{journey.title}</span>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {t('{n} ngày', { n: journey.days })}{journey.author && ` · @${journey.author}`}
-                        </span>
-                      </label>
-                    </li>
-                  )
-                })}
-              </ul>
-            </fieldset>
-          )}
-
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            {t('AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ nào thiếu sẽ ghi “chưa có dữ liệu”.')}{' '}
-            {t('Còn {left}/{limit} lượt AI hôm nay.', { left, limit: options.data.dailyLimit })}
-          </p>
-
-          {left === 0 && (
-            <p role="alert" className="text-sm text-destructive">
-              {t('Bạn đã dùng hết lượt AI hôm nay. Hãy quay lại vào ngày mai nhé.')}
+          <aside className="hidden md:block" aria-label={t('Thông tin chuyến đi')}>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('Thông tin chuyến đi')}</p>
+            <p className="mt-1 font-display text-lg">
+              {t('Đã có {done}/{total} mục', { done: slots.filter((s) => settled.includes(s)).length, total: slots.length })}
             </p>
-          )}
-
-          {(formError || create.isError) && (
-            <p role="alert" className="text-sm text-destructive">
-              {formError ?? (create.error as Error).message}
+            <ol className="mt-4 space-y-3">
+              {slots.map((slot) => {
+                const done = settled.includes(slot)
+                return (
+                  <li key={slot} className="flex gap-2.5">
+                    <span
+                      className={cn(
+                        'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border',
+                        done ? 'border-primary bg-primary text-primary-foreground' : 'border-border',
+                      )}
+                    >
+                      {done && <Check className="size-3" />}
+                    </span>
+                    <div className="min-w-0 text-sm">
+                      <p className="text-xs text-muted-foreground">{t(LABELS[slot])}</p>
+                      <p className={cn('truncate', !done && 'text-muted-foreground')}>
+                        {done ? valueOf(slot, form) : t('Mặc định: {value}', { value: valueOf(slot, form) })}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+              {t('Bấm “Tạo bản nháp” lúc nào cũng được: mục chưa trả lời sẽ dùng mặc định.')}
             </p>
-          )}
+          </aside>
         </div>
       )}
     </Modal>

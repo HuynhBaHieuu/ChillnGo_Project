@@ -1,6 +1,6 @@
 /**
  * AI clone (server/src/routes/aiClone.ts): adapt a journey to your trip,
- * review what the AI changed, chat to edit, then save it to "Đã clone về".
+ * review what the AI changed, chat to edit, then save it to "Đã sao chép".
  *
  * Only journeys stored by the API can be adapted: the AI may only use what
  * ChillnGo's database holds, and the sample journeys are not in it.
@@ -81,7 +81,7 @@ export async function createAiChecklist(id: ObjectId): Promise<AiDraft> {
   return draft
 }
 
-/** POST /api/ai-drafts/:id/commit — saves it to "Đã clone về". Saving twice gives the same itinerary. */
+/** POST /api/ai-drafts/:id/commit — saves it to "Đã sao chép". Saving twice gives the same itinerary. */
 export async function commitAiDraft(id: ObjectId, title?: string): Promise<ClonedItinerary> {
   const { itinerary } = await http<{ itinerary: ClonedItinerary }>(`/api/ai-drafts/${id}/commit`, {
     method: 'POST',

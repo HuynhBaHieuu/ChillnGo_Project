@@ -204,7 +204,7 @@ export function RouteScrollStage({ rows, stats }: { rows: DestinationRow[]; stat
                 “
               </span>
               <blockquote className="font-display text-[1.5em] font-medium leading-[1.2] md:text-[2em]">
-                {t('Lên kế hoạch mất ba tuần. Clone một chuyến đi có thật chỉ mất một chạm.')}
+                {t('Lên kế hoạch mất ba tuần. Sao chép một chuyến đi có thật chỉ mất một chạm.')}
               </blockquote>
               <p className="font-body text-[0.875em] font-medium">-</p>
               <figcaption className="font-mono text-[0.75em] uppercase tracking-[0.12em] text-primary">{t('Cộng đồng ChillnGo')}</figcaption>

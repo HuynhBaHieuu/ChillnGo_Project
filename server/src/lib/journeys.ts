@@ -63,7 +63,7 @@ export async function creditClone(postIds: string[], userId: string, how = ''): 
       type: 'clone',
       actorId: userId,
       postId: String(post._id),
-      message: `đã clone hành trình “${title || 'của bạn'}”${how}`,
+      message: `đã sao chép hành trình “${title || 'của bạn'}”${how}`,
     })
   }
 }

@@ -13,7 +13,7 @@ export const landing = {
   'Xem phim': { en: 'Watch the film', zh: '观看短片', ja: 'ムービーを見る', ko: '영상 보기' },
 
   'Cách ChillnGo hoạt động': { en: 'How ChillnGo works', zh: 'ChillnGo 如何运作', ja: 'ChillnGoの使い方', ko: 'ChillnGo 이용 방법' },
-  Clone: { en: 'Clone', zh: '复制', ja: 'クローン', ko: '복제' },
+  'Sao chép': { en: 'Clone', zh: '复制', ja: 'クローン', ko: '복제' },
   'Chia sẻ': { en: 'Share', zh: '分享', ja: 'シェア', ko: '공유' },
   'Khám phá hành trình thật': { en: 'Discover real journeys', zh: '探索真实行程', ja: '本物の旅程を探す', ko: '진짜 여정 탐색하기' },
   'Lọc theo vùng, mùa và ngân sách': {
@@ -35,13 +35,13 @@ export const landing = {
     ja: '各スポットにメモ・写真・予算の目安付き。',
     ko: ' 각 장소마다 메모, 사진, 예상 비용이 있어요.',
   },
-  'Clone về và sửa theo ý bạn': {
+  'Sao chép về và sửa theo ý bạn': {
     en: 'Clone it and make it yours',
     zh: '一键复制，随心修改',
     ja: 'クローンして自分好みに',
     ko: '복제해서 내 마음대로 수정',
   },
-  'Clone một chạm': { en: 'One-tap clone', zh: '一键复制', ja: 'ワンタップでクローン', ko: '원탭 복제' },
+  'Sao chép một chạm': { en: 'One-tap clone', zh: '一键复制', ja: 'ワンタップでクローン', ko: '원탭 복제' },
   ' biến chuyến đi của người khác thành bản nháp của bạn.': {
     en: " turns someone else's trip into your own draft.",
     zh: '，把别人的旅程变成你的草稿。',
@@ -64,7 +64,7 @@ export const landing = {
   },
   'Đi xong, chia sẻ lại': { en: 'Back home? Share it', zh: '旅行归来，分享出去', ja: '旅を終えたらシェア', ko: '다녀왔다면 공유하기' },
   'Đăng hành trình của bạn': { en: 'Post your journey', zh: '发布你的行程', ja: 'あなたの旅程を投稿', ko: '내 여정을 올려' },
-  ' cho người đi sau tham khảo và clone tiếp.': {
+  ' cho người đi sau tham khảo và sao chép tiếp.': {
     en: ' so the next traveller can learn from it and clone it.',
     zh: '，供后来者参考和复制。',
     ja: 'して、次の旅人の参考やクローンに。',
@@ -91,7 +91,7 @@ export const landing = {
     ja: '{trip} のスポットのひとつ。旅程を開くと、旅した人の時間・費用・メモが見られます。',
     ko: '{trip}의 한 경유지. 여정을 열어 다녀온 사람의 시간, 비용, 메모를 확인하세요.',
   },
-  'Lên kế hoạch mất ba tuần. Clone một chuyến đi có thật chỉ mất một chạm.': {
+  'Lên kế hoạch mất ba tuần. Sao chép một chuyến đi có thật chỉ mất một chạm.': {
     en: 'Planning takes three weeks. Cloning a real trip takes one tap.',
     zh: '做攻略要三周，复制一段真实旅程只需一键。',
     ja: '計画には3週間。本物の旅をクローンするならワンタップ。',
@@ -106,14 +106,14 @@ export const landing = {
     ja: '旅のためのSNS',
     ko: '여행을 위한 소셜 네트워크',
   },
-  'ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Clone về làm của bạn chỉ với một chạm, rồi sửa theo cách bạn muốn đi.': {
+  'ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép về làm của bạn chỉ với một chạm, rồi sửa theo cách bạn muốn đi.': {
     en: 'ChillnGo is where real trips are told in full — every day, every stop, every expense. Found a journey you like? Clone it as your own with one tap, then tweak it the way you want to travel.',
     zh: 'ChillnGo 完整记录每一段真实旅程——每一天、每个站点、每一笔花费。看到心仪的行程？一键复制成你自己的，再按你的方式修改。',
     ja: 'ChillnGoは、本物の旅をまるごと伝える場所。1日ごと、スポットごと、出費ごとに。気に入った旅程があれば、ワンタップで自分のものにクローンして、好きなようにアレンジしよう。',
     ko: 'ChillnGo는 진짜 여행을 하루하루, 경유지마다, 지출 하나까지 온전히 기록하는 곳이에요. 마음에 드는 여정이 있나요? 한 번의 탭으로 복제해 내 여정으로 만들고, 원하는 대로 수정하세요.',
   },
   'Con số thật': { en: 'Real numbers', zh: '真实数据', ja: 'リアルな数字', ko: '진짜 숫자' },
-  'Không có lịch trình dựng sẵn, chỉ có người đã đi và kể lại. Đến nay cộng đồng đã chia sẻ {trips} hành trình với {stops} điểm dừng có toạ độ, được clone {clones} lần và lưu lại {bookmarks} lần.': {
+  'Không có lịch trình dựng sẵn, chỉ có người đã đi và kể lại. Đến nay cộng đồng đã chia sẻ {trips} hành trình với {stops} điểm dừng có toạ độ, được sao chép {clones} lần và lưu lại {bookmarks} lần.': {
     en: 'No ready-made itineraries, only people who went and told the story. So far the community has shared {trips} journeys with {stops} mapped stops, cloned {clones} times and saved {bookmarks} times.',
     zh: '没有现成的模板行程，只有亲历者的分享。迄今社区已分享 {trips} 段行程、{stops} 个带坐标的站点，被复制 {clones} 次，收藏 {bookmarks} 次。',
     ja: '既製の旅程はなく、実際に旅した人の記録だけ。これまでにコミュニティは {trips} 件の旅程と座標付きの {stops} か所のスポットを共有し、{clones} 回クローン、{bookmarks} 回保存されました。',

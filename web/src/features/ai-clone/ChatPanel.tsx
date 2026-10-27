@@ -113,7 +113,7 @@ export function ChatPanel({ draft, busy }: ChatPanelProps) {
   )
 }
 
-function Bubble({ mine, children }: { mine: boolean; children: React.ReactNode }) {
+export function Bubble({ mine, children }: { mine: boolean; children: React.ReactNode }) {
   return (
     <li className={cn('flex', mine && 'justify-end')}>
       <p

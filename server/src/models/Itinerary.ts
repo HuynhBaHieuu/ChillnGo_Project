@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
 
 /**
- * A journey someone cloned to plan their own trip ("Đã clone về"). Private to
+ * A journey someone cloned to plan their own trip ("Đã sao chép"). Private to
  * its owner. Field names match `ClonedItinerary` in web/src/services/types.ts;
  * `days` has the journey's shape (TripDay), stored as given.
  *

@@ -109,7 +109,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       children: [
         Text('Bắt đầu ngay', style: AppText.h1),
         const SizedBox(height: 8),
-        Text('Tạo tài khoản để chia sẻ hành trình của bạn, và clone những lịch trình bạn thích về làm của mình.', style: AppText.meta),
+        Text('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.', style: AppText.meta),
         const SizedBox(height: 20),
         AppCard(
           child: Column(
