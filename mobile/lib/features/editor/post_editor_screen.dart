@@ -295,7 +295,7 @@ class _EditorFormState extends ConsumerState<_EditorForm> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 32),
             children: [
-              Text('Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người clone lịch trình của bạn càng đỡ phải đoán.', style: AppText.meta),
+              Text('Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người sao chép lịch trình của bạn càng đỡ phải đoán.', style: AppText.meta),
               const SizedBox(height: 18),
               AppCard(
                 child: Column(

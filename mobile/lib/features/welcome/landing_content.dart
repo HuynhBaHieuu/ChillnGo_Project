@@ -18,13 +18,13 @@ import '../../ui/surfaces.dart';
 const _statement = [
   'ChillnGo là mạng xã hội của những chuyến đi có thật.',
   'Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.',
-  'Thấy hợp ý? Clone về làm của bạn chỉ với một chạm.',
+  'Thấy hợp ý? Sao chép về làm của bạn chỉ với một chạm.',
 ];
 
 const _features = [
   (title: 'Khám phá hành trình', desc: 'Lịch trình thật, lọc theo vùng, mùa và ngân sách.', icon: LucideIcons.compass),
   (title: 'Xem từng ngày', desc: 'Mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.', icon: LucideIcons.calendarRange),
-  (title: 'Clone một chạm', desc: 'Biến chuyến đi của người khác thành bản nháp của bạn.', icon: LucideIcons.copy),
+  (title: 'Sao chép một chạm', desc: 'Biến chuyến đi của người khác thành bản nháp của bạn.', icon: LucideIcons.copy),
   (title: 'Sắp xếp lại ngày', desc: 'Đổi thứ tự ngày, ngày tháng tự cập nhật theo.', icon: LucideIcons.arrowUpDown),
   (title: 'Ghép nhiều chuyến', desc: 'Lấy những ngày hay nhất từ nhiều bài, gộp vào một lịch trình.', icon: LucideIcons.gitMerge),
   (title: 'Chia sẻ lại', desc: 'Đi xong, đăng hành trình của bạn cho người đi sau.', icon: LucideIcons.share2),
@@ -113,7 +113,7 @@ class LandingContent extends ConsumerWidget {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Clone nó về làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn phải dựng lịch trình từ con số không.',
+                      'ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép nó về làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn phải dựng lịch trình từ con số không.',
                       style: AppText.body.copyWith(color: AppColors.cream),
                     ),
                     const SizedBox(height: 22),
@@ -176,7 +176,7 @@ class LandingContent extends ConsumerWidget {
                       children: [
                         for (final item in [
                           (stats.tripCount, 'hành trình'),
-                          (stats.cloneCount, 'lượt clone'),
+                          (stats.cloneCount, 'lượt sao chép'),
                           (stats.bookmarkCount, 'lượt lưu'),
                           (stats.stopCount, 'điểm dừng'),
                         ])
@@ -258,7 +258,7 @@ class LandingContent extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text('Được lưu nhiều nhất', style: AppText.h1, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                Text('Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi clone về làm của bạn.', style: AppText.meta, textAlign: TextAlign.center),
+                Text('Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi sao chép về làm của bạn.', style: AppText.meta, textAlign: TextAlign.center),
                 const SizedBox(height: 18),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -390,7 +390,7 @@ class LandingContent extends ConsumerWidget {
                 onPressed: () => context.push(signedIn ? '/posts/new' : '/register'),
               ),
               const SizedBox(height: 16),
-              Text('Chia sẻ hành trình thật. Clone lịch trình chỉ với một chạm.', style: AppText.meta, textAlign: TextAlign.center),
+              Text('Chia sẻ hành trình thật. Sao chép lịch trình chỉ với một chạm.', style: AppText.meta, textAlign: TextAlign.center),
               const SizedBox(height: 10),
               Text('© 2026 ChillnGo', style: AppText.meta.copyWith(fontSize: 12)),
             ],

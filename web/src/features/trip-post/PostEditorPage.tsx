@@ -342,7 +342,7 @@ export function PostEditorPage() {
     <PageContainer>
       <PageHeader
         title={isEdit ? t('Chỉnh sửa hành trình') : t('Đăng hành trình mới')}
-        description={t('Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người clone lịch trình của bạn càng đỡ phải đoán.')}
+        description={t('Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người sao chép lịch trình của bạn càng đỡ phải đoán.')}
       />
 
       <form

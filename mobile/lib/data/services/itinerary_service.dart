@@ -52,7 +52,7 @@ abstract final class ItineraryService {
   static Future<ClonedItinerary> clonePost({required String postId, required String ownerId, String? title, String? startDate}) async {
     await mockDelay();
     final post = assertFound(_db.postById(postId), 'Không tìm thấy hành trình này.');
-    if (post.days.isEmpty) throw ApiError('Hành trình này chưa có ngày nào để clone.', status: 400);
+    if (post.days.isEmpty) throw ApiError('Hành trình này chưa có ngày nào để sao chép.', status: 400);
 
     final id = nextId('ci');
     final start = (startDate == null || startDate.isEmpty) ? post.startDate : startDate;
@@ -64,7 +64,7 @@ abstract final class ItineraryService {
       ownerId: ownerId,
       sourcePostIds: [post.id],
       title: name.isNotEmpty ? name : '${post.title} (bản của tôi)',
-      note: 'Clone từ bài viết "${post.title}".',
+      note: 'Sao chép từ bài viết "${post.title}".',
       coverUrl: post.coverUrl,
       startDate: start,
       days: days,

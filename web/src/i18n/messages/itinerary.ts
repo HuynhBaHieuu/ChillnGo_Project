@@ -8,7 +8,7 @@ export const itinerary = {
   'Đã đi': { en: 'Completed', zh: '已出行', ja: '旅行済み', ko: '다녀옴' },
 
   /* ItinerariesPage */
-  'Hành trình bạn tự đăng và những lịch trình bạn đã clone về. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.': {
+  'Hành trình bạn tự đăng và những lịch trình bạn đã sao chép. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.': {
     en: "Journeys you posted and itineraries you cloned. Reorder days, merge in days from other posts and track the total cost live.",
     zh: '你发布的行程和你复制的行程。调整日程顺序、从其他帖子合并天数，并实时查看总花费。',
     ja: 'あなたが投稿した旅程とクローンした旅程です。日の並べ替え、他の投稿からの日の追加、合計費用のリアルタイム確認ができます。',
@@ -17,10 +17,10 @@ export const itinerary = {
   'Tìm hành trình mới': { en: 'Find new journeys', zh: '寻找新行程', ja: '新しい旅程を探す', ko: '새 여정 찾기' },
   'Loại hành trình': { en: 'Journey type', zh: '行程类型', ja: '旅程の種類', ko: '여정 유형' },
   'Tôi đăng': { en: 'Posted by me', zh: '我发布的', ja: '自分の投稿', ko: '내가 올린 여정' },
-  'Đã clone về': { en: 'Cloned', zh: '已复制', ja: 'クローン済み', ko: '복제한 일정' },
+  'Đã sao chép': { en: 'Cloned', zh: '已复制', ja: 'クローン済み', ko: '복제한 일정' },
   'Không tải được hành trình của bạn': { en: "Couldn't load your journeys", zh: '无法加载你的行程', ja: '旅程を読み込めませんでした', ko: '여정을 불러오지 못했어요' },
   'Bạn chưa đăng hành trình nào': { en: "You haven't posted any journeys yet", zh: '你还没有发布任何行程', ja: 'まだ旅程を投稿していません', ko: '아직 올린 여정이 없어요' },
-  'Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể clone về làm lịch trình của họ.': {
+  'Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể sao chép về làm lịch trình của họ.': {
     en: 'Tell your trip day by day, stop by stop, with real costs. Others can clone it as their own itinerary.',
     zh: '按天、按站点讲述你的旅程和真实花费。其他人可以复制成自己的行程。',
     ja: '旅を1日ずつ、スポットごとに、実際の費用とともに記録しましょう。他の人が自分の旅程としてクローンできます。',
@@ -31,7 +31,7 @@ export const itinerary = {
   'Viết tiếp': { en: 'Keep writing', zh: '继续写', ja: '続きを書く', ko: '이어 쓰기' },
   'Xem bài': { en: 'View post', zh: '查看帖子', ja: '投稿を見る', ko: '게시물 보기' },
   'Chưa có lịch trình nào': { en: 'No itineraries yet', zh: '还没有行程', ja: 'まだ旅程はありません', ko: '아직 일정이 없어요' },
-  'Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để clone nó về đây rồi sửa theo cách bạn muốn đi.': {
+  'Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.': {
     en: 'When you find a journey you like, tap “Use as my itinerary” to clone it here, then adjust it to the way you want to travel.',
     zh: '看到喜欢的行程时，点击“用作我的行程”将它复制到这里，再按你的方式修改。',
     ja: '気に入った旅程を見つけたら「自分の旅程にする」を押してここにクローンし、行きたいスタイルに合わせて編集しましょう。',
@@ -79,7 +79,7 @@ export const itinerary = {
     ja: 'この旅程の{n}日分をあなた自身の旅程としてコピーします。あとで編集、並べ替え、他の投稿からの日の追加ができます。',
     ko: '이 여정의 {n}일을 나만의 일정으로 복사해요. 나중에 편집하고, 순서를 바꾸고, 다른 게시물의 날을 합칠 수 있어요.',
   },
-  'Clone hành trình': { en: 'Clone journey', zh: '复制行程', ja: '旅程をクローン', ko: '여정 복제' },
+  'Sao chép hành trình': { en: 'Clone journey', zh: '复制行程', ja: '旅程をクローン', ko: '여정 복제' },
   'Tên lịch trình': { en: 'Itinerary name', zh: '行程名称', ja: '旅程名', ko: '일정 이름' },
   'Ngày khởi hành': { en: 'Start date', zh: '出发日期', ja: '出発日', ko: '출발일' },
   'Các ngày trong lịch trình sẽ được đánh lại từ ngày này.': {
@@ -116,7 +116,7 @@ export const itinerary = {
   'Đang theo dõi': { en: 'Following', zh: '已关注', ja: 'フォロー中', ko: '팔로잉' },
   'Theo dõi': { en: 'Follow', zh: '关注', ja: 'フォロー', ko: '팔로우' },
   'Người theo dõi': { en: 'Followers', zh: '粉丝', ja: 'フォロワー', ko: '팔로워' },
-  'Lịch trình đã clone': { en: 'Cloned itineraries', zh: '已复制的行程', ja: 'クローンした旅程', ko: '복제한 일정' },
+  'Lịch trình đã sao chép': { en: 'Cloned itineraries', zh: '已复制的行程', ja: 'クローンした旅程', ko: '복제한 일정' },
   'Không tìm thấy người dùng': { en: 'User not found', zh: '未找到该用户', ja: 'ユーザーが見つかりません', ko: '사용자를 찾을 수 없어요' },
   'Chưa có bài viết nào': { en: 'No posts yet', zh: '还没有帖子', ja: 'まだ投稿はありません', ko: '아직 게시물이 없어요' },
   'Hành trình đầu tiên của bạn sẽ xuất hiện ở đây.': { en: 'Your first journey will appear here.', zh: '你的第一个行程会出现在这里。', ja: '最初の旅程はここに表示されます。', ko: '첫 여정이 여기에 표시돼요.' },
@@ -129,14 +129,14 @@ export const itinerary = {
     ko: '게시물의 북마크 아이콘을 누르면 나중에 읽을 수 있게 저장돼요.',
   },
   'Lịch trình riêng tư': { en: 'Private itineraries', zh: '私人行程', ja: '非公開の旅程', ko: '비공개 일정' },
-  'Chỉ chủ tài khoản mới xem được những lịch trình đã clone.': {
+  'Chỉ chủ tài khoản mới xem được những lịch trình đã sao chép.': {
     en: 'Only the account owner can see cloned itineraries.',
     zh: '只有账户本人才能查看已复制的行程。',
     ja: 'クローンした旅程はアカウントの持ち主だけが見られます。',
     ko: '복제한 일정은 계정 주인만 볼 수 있어요.',
   },
-  'Chưa clone lịch trình nào': { en: 'No cloned itineraries yet', zh: '还没有复制行程', ja: 'まだクローンした旅程はありません', ko: '아직 복제한 일정이 없어요' },
-  'Khi bạn clone một hành trình, nó sẽ xuất hiện ở đây.': { en: 'When you clone a journey, it will appear here.', zh: '复制行程后，它会出现在这里。', ja: '旅程をクローンすると、ここに表示されます。', ko: '여정을 복제하면 여기에 표시돼요.' },
+  'Chưa sao chép lịch trình nào': { en: 'No cloned itineraries yet', zh: '还没有复制行程', ja: 'まだクローンした旅程はありません', ko: '아직 복제한 일정이 없어요' },
+  'Khi bạn sao chép một hành trình, nó sẽ xuất hiện ở đây.': { en: 'When you clone a journey, it will appear here.', zh: '复制行程后，它会出现在这里。', ja: '旅程をクローンすると、ここに表示されます。', ko: '여정을 복제하면 여기에 표시돼요.' },
 
   /* EditProfilePage */
   'ảnh đại diện': { en: 'profile photo', zh: '头像', ja: 'プロフィール写真', ko: '프로필 사진' },

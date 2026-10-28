@@ -1,5 +1,5 @@
 /**
- * Cloned itineraries ("Đã clone về"), stored by the API
+ * Cloned itineraries ("Đã sao chép"), stored by the API
  * (server/src/routes/itineraries.ts) and private to their owner.
  *
  * The sample journeys (ids like p_001) exist only here in the browser, so

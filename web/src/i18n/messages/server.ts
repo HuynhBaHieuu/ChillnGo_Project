@@ -440,14 +440,14 @@ export const server = {
   'Link không hợp lệ': { en: 'Invalid link', zh: '链接无效', ja: 'リンクが無効です', ko: '잘못된 링크입니다' },
 
   /* --------------------------------------------------------- itineraries */
-  'Thiếu dữ liệu hành trình để clone.': { en: 'Missing journey data to clone.', zh: '缺少要复制的行程数据。', ja: 'クローンする旅程データがありません。', ko: '복제할 여정 데이터가 없습니다.' },
+  'Thiếu dữ liệu hành trình để sao chép.': { en: 'Missing journey data to clone.', zh: '缺少要复制的行程数据。', ja: 'クローンする旅程データがありません。', ko: '복제할 여정 데이터가 없습니다.' },
   'Không tìm thấy lịch trình.': { en: 'Itinerary not found.', zh: '未找到该行程。', ja: '旅程が見つかりません。', ko: '일정을 찾을 수 없습니다.' },
   'Lịch trình tối đa 60 ngày.': { en: 'Itineraries can be at most 60 days.', zh: '行程最多 60 天。', ja: '旅程は最大60日です。', ko: '일정은 최대 60일입니다.' },
   'Không tìm thấy ngày này.': { en: 'Day not found.', zh: '未找到这一天。', ja: 'この日が見つかりません。', ko: '이 날짜를 찾을 수 없습니다.' },
   'Lịch trình cần ít nhất một ngày.': { en: 'An itinerary needs at least one day.', zh: '行程至少需要一天。', ja: '旅程には1日以上が必要です。', ko: '일정에는 최소 하루가 필요합니다.' },
   'Ngày không hợp lệ': { en: 'Invalid date', zh: '日期无效', ja: '日付が無効です', ko: '잘못된 날짜입니다' },
   'Tối đa 60 ngày': { en: 'At most 60 days', zh: '最多 60 天', ja: '最大60日', ko: '최대 60일' },
-  'Clone từ hành trình “{title}”.': { en: 'Cloned from the journey “{title}”.', zh: '复制自行程“{title}”。', ja: '旅程「{title}」からクローン。', ko: '여정 “{title}”에서 복제했어요.' },
+  'Sao chép từ hành trình “{title}”.': { en: 'Cloned from the journey “{title}”.', zh: '复制自行程“{title}”。', ja: '旅程「{title}」からクローン。', ko: '여정 “{title}”에서 복제했어요.' },
   'Hãy chọn ít nhất một ngày để ghép.': { en: 'Pick at least one day to merge.', zh: '请至少选择一天进行合并。', ja: '統合する日を1日以上選んでください。', ko: '합칠 날을 하루 이상 선택해 주세요.' },
 
   /* ---------------------------------------------------------- livestream */
@@ -649,21 +649,21 @@ export const server = {
     ja: 'が旅程「{title}」への招待を承諾しました',
     ko: '님이 여정 “{title}” 동행 초대를 수락했습니다',
   },
-  'đã clone hành trình của bạn': { en: 'cloned your journey', zh: '复制了你的行程', ja: 'があなたの旅程をクローンしました', ko: '님이 회원님의 여정을 복제했습니다' },
-  'đã clone hành trình của bạn bằng AI': {
+  'đã sao chép hành trình của bạn': { en: 'cloned your journey', zh: '复制了你的行程', ja: 'があなたの旅程をクローンしました', ko: '님이 회원님의 여정을 복제했습니다' },
+  'đã sao chép hành trình của bạn bằng AI': {
     en: 'cloned your journey with AI',
     zh: '用 AI 复制了你的行程',
     ja: 'がAIであなたの旅程をクローンしました',
     ko: '님이 AI로 회원님의 여정을 복제했습니다',
   },
-  'đã clone hành trình “{title}”': { en: 'cloned your journey “{title}”', zh: '复制了你的行程“{title}”', ja: 'があなたの旅程「{title}」をクローンしました', ko: '님이 여정 “{title}”을(를) 복제했습니다' },
-  'đã clone hành trình “{title}” bằng AI': {
+  'đã sao chép hành trình “{title}”': { en: 'cloned your journey “{title}”', zh: '复制了你的行程“{title}”', ja: 'があなたの旅程「{title}」をクローンしました', ko: '님이 여정 “{title}”을(를) 복제했습니다' },
+  'đã sao chép hành trình “{title}” bằng AI': {
     en: 'cloned your journey “{title}” with AI',
     zh: '用 AI 复制了你的行程“{title}”',
     ja: 'がAIであなたの旅程「{title}」をクローンしました',
     ko: '님이 AI로 여정 “{title}”을(를) 복제했습니다',
   },
-  'đã clone lịch trình {title} của bạn': {
+  'đã sao chép lịch trình {title} của bạn': {
     en: 'cloned your itinerary {title}',
     zh: '复制了你的行程 {title}',
     ja: 'があなたの旅程 {title} をクローンしました',

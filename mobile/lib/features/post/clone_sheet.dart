@@ -61,7 +61,7 @@ class _CloneFormState extends ConsumerState<_CloneForm> {
       Navigator.of(context).pop();
       final parent = widget.parentContext;
       if (parent.mounted) {
-        toast(parent, 'Đã clone vào Hành trình của tôi.');
+        toast(parent, 'Đã sao chép vào Hành trình của tôi.');
         parent.push('/itineraries/${itinerary.id}');
       }
     } catch (error) {
@@ -117,7 +117,7 @@ class _CloneFormState extends ConsumerState<_CloneForm> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: AppButton(label: 'Clone hành trình', icon: LucideIcons.copy, loading: _pending, onPressed: _clone),
+              child: AppButton(label: 'Sao chép hành trình', icon: LucideIcons.copy, loading: _pending, onPressed: _clone),
             ),
           ],
         ),

@@ -56,7 +56,8 @@ shows Minh's trips.
 | `ASSISTANT_DEBUG` | no | `1` logs each lookup the assistant makes (tool, arguments, result size) to the console. |
 | `ASSISTANT_MODEL` | no | Model the AI travel assistant (`POST /api/assistant/chat`) asks through LiveKit Inference, as `provider/model`. Default `google/gemini-2.5-flash`. The assistant needs no key of its own: it uses the `LIVEKIT_*` keys and works only with a LiveKit Cloud project, billed to its inference quota. |
 
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | no | Google Gemini for AI clone (key from https://aistudio.google.com/apikey); model default `gemini-3.8-flash`. When Gemini fails or runs out of quota, AI clone falls back to LiveKit Inference with `ASSISTANT_MODEL`. Unset: LiveKit only. |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | no | Google Gemini, the last model the assistant and AI clone ask (key from https://aistudio.google.com/apikey); model default `gemini-3.8-flash`. Unset: skipped. |
+| `MUSE_API_KEY`, `MUSE_API_URL`, `MUSE_MODEL` | no | Muse, the first model the assistant and AI clone ask; any OpenAI-style API (`MUSE_API_URL` is its base URL or full `/chat/completions` address). When it fails or runs out, LiveKit Inference is asked, then Gemini. All three unset: skipped. |
 | `AI_DAILY_LIMIT_PER_USER` | no | AI requests (an AI clone, a chat message) each user may make per day. Default `20`. |
 
 The server refuses to start if a required variable is missing.
@@ -163,8 +164,9 @@ fact shows as "chưa có dữ liệu". No personal data goes to the model. Only
 journeys stored here can be adapted (the web app's sample journeys are not in
 the database).
 
-**Models.** Gemini first (`GEMINI_*`), LiveKit Inference when Gemini fails;
-after a `429` Gemini is skipped for as long as it asks. Each call logs its
+**Models.** Muse first (`MUSE_*`), then LiveKit Inference, then Gemini
+(`GEMINI_*`), each asked when the one before fails; after a `429` or `402` a
+model is skipped for as long as it asks. The AI assistant uses the same order. Each call logs its
 provider, model, tokens and time as `[ai] task=…`. Tunable numbers (value
 score weights, pace, retries, Gemini's reasoning effort) are in
 `ai/config.ts`.
@@ -493,7 +495,7 @@ src/
   models/Livestream.ts  livestream, its comments, its viewers
   routes/profiles.ts    public profiles and follows
   routes/notifications.ts  the signed-in user's notifications
-  routes/assistant.ts   AI assistant: streams a reply from LiveKit Inference, running its tool calls
+  routes/assistant.ts   AI assistant: streams a reply (Muse → LiveKit → Gemini), running its tool calls
   lib/assistantTools.ts the assistant's read-only lookups (journeys, the user's own, the site guide)
   lib/siteGuide.ts      how to use the website, by topic, for the assistant: keep in step with web/src
   models/Follow.ts      who follows whom
@@ -520,7 +522,7 @@ src/
   lib/journeys.ts       which journeys may be cloned, re-dating copied days, clone credit
   routes/aiClone.ts     AI clone: the form, drafts, review, chat, commit
   ai/aiService.ts       structured answers: parse, validate, send problems back, retry
-  ai/llm.ts             the model: Gemini, falling back to LiveKit Inference
+  ai/llm.ts             the models, in order: Muse, LiveKit Inference, Gemini
   ai/prompts.ts         what the model is told (Vietnamese) and the input it gets
   ai/schemas.ts         the form, and the model's plan and chat patches (zod, strict)
   ai/candidates.ts      the candidate places of a request, from the database, with value scores

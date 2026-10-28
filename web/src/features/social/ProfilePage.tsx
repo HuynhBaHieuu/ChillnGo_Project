@@ -23,7 +23,7 @@ import { useAuthStore } from '@/store'
 const TABS = translatedList<{ value: ProfileTab; label: string }, 'label'>([
   { value: 'posts', label: 'Bài viết' },
   { value: 'saved', label: 'Đã lưu' },
-  { value: 'cloned', label: 'Lịch trình đã clone' },
+  { value: 'cloned', label: 'Lịch trình đã sao chép' },
   { value: 'live', label: 'Livestream' },
 ], ['label'])
 
@@ -200,7 +200,7 @@ export function ProfilePage() {
             <EmptyState
               icon={Copy}
               title={t('Lịch trình riêng tư')}
-              description={t('Chỉ chủ tài khoản mới xem được những lịch trình đã clone.')}
+              description={t('Chỉ chủ tài khoản mới xem được những lịch trình đã sao chép.')}
             />
           ) : (
             <>
@@ -214,8 +214,8 @@ export function ProfilePage() {
               {itineraries?.length === 0 && (
                 <EmptyState
                   icon={Copy}
-                  title={t('Chưa clone lịch trình nào')}
-                  description={t('Khi bạn clone một hành trình, nó sẽ xuất hiện ở đây.')}
+                  title={t('Chưa sao chép lịch trình nào')}
+                  description={t('Khi bạn sao chép một hành trình, nó sẽ xuất hiện ở đây.')}
                 />
               )}
               {itineraries && itineraries.length > 0 && (

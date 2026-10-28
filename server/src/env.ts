@@ -137,9 +137,19 @@ export const env = {
   /** Log each lookup the assistant makes (tool, arguments, result size). Off unless ASSISTANT_DEBUG=1. */
   assistantDebug: process.env.ASSISTANT_DEBUG === '1',
   /**
-   * Google Gemini, asked first by AI clone. When it fails or its quota runs out,
-   * AI clone falls back to LiveKit Inference (with ASSISTANT_MODEL). Unset: LiveKit only.
+   * Muse, the first model the assistant and AI clone ask (see ai/llm.ts). Any
+   * OpenAI-style chat completions API: MUSE_API_URL is its base URL or its full
+   * /chat/completions address. Off unless the key, URL and model are all set.
    */
+  muse:
+    process.env.MUSE_API_KEY?.trim() && process.env.MUSE_API_URL?.trim() && process.env.MUSE_MODEL?.trim()
+      ? {
+          apiKey: process.env.MUSE_API_KEY.trim(),
+          url: process.env.MUSE_API_URL.trim().replace(/\/(chat\/completions)?\/?$/, '') + '/chat/completions',
+          model: process.env.MUSE_MODEL.trim(),
+        }
+      : null,
+  /** Google Gemini, the last model asked when the others fail or run out. Unset: skipped. */
   gemini: process.env.GEMINI_API_KEY?.trim()
     ? { apiKey: process.env.GEMINI_API_KEY.trim(), model: process.env.GEMINI_MODEL?.trim() || 'gemini-3.8-flash' }
     : null,

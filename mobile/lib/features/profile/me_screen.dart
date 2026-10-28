@@ -31,7 +31,7 @@ class MeScreen extends ConsumerWidget {
                       EmptyState(
                         icon: LucideIcons.logIn,
                         title: 'Đăng nhập để có trang cá nhân',
-                        description: 'Lưu hành trình bạn thích, clone lịch trình về làm của mình, check-in và phát trực tiếp chuyến đi.',
+                        description: 'Lưu hành trình bạn thích, sao chép lịch trình về làm của mình, check-in và phát trực tiếp chuyến đi.',
                         action: Wrap(
                           spacing: 10,
                           runSpacing: 10,

@@ -40,7 +40,7 @@ class MenuScreen extends ConsumerWidget {
             (label: 'Chỉnh sửa hồ sơ', hint: null, icon: LucideIcons.userPen, path: '/profile/edit'),
             (label: 'Đăng bài mới', hint: null, icon: LucideIcons.squarePen, path: '/posts/new'),
             (label: 'Hoạt động của bạn', hint: 'Lượt thích, bình luận, bản nháp, đã xoá…', icon: LucideIcons.activity, path: '/activity'),
-            (label: 'Hành trình của tôi', hint: 'Bài bạn đăng và lịch trình đã clone', icon: LucideIcons.map, path: '/itineraries'),
+            (label: 'Hành trình của tôi', hint: 'Bài bạn đăng và lịch trình đã sao chép', icon: LucideIcons.map, path: '/itineraries'),
             (label: 'Đã lưu', hint: null, icon: LucideIcons.bookmark, path: '/activity/saved'),
             (label: 'Phát trực tiếp', hint: null, icon: LucideIcons.radio, path: '/live/new'),
             (label: 'Về ChillnGo', hint: null, icon: LucideIcons.info, path: '/about'),

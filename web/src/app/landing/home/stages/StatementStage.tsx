@@ -65,7 +65,7 @@ export function StatementStage({ stats }: { stats: LandingStats }) {
               data-fade
               className="xp-fade font-display text-[1.625em] font-bold tracking-[-0.035em] leading-none indent-[25%] md:text-[2.625em] md:indent-[33.333%]"
             >
-              {t('ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Clone về làm của bạn chỉ với một chạm, rồi sửa theo cách bạn muốn đi.')}
+              {t('ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép về làm của bạn chỉ với một chạm, rồi sửa theo cách bạn muốn đi.')}
             </h2>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function StatementStage({ stats }: { stats: LandingStats }) {
           <div data-banner-copy className="col-span-6 col-start-2 flex flex-col gap-[0.75em] text-white md:col-span-2 md:col-start-3">
             <p className="font-mono text-[0.75em] uppercase leading-[1.2] tracking-[0.12em] text-primary">{t('Con số thật')}</p>
             <p className="font-body text-[0.875em] font-medium leading-[1.5]">
-              {t('Không có lịch trình dựng sẵn, chỉ có người đã đi và kể lại. Đến nay cộng đồng đã chia sẻ {trips} hành trình với {stops} điểm dừng có toạ độ, được clone {clones} lần và lưu lại {bookmarks} lần.', {
+              {t('Không có lịch trình dựng sẵn, chỉ có người đã đi và kể lại. Đến nay cộng đồng đã chia sẻ {trips} hành trình với {stops} điểm dừng có toạ độ, được sao chép {clones} lần và lưu lại {bookmarks} lần.', {
                 trips: formatNumber(stats.tripCount),
                 stops: formatNumber(stats.stopCount),
                 clones: formatNumber(stats.cloneCount),

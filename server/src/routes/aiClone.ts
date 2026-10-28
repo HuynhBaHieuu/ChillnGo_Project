@@ -1,6 +1,6 @@
 /**
  * AI clone: adapt one journey (or merge two or three at the same destination)
- * to your own trip, review what the AI changed, save it to "Đã clone về".
+ * to your own trip, review what the AI changed, save it to "Đã sao chép".
  * Mounted at /api.
  *
  *   GET    /api/posts/:id/ai-clone                    the form's options: destination, interests, season, journeys to merge, AI requests left
