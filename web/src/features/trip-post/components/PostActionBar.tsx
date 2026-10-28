@@ -64,17 +64,17 @@ export function PostActionBar({ post, onClone, onAiClone, onComment }: PostActio
 
         <span
           className="inline-flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground"
-          title={t('Số lần hành trình này được clone')}
+          title={t('Số lần hành trình này được sao chép')}
         >
           <Copy className="size-4" />
-          {t('{n} lượt clone', { n: formatCount(post.cloneCount) })}
+          {t('{n} lượt sao chép', { n: formatCount(post.cloneCount) })}
         </span>
 
         <div className="ml-auto flex w-full flex-wrap gap-2 sm:w-auto">
           {aiCloneService.canAiClone(post._id) && (
             <GlassButton size="lg" tone="sunset" className="flex-1 sm:flex-none" onClick={() => requireAuth(onAiClone)}>
               <Sparkles />
-              {t('Clone với AI')}
+              {t('Sao chép bằng AI')}
             </GlassButton>
           )}
           <GlassButton size="lg" className="flex-1 sm:flex-none" onClick={() => requireAuth(onClone)}>

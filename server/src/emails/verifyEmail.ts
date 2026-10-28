@@ -145,7 +145,7 @@ export function verifyEmailMessage(input: VerifyEmailInput): MailMessage {
           <td align="center" style="padding:28px 24px 0 24px;font-family:${FONT};font-size:12px;line-height:1.6;color:${MUTED};">
             Email tự động từ ChillnGo, gửi tới ${email} vì địa chỉ này vừa được dùng để đăng ký tài khoản.<br>
             Vui lòng không trả lời email này.<br>
-            &copy; ${year} ChillnGo &middot; Review &amp; clone hành trình du lịch
+            &copy; ${year} ChillnGo &middot; Review &amp; sao chép hành trình du lịch
           </td>
         </tr>
 

@@ -41,7 +41,7 @@ export function ItinerariesPage() {
     <PageContainer>
       <PageHeader
         title={t('Hành trình của tôi')}
-        description={t('Hành trình bạn tự đăng và những lịch trình bạn đã clone về. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.')}
+        description={t('Hành trình bạn tự đăng và những lịch trình bạn đã sao chép. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.')}
         action={
           <div className="flex flex-wrap gap-3">
             <GlassButton asChild size="lg" tone="sunset">
@@ -70,7 +70,7 @@ export function ItinerariesPage() {
       >
         <TabsList aria-label={t('Loại hành trình')} className="np-well border-transparent">
           <TabsTrigger value="mine">{t('Tôi đăng')}</TabsTrigger>
-          <TabsTrigger value="cloned">{t('Đã clone về')}</TabsTrigger>
+          <TabsTrigger value="cloned">{t('Đã sao chép')}</TabsTrigger>
         </TabsList>
         <TabsContent value="mine">
           <MyJourneys />
@@ -119,7 +119,7 @@ function MyJourneys() {
       <EmptyState
         icon={PenLine}
         title={t('Bạn chưa đăng hành trình nào')}
-        description={t('Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể clone về làm lịch trình của họ.')}
+        description={t('Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể sao chép về làm lịch trình của họ.')}
         action={
           <GlassButton asChild size="lg" tone="sunset">
             <Link to="/posts/new">
@@ -213,7 +213,7 @@ function ClonedItineraries() {
       <EmptyState
         icon={Map}
         title={t('Chưa có lịch trình nào')}
-        description={t('Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để clone nó về đây rồi sửa theo cách bạn muốn đi.')}
+        description={t('Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình của tôi” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.')}
         action={
           <GlassButton asChild size="lg">
             <Link to="/discover">{t('Khám phá hành trình')}</Link>

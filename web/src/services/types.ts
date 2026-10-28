@@ -473,7 +473,7 @@ export interface AiDraft {
   checklist: AiChecklist | null
   pendingCount: number
   chat: { role: 'user' | 'assistant'; content: string; at: ISODate }[]
-  /** Set once saved to "Đã clone về". */
+  /** Set once saved to "Đã sao chép". */
   committedItineraryId: ObjectId | null
   expiresAt: ISODate
   callsLeft: number

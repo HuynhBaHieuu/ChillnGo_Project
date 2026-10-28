@@ -51,7 +51,7 @@ export const auth = {
     ja: '既存のアカウントは、メールまたはGoogleで通常どおりログインできます。',
     ko: '기존 회원은 이메일이나 Google로 평소처럼 로그인할 수 있어요.',
   },
-  'Tạo tài khoản để chia sẻ hành trình của bạn, và clone những lịch trình bạn thích về làm của mình.': {
+  'Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.': {
     en: 'Create an account to share your journeys and clone the itineraries you love.',
     zh: '创建账户，分享你的行程，并把喜欢的行程复制为自己的。',
     ja: 'アカウントを作成して旅程をシェアし、気に入った旅程をクローンしよう。',

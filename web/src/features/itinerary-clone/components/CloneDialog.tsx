@@ -68,7 +68,7 @@ export function CloneDialog({ post, open, onOpenChange }: CloneDialogProps) {
           </Button>
           <GlassButton onClick={handleClone} disabled={clonePost.isPending}>
             {clonePost.isPending && <Loader2 className="animate-spin" />}
-            {t('Clone hành trình')}
+            {t('Sao chép hành trình')}
           </GlassButton>
         </>
       }

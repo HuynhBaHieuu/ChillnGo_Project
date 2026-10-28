@@ -54,7 +54,7 @@ export const post = {
   },
   'Chỉnh sửa hành trình': { en: 'Edit journey', zh: '编辑行程', ja: '旅程を編集', ko: '여정 편집' },
   'Đăng hành trình mới': { en: 'Post a new journey', zh: '发布新行程', ja: '新しい旅程を投稿', ko: '새 여정 올리기' },
-  'Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người clone lịch trình của bạn càng đỡ phải đoán.': {
+  'Kể lại chuyến đi theo từng ngày. Càng ghi rõ chi phí và ghi chú, người sao chép lịch trình của bạn càng đỡ phải đoán.': {
     en: 'Tell your trip day by day. The clearer your costs and notes, the less guessing for whoever clones your itinerary.',
     zh: '按天讲述你的旅程。花费和备注写得越清楚，复制你行程的人就越不用猜。',
     ja: '旅を1日ずつ振り返りましょう。費用やメモが詳しいほど、旅程をクローンする人が迷わずに済みます。',
@@ -162,9 +162,9 @@ export const post = {
   /* PostActionBar, PostComposer, TagPicker */
   '{n} lượt thích': { en: ['{n} like', '{n} likes'], zh: '{n} 个赞', ja: 'いいね {n}件', ko: '좋아요 {n}개' },
   'Lưu bài viết': { en: 'Save post', zh: '收藏帖子', ja: '投稿を保存', ko: '게시물 저장' },
-  'Số lần hành trình này được clone': { en: 'Times this journey was cloned', zh: '此行程被复制的次数', ja: 'この旅程がクローンされた回数', ko: '이 여정이 복제된 횟수' },
-  '{n} lượt clone': { en: ['{n} clone', '{n} clones'], zh: '{n} 次复制', ja: 'クローン {n}回', ko: '복제 {n}회' },
-  'Clone với AI': { en: 'Clone with AI', zh: '用 AI 复制', ja: 'AIでクローン', ko: 'AI로 복제' },
+  'Số lần hành trình này được sao chép': { en: 'Times this journey was cloned', zh: '此行程被复制的次数', ja: 'この旅程がクローンされた回数', ko: '이 여정이 복제된 횟수' },
+  '{n} lượt sao chép': { en: ['{n} clone', '{n} clones'], zh: '{n} 次复制', ja: 'クローン {n}回', ko: '복제 {n}회' },
+  'Sao chép bằng AI': { en: 'Clone with AI', zh: '用 AI 复制', ja: 'AIでクローン', ko: 'AI로 복제' },
   'Dùng làm lịch trình của tôi': { en: 'Use as my itinerary', zh: '用作我的行程', ja: '自分の旅程にする', ko: '내 일정으로 사용' },
   'Trang cá nhân của bạn': { en: 'Your profile', zh: '你的个人主页', ja: 'あなたのプロフィール', ko: '내 프로필' },
   'Check-in: ảnh, cảm xúc và địa điểm': {

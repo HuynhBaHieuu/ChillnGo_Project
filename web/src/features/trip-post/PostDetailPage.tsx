@@ -27,7 +27,11 @@ import {
   tripLengthLabel,
 } from '@/lib/format'
 import { t } from '@/i18n'
+import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store'
+
+/** Out over the right page margin, up to the gutter's width from the window's edge (large screens). */
+const MAP_BLEED = 'lg:mr-[calc(-1*max(0px,(100vw_-_80rem)/2))]'
 
 export function PostDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -163,14 +167,20 @@ export function PostDetailPage() {
           </div>
 
           {/* Map */}
-          <aside className="min-w-0 lg:sticky lg:top-32">
+          {/*
+            On large screens the column runs from its sticky offset to 1rem above
+            the window's bottom, and the map fills what the heading and caption
+            leave. Map and caption take up the page margin, stopping the gutter's
+            width (1.5rem) short of the window's right edge.
+          */}
+          <aside className="min-w-0 lg:sticky lg:top-32 lg:flex lg:h-[calc(100dvh_-_9rem)] lg:flex-col">
             <h2 className="font-display text-3xl">{t('Bản đồ tuyến')}</h2>
             <MapPreview
               days={post.days}
-              className="mt-6 h-[28rem] w-full"
+              className={cn('mt-6 h-[28rem] w-full lg:h-auto lg:min-h-[20rem] lg:w-auto lg:flex-1', MAP_BLEED)}
               label={t('Bản đồ tuyến đường của {title}', { title: post.title })}
             />
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className={cn('mt-3 text-xs text-muted-foreground', MAP_BLEED)}>
               {t('Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi của ngày đó: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.')}
             </p>
           </aside>

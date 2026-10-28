@@ -97,7 +97,7 @@ export function RegisterPage() {
   return (
     <AuthCard
       title={t('Bắt đầu ngay')}
-      description={t('Tạo tài khoản để chia sẻ hành trình của bạn, và clone những lịch trình bạn thích về làm của mình.')}
+      description={t('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.')}
       footer={
         <>
           {t('Đã có tài khoản?')}{' '}
