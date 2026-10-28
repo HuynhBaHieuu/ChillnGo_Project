@@ -26,6 +26,9 @@ interface MapPreviewProps {
   className?: string
   /** Accessible description of what the map is showing. */
   label?: string
+  /** With `days`: the picked day (1-based position), when the page shows its own day tabs. */
+  day?: number | null
+  onDayChange?: (day: number | null) => void
 }
 
 /**
@@ -42,6 +45,8 @@ export function MapPreview({
   days,
   className,
   label = t('Bản đồ hành trình'),
+  day,
+  onDayChange,
 }: MapPreviewProps) {
   const stops = useMemo(() => (days ? stopsOfDays(days) : []), [days])
   const allCoords = useMemo<[number, number][]>(
@@ -80,6 +85,8 @@ export function MapPreview({
         cluster={cluster}
         className={className}
         label={label}
+        day={day}
+        onDayChange={onDayChange}
       />
     </Suspense>
   )

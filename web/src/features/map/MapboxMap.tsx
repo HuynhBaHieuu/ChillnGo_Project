@@ -34,6 +34,9 @@ interface MapboxMapProps {
   cluster: boolean
   className?: string
   label: string
+  /** The picked day, when the page owns it (its own day tabs): the map's chips are then left out. */
+  day?: number | null
+  onDayChange?: (day: number | null) => void
 }
 
 /**
@@ -60,6 +63,8 @@ export default function MapboxMap({
   cluster,
   className,
   label,
+  day,
+  onDayChange,
 }: MapboxMapProps) {
   const routeCoords = useMemo(() => routeCoordinates(route), [route])
 
@@ -74,7 +79,10 @@ export default function MapboxMap({
   )
 
   // The day whose route is shown; null shows every stop and no route.
-  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const [ownDay, setOwnDay] = useState<number | null>(null)
+  const controlled = onDayChange !== undefined
+  const selectedDay = controlled ? (day ?? null) : ownDay
+  const setSelectedDay = onDayChange ?? setOwnDay
   const stopDays = useMemo(() => [...new Set(stops.map((s) => s.day))], [stops])
   // A day can vanish while picked (the itinerary editor deletes days).
   const activeDay = selectedDay !== null && stopDays.includes(selectedDay) ? selectedDay : null
@@ -339,7 +347,7 @@ export default function MapboxMap({
           ))}
       </Map>
 
-      {stopDays.length > 0 && (
+      {stopDays.length > 0 && !controlled && (
         // The navbar's pills; 0 stands for "every day". Clear of the zoom buttons on the right.
         <div className="absolute left-2 right-12 top-2 z-10 flex">
           <PillTabs

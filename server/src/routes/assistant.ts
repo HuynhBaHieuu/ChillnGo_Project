@@ -2,10 +2,10 @@
  * POST /api/assistant/chat { messages } → the reply, streamed as plain text
  *
  * ChillnGo's AI assistant: travel advice from the journeys people have posted,
- * and help using the website. The model (ASSISTANT_MODEL) is reached through
- * LiveKit Inference with the project's LiveKit Cloud keys, so there is no extra
- * key; the browser only ever sees the reply. The conversation lives in the
- * browser and comes with each question: nothing is stored.
+ * and help using the website. Each turn asks Muse, then LiveKit Inference, then
+ * Gemini (ai/llm.ts), moving on when one fails or runs out; the browser only
+ * ever sees the reply. The conversation lives in the browser and comes with
+ * each question: nothing is stored.
  *
  * The model has no access to the database. It asks for the read-only tools in
  * lib/assistantTools.ts; each call is run here, as the signed-in user, and its
@@ -20,17 +20,16 @@
  * back with their tags, which keeps the model writing them and lets it find a
  * journey again by its id.
  *
- * Signed-in users only, rate-limited. Without LiveKit Cloud it answers 503.
+ * Signed-in users only, rate-limited. With no model configured it answers 503.
  */
 
 import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
-import { env } from '../env.js'
+import { pauseIfSpent, providers } from '../ai/llm.js'
 import { TOOLS, runTool } from '../lib/assistantTools.js'
 import { HttpError } from '../lib/errors.js'
-import { INFERENCE_CHAT_URL, inferenceToken } from '../lib/livekit.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 
@@ -142,8 +141,7 @@ const bodySchema = z.object({
 assistantRouter.post('/chat', requireAuth, loadCurrentUser, limiter, async (req, res) => {
   const { messages } = bodySchema.parse(req.body)
   const userId = currentUser(res)._id
-  const token = await inferenceToken()
-  if (!token) throw new HttpError(503, 'Trợ lý AI chưa được bật trên máy chủ.', 'ASSISTANT_OFF')
+  if ((await providers()).length === 0) throw new HttpError(503, 'Trợ lý AI chưa được bật trên máy chủ.', 'ASSISTANT_OFF')
 
   // The reader pressed Stop or closed the panel: stop paying for the rest of the reply.
   const upstream = new AbortController()
@@ -159,35 +157,42 @@ assistantRouter.post('/chat', requireAuth, loadCurrentUser, limiter, async (req,
   }
 
   for (let round = 1; round <= MAX_ROUNDS; round++) {
-    let response: Response
-    try {
-      response = await fetch(INFERENCE_CHAT_URL, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: env.assistantModel,
-          stream: true,
-          messages: conversation,
-          // The first turn looks something up (data or the site guide); later ones may answer.
-          ...(round < MAX_ROUNDS && { tools: TOOLS, tool_choice: round === 1 ? 'required' : 'auto' }),
-        }),
-        signal: AbortSignal.any([upstream.signal, AbortSignal.timeout(60_000)]),
-      })
-    } catch {
-      if (upstream.signal.aborted) return
-      // Part of an answer already went out: the reader keeps it.
-      if (res.headersSent) break
-      throw new HttpError(502, 'Trợ lý AI không phản hồi. Vui lòng thử lại.', 'ASSISTANT_UNREACHABLE')
+    // Each model in turn until one takes this turn: the whole conversation goes each time, so any can carry on.
+    let response: Response | null = null
+    let spent = false
+    for (const provider of await providers()) {
+      try {
+        const answer = await fetch(provider.url, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${provider.key}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: provider.model,
+            stream: true,
+            messages: conversation,
+            // The first turn looks something up (data or the site guide); later ones may answer.
+            ...(round < MAX_ROUNDS && { tools: TOOLS, tool_choice: round === 1 ? 'required' : 'auto' }),
+          }),
+          signal: AbortSignal.any([upstream.signal, AbortSignal.timeout(60_000)]),
+        })
+        if (answer.ok && answer.body) {
+          response = answer
+          break
+        }
+        // The provider's reason (unknown model, quota, keys) is for the developer, not the reader.
+        const body = await answer.text().catch(() => '')
+        console.error(`[assistant] ${provider.name} answered ${answer.status}: ${body.replace(/\s+/g, ' ').slice(0, 300)}`)
+        pauseIfSpent(provider, answer, body)
+        spent ||= answer.status === 429 || answer.status === 402
+      } catch (error) {
+        if (upstream.signal.aborted) return
+        console.error(`[assistant] ${provider.name} unreachable: ${(error as Error).message}`)
+      }
     }
 
-    if (!response.ok || !response.body) {
-      // The gateway's reason (unknown model, quota, keys) is for the developer, not the reader.
-      const reason = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300)
-      console.error(`LiveKit Inference answered ${response.status}: ${reason}`)
+    if (!response?.body) {
+      // Part of an answer already went out: the reader keeps it.
       if (res.headersSent) break
-      if (response.status === 429) {
-        throw new HttpError(429, 'Trợ lý AI đang quá tải. Vui lòng thử lại sau ít phút.', 'ASSISTANT_BUSY')
-      }
+      if (spent) throw new HttpError(429, 'Trợ lý AI đang quá tải. Vui lòng thử lại sau ít phút.', 'ASSISTANT_BUSY')
       throw new HttpError(503, 'Trợ lý AI đang tạm ngưng. Vui lòng thử lại sau.', 'ASSISTANT_UNAVAILABLE')
     }
 

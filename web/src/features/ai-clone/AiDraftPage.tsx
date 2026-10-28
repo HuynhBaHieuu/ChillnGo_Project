@@ -7,19 +7,20 @@ import {
   CornerDownRight,
   ListChecks,
   Loader2,
+  MapPin,
   RotateCcw,
   Route,
   Sparkles,
   Undo2,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { PageContainer } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
-import { GlassCard } from '@/components/GlassCard'
 import { MapPreview } from '@/components/MapPreview'
+import { PillTabs } from '@/components/PillNav'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChatPanel } from '@/features/ai-clone/ChatPanel'
@@ -31,12 +32,13 @@ import {
   useOptimizeRoute,
   useSetChangeStatus,
 } from '@/features/ai-clone/hooks'
+import { dayColor } from '@/features/map/geometry'
 import { localeTag, t, tx } from '@/i18n'
 import type { MessageKey } from '@/i18n'
 import { tr } from '@/i18n/rich'
 import { formatLongDate, formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import type { AiChangeStatus, AiChangeType, AiDraft, AiPlace, ItinerarySource, TripDay } from '@/services/types'
+import type { AiChangeStatus, AiChangeType, AiDraft, AiDraftStop, AiPlace, ItinerarySource, TripDay } from '@/services/types'
 
 /** "3,2 km" — Vietnamese decimal comma. */
 function km(value: number): string {
@@ -63,7 +65,7 @@ function SourcesLine({ sources }: { sources: ItinerarySource[] }) {
       {sources.map((source, i) => (
         <span key={source.postId}>
           {i > 0 && (i === sources.length - 1 ? ` ${t('và')} ` : ', ')}
-          <Link to={`/posts/${source.postId}`} className="text-foreground underline-offset-4 hover:underline">
+          <Link to={`/posts/${source.postId}`} className="font-medium text-foreground underline underline-offset-4 hover:text-np-teal">
             “{source.title}”
           </Link>
           {source.author && (
@@ -134,6 +136,12 @@ function factsOf(place: AiPlace): string[] {
   ].filter((f): f is string => Boolean(f))
 }
 
+/** A reason's first sentence, which is highlighted, and the rest. */
+function splitLead(text: string): [string, string] {
+  const match = /^(.+?[.!?…])(\s+[\s\S]+)$/.exec(text)
+  return match ? [match[1], match[2]] : [text, '']
+}
+
 /** The draft's stops as journey days, for the map. Stops with no position stay off it. */
 function mapDaysOf(draft: AiDraft): TripDay[] {
   return draft.days.map((day) => ({
@@ -154,6 +162,9 @@ function mapDaysOf(draft: AiDraft): TripDay[] {
   }))
 }
 
+/** Below the fixed navbar, the chat and the plan each scroll on their own (large screens). */
+const SPLIT = 'lg:h-[calc(100dvh-6rem)]'
+
 export function AiDraftPage() {
   const { id = '' } = useParams<{ id: string }>()
   const { data: draft, isPending, isError, error } = useAiDraft(id)
@@ -165,6 +176,10 @@ export function AiDraftPage() {
   const navigate = useNavigate()
   /** What the route optimiser said about each day it was asked to sort. */
   const [routeNotes, setRouteNotes] = useState<Record<number, string>>({})
+  /** The day shown, by position (1 = first day); 0 shows every day. Shared with the map. */
+  const [day, setDay] = useState(0)
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const mapDays = useMemo(() => (draft ? mapDaysOf(draft) : []), [draft])
   /**
    * One edit at a time. `busy` only disables the buttons on the next render; a
    * double click lands both clicks before it, so this catches the second.
@@ -180,14 +195,18 @@ export function AiDraftPage() {
 
   if (isPending) {
     return (
-      <PageContainer>
-        <Skeleton className="h-10 w-80" />
-        <Skeleton className="mt-6 h-28 rounded-2xl" />
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
-          <Skeleton className="h-96 rounded-2xl" />
-          <Skeleton className="h-96 rounded-2xl" />
+      <div className="np-page bg-[hsl(var(--background))] pt-24">
+        <div className={cn('mx-auto grid max-w-[110rem] gap-6 px-4 lg:grid-cols-[25rem_minmax(0,1fr)] lg:px-0', SPLIT)}>
+          <Skeleton className="hidden h-full rounded-none lg:block" />
+          <div className="space-y-5 lg:px-8">
+            <Skeleton className="h-9 w-96 max-w-full" />
+            <Skeleton className="h-24 rounded-2xl" />
+            <Skeleton className="h-11 w-72 rounded-full" />
+            <Skeleton className="h-56 rounded-2xl" />
+            <Skeleton className="h-56 rounded-2xl" />
+          </div>
         </div>
-      </PageContainer>
+      </div>
     )
   }
 
@@ -214,6 +233,14 @@ export function AiDraftPage() {
   const { cost } = draft
   const failure = (setStatus.error ?? acceptAll.error ?? commit.error ?? optimize.error ?? checklist.error) as Error | null
   const season = seasonNotes(draft)
+  const days = draft.days.map((d, i) => ({ ...d, position: i + 1 }))
+  const shownDays = day ? days.filter((d) => d.position === day) : days
+
+  /** Pick a day from the tabs or the map; the plan goes back to its top. */
+  function pickDay(next: number) {
+    setDay(next)
+    canvasRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   function sortRoute(dayIndex: number) {
     once((done) =>
@@ -249,10 +276,12 @@ export function AiDraftPage() {
     )
   }
 
-  const actionsFor = (changeId: string, type: AiChangeType, status: AiChangeStatus) =>
-    committed ? null : (
-      <div className="flex flex-wrap gap-1.5">
-        {actionsOf(type, status).map((action) => (
+  const actionsFor = (changeId: string, type: AiChangeType, status: AiChangeStatus) => {
+    const actions = committed ? [] : actionsOf(type, status)
+    if (actions.length === 0) return null
+    return (
+      <div className="flex flex-wrap justify-end gap-2">
+        {actions.map((action) => (
           <Button
             key={action.label}
             type="button"
@@ -260,323 +289,418 @@ export function AiDraftPage() {
             size="sm"
             disabled={busy}
             onClick={() => change(changeId, action.status)}
-            className="h-7 rounded-full px-3 text-xs"
+            className="h-9 rounded-full px-4"
           >
-            <action.icon className="size-3.5" />
+            <action.icon className="size-4" />
             {t(action.label)}
           </Button>
         ))}
       </div>
     )
+  }
 
-  return (
-    <PageContainer>
-      {source && (
-        <Link
-          to={`/posts/${source.postId}`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          {t('Hành trình gốc')}
-        </Link>
-      )}
-
-      <header className="animate-fade-rise mt-6">
-        <p className="inline-flex items-center gap-2 text-sm text-np-teal">
-          <Sparkles className="size-4" />
-          {t('Bản nháp AI')}
-        </p>
-        <h1 className="mt-3 max-w-[26ch] font-display text-4xl tracking-tight">
-          {t('{place} {days} ngày cho {people} người', {
-            place: draft.destination ?? t('Lịch trình'),
-            days: form.days,
-            people: form.groupSize,
-            n: form.groupSize,
-          })}
-        </h1>
+  // The AI's opening words in the chat: what it adapted, and the season.
+  const intro =
+    source || season.length > 0 ? (
+      <>
         {source && (
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p>
             {tr(draft.sources.length > 1 ? 'Gộp từ các hành trình {sources}. Khởi hành {date}.' : 'Phỏng theo hành trình {sources}. Khởi hành {date}.', {
               sources: <SourcesLine sources={draft.sources} />,
               date: formatLongDate(form.startDate),
             })}
           </p>
         )}
-        {season.length > 0 && (
-          <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
-            {season.map((note) => (
-              <li key={note} className="flex items-start gap-2">
-                <CloudRain className="mt-0.5 size-4 shrink-0 text-np-teal" aria-hidden />
-                {note}
-              </li>
-            ))}
-          </ul>
-        )}
-      </header>
+        {season.map((note) => (
+          <span key={note} className="mt-3 flex items-start gap-2 text-muted-foreground">
+            <CloudRain className="mt-0.5 size-4 shrink-0 text-np-teal" aria-hidden />
+            {note}
+          </span>
+        ))}
+      </>
+    ) : undefined
 
-      {/* Cost against budget, what is left to review, and saving. */}
-      <GlassCard className="mt-8 p-5 sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{t('Tổng chi phí ước tính')}</p>
-            <p className={cn('mt-1 font-display text-3xl tracking-tight', cost.overBudget && 'text-destructive')}>
-              {formatVnd(cost.total)}
-              {cost.budget !== null && (
-                <span className="ml-2 text-base text-muted-foreground">/ {t('ngân sách {amount}', { amount: formatVnd(cost.budget) })}</span>
-              )}
-            </p>
-            {cost.budget !== null && cost.budget > 0 && (
-              <div className="mt-3 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-np-well" aria-hidden>
-                <div
-                  className={cn('h-full rounded-full', cost.overBudget ? 'bg-destructive' : 'bg-np-teal')}
-                  style={{ width: `${Math.min(100, (cost.total / cost.budget) * 100)}%` }}
+  return (
+    <div className="np-page bg-[hsl(var(--background))] pb-32 pt-24 text-foreground md:pb-20 lg:pb-0">
+      <div className={cn('mx-auto flex max-w-[110rem] flex-col lg:grid lg:grid-cols-[25rem_minmax(0,1fr)]', SPLIT)}>
+        <ChatPanel
+          draft={draft}
+          busy={busy}
+          intro={intro}
+          className="order-last mt-10 border-y border-border lg:order-none lg:mt-0 lg:h-full lg:border-y-0 lg:border-r"
+        />
+
+        {/* The plan, beside the chat: like a canvas the chat edits. */}
+        <div ref={canvasRef} className="min-w-0 px-4 sm:px-6 lg:h-full lg:overflow-y-auto lg:px-8 lg:pb-10">
+          <header className="animate-fade-rise flex flex-col gap-4 pt-2 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                {source && (
+                  <Link
+                    to={`/posts/${source.postId}`}
+                    className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <ArrowLeft className="size-4" />
+                    {t('Hành trình gốc')}
+                  </Link>
+                )}
+                <span className="inline-flex items-center gap-1.5 text-np-teal">
+                  <Sparkles className="size-4" />
+                  {t('Bản nháp AI')}
+                </span>
+              </div>
+              <h1 className="mt-2 font-display text-[1.75rem] font-extrabold leading-8 tracking-tight">
+                {t('{place} {days} ngày cho {people} người', {
+                  place: draft.destination ?? t('Lịch trình'),
+                  days: form.days,
+                  people: form.groupSize,
+                  n: form.groupSize,
+                })}
+              </h1>
+            </div>
+
+            {committed ? (
+              <div className="flex shrink-0 flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 text-sm text-np-teal">
+                  <CheckCheck className="size-4" />
+                  {t('Đã lưu vào lịch trình của bạn')}
+                </span>
+                <GlassButton asChild tone="sunset">
+                  <Link to={`/itineraries/${draft.committedItineraryId}`}>{t('Mở lịch trình')}</Link>
+                </GlassButton>
+              </div>
+            ) : (
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={busy || draft.pendingCount === 0}
+                  onClick={() => once((done) => acceptAll.mutate(undefined, { onSettled: done }))}
+                >
+                  <CheckCheck />
+                  {t('Chấp nhận tất cả')}
+                </Button>
+                <GlassButton tone="sunset" onClick={save} disabled={busy}>
+                  {commit.isPending && <Loader2 className="animate-spin" />}
+                  {t('Lưu vào lịch trình của tôi')}
+                </GlassButton>
+              </div>
+            )}
+          </header>
+
+          <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] xl:items-start">
+            {/* The map: above the plan on smaller screens, held beside it on wide ones. */}
+            <div className="order-2 xl:sticky xl:top-4 xl:order-last">
+              <MapPreview
+                days={mapDays}
+                day={day || null}
+                onDayChange={(next) => pickDay(next ?? 0)}
+                className="h-64 w-full sm:h-80 xl:h-[calc(100dvh-8rem)]"
+                label={t('Bản đồ các điểm trong bản nháp')}
+              />
+            </div>
+
+            <div className="contents xl:block xl:min-w-0">
+              {/* Cost against budget, and what is left to review. */}
+              <div className="order-1 rounded-2xl border border-border p-4 sm:p-5">
+                <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-end 2xl:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-muted-foreground">{t('Tổng chi phí ước tính')}</p>
+                    <p className={cn('mt-0.5 font-display text-2xl font-bold tracking-tight', cost.overBudget && 'text-destructive')}>
+                      {formatVnd(cost.total)}
+                      {cost.budget !== null && (
+                        <span className="ml-2 inline-block whitespace-nowrap text-sm font-normal text-muted-foreground">
+                          / {t('ngân sách {amount}', { amount: formatVnd(cost.budget) })}
+                        </span>
+                      )}
+                    </p>
+                    {cost.budget !== null && cost.budget > 0 && (
+                      <div className="mt-2.5 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-np-well" aria-hidden>
+                        <div
+                          className={cn('h-full rounded-full', cost.overBudget ? 'bg-destructive' : 'bg-np-teal')}
+                          style={{ width: `${Math.min(100, (cost.total / cost.budget) * 100)}%` }}
+                        />
+                      </div>
+                    )}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {cost.overBudget && cost.budget !== null && (
+                        <span className="text-destructive">{t('Vượt ngân sách {amount}.', { amount: formatVnd(cost.total - cost.budget) })} </span>
+                      )}
+                      {cost.missing > 0
+                        ? t('{n} điểm chưa có dữ liệu giá, chưa tính vào tổng.', { n: cost.missing })
+                        : t('Tính từ giá trung bình trong dữ liệu ChillnGo × số người.')}
+                    </p>
+                  </div>
+                  <div className="text-xs text-muted-foreground 2xl:text-right">
+                    {!committed && (
+                      <p className="text-sm text-foreground">
+                        {draft.pendingCount > 0 ? t('Còn {n} thay đổi chờ duyệt', { n: draft.pendingCount }) : t('Đã duyệt hết thay đổi')}
+                      </p>
+                    )}
+                    <p className="mt-1">
+                      {t('Bản nháp tự xoá sau 24 giờ, lúc {time}.', {
+                        time: new Date(draft.expiresAt).toLocaleString(localeTag(), {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          day: '2-digit',
+                          month: '2-digit',
+                        }),
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {draft.warnings.length > 0 && (
+                  <ul className="mt-4 space-y-1.5 border-t border-border pt-3">
+                    {draft.warnings.map((warning) => (
+                      <li key={warning} className="flex items-start gap-2 text-sm text-[hsl(var(--np-ochre))]">
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                        {warning}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {failure && (
+                  <p role="alert" className="mt-3 text-sm text-destructive">
+                    {failure.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="order-1 xl:mt-5">
+                <PillTabs
+                  label={t('Chọn ngày để xem đường đi')}
+                  value={day}
+                  onChange={pickDay}
+                  items={[
+                    { value: 0, label: t('Tất cả') },
+                    ...days.map((d) => ({
+                      value: d.position,
+                      label: t('Ngày {n}', { n: d.dayIndex }),
+                      leading: <span className="size-2 rounded-full" style={{ backgroundColor: dayColor(d.position) }} aria-hidden />,
+                    })),
+                  ]}
+                  className="w-fit"
                 />
               </div>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              {cost.overBudget && cost.budget !== null && (
-                <span className="text-destructive">{t('Vượt ngân sách {amount}.', { amount: formatVnd(cost.total - cost.budget) })} </span>
-              )}
-              {cost.missing > 0
-                ? t('{n} điểm chưa có dữ liệu giá, chưa tính vào tổng.', { n: cost.missing })
-                : t('Tính từ giá trung bình trong dữ liệu ChillnGo × số người.')}
-            </p>
-          </div>
 
-          {committed ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 text-sm text-np-teal">
-                <CheckCheck className="size-4" />
-                {t('Đã lưu vào lịch trình của bạn')}
-              </span>
-              <GlassButton asChild tone="sunset">
-                <Link to={`/itineraries/${draft.committedItineraryId}`}>{t('Mở lịch trình')}</Link>
-              </GlassButton>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                {draft.pendingCount > 0 ? t('Còn {n} thay đổi chờ duyệt', { n: draft.pendingCount }) : t('Đã duyệt hết thay đổi')}
-              </span>
-              <Button
-                variant="outline"
-                disabled={busy || draft.pendingCount === 0}
-                onClick={() => once((done) => acceptAll.mutate(undefined, { onSettled: done }))}
-              >
-                <CheckCheck />
-                {t('Chấp nhận tất cả')}
-              </Button>
-              <GlassButton tone="sunset" onClick={save} disabled={busy}>
-                {commit.isPending && <Loader2 className="animate-spin" />}
-                {t('Lưu vào lịch trình của tôi')}
-              </GlassButton>
-            </div>
-          )}
-        </div>
-
-        {draft.warnings.length > 0 && (
-          <ul className="mt-5 space-y-1.5 border-t border-border pt-4">
-            {draft.warnings.map((warning) => (
-              <li key={warning} className="flex items-start gap-2 text-sm text-[hsl(var(--np-ochre))]">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                {warning}
-              </li>
-            ))}
-          </ul>
-        )}
-        {failure && (
-          <p role="alert" className="mt-4 text-sm text-destructive">
-            {failure.message}
-          </p>
-        )}
-      </GlassCard>
-
-      <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
-        <div className="min-w-0 space-y-6">
-          {draft.days.map((day) => (
-            <GlassCard as="section" key={day.dayIndex} className="p-5 sm:p-7">
-              <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('Ngày {n}', { n: day.dayIndex })}</p>
-                  <h2 className="mt-1 font-display text-xl">{formatLongDate(day.date)}</h2>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    {t('Ước tính')} <span className="text-foreground">{formatVnd(day.cost.total)}</span>
-                    {day.cost.missing > 0 && ` · ${t('{n} điểm chưa có giá', { n: day.cost.missing })}`}
-                  </p>
-                  {!committed && day.stops.length >= 3 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={busy}
-                      onClick={() => sortRoute(day.dayIndex)}
-                      className="h-7 rounded-full px-3 text-xs"
-                    >
-                      {optimize.isPending && optimize.variables === day.dayIndex ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <Route className="size-3.5" />
-                      )}
-                      {t('Tối ưu tuyến')}
-                    </Button>
-                  )}
-                </div>
-              </header>
-              {routeNotes[day.dayIndex] && (
-                <p role="status" className="mt-3 text-sm text-np-teal">
-                  {routeNotes[day.dayIndex]}
-                </p>
-              )}
-
-              {day.stops.length === 0 && (
-                <p className="mt-6 text-sm text-muted-foreground">{t('Ngày này chưa có điểm nào.')}</p>
-              )}
-
-              <ol className="mt-6 space-y-5">
-                {day.stops.map((stop) => {
-                  const label = labelOf(stop.type, stop.status)
-                  const note = costNote(stop.place)
-                  return (
-                    <li key={stop.changeId} className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-                      <time className="text-sm tabular-nums text-muted-foreground sm:w-24 sm:shrink-0 sm:pt-0.5">
-                        {stop.startTime}–{stop.endTime}
-                      </time>
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                          <h3 className="font-medium">{stop.place.name}</h3>
-                          <span className={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', label.tone)}>
-                            {label.text}
-                          </span>
-                          {stop.status === 'accepted' && stop.type !== 'keep' && (
-                            <span className="text-[11px] text-muted-foreground">{t('đã chấp nhận')}</span>
-                          )}
+                <div className="order-3 min-w-0 space-y-10 xl:mt-8">
+                  {shownDays.map((d) => (
+                    <section key={d.dayIndex} aria-label={t('Ngày {n}', { n: d.dayIndex })}>
+                      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+                        <div>
+                          <h2 className="flex items-center gap-2 font-display text-xl font-extrabold">
+                            <span className="size-2.5 rounded-full" style={{ backgroundColor: dayColor(d.position) }} aria-hidden />
+                            {t('Ngày {n}', { n: d.dayIndex })}
+                          </h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {formatLongDate(d.date)} · {t('Ước tính')} <span className="text-foreground">{formatVnd(d.cost.total)}</span>
+                            {d.cost.missing > 0 && ` · ${t('{n} điểm chưa có giá', { n: d.cost.missing })}`}
+                          </p>
                         </div>
-                        {stop.type === 'replace' && stop.status !== 'reverted' && stop.original && (
-                          <p className="text-[13px] text-muted-foreground">
-                            {tr('Thay cho {name}', { name: <span className="line-through">{stop.original.name}</span> })}
-                          </p>
+                        {!committed && d.stops.length >= 3 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => sortRoute(d.dayIndex)}
+                            className="h-9 rounded-full px-4"
+                          >
+                            {optimize.isPending && optimize.variables === d.dayIndex ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <Route className="size-4" />
+                            )}
+                            {t('Tối ưu tuyến')}
+                          </Button>
                         )}
-                        <p className="text-[13px] text-muted-foreground">
-                          <span className={cn(stop.place.cost === null && 'italic')}>{costText(stop.place)}</span>
-                          {note && ` (${note})`}
-                          {factsOf(stop.place).map((fact) => ` · ${fact}`)}
+                      </header>
+                      {routeNotes[d.dayIndex] && (
+                        <p role="status" className="mt-3 text-sm text-np-teal">
+                          {routeNotes[d.dayIndex]}
                         </p>
-                        {/* A reverted change is the user's call: the AI's reason for it no longer applies. */}
-                        {stop.reason && stop.status !== 'reverted' && (
-                          <p className="flex gap-1.5 text-sm leading-relaxed">
-                            <Sparkles className="mt-1 size-3.5 shrink-0 text-np-teal" aria-label={t('Lý do của AI')} />
-                            {stop.reason}
-                          </p>
-                        )}
-                        {stop.planB && (
-                          <p className="flex gap-1.5 text-[13px] leading-relaxed text-muted-foreground">
-                            <CornerDownRight className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-                            <span>
-                              Plan B: <span className="text-foreground">{stop.planB.place.name}</span>. {stop.planB.reason}
-                            </span>
-                          </p>
-                        )}
-                        {actionsFor(stop.changeId, stop.type, stop.status)}
-                      </div>
-                    </li>
-                  )
-                })}
-              </ol>
-            </GlassCard>
-          ))}
+                      )}
 
-          {draft.notInPlan.length > 0 && (
-            <GlassCard as="section" className="p-5 sm:p-7">
-              <h2 className="font-display text-xl">{t('Không có trong lịch trình')}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t('Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.')}
-              </p>
-              <ul className="mt-5 space-y-4">
-                {draft.notInPlan.map((item) => {
-                  const label =
-                    item.type === 'add'
-                      ? { text: t('Bạn đã bỏ'), tone: 'border-border text-muted-foreground' }
-                      : labelOf(item.type, item.status)
-                  return (
-                    <li key={item.changeId} className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <h3 className="font-medium">{item.place.name}</h3>
-                        <span className={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', label.tone)}>
-                          {label.text}
-                        </span>
-                      </div>
-                      {item.reason && <p className="text-sm text-muted-foreground">{item.reason}</p>}
-                      {actionsFor(item.changeId, item.type, item.status)}
-                    </li>
-                  )
-                })}
-              </ul>
-            </GlassCard>
-          )}
+                      {d.stops.length === 0 && <p className="mt-4 text-sm text-muted-foreground">{t('Ngày này chưa có điểm nào.')}</p>}
 
-          <GlassCard as="section" className="p-5 sm:p-7">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="flex items-center gap-2 font-display text-xl">
-                  <ListChecks className="size-5 text-np-teal" aria-hidden />
-                  {t('Chuẩn bị cho chuyến đi')}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {draft.checklist
-                    ? draft.checklist.sortedByAi
-                      ? t('AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.')
-                      : t('Theo thứ tự mặc định của ChillnGo.')
-                    : t('Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.')}
-                </p>
-              </div>
-              {!committed && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() => once((done) => checklist.mutate(undefined, { onSettled: done }))}
-                >
-                  {checklist.isPending ? <Loader2 className="animate-spin" /> : <ListChecks />}
-                  {draft.checklist ? t('Tạo lại') : t('Tạo checklist')}
-                </Button>
-              )}
+                      <ol className="mt-4 space-y-4">
+                        {d.stops.map((stop, i) => (
+                          <StopCard
+                            key={stop.changeId}
+                            stop={stop}
+                            order={i + 1}
+                            color={dayColor(d.position)}
+                            actions={actionsFor(stop.changeId, stop.type, stop.status)}
+                          />
+                        ))}
+                      </ol>
+                    </section>
+                  ))}
+
+                  {draft.notInPlan.length > 0 && (
+                    <section>
+                      <h2 className="font-display text-xl font-extrabold">{t('Không có trong lịch trình')}</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {t('Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.')}
+                      </p>
+                      <ul className="mt-4 space-y-3">
+                        {draft.notInPlan.map((item) => {
+                          const label =
+                            item.type === 'add'
+                              ? { text: t('Bạn đã bỏ'), tone: 'border-border text-muted-foreground' }
+                              : labelOf(item.type, item.status)
+                          return (
+                            <li
+                              key={item.changeId}
+                              className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                            >
+                              <div className="min-w-0 space-y-1">
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  <h3 className="font-display font-bold">{item.place.name}</h3>
+                                  <span className={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', label.tone)}>
+                                    {label.text}
+                                  </span>
+                                </div>
+                                {item.reason && <p className="text-sm text-muted-foreground">{item.reason}</p>}
+                              </div>
+                              {actionsFor(item.changeId, item.type, item.status)}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </section>
+                  )}
+
+                  <section className="rounded-2xl border border-border p-4 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h2 className="flex items-center gap-2 font-display text-xl font-extrabold">
+                          <ListChecks className="size-5 text-np-teal" aria-hidden />
+                          {t('Chuẩn bị cho chuyến đi')}
+                        </h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {draft.checklist
+                            ? draft.checklist.sortedByAi
+                              ? t('AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.')
+                              : t('Theo thứ tự mặc định của ChillnGo.')
+                            : t('Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.')}
+                        </p>
+                      </div>
+                      {!committed && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full"
+                          disabled={busy}
+                          onClick={() => once((done) => checklist.mutate(undefined, { onSettled: done }))}
+                        >
+                          {checklist.isPending ? <Loader2 className="animate-spin" /> : <ListChecks />}
+                          {draft.checklist ? t('Tạo lại') : t('Tạo checklist')}
+                        </Button>
+                      )}
+                    </div>
+                    {draft.checklist && (
+                      <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                        {draft.checklist.groups.map((group) => (
+                          <div key={group.group}>
+                            <h3 className="text-sm font-medium">{group.group}</h3>
+                            <ul className="mt-2 space-y-1.5">
+                              {group.items.map((item) => (
+                                <li key={item.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                  <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-np-teal" />
+                                  {item.text}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                </div>
             </div>
-            {draft.checklist && (
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                {draft.checklist.groups.map((group) => (
-                  <div key={group.group}>
-                    <h3 className="text-sm font-medium">{group.group}</h3>
-                    <ul className="mt-2 space-y-1.5">
-                      {group.items.map((item) => (
-                        <li key={item.id} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-np-teal" />
-                          {item.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
-          </GlassCard>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-          <section>
-            <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
-            <MapPreview days={mapDaysOf(draft)} className="mt-4 h-80 w-full" label={t('Bản đồ các điểm trong bản nháp')} />
-          </section>
+/** One stop: photo, numbered name in its day's colour (as on the map), cost, facts, the AI's reason, and its buttons. */
+function StopCard({ stop, order, color, actions }: { stop: AiDraftStop; order: number; color: string; actions: React.ReactNode }) {
+  const label = labelOf(stop.type, stop.status)
+  const note = costNote(stop.place)
+  // A reverted change is the user's call: the AI's reason for it no longer applies.
+  const reason = stop.reason && stop.status !== 'reverted' ? splitLead(stop.reason) : null
+
+  return (
+    <li className="flex flex-col gap-4 rounded-2xl border border-border p-4 transition-colors hover:border-foreground/25 sm:flex-row">
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-xl bg-np-well sm:aspect-square sm:w-44 2xl:w-52">
+        {stop.place.photoUrl ? (
+          <img src={stop.place.photoUrl} alt="" loading="lazy" className="size-full object-cover" />
+        ) : (
+          <div className="flex size-full items-center justify-center text-muted-foreground">
+            <MapPin className="size-8" aria-hidden />
+          </div>
+        )}
+        <span
+          className={cn(
+            'absolute left-2 top-2 rounded-full border bg-[hsl(var(--background)/0.85)] px-2 py-0.5 text-[11px] font-medium backdrop-blur-sm',
+            label.tone,
+          )}
+        >
+          {label.text}
+        </span>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="font-display text-lg font-bold leading-snug">
+            <span style={{ color }}>{order}.</span> {stop.place.name}
+          </h3>
+          <p className="shrink-0 text-right">
+            <span className={cn('block font-display text-lg font-bold', stop.place.cost === null && 'text-sm font-normal italic text-muted-foreground')}>
+              {costText(stop.place)}
+            </span>
+            {note && <span className="text-xs text-muted-foreground">{note}</span>}
+          </p>
         </div>
 
-        <aside className="min-w-0 space-y-3 lg:sticky lg:top-32">
-          <ChatPanel draft={draft} busy={busy} />
-          <p className="px-1 text-xs text-muted-foreground">
-            {t('Bản nháp tự xoá sau 24 giờ, lúc {time}.', {
-              time: new Date(draft.expiresAt).toLocaleString(localeTag(), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
-            })}
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          <time className="tabular-nums">
+            {stop.startTime}–{stop.endTime}
+          </time>
+          {factsOf(stop.place).map((fact) => ` · ${fact}`)}
+          {stop.status === 'accepted' && stop.type !== 'keep' && ` · ${t('đã chấp nhận')}`}
+        </p>
+
+        {stop.type === 'replace' && stop.status !== 'reverted' && stop.original && (
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            {tr('Thay cho {name}', { name: <span className="line-through">{stop.original.name}</span> })}
           </p>
-        </aside>
+        )}
+
+        {reason && (
+          <p className="mt-3 text-sm leading-relaxed">
+            <mark className="rounded bg-np-teal/20 px-1 text-foreground [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              {reason[0]}
+            </mark>
+            {reason[1]}
+          </p>
+        )}
+
+        {stop.planB && (
+          <p className="mt-2 flex gap-1.5 text-[13px] leading-relaxed text-muted-foreground">
+            <CornerDownRight className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            <span>
+              Plan B: <span className="text-foreground">{stop.planB.place.name}</span>. {stop.planB.reason}
+            </span>
+          </p>
+        )}
+
+        {actions && <div className="mt-auto pt-4">{actions}</div>}
       </div>
-    </PageContainer>
+    </li>
   )
 }
