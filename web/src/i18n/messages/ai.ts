@@ -296,6 +296,22 @@ export const ai = {
   'Yêu cầu chỉnh sửa': { en: 'Edit request', zh: '修改需求', ja: '編集リクエスト', ko: '수정 요청' },
   'Bản nháp đã được lưu.': { en: 'The draft has been saved.', zh: '草稿已保存。', ja: '下書きは保存されました。', ko: '초안이 저장되었어요.' },
   'Bạn muốn đổi gì?': { en: 'What would you like to change?', zh: '你想改什么？', ja: '何を変えたいですか？', ko: '무엇을 바꾸고 싶나요?' },
+  'AI đang tạo bản nháp…': { en: 'The AI is making the draft…', zh: 'AI 正在生成草稿…', ja: 'AIが下書きを作成中…', ko: 'AI가 초안을 만드는 중…' },
+  'Quay lại chat': { en: 'Back to chat', zh: '返回聊天', ja: 'チャットに戻る', ko: '채팅으로 돌아가기' },
+  'Rẻ hơn một chút': { en: 'A bit cheaper', zh: '便宜一点', ja: 'もう少し安く', ko: '조금 더 저렴하게' },
+  'Thêm một quán ăn địa phương': { en: 'Add a local food spot', zh: '加一家当地餐馆', ja: '地元の食事処を追加', ko: '현지 맛집 하나 추가' },
+  'Thêm điểm trong nhà phòng khi mưa': {
+    en: 'Add an indoor spot in case of rain',
+    zh: '加一个室内地点以防下雨',
+    ja: '雨に備えて屋内スポットを追加',
+    ko: '비 올 때를 대비해 실내 장소 추가',
+  },
+  'Bớt một điểm để đi thong thả hơn': {
+    en: 'One stop fewer, for a slower pace',
+    zh: '少一个地点，走得悠闲些',
+    ja: '1か所減らしてゆったりと',
+    ko: '장소 하나 빼고 여유롭게',
+  },
   'Mỗi tin nhắn dùng một lượt AI · còn {left}/{limit} lượt hôm nay.': {
     en: 'Each message uses one AI request · {left}/{limit} left today.',
     zh: '每条消息消耗一次 AI 次数 · 今天还剩 {left}/{limit} 次。',
