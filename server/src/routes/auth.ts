@@ -1,8 +1,10 @@
+import { waitUntil } from '@vercel/functions'
 import bcrypt from 'bcryptjs'
 import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
+import { resetPasswordMessage } from '../emails/resetPassword.js'
 import { verifyEmailMessage } from '../emails/verifyEmail.js'
 import { assertNotLocked } from '../lib/accountStatus.js'
 import { env } from '../env.js'
@@ -12,7 +14,13 @@ import { findOrCreateGoogleUser } from '../lib/googleAccount.js'
 import { sendMail } from '../lib/mailer.js'
 import { displayNameSchema, emailSchema, passwordSchema, usernameSchema } from '../lib/schemas.js'
 import { signToken } from '../lib/token.js'
-import { RESEND_COOLDOWN_MS, createVerifyToken, hashToken } from '../lib/verification.js'
+import {
+  RESEND_COOLDOWN_MS,
+  RESET_COOLDOWN_MS,
+  createResetToken,
+  createVerifyToken,
+  hashToken,
+} from '../lib/verification.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { getSettings } from '../models/Setting.js'
@@ -42,12 +50,15 @@ const verifySchema = z.object({
 
 const resendSchema = z.object({ email: emailSchema })
 
+const resetPasswordSchema = verifySchema.extend({ password: passwordSchema })
+
 const googleSchema = z.object({
   credential: z.string('Thiếu thông tin đăng nhập Google').min(1, 'Thiếu thông tin đăng nhập Google').max(4096),
 })
 
 const INVALID_LOGIN = 'Email hoặc mật khẩu không đúng'
 const INVALID_VERIFY_LINK = 'Liên kết xác nhận không hợp lệ, đã được dùng hoặc đã hết hạn.'
+const INVALID_RESET_LINK = 'Liên kết đặt lại mật khẩu không hợp lệ, đã được dùng hoặc đã hết hạn.'
 
 /**
  * Compared against when the email does not exist, so a wrong email takes as
@@ -78,6 +89,15 @@ const authLimiter = rateLimit({
 
 /** Resend always answers 200, so every request counts here. */
 const resendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Bạn đã yêu cầu gửi lại quá nhiều lần. Vui lòng đợi vài phút.' },
+})
+
+/** Forgot password always answers 200, so every request counts here too. */
+const forgotLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   standardHeaders: 'draft-8',
@@ -116,6 +136,46 @@ async function sendVerificationEmail(
     }),
   )
   if (env.smtp) console.log(`Verification email sent to ${user.email}`)
+}
+
+/**
+ * Emails a reset link unless the account is missing or locked, or a link went
+ * out less than a minute ago. The filter and the new token are one atomic
+ * update, so two requests at once cannot both send. A new link replaces the
+ * previous one.
+ */
+async function sendPasswordReset(email: string): Promise<void> {
+  const reset = createResetToken()
+  const now = new Date()
+  const user = await User.findOneAndUpdate(
+    {
+      email,
+      status: { $ne: 'locked' },
+      $or: [
+        { passwordResetSentAt: { $exists: false } },
+        { passwordResetSentAt: { $lte: new Date(now.getTime() - RESET_COOLDOWN_MS) } },
+      ],
+    },
+    {
+      $set: {
+        passwordResetTokenHash: reset.hash,
+        passwordResetExpiresAt: reset.expiresAt,
+        passwordResetSentAt: now,
+      },
+    },
+    { returnDocument: 'after' },
+  )
+  if (!user) return
+
+  await sendMail(
+    resetPasswordMessage({
+      to: user.email,
+      displayName: user.displayName,
+      username: user.username,
+      resetUrl: `${env.appUrl}/reset-password?token=${encodeURIComponent(reset.token)}`,
+    }),
+  )
+  if (env.smtp) console.log(`Password reset email sent to ${user.email}`)
 }
 
 export const authRouter = Router()
@@ -293,6 +353,61 @@ authRouter.post('/resend-verification', resendLimiter, async (req, res) => {
   }
 
   res.json({ message: `Đã gửi email xác nhận mới tới ${user.email}.` })
+})
+
+/**
+ * POST /api/auth/forgot-password { email } → 200 { message }
+ *
+ * Same answer whether or not the email has an account, at the same speed: the
+ * lookup and the send run after responding. Unlike resend-verification, a
+ * failed send cannot be reported either, so it only reaches the server log.
+ */
+authRouter.post('/forgot-password', forgotLimiter, async (req, res) => {
+  const { email } = resendSchema.parse(req.body)
+
+  waitUntil(
+    sendPasswordReset(email).catch((error: unknown) => {
+      console.error('Could not send password reset email:', error)
+    }),
+  )
+
+  res.json({ message: 'Nếu email này có tài khoản ChillnGo, chúng tôi đã gửi liên kết đặt lại mật khẩu.' })
+})
+
+/**
+ * POST /api/auth/reset-password { token, password } → 200 { message }
+ *
+ * Sets the new password. The link is single-use: the stored hash is removed in
+ * the same atomic update, so two clicks cannot both succeed. Does not sign in;
+ * every existing session stops working and the user logs in with the new
+ * password. Google-only accounts gain a password this way.
+ *
+ * The link proves the user can read this mailbox, so it also confirms the email.
+ */
+authRouter.post('/reset-password', authLimiter, async (req, res) => {
+  const { token, password } = resetPasswordSchema.parse(req.body)
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS)
+
+  const user = await User.findOneAndUpdate(
+    {
+      passwordResetTokenHash: hashToken(token),
+      passwordResetExpiresAt: { $gt: new Date() },
+      status: { $ne: 'locked' },
+    },
+    {
+      $set: { passwordHash, passwordChangedAt: new Date(), emailVerified: true },
+      $unset: {
+        passwordResetTokenHash: 1,
+        passwordResetExpiresAt: 1,
+        emailVerifyTokenHash: 1,
+        emailVerifyExpiresAt: 1,
+      },
+    },
+  )
+  if (!user) throw new HttpError(400, INVALID_RESET_LINK, 'INVALID_RESET_TOKEN')
+  await recordAccountEvents(user._id, [{ type: 'password_reset' }])
+
+  res.json({ message: 'Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.' })
 })
 
 /** GET /api/auth/me → 200 { user }. Used to validate a stored token. */

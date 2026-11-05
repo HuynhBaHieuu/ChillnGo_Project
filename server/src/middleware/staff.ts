@@ -3,6 +3,7 @@ import type { RequestHandler, Response } from 'express'
 import { assertNotLocked } from '../lib/accountStatus.js'
 import { HttpError } from '../lib/errors.js'
 import { effectivePermissions, isStaff } from '../lib/permissions.js'
+import { issuedBeforePasswordChange } from '../lib/verification.js'
 import type { AdminModule } from '../lib/permissions.js'
 import { User } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
@@ -12,11 +13,15 @@ import type { UserDocument } from '../models/User.js'
  *
  * Role and lock status are read fresh on every request rather than trusted
  * from the token, so demoting or locking someone takes effect immediately.
- * A deleted or locked account gets 401, which signs the web client out.
+ * A deleted or locked account gets 401, which signs the web client out, and
+ * so does a token from before a password reset.
  */
 export const loadCurrentUser: RequestHandler = async (_req, res, next) => {
   const user = await User.findById(res.locals.userId as string)
   if (!user) throw new HttpError(401, 'Tài khoản không còn tồn tại. Vui lòng đăng nhập lại.')
+  if (issuedBeforePasswordChange(res.locals.tokenIssuedAt as number, user.passwordChangedAt)) {
+    throw new HttpError(401, 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+  }
   try {
     assertNotLocked(user)
   } catch (error) {

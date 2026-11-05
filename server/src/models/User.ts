@@ -49,6 +49,14 @@ const userSchema = new Schema(
     emailVerifyExpiresAt: { type: Date, select: false },
     /** When the last verification email went out, to throttle resends. */
     emailVerifySentAt: { type: Date, select: false },
+
+    /** SHA-256 of the pending password reset token; the token itself is never stored. */
+    passwordResetTokenHash: { type: String, select: false, index: { sparse: true } },
+    passwordResetExpiresAt: { type: Date, select: false },
+    /** When the last reset email went out, to throttle repeat requests. */
+    passwordResetSentAt: { type: Date, select: false },
+    /** Sign-in tokens issued before this no longer work. Set by a password reset. */
+    passwordChangedAt: { type: Date },
   },
   { timestamps: true, versionKey: false },
 )

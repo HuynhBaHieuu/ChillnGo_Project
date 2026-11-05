@@ -354,7 +354,7 @@ postsRouter.get('/deleted', requireAuth, loadCurrentUser, async (_req, res) => {
   res.json({ items: posts.map((p) => toListView(p, userId)) })
 })
 
-postsRouter.get('/liked-ids', requireAuth, async (_req, res) => {
+postsRouter.get('/liked-ids', requireAuth, loadCurrentUser, async (_req, res) => {
   const likes = await PostLike.find({ userId: res.locals.userId as string }).sort({ createdAt: -1 }).select('postId').lean()
   res.json({ ids: likes.map((l) => l.postId) })
 })

@@ -143,8 +143,11 @@ Verification emails link to the website (`APP_URL` on the server). On the
 phone, either open that link, or paste the link or its token into
 "Xác nhận email" in the app.
 
+Password reset emails work the same way: open the link on the website, or paste
+it into "Đặt lại mật khẩu" in the app (login > "Quên mật khẩu?").
+
 The app also opens `chillngo://app/<path>` links, for example
-`chillngo://app/posts/<id>`. To test one on Android:
+`chillngo://app/posts/<id>` or `chillngo://app/reset-password?token=<token>`. To test one on Android:
 
 ```bash
 adb shell am start -a android.intent.action.VIEW -d "chillngo://app/live"
