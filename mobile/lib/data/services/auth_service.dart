@@ -77,6 +77,18 @@ abstract final class AuthService {
     return str(data['message'], 'Đã gửi lại email xác minh.');
   }
 
+  /// Emails a reset link if the account exists. Succeeds either way, so it does
+  /// not reveal which emails are registered.
+  static Future<void> forgotPassword(String email) async {
+    await Api.post('/api/auth/forgot-password', body: {'email': email.trim()}, auth: false);
+  }
+
+  /// Sets a new password with the token from the emailed link. Ends every
+  /// session of the account and does not sign in.
+  static Future<void> resetPassword(String token, String password) async {
+    await Api.post('/api/auth/reset-password', body: {'token': token, 'password': password}, auth: false);
+  }
+
   /// Re-reads the user behind the stored token. ApiError 401 when it is no longer valid.
   static Future<User> currentUser() async {
     final data = await Api.get('/api/auth/me');

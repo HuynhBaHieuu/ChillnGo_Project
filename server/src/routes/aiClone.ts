@@ -268,7 +268,7 @@ aiCloneRouter.post('/posts/ai-merge', requireAuth, loadCurrentUser, writeLimiter
 
 /* ----------------------------------------------------------------- review */
 
-aiCloneRouter.get('/ai-drafts/:draftId', requireAuth, async (req, res) => {
+aiCloneRouter.get('/ai-drafts/:draftId', requireAuth, loadCurrentUser, async (req, res) => {
   const draft = await loadDraft(res.locals.userId as string, String(req.params.draftId), false)
   res.json({ draft: await draftResponse(draft) })
 })
@@ -298,7 +298,7 @@ aiCloneRouter.post('/ai-drafts/:draftId/chat', requireAuth, loadCurrentUser, wri
 
 const statusSchema = z.object({ status: z.enum(['accepted', 'reverted', 'pending'], 'Trạng thái không hợp lệ') })
 
-aiCloneRouter.patch('/ai-drafts/:draftId/changes/:changeId', requireAuth, writeLimiter, async (req, res) => {
+aiCloneRouter.patch('/ai-drafts/:draftId/changes/:changeId', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const { status } = statusSchema.parse(req.body)
   const saved = await editDraft(res.locals.userId as string, String(req.params.draftId), (state) => {
     const problem = setChangeStatus(state, String(req.params.changeId), status)
@@ -307,7 +307,7 @@ aiCloneRouter.patch('/ai-drafts/:draftId/changes/:changeId', requireAuth, writeL
   res.json({ draft: await draftResponse(saved) })
 })
 
-aiCloneRouter.post('/ai-drafts/:draftId/accept-all', requireAuth, writeLimiter, async (req, res) => {
+aiCloneRouter.post('/ai-drafts/:draftId/accept-all', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const saved = await editDraft(res.locals.userId as string, String(req.params.draftId), acceptAll)
   res.json({ draft: await draftResponse(saved) })
 })
@@ -316,7 +316,7 @@ aiCloneRouter.post('/ai-drafts/:draftId/accept-all', requireAuth, writeLimiter, 
 
 const routeSchema = z.object({ dayIndex: z.number().int().min(1).max(14).optional() })
 
-aiCloneRouter.post('/ai-drafts/:draftId/optimize-route', requireAuth, writeLimiter, async (req, res) => {
+aiCloneRouter.post('/ai-drafts/:draftId/optimize-route', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const { dayIndex } = routeSchema.parse(req.body ?? {})
   let routes: RouteResult[] = []
   const saved = await editDraft(res.locals.userId as string, String(req.params.draftId), (state) => {
@@ -332,7 +332,7 @@ aiCloneRouter.post('/ai-drafts/:draftId/optimize-route', requireAuth, writeLimit
   res.json({ draft: await draftResponse(saved), routes })
 })
 
-aiCloneRouter.get('/ai-drafts/:draftId/plan-b', requireAuth, async (req, res) => {
+aiCloneRouter.get('/ai-drafts/:draftId/plan-b', requireAuth, loadCurrentUser, async (req, res) => {
   const draft = await loadDraft(res.locals.userId as string, String(req.params.draftId), false)
   res.json({ planB: planBList(stateOf(draft)) })
 })

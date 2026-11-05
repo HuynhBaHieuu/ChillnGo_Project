@@ -7,6 +7,8 @@ import { env } from '../env.js'
 interface TokenClaims {
   sub: string
   role: string
+  /** When the token was issued, in seconds since the epoch. */
+  iat: number
 }
 
 export function signToken(user: { _id: string; role: string }): string {
@@ -22,7 +24,7 @@ export function verifyToken(token: string): TokenClaims | null {
   try {
     const payload = jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] })
     if (typeof payload === 'string' || typeof payload.sub !== 'string') return null
-    return { sub: payload.sub, role: String(payload.role ?? 'user') }
+    return { sub: payload.sub, role: String(payload.role ?? 'user'), iat: payload.iat ?? 0 }
   } catch {
     return null
   }

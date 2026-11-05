@@ -115,6 +115,7 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
 const _events = {
   'account_created': ('Tạo tài khoản', LucideIcons.sparkles),
   'email_verified': ('Xác minh địa chỉ email', LucideIcons.badgeCheck),
+  'password_reset': ('Đặt lại mật khẩu', LucideIcons.keyRound),
   'avatar_changed': ('Đổi ảnh đại diện', LucideIcons.image),
   'avatar_removed': ('Gỡ ảnh đại diện', LucideIcons.imageOff),
   'cover_changed': ('Đổi ảnh bìa', LucideIcons.image),

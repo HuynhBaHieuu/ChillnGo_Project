@@ -5,9 +5,11 @@ import { HomePage } from '@/app/landing/home/HomePage'
 import { NotFoundPage } from '@/app/landing/NotFoundPage'
 import { RootLayout } from '@/app/layout/RootLayout'
 import { ActivityPage } from '@/features/activity/ActivityPage'
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage'
 import { ADMIN_SECTIONS } from '@/features/discovery-admin/admin/sections'
 import { AdminIndex, AdminLayout, AdminSectionPage } from '@/features/discovery-admin/AdminLayout'
@@ -114,6 +116,8 @@ export const router = createBrowserRouter([
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      { path: '/reset-password', element: <ResetPasswordPage /> },
 
       { path: '*', element: <NotFoundPage /> },
     ],
