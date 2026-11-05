@@ -15,8 +15,10 @@ import 'core/roles.dart';
 import 'features/activity/activity_screen.dart';
 import 'features/activity/activity_section_screen.dart';
 import 'features/admin/admin_screen.dart';
+import 'features/auth/forgot_password_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
+import 'features/auth/reset_password_screen.dart';
 import 'features/auth/verify_email_screen.dart';
 import 'features/checkin/new_checkin_screen.dart';
 import 'features/common/not_found_screen.dart';
@@ -63,7 +65,7 @@ String? _redirect(BuildContext context, GoRouterState state) {
     return '/welcome';
   }
 
-  if (staff) return path.startsWith('/admin') ? null : '/admin';
+  if (staff) return path.startsWith('/admin') || path == '/reset-password' ? null : '/admin';
 
   if (!session.signedIn && _needsAccount(path)) {
     return '/login?next=${Uri.encodeComponent(state.uri.toString())}';
@@ -133,6 +135,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/verify-email',
       builder: (_, state) => VerifyEmailScreen(token: state.uri.queryParameters['token']),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (_, state) => ForgotPasswordScreen(email: state.uri.queryParameters['email']),
+    ),
+    GoRoute(
+      path: '/reset-password',
+      builder: (_, state) => ResetPasswordScreen(token: state.uri.queryParameters['token']),
     ),
 
     GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),

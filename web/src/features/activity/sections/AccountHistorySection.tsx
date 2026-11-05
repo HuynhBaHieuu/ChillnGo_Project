@@ -1,4 +1,4 @@
-import { AtSign, BadgeCheck, FileText, History, Image, ImageOff, MapPin, Sparkles, UserPen } from 'lucide-react'
+import { AtSign, BadgeCheck, FileText, History, Image, ImageOff, KeyRound, MapPin, Sparkles, UserPen } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { Empty, ErrorPanel, ListSkeleton, SectionHeader } from '@/features/activity/components'
@@ -11,6 +11,7 @@ import type { AccountEvent, AccountEventType } from '@/services/activity.service
 const EVENTS: Record<AccountEventType, { label: MessageKey; icon: LucideIcon }> = {
   account_created: { label: 'Tạo tài khoản#event', icon: Sparkles },
   email_verified: { label: 'Xác minh địa chỉ email#event', icon: BadgeCheck },
+  password_reset: { label: 'Đặt lại mật khẩu#event', icon: KeyRound },
   avatar_changed: { label: 'Đổi ảnh đại diện#event', icon: Image },
   avatar_removed: { label: 'Gỡ ảnh đại diện#event', icon: ImageOff },
   cover_changed: { label: 'Đổi ảnh bìa#event', icon: Image },

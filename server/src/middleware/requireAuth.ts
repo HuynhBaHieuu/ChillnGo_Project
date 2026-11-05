@@ -14,6 +14,7 @@ export const requireAuth: RequestHandler = (req, res, next) => {
   if (!claims) throw new HttpError(401, 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
 
   res.locals.userId = claims.sub
+  res.locals.tokenIssuedAt = claims.iat
   next()
 }
 

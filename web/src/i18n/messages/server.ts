@@ -212,6 +212,12 @@ export const server = {
   },
   'Vui lòng nhập email': { en: 'Please enter your email', zh: '请输入邮箱', ja: 'メールアドレスを入力してください', ko: '이메일을 입력해 주세요' },
   'Vui lòng nhập mật khẩu': { en: 'Please enter your password', zh: '请输入密码', ja: 'パスワードを入力してください', ko: '비밀번호를 입력해 주세요' },
+  'Liên kết đặt lại mật khẩu không hợp lệ, đã được dùng hoặc đã hết hạn.': {
+    en: 'This password reset link is invalid, already used or expired.',
+    zh: '该密码重置链接无效、已被使用或已过期。',
+    ja: 'このパスワード再設定リンクは無効、使用済み、または期限切れです。',
+    ko: '이 비밀번호 재설정 링크는 잘못되었거나 이미 사용되었거나 만료되었습니다.',
+  },
   'Thiếu mã xác nhận': { en: 'Missing confirmation code', zh: '缺少验证码', ja: '確認コードがありません', ko: '인증 코드가 없습니다' },
   'Mã xác nhận không hợp lệ': { en: 'Invalid confirmation code', zh: '验证码无效', ja: '確認コードが無効です', ko: '잘못된 인증 코드입니다' },
   'Thiếu thông tin đăng nhập Google': { en: 'Missing Google sign-in details', zh: '缺少 Google 登录信息', ja: 'Googleログイン情報がありません', ko: 'Google 로그인 정보가 없습니다' },

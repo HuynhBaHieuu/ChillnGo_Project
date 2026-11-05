@@ -55,6 +55,7 @@ export function clearSearchHistory(): Promise<{ ok: true }> {
 export type AccountEventType =
   | 'account_created'
   | 'email_verified'
+  | 'password_reset'
   | 'avatar_changed'
   | 'avatar_removed'
   | 'cover_changed'
