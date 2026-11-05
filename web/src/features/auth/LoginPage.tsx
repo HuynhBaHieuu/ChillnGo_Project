@@ -75,7 +75,12 @@ export function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">{t('Mật khẩu')}</Label>
+          <div className="flex items-baseline justify-between gap-4">
+            <Label htmlFor="password">{t('Mật khẩu')}</Label>
+            <Link to="/forgot-password" state={{ email: email.trim() }} className="text-sm text-muted-foreground hover:text-foreground">
+              {t('Quên mật khẩu?')}
+            </Link>
+          </div>
           <PasswordInput
             id="password"
             required

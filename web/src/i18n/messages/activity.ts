@@ -48,6 +48,7 @@ export const activity = {
   'Đổi ảnh bìa#event': { en: 'Changed cover photo', zh: '更换封面', ja: 'カバー写真を変更', ko: '커버 사진 변경' },
   'Gỡ ảnh bìa#event': { en: 'Removed cover photo', zh: '移除封面', ja: 'カバー写真を削除', ko: '커버 사진 삭제' },
   'Đổi tên người dùng#event': { en: 'Changed username', zh: '更改用户名', ja: 'ユーザー名を変更', ko: '사용자 이름 변경' },
+  'Đặt lại mật khẩu#event': { en: 'Reset password', zh: '重置密码', ja: 'パスワードをリセット', ko: '비밀번호 재설정' },
   'Đổi tên hiển thị#event': { en: 'Changed display name', zh: '更改显示名称', ja: '表示名を変更', ko: '표시 이름 변경' },
   'Đổi phần giới thiệu#event': { en: 'Changed bio', zh: '更改简介', ja: '自己紹介を変更', ko: '소개 변경' },
   'Đổi nơi sống#event': { en: 'Changed location', zh: '更改所在地', ja: '居住地を変更', ko: '사는 곳 변경' },

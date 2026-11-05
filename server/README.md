@@ -74,6 +74,8 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/auth/verify-email` | `token` from the emailed link | `200 { token, user }`. Marks the email verified and signs in. |
 | `POST /api/auth/resend-verification` | `email` | `200 { message }` when a new email went out. Otherwise `404 NO_ACCOUNT`, `409 ALREADY_VERIFIED`, or `429 RESEND_COOLDOWN` within a minute of the last send. |
 | `POST /api/auth/google` | `credential`, the ID token from Google's button | `200 { token, user }`. Creates or links the account. |
+| `POST /api/auth/forgot-password` | `email` | `200 { message }`, the same whether or not the email has an account. Emails a reset link unless the account is locked or a link went out within the last minute. |
+| `POST /api/auth/reset-password` | `token` from the emailed link, `password` | `200 { message }`. No session: the user logs in with the new password. `400 INVALID_RESET_TOKEN` when the link is wrong, used or expired. |
 | `POST /api/auth/login` | `email`, `password` | `200 { token, user }`, or `403` with `code: EMAIL_NOT_VERIFIED`. |
 | `POST /api/users/me/upload-signature` | `kind`: `avatar` or `cover` | `200 { uploadUrl, fields }`: post the file plus `fields` straight to Cloudinary. |
 | `PATCH /api/users/me` | any of `displayName`, `username`, `bio`, `location`, `avatar`/`cover` (`"uploaded"` or `"remove"`) | `200 { user }` |
@@ -131,6 +133,10 @@ Rules enforced by the API:
 - **Email verification:** login is refused until the emailed link is opened. The
   link is valid for 24 hours and works once. Only a SHA-256 hash of its token is
   stored. A resend replaces the previous link and is allowed once a minute.
+- **Password reset:** the emailed link is valid for 60 minutes and works once.
+  Only a SHA-256 hash of its token is stored. A new request replaces the previous
+  link and is allowed once a minute. A reset ends every existing session, marks
+  the email verified, and gives a Google-only account a password.
 - **Google accounts:** the first Google sign-in links to an existing account with
   the same email, and marks that email verified, or creates a new account. A new
   account gets a username from the email and has no password. A password login
@@ -484,7 +490,7 @@ src/
   env.ts                reads and validates environment variables
   db.ts                 cached MongoDB connection
   models/User.ts        User schema + toPublicUser()
-  routes/auth.ts        register, verify-email, resend-verification, login, me
+  routes/auth.ts        register, verify-email, resend-verification, forgot-password, reset-password, login, me
   routes/admin.ts       back office: users, admins, stats, audit log, settings
   routes/users.ts       the signed-in user's profile and image uploads
   routes/checkins.ts    photo check-ins
@@ -509,6 +515,7 @@ src/
   models/Setting.ts     system settings (single document)
   scripts/seed-superadmin.ts  create (or restore) the Super Admin
   emails/verifyEmail.ts the confirmation email (HTML + plain text)
+  emails/resetPassword.ts the password reset email
   lib/mailer.ts         SMTP sending, or console output without SMTP
   lib/verification.ts   single-use verification tokens
   lib/google.ts         verifies Google ID tokens

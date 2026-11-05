@@ -82,6 +82,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   PasswordField(controller: _password, textInputAction: TextInputAction.go, onChanged: (_) => setState(() {}), onSubmitted: (_) => _submit()),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AppButton(
+                      label: 'Quên mật khẩu?',
+                      variant: ButtonVariant.ghost,
+                      size: ButtonSize.sm,
+                      onPressed: () => context.push('/forgot-password?email=${Uri.encodeComponent(_email.text.trim())}'),
+                    ),
+                  ),
                   if (_error != null && !needsVerification) ...[const SizedBox(height: 12), ErrorText(_error!.message)],
                   if (needsVerification) ...[
                     const SizedBox(height: 14),
@@ -119,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   AppButton(label: 'Đăng nhập', size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _canSubmit ? _submit : null),
                   const SizedBox(height: 16),
                   GoogleSignInButton(onSignedIn: (session) => completeSignIn(context, ref, session, widget.next)),

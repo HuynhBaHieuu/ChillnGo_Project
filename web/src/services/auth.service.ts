@@ -118,6 +118,30 @@ export function resendVerification(email: string): Promise<{ message: string }> 
 }
 
 /**
+ * POST /api/auth/forgot-password — emails a reset link if the account exists.
+ * Succeeds either way, so it does not reveal which emails are registered.
+ */
+export function forgotPassword(email: string): Promise<{ message: string }> {
+  return http<{ message: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    body: { email: email.trim() },
+    auth: false,
+  })
+}
+
+/**
+ * POST /api/auth/reset-password — sets a new password with the token from the
+ * emailed link. Ends every session of the account; does not sign in.
+ */
+export function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  return http<{ message: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    body: { token, password },
+    auth: false,
+  })
+}
+
+/**
  * GET /api/auth/me — re-reads the user behind the stored token.
  * Throws ApiError 401 when the token is expired or invalid.
  */

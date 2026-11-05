@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose'
 export const ACCOUNT_EVENTS = [
   'account_created',
   'email_verified',
+  'password_reset',
   'avatar_changed',
   'avatar_removed',
   'cover_changed',
