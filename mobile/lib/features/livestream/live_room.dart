@@ -16,6 +16,7 @@ import 'package:livekit_client/livekit_client.dart';
 
 import '../../data/json.dart';
 import '../../data/models.dart';
+import '../../core/i18n.dart';
 
 /// Same topic the server sends on (server/src/lib/livekit.ts).
 const dataTopic = 'chillngo';
@@ -43,11 +44,11 @@ String _userIdOf(String identity) => identity.split('~').first;
 String mediaErrorMessage(Object error) {
   final text = error.toString().toLowerCase();
   if (text.contains('permission') || text.contains('denied') || text.contains('notallowed')) {
-    return 'Bạn đã chặn quyền camera hoặc micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.';
+    return t('Bạn đã chặn quyền camera hoặc micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.');
   }
-  if (text.contains('notfound') || text.contains('no camera') || text.contains('overconstrained')) return 'Không tìm thấy camera hoặc micro.';
-  if (text.contains('notreadable') || text.contains('in use') || text.contains('busy')) return 'Camera hoặc micro đang được ứng dụng khác sử dụng.';
-  return 'Không mở được camera hoặc micro.';
+  if (text.contains('notfound') || text.contains('no camera') || text.contains('overconstrained')) return t('Không tìm thấy camera hoặc micro.');
+  if (text.contains('notreadable') || text.contains('in use') || text.contains('busy')) return t('Camera hoặc micro đang được ứng dụng khác sử dụng.');
+  return t('Không mở được camera hoặc micro.');
 }
 
 class LiveRoom extends ChangeNotifier {
@@ -189,12 +190,12 @@ class LiveRoom extends ChangeNotifier {
             onRemoved();
           case DisconnectReason.duplicateIdentity:
             // Only the host has a fixed identity: viewers can watch from as many devices as they like.
-            error = 'Bạn đang phát livestream này ở một thiết bị khác.';
+            error = t('Bạn đang phát livestream này ở một thiết bị khác.');
           case DisconnectReason.clientInitiated:
           case null:
             break;
           default:
-            error = 'Mất kết nối tới livestream. Kiểm tra mạng rồi thử lại.';
+            error = t('Mất kết nối tới livestream. Kiểm tra mạng rồi thử lại.');
         }
         _notify();
       })
@@ -239,7 +240,7 @@ class LiveRoom extends ChangeNotifier {
             camOn = true;
           } catch (e) {
             camOn = false;
-            error = '${mediaErrorMessage(e)} Livestream tiếp tục với âm thanh.';
+            error = t('{value} Livestream tiếp tục với âm thanh.', {'value': mediaErrorMessage(e)});
           }
         } else {
           camOn = false;
@@ -249,7 +250,7 @@ class LiveRoom extends ChangeNotifier {
     } catch (_) {
       if (!_disposed) {
         state = LinkState.disconnected;
-        error = 'Không kết nối được tới livestream. Vui lòng thử lại.';
+        error = t('Không kết nối được tới livestream. Vui lòng thử lại.');
         _notify();
       }
     }
@@ -302,7 +303,7 @@ class LiveRoom extends ChangeNotifier {
       backCamera = !backCamera;
       video = track;
     } catch (_) {
-      error = 'Không chuyển được sang camera khác.';
+      error = t('Không chuyển được sang camera khác.');
     } finally {
       _busy = false;
       _notify();

@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../data/models.dart';
 import '../../state/providers.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// A journey in a list (web/src/components/TripCard.tsx).
 /// [grid]: the compact card for two-column lists.
@@ -24,7 +25,7 @@ class TripCard extends ConsumerWidget {
     final author = post.author;
     return Semantics(
       button: true,
-      label: '${post.title}, của ${author?.displayName ?? ''}',
+      label: t('{title}, của {value}', {'title': post.title, 'value': author?.displayName ?? ''}),
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: () => context.push('/posts/${post.id}'),
@@ -205,7 +206,7 @@ class _TagChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.pill),
         border: Border.all(color: AppColors.border),
       ),
-      child: Text('#$tag', style: AppText.label.copyWith(fontSize: 12.5, color: AppColors.sage)),
+      child: Text('#${tx(tag)}', style: AppText.label.copyWith(fontSize: 12.5, color: AppColors.sage)),
     );
     if (onTap == null) return chip;
     return InkWell(borderRadius: BorderRadius.circular(AppRadius.pill), onTap: onTap, child: chip);

@@ -11,6 +11,7 @@ import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/surfaces.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 const _icons = {
   'like': LucideIcons.heart,
@@ -66,7 +67,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     if (notifications.hasValue) WidgetsBinding.instance.addPostFrameCallback((_) => _markRead(list));
 
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Thông báo')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Thông báo'))),
       body: notifications.isLoading && !notifications.hasValue
           ? ListView(
               padding: const EdgeInsets.all(kGutter),
@@ -107,13 +108,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   if (unread > 0)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6),
-                      child: Text('$unread thông báo mới', style: AppText.meta),
+                      child: Text(t('{unread} thông báo mới', {'unread': unread}), style: AppText.meta),
                     ),
                   if (list.isEmpty)
-                    const EmptyState(
+                    EmptyState(
                       icon: LucideIcons.bell,
-                      title: 'Chưa có thông báo nào',
-                      description: 'Khi có người theo dõi bạn hoặc người bạn theo dõi phát trực tiếp, thông báo sẽ hiện ở đây.',
+                      title: t('Chưa có thông báo nào'),
+                      description: t('Khi có người theo dõi bạn hoặc người bạn theo dõi phát trực tiếp, thông báo sẽ hiện ở đây.'),
                     ),
                   for (final n in list) _NotificationRow(notification: n),
                 ],
@@ -185,7 +186,7 @@ class _NotificationRow extends StatelessWidget {
                                 text: '${n.actor!.displayName} ',
                                 style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.cream),
                               ),
-                            TextSpan(text: n.message, style: AppText.bodySmall),
+                            TextSpan(text: tx(n.message), style: AppText.bodySmall),
                           ],
                         ),
                       ),

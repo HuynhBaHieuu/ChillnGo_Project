@@ -18,6 +18,7 @@ import '../map/route_map.dart';
 import 'itineraries_screen.dart';
 import 'merge_sheet.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// /itineraries/:id: a cloned itinerary (web: ItineraryDetailPage).
 class ItineraryDetailScreen extends ConsumerStatefulWidget {
@@ -63,9 +64,9 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
   Future<void> _remove(ClonedItinerary itinerary, TripDay day) async {
     final done = await confirmAction(
       context,
-      title: 'Xoá ngày này?',
-      description: '“${day.title.isEmpty ? 'Chưa đặt tên' : day.title}” sẽ bị bỏ khỏi lịch trình. Các ngày sau sẽ được đánh số lại.',
-      confirmLabel: 'Xoá ngày',
+      title: t('Xoá ngày này?'),
+      description: t('“{value}” sẽ bị bỏ khỏi lịch trình. Các ngày sau sẽ được đánh số lại.', {'value': day.title.isEmpty ? t('Chưa đặt tên') : day.title}),
+      confirmLabel: t('Xoá ngày'),
       destructive: true,
       onConfirm: () => ItineraryService.removeDay(itinerary.id, day.id),
     );
@@ -103,9 +104,9 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
           padding: const EdgeInsets.all(kGutter),
           child: Center(
             child: EmptyState(
-              title: 'Không tìm thấy lịch trình',
-              description: async.hasError ? errorMessage(async.error) : 'Lịch trình này có thể đã bị xoá.',
-              action: AppButton(label: 'Về danh sách', variant: ButtonVariant.outline, onPressed: () => context.pushReplacement('/itineraries?tab=cloned')),
+              title: t('Không tìm thấy lịch trình'),
+              description: async.hasError ? errorMessage(async.error) : t('Lịch trình này có thể đã bị xoá.'),
+              action: AppButton(label: t('Về danh sách'), variant: ButtonVariant.outline, onPressed: () => context.pushReplacement('/itineraries?tab=cloned')),
             ),
           ),
         ),
@@ -137,8 +138,8 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               AppBadge(itineraryStatusLabels[itinerary.status] ?? itinerary.status, tone: BadgeTone.outline),
-              if (itinerary.cloneType != 'manual') const AppBadge('Điều chỉnh bằng AI', icon: LucideIcons.sparkles, tone: BadgeTone.outline),
-              Text('${tripLengthLabel(days.length)} · khởi hành ${formatShortDate(itinerary.startDate)}', style: AppText.meta),
+              if (itinerary.cloneType != 'manual') AppBadge(t('Điều chỉnh bằng AI'), icon: LucideIcons.sparkles, tone: BadgeTone.outline),
+              Text(t('{length} · khởi hành {date}', {'length': tripLengthLabel(days.length), 'date': formatShortDate(itinerary.startDate)}), style: AppText.meta),
             ],
           ),
           const SizedBox(height: 10),
@@ -147,7 +148,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerLeft,
-            child: AppButton(label: 'Ghép từ bài khác', icon: LucideIcons.gitMerge, onPressed: () => showMergeSheet(context, itinerary)),
+            child: AppButton(label: t('Ghép từ bài khác'), icon: LucideIcons.gitMerge, onPressed: () => showMergeSheet(context, itinerary)),
           ),
           const SizedBox(height: 18),
           AppCard(
@@ -155,29 +156,29 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Tổng chi phí', style: AppText.meta),
+                Text(t('Tổng chi phí'), style: AppText.meta),
                 Text(formatVnd(total), style: AppText.hero),
-                Text('Tính lại tức thì mỗi khi bạn đổi thứ tự, xoá hoặc ghép thêm ngày.', style: AppText.meta),
+                Text(t('Tính lại tức thì mỗi khi bạn đổi thứ tự, xoá hoặc ghép thêm ngày.'), style: AppText.meta),
                 const SizedBox(height: 6),
-                row('Số ngày', '${days.length}'),
-                row('Số điểm dừng', '$stops'),
-                row('Nguồn', '${itinerary.sourcePostIds.length} bài viết'),
+                row(t('Số ngày'), '${days.length}'),
+                row(t('Số điểm dừng'), '$stops'),
+                row(t('Nguồn'), t('{n} bài viết', {'n': itinerary.sourcePostIds.length})),
               ],
             ),
           ),
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: Text('Các ngày', style: AppText.h2)),
+              Expanded(child: Text(t('Các ngày'), style: AppText.h2)),
               if (_saving) ...[
                 const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
                 const SizedBox(width: 6),
-                Text('Đang lưu thứ tự…', style: AppText.meta),
+                Text(t('Đang lưu thứ tự…'), style: AppText.meta),
               ],
             ],
           ),
           const SizedBox(height: 6),
-          Text('Dùng mũi tên để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại theo thứ tự mới.', style: AppText.meta),
+          Text(t('Dùng mũi tên để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại theo thứ tự mới.'), style: AppText.meta),
           const SizedBox(height: 12),
           for (var index = 0; index < days.length; index++) ...[
             AppCard(
@@ -198,15 +199,15 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('NGÀY ${index + 1}', style: AppText.caps),
-                            Text(days[index].title.isEmpty ? 'Chưa đặt tên' : days[index].title, style: AppText.h3),
+                            Text(t('NGÀY {value}', {'value': index + 1}), style: AppText.caps),
+                            Text(days[index].title.isEmpty ? t('Chưa đặt tên') : days[index].title, style: AppText.h3),
                             Text(formatLongDate(days[index].date), style: AppText.meta),
                           ],
                         ),
                       ),
                       AppIconButton(
                         icon: LucideIcons.arrowUp,
-                        label: 'Đưa ngày ${index + 1} lên',
+                        label: t('Đưa ngày {value} lên', {'value': index + 1}),
                         tone: IconTone.well,
                         size: 34,
                         onPressed: index == 0 || _saving ? null : () => _move(itinerary, index, index - 1),
@@ -214,7 +215,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                       const SizedBox(width: 6),
                       AppIconButton(
                         icon: LucideIcons.arrowDown,
-                        label: 'Đưa ngày ${index + 1} xuống',
+                        label: t('Đưa ngày {value} xuống', {'value': index + 1}),
                         tone: IconTone.well,
                         size: 34,
                         onPressed: index == days.length - 1 || _saving ? null : () => _move(itinerary, index, index + 1),
@@ -223,7 +224,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                         const SizedBox(width: 6),
                         AppIconButton(
                           icon: LucideIcons.trash,
-                          label: 'Xoá ngày ${index + 1}',
+                          label: t('Xoá ngày {value}', {'value': index + 1}),
                           tone: IconTone.danger,
                           size: 34,
                           onPressed: () => _remove(itinerary, days[index]),
@@ -248,7 +249,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  location.name.isEmpty ? 'Điểm dừng' : location.name,
+                                  location.name.isEmpty ? t('Điểm dừng') : location.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppText.bodySmall,
@@ -258,7 +259,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí', style: AppText.meta),
+                          Text(location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí'), style: AppText.meta),
                         ],
                       ),
                     ),
@@ -268,16 +269,16 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
             const SizedBox(height: 12),
           ],
           const SizedBox(height: 12),
-          Text('Bản đồ tuyến', style: AppText.h2),
+          Text(t('Bản đồ tuyến'), style: AppText.h2),
           const SizedBox(height: 12),
-          RouteMap(days: days, height: 260, label: 'Bản đồ tuyến đường của ${itinerary.title}'),
+          RouteMap(days: days, height: 260, label: t('Bản đồ tuyến đường của {title}', {'title': itinerary.title})),
           if (itinerary.checklist?.groups.isNotEmpty ?? false) ...[
             const SizedBox(height: 24),
-            Text('Chuẩn bị', style: AppText.h2),
+            Text(t('Chuẩn bị'), style: AppText.h2),
             ChecklistGroups(itinerary.checklist!),
           ],
           const SizedBox(height: 24),
-          Text('Bài viết gốc', style: AppText.h2),
+          Text(t('Bài viết gốc'), style: AppText.h2),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -285,7 +286,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
             children: [
               for (var i = 0; i < itinerary.sourcePostIds.length; i++)
                 AppButton(
-                  label: 'Xem bài viết gốc${itinerary.sourcePostIds.length > 1 ? ' ${i + 1}' : ''}',
+                  label: t('Xem bài viết gốc{value}', {'value': itinerary.sourcePostIds.length > 1 ? ' ${i + 1}' : ''}),
                   variant: ButtonVariant.outline,
                   size: ButtonSize.sm,
                   onPressed: () => context.push('/posts/${itinerary.sourcePostIds[i]}'),

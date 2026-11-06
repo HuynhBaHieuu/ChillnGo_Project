@@ -12,6 +12,7 @@ import '../../ui/buttons.dart';
 import '../../ui/surfaces.dart';
 import '../post/post_actions.dart';
 import 'interests.dart';
+import '../../core/i18n.dart';
 
 /// A photo-first trip card with a save button (web: DiscoverCard).
 /// [wide]: landscape photo with the title under it.
@@ -92,7 +93,7 @@ class DiscoverCard extends ConsumerWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${budgetLabel(post.budgetLevel)} · từ ${formatVndShort(post.totalEstCost)}',
+                          t('{value} · từ {amount}', {'value': budgetLabel(post.budgetLevel), 'amount': formatVndShort(post.totalEstCost)}),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.cream),
@@ -109,7 +110,7 @@ class DiscoverCard extends ConsumerWidget {
           right: 8,
           child: AppIconButton(
             icon: counts.saved ? Icons.bookmark : LucideIcons.bookmark,
-            label: counts.saved ? 'Bỏ lưu hành trình' : 'Lưu hành trình',
+            label: counts.saved ? t('Bỏ lưu hành trình') : t('Lưu hành trình'),
             tone: IconTone.overlay,
             size: 36,
             onPressed: () => toggleSave(context, ref, post),
@@ -270,8 +271,8 @@ class StoryCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(post.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.h3),
             const SizedBox(height: 4),
-            Text('${formatShortDate(post.startDate)} • ${post.days.length} ngày', style: AppText.meta),
-            Text('Bởi ${post.author?.displayName ?? ''}', style: AppText.meta),
+            Text(t('{date} • {n} ngày', {'date': formatShortDate(post.startDate), 'n': post.days.length}), style: AppText.meta),
+            Text(t('Bởi {value}', {'value': post.author?.displayName ?? ''}), style: AppText.meta),
           ],
         ),
       ),
@@ -410,12 +411,12 @@ class InterestRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Band(
-      title: title,
-      description: description,
+      title: tx(title),
+      description: description == null ? null : tx(description!),
       child: Carousel<InterestTile>(
         items: tiles,
         cardShare: 0.46,
-        itemBuilder: (context, tile, width) => PhotoTile(label: tile.tag, image: tile.image, height: width, onTap: () => context.push(interestPath(tile.tag))),
+        itemBuilder: (context, tile, width) => PhotoTile(label: tx(tile.tag), image: tile.image, height: width, onTap: () => context.push(interestPath(tile.tag))),
       ),
     );
   }
@@ -448,11 +449,11 @@ class TripOfTheYearBanner extends StatelessWidget {
                   child: const Icon(LucideIcons.trophy, size: 28, color: AppColors.onPrimary),
                 ),
                 const SizedBox(height: 12),
-                Text('Hành trình của năm', style: AppText.h1),
+                Text(t('Hành trình của năm'), style: AppText.h1),
                 const SizedBox(height: 6),
-                Text('Được lưu nhiều nhất trên ChillnGo, do chính cộng đồng bình chọn bằng từng lượt lưu.', style: AppText.body),
+                Text(t('Được lưu nhiều nhất trên ChillnGo, do chính cộng đồng bình chọn bằng từng lượt lưu.'), style: AppText.body),
                 const SizedBox(height: 14),
-                AppButton(label: 'Xem hành trình', onPressed: open),
+                AppButton(label: t('Xem hành trình'), onPressed: open),
               ],
             ),
           ),
@@ -522,17 +523,17 @@ class ShareTripBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text('Cộng đồng ChillnGo', style: AppText.meta, textAlign: TextAlign.center),
+          Text(t('Cộng đồng ChillnGo'), style: AppText.meta, textAlign: TextAlign.center),
           const SizedBox(height: 6),
-          Text('Kể lại chuyến đi của bạn', style: AppText.h1, textAlign: TextAlign.center),
+          Text(t('Kể lại chuyến đi của bạn'), style: AppText.h1, textAlign: TextAlign.center),
           const SizedBox(height: 8),
           Text(
-            'Chia sẻ lịch trình, chi phí và những điểm dừng bạn yêu thích. Hành trình của bạn có thể là cảm hứng cho chuyến đi tiếp theo của ai đó.',
+            t('Chia sẻ lịch trình, chi phí và những điểm dừng bạn yêu thích. Hành trình của bạn có thể là cảm hứng cho chuyến đi tiếp theo của ai đó.'),
             style: AppText.body,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 14),
-          AppButton(label: 'Đăng hành trình', onPressed: () => context.push('/posts/new')),
+          AppButton(label: t('Đăng hành trình'), onPressed: () => context.push('/posts/new')),
         ],
       ),
     );

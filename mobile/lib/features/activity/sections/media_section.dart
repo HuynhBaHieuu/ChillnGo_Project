@@ -19,6 +19,7 @@ import '../../../ui/paged_list.dart';
 import '../../../ui/sheets.dart';
 import '../../../ui/surfaces.dart';
 import '../activity_common.dart';
+import '../../../core/i18n.dart';
 
 class MediaSection extends StatefulWidget {
   const MediaSection({super.key, this.initialTab});
@@ -30,11 +31,11 @@ class MediaSection extends StatefulWidget {
 }
 
 class _MediaSectionState extends State<MediaSection> {
-  static const _tabs = <({String value, String label, int? count})>[
-    (value: 'posts', label: 'Bài viết', count: null),
+  static List<({String value, String label, int? count})> get _tabs => <({String value, String label, int? count})>[
+    (value: 'posts', label: t('Bài viết'), count: null),
     (value: 'videos', label: 'Video', count: null),
     (value: 'stories', label: 'Tin', count: null),
-    (value: 'live', label: 'Trực tiếp', count: null),
+    (value: 'live', label: t('Trực tiếp'), count: null),
   ];
 
   late String _tab = _tabs.any((t) => t.value == widget.initialTab) ? widget.initialTab! : 'posts';
@@ -44,19 +45,19 @@ class _MediaSectionState extends State<MediaSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionIntro(
-          title: 'Ảnh và video',
-          description: 'Mọi thứ bạn đã chia sẻ: hành trình, check-in ảnh, bản ghi livestream và các buổi phát trực tiếp của bạn.',
+        SectionIntro(
+          title: t('Ảnh và video'),
+          description: t('Mọi thứ bạn đã chia sẻ: hành trình, check-in ảnh, bản ghi livestream và các buổi phát trực tiếp của bạn.'),
         ),
         const SizedBox(height: 16),
         SegmentTabs<String>(items: _tabs, value: _tab, onChanged: (t) => setState(() => _tab = t)),
         const SizedBox(height: 16),
         switch (_tab) {
           'videos' => const _Videos(),
-          'stories' => const NotAvailable(
+          'stories' => NotAvailable(
             icon: LucideIcons.clapperboard,
-            feature: 'tính năng tin (story)',
-            description: 'Khi có tính năng tin, những tin bạn đăng sẽ được gom lại ở đây.',
+            feature: t('tính năng tin (story)'),
+            description: t('Khi có tính năng tin, những tin bạn đăng sẽ được gom lại ở đây.'),
           ),
           'live' => const _Live(),
           _ => const _Posts(),
@@ -84,8 +85,8 @@ class _Posts extends ConsumerWidget {
       context,
       title: tile.title,
       actions: [
-        if (tile.journey) ...[const MenuAction('view', 'Xem', icon: LucideIcons.eye), const MenuAction('edit', 'Chỉnh sửa', icon: LucideIcons.pencil)],
-        const MenuAction('delete', 'Xoá', icon: LucideIcons.trash, destructive: true),
+        if (tile.journey) ...[const MenuAction('view', 'Xem', icon: LucideIcons.eye), MenuAction('edit', t('Chỉnh sửa'), icon: LucideIcons.pencil)],
+        MenuAction('delete', t('Xoá'), icon: LucideIcons.trash, destructive: true),
       ],
     );
     if (!context.mounted || choice == null) return;
@@ -94,9 +95,9 @@ class _Posts extends ConsumerWidget {
     if (choice == 'delete') {
       final done = await confirmAction(
         context,
-        title: tile.journey ? 'Xoá hành trình này?' : 'Xoá check-in này?',
-        description: 'Nội dung sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày.',
-        confirmLabel: 'Xoá',
+        title: tile.journey ? t('Xoá hành trình này?') : t('Xoá check-in này?'),
+        description: t('Nội dung sẽ được chuyển vào mục Đã xoá gần đây, bạn có thể khôi phục trong 30 ngày.'),
+        confirmLabel: t('Xoá'),
         destructive: true,
         onConfirm: () => tile.journey ? PostService.deleteJourney(tile.id) : CheckInService.delete(tile.id),
       );
@@ -119,7 +120,7 @@ class _Posts extends ConsumerWidget {
           id: p.id,
           at: p.createdAt,
           image: p.coverUrl.isNotEmpty ? p.coverUrl : autoCover(p.title),
-          title: p.title.isEmpty ? 'Hành trình chưa đặt tên' : p.title,
+          title: p.title.isEmpty ? t('Hành trình chưa đặt tên') : p.title,
         ),
       for (final c in checkins.value!)
         _Tile(
@@ -134,8 +135,8 @@ class _Posts extends ConsumerWidget {
     if (tiles.isEmpty) {
       return EmptyState(
         icon: LucideIcons.camera,
-        title: 'Bạn chưa chia sẻ gì',
-        description: 'Hành trình bạn đăng và ảnh bạn check-in sẽ hiện ở đây.',
+        title: t('Bạn chưa chia sẻ gì'),
+        description: t('Hành trình bạn đăng và ảnh bạn check-in sẽ hiện ở đây.'),
         action: AppButton(label: 'Check-in ngay', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.push('/checkin/new')),
       );
     }
@@ -172,7 +173,7 @@ class _Posts extends ConsumerWidget {
                             left: 8,
                             top: 8,
                             child: AppBadge(
-                              tile.journey ? 'Hành trình' : 'Check-in',
+                              tile.journey ? t('Hành trình') : 'Check-in',
                               icon: tile.journey ? LucideIcons.map : LucideIcons.camera,
                               tone: BadgeTone.overlay,
                             ),
@@ -182,7 +183,7 @@ class _Posts extends ConsumerWidget {
                             top: 6,
                             child: AppIconButton(
                               icon: LucideIcons.ellipsis,
-                              label: 'Thêm tuỳ chọn cho ${tile.title}',
+                              label: t('Thêm tuỳ chọn cho {title}', {'title': tile.title}),
                               tone: IconTone.overlay,
                               size: 32,
                               onPressed: () => _menu(context, ref, tile),
@@ -267,10 +268,10 @@ class _Videos extends ConsumerWidget {
         );
       },
       loading: const ListSkeleton(rows: 4, media: true),
-      empty: const EmptyState(
+      empty: EmptyState(
         icon: LucideIcons.film,
-        title: 'Chưa có video nào',
-        description: 'Bật ghi hình khi phát trực tiếp, bản ghi sẽ được giữ lại ở đây.',
+        title: t('Chưa có video nào'),
+        description: t('Bật ghi hình khi phát trực tiếp, bản ghi sẽ được giữ lại ở đây.'),
       ),
       gap: 14,
       itemBuilder: (context, stream) {
@@ -296,12 +297,12 @@ class _Videos extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Positioned(right: 6, bottom: 6, child: AppBadge(ready ? clockDuration(length) : 'Đang xử lý…', tone: BadgeTone.overlay)),
+                  Positioned(right: 6, bottom: 6, child: AppBadge(ready ? clockDuration(length) : t('Đang xử lý…'), tone: BadgeTone.overlay)),
                 ],
               ),
               const SizedBox(height: 6),
               Text(stream.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.h3),
-              Text('${formatDateTime(stream.startedAt)} · ${formatNumber(stream.uniqueViewers)} người xem', style: AppText.meta),
+              Text(t('{time} · {n} người xem', {'time': formatDateTime(stream.startedAt), 'n': formatNumber(stream.uniqueViewers)}), style: AppText.meta),
             ],
           ),
         );
@@ -310,12 +311,12 @@ class _Videos extends ConsumerWidget {
   }
 }
 
-const _recordingLabel = {
+Map<String, String?> get _recordingLabel => {
   'none': null,
-  'recording': 'Đang ghi hình',
-  'processing': 'Bản ghi đang xử lý',
-  'ready': 'Có bản xem lại',
-  'failed': 'Ghi hình thất bại',
+  'recording': t('Đang ghi hình'),
+  'processing': t('Bản ghi đang xử lý'),
+  'ready': t('Có bản xem lại'),
+  'failed': t('Ghi hình thất bại'),
 };
 
 class _Live extends ConsumerWidget {
@@ -345,7 +346,7 @@ class _Live extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(stream.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.h3),
-              Text(isLive ? 'Đang phát · bắt đầu ${timeAgo(stream.startedAt)}' : formatDateTime(stream.startedAt), style: AppText.meta),
+              Text(isLive ? t('Đang phát · bắt đầu {time}', {'time': timeAgo(stream.startedAt)}) : formatDateTime(stream.startedAt), style: AppText.meta),
               const SizedBox(height: 2),
               Row(
                 children: [
@@ -353,7 +354,7 @@ class _Live extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Flexible(
                     child: Text(
-                      'cao nhất ${formatNumber(stream.peakViewers)}${recording != null ? ' · $recording' : ''}',
+                      t('cao nhất {n}{value}', {'n': formatNumber(stream.peakViewers), 'value': recording != null ? ' · $recording' : ''}),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.meta,
@@ -385,9 +386,9 @@ class _Live extends ConsumerWidget {
               ? null
               : EmptyState(
                   icon: LucideIcons.radio,
-                  title: 'Bạn chưa phát trực tiếp lần nào',
-                  description: 'Bấm nút “+” rồi chọn Phát trực tiếp. Mọi buổi bạn phát sẽ được liệt kê ở đây.',
-                  action: AppButton(label: 'Phát trực tiếp', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.push('/live/new')),
+                  title: t('Bạn chưa phát trực tiếp lần nào'),
+                  description: t('Bấm nút “+” rồi chọn Phát trực tiếp. Mọi buổi bạn phát sẽ được liệt kê ở đây.'),
+                  action: AppButton(label: t('Phát trực tiếp'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.push('/live/new')),
                 ),
           itemBuilder: _row,
         ),

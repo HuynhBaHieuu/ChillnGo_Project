@@ -14,6 +14,7 @@ import '../shell/tab_header.dart';
 import 'discover_cards.dart';
 import 'interests.dart';
 import 'search_hero.dart';
+import '../../core/i18n.dart';
 
 String _currentSeason() {
   final month = DateTime.now().month;
@@ -109,8 +110,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     ];
 
     final query = _filters.query.trim();
-    final resultsTitle = query.isNotEmpty ? 'Kết quả cho “$query”' : 'Hành trình phù hợp';
-    final resultsDetail = [if (_filters.region != 'all') regionLabel(_filters.region), ..._filters.tags].join(' · ');
+    final resultsTitle = query.isNotEmpty ? t('Kết quả cho “{query}”', {'query': query}) : t('Hành trình phù hợp');
+    final resultsDetail = [if (_filters.region != 'all') regionLabel(_filters.region), ..._filters.tags.map(tx)].join(' · ');
     final seasonName = seasonLabel(_season).toLowerCase();
 
     Future<void> refresh() async {
@@ -153,10 +154,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             SectionHeader(
                               title: resultsTitle,
                               subtitle: results.isLoading && !results.hasValue
-                                  ? 'Đang tìm hành trình…'
-                                  : '${results.value?.length ?? 0} hành trình${resultsDetail.isNotEmpty ? ' · $resultsDetail' : ''}',
+                                  ? t('Đang tìm hành trình…')
+                                  : t('{value} hành trình{value2}', {'value': results.value?.length ?? 0, 'value2': resultsDetail.isNotEmpty ? ' · $resultsDetail' : ''}),
                               action: AppButton(
-                                label: 'Xoá lọc',
+                                label: t('Xoá lọc'),
                                 icon: LucideIcons.x,
                                 variant: ButtonVariant.ghost,
                                 size: ButtonSize.sm,
@@ -173,10 +174,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                                 children: [for (final p in results.value!) DiscoverCard(post: p, chip: regionLabel(p.region))],
                               )
                             else
-                              const EmptyState(
+                              EmptyState(
                                 icon: LucideIcons.searchX,
-                                title: 'Không có hành trình nào khớp',
-                                description: 'Thử một từ khoá khác hoặc chọn khu vực “Tất cả”.',
+                                title: t('Không có hành trình nào khớp'),
+                                description: t('Thử một từ khoá khác hoặc chọn khu vực “Tất cả”.'),
                               ),
                           ],
                         ),
@@ -196,7 +197,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       ),
                     if (food.length >= _minRow) ...[
                       Band(
-                        title: 'Ăn ngon khắp ba miền',
+                        title: t('Ăn ngon khắp ba miền'),
                         child: Carousel<TripPost>(
                           items: food,
                           itemBuilder: (_, p, _) => DiscoverCard(post: p, chip: regionLabel(p.region)),
@@ -206,8 +207,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     ],
                     if (loved.length >= _minRow) ...[
                       Band(
-                        title: 'Hành trình được yêu thích',
-                        description: 'Được cộng đồng thả tim nhiều nhất',
+                        title: t('Hành trình được yêu thích'),
+                        description: t('Được cộng đồng thả tim nhiều nhất'),
                         child: Carousel<TripPost>(
                           items: loved,
                           itemBuilder: (_, p, _) => DiscoverCard(post: p),
@@ -222,7 +223,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     const SizedBox(height: 32),
                     if (inspiration.length >= _minRow) ...[
                       Band(
-                        title: 'Cảm hứng cho chuyến đi tới',
+                        title: t('Cảm hứng cho chuyến đi tới'),
                         child: Carousel<TripPost>(
                           items: inspiration,
                           cardShare: 0.78,
@@ -233,8 +234,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     ],
                     if (seasonal.length >= _minRow) ...[
                       Band(
-                        title: 'Đi đâu $seasonName này?',
-                        description: 'Những hành trình hợp nhất với $seasonName',
+                        title: t('Đi đâu {seasonName} này?', {'seasonName': seasonName}),
+                        description: t('Những hành trình hợp nhất với {seasonName}', {'seasonName': seasonName}),
                         child: Carousel<TripPost>(
                           items: seasonal,
                           itemBuilder: (_, p, _) => DiscoverCard(post: p, chip: regionLabel(p.region)),
@@ -244,7 +245,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     ],
                     if (regionTiles.length >= _minRow) ...[
                       Band(
-                        title: 'Điểm đến không thể bỏ lỡ',
+                        title: t('Điểm đến không thể bỏ lỡ'),
                         child: Carousel<({String region, String image})>(
                           items: regionTiles,
                           cardShare: 0.5,
@@ -271,10 +272,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('ChillnGo: cộng đồng của những người mê xê dịch', style: AppText.h2),
+                          Text(t('ChillnGo: cộng đồng của những người mê xê dịch'), style: AppText.h2),
                           const SizedBox(height: 10),
                           Text(
-                            'ChillnGo giúp bạn đi những chuyến đi trọn vẹn hơn: đọc lịch trình thật từ người đã đi, xem chi phí từng điểm dừng, lưu lại những hành trình bạn thích và sao chép thành lịch trình của riêng mình chỉ với một chạm. Mỗi hành trình bạn chia sẻ lại trở thành cảm hứng cho chuyến đi tiếp theo của ai đó.',
+                            t('ChillnGo giúp bạn đi những chuyến đi trọn vẹn hơn: đọc lịch trình thật từ người đã đi, xem chi phí từng điểm dừng, lưu lại những hành trình bạn thích và sao chép thành lịch trình của riêng mình chỉ với một chạm. Mỗi hành trình bạn chia sẻ lại trở thành cảm hứng cho chuyến đi tiếp theo của ai đó.'),
                             style: AppText.meta,
                           ),
                         ],

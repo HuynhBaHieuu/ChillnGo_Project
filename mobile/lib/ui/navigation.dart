@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../core/i18n.dart';
 
 /// Leaves the current page: back to the one below it, or to the Newsfeed when
 /// the page was opened straight from a link (chillngo://app/...) and nothing
@@ -27,7 +28,7 @@ class BackOrHome extends StatelessWidget {
     if (Navigator.of(context).canPop()) return close ? const CloseButton() : const BackButton();
     return IconButton(
       icon: close ? const CloseButtonIcon() : const BackButtonIcon(),
-      tooltip: 'Về Newsfeed',
+      tooltip: t('Về Newsfeed'),
       onPressed: () => GoRouter.of(context).go('/feed'),
     );
   }

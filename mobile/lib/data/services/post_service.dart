@@ -10,6 +10,7 @@ import '../mock_db.dart';
 import '../models.dart';
 import '../server_posts.dart';
 import '../upload.dart';
+import '../../core/i18n.dart';
 
 MockDb get _db => MockDb.instance;
 
@@ -53,7 +54,7 @@ abstract final class PostService {
       return decorate(upsertServerPost(_post(data)), viewerId);
     }
     await mockDelay();
-    final post = assertFound(_db.postById(id), 'Không tìm thấy hành trình này. Có thể nó đã bị xoá.');
+    final post = assertFound(_db.postById(id), t('Không tìm thấy hành trình này. Có thể nó đã bị xoá.'));
     return decorate(post, viewerId);
   }
 
@@ -85,7 +86,7 @@ abstract final class PostService {
   static Future<String> uploadJourneyImage(PickedImage image, {void Function(int percent)? onProgress}) async {
     final result = await uploadPhoto('/api/posts/cover-signature', image, onProgress: onProgress);
     final url = str(result.uploaded['secure_url']);
-    if (url.isEmpty) throw ApiError('Không nhận được địa chỉ ảnh sau khi tải lên.', status: 0);
+    if (url.isEmpty) throw ApiError(t('Không nhận được địa chỉ ảnh sau khi tải lên.'), status: 0);
     return url;
   }
 
@@ -97,7 +98,7 @@ abstract final class PostService {
     // Seed journeys are demo data: edits stay in this session.
     await mockDelay();
     final index = _db.tripPosts.indexWhere((p) => p.id == id);
-    if (index == -1) throw ApiError('Không tìm thấy hành trình này.');
+    if (index == -1) throw ApiError(t('Không tìm thấy hành trình này.'));
     final current = _db.tripPosts[index];
     final updated = TripPost.fromJson({...current.toJson(), ...payload.toJson(), 'updatedAt': nowIso()});
     _db.tripPosts[index] = updated;
@@ -106,7 +107,7 @@ abstract final class PostService {
 
   static Future<({int likeCount, bool likedByMe})> toggleLike(String postId, String viewerId) async {
     await mockDelay();
-    final post = assertFound(_db.postById(postId), 'Không tìm thấy hành trình này.');
+    final post = assertFound(_db.postById(postId), t('Không tìm thấy hành trình này.'));
     final index = _db.likes.indexWhere((l) => l.userId == viewerId && l.postId == postId);
     if (index == -1) {
       _db.likes.add(LikeRecord(viewerId, postId));
@@ -120,7 +121,7 @@ abstract final class PostService {
 
   static Future<({int bookmarkCount, bool bookmarkedByMe})> toggleBookmark(String postId, String viewerId) async {
     await mockDelay();
-    final post = assertFound(_db.postById(postId), 'Không tìm thấy hành trình này.');
+    final post = assertFound(_db.postById(postId), t('Không tìm thấy hành trình này.'));
     final index = _db.bookmarks.indexWhere((b) => b.userId == viewerId && b.postId == postId);
     if (index == -1) {
       _db.bookmarks.add(Bookmark(id: nextId('b'), userId: viewerId, postId: postId, createdAt: nowIso()));
@@ -156,7 +157,7 @@ abstract final class PostService {
   static Future<Comment> addComment({required String postId, required String authorId, String? parentId, required String content}) async {
     await mockDelay();
     final text = content.trim();
-    if (text.isEmpty) throw ApiError('Bình luận không được để trống.', status: 400);
+    if (text.isEmpty) throw ApiError(t('Bình luận không được để trống.'), status: 400);
     final comment = Comment(
       id: nextId('c'),
       postId: postId,

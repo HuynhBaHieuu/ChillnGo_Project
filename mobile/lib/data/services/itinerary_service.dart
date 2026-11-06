@@ -12,11 +12,12 @@ import '../json.dart';
 import '../mock_db.dart';
 import '../models.dart';
 import '../server_posts.dart';
+import '../../core/i18n.dart';
 
 /// A demo journey's days as the app has them; nothing for one the API stores.
 Json? _sampleSource(String postId, [List<String>? dayIds]) {
   if (isServerId(postId)) return null;
-  final post = assertFound(MockDb.instance.postById(postId), 'Không tìm thấy hành trình này.');
+  final post = assertFound(MockDb.instance.postById(postId), t('Không tìm thấy hành trình này.'));
   return {
     'title': post.title,
     'coverUrl': post.coverUrl,

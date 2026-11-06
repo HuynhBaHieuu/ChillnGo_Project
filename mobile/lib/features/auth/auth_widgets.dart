@@ -19,6 +19,7 @@ import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
+import '../../core/i18n.dart';
 
 /// After signing in: staff go to the admin console; everyone else back to
 /// where they were, then on to [next] when it is somewhere else.
@@ -93,7 +94,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       await _initGoogle();
       final account = await GoogleSignIn.instance.authenticate();
       final idToken = account.authentication.idToken;
-      if (idToken == null) throw Exception('Google không trả về thông tin đăng nhập. Vui lòng thử lại.');
+      if (idToken == null) throw Exception(t('Google không trả về thông tin đăng nhập. Vui lòng thử lại.'));
       final session = await AuthService.loginWithGoogle(idToken);
       await widget.onSignedIn(session);
     } on GoogleSignInException catch (e) {
@@ -101,12 +102,12 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       if (mounted) {
         setState(
           () => _error = e.code == GoogleSignInExceptionCode.clientConfigurationError || e.code == GoogleSignInExceptionCode.providerConfigurationError
-              ? 'Đăng nhập Google chưa được cấu hình cho ứng dụng này (OAuth client Android và SHA-1). Xem README của ứng dụng.'
-              : 'Không đăng nhập được bằng Google. Vui lòng thử lại.',
+              ? t('Đăng nhập Google chưa được cấu hình cho ứng dụng này (OAuth client Android và SHA-1). Xem README của ứng dụng.')
+              : t('Không đăng nhập được bằng Google. Vui lòng thử lại.'),
         );
       }
     } catch (e) {
-      if (mounted) setState(() => _error = errorMessage(e, 'Không đăng nhập được bằng Google. Vui lòng thử lại.'));
+      if (mounted) setState(() => _error = errorMessage(e, t('Không đăng nhập được bằng Google. Vui lòng thử lại.')));
     } finally {
       if (mounted) setState(() => _pending = false);
     }
@@ -123,14 +124,14 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             const Expanded(child: Divider(color: AppColors.borderStrong)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text('hoặc', style: AppText.meta),
+              child: Text(t('hoặc'), style: AppText.meta),
             ),
             const Expanded(child: Divider(color: AppColors.borderStrong)),
           ],
         ),
         const SizedBox(height: 12),
         AppButton(
-          label: widget.signUp ? 'Đăng ký với Google' : 'Tiếp tục với Google',
+          label: widget.signUp ? t('Đăng ký với Google') : t('Tiếp tục với Google'),
           icon: LucideIcons.logIn,
           variant: ButtonVariant.secondary,
           size: ButtonSize.lg,
@@ -218,7 +219,7 @@ class _ResendVerificationButtonState extends State<ResendVerificationButton> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppButton(
-          label: waiting ? 'Gửi lại email sau $_secondsLeft giây' : 'Gửi lại email xác nhận',
+          label: waiting ? t('Gửi lại email sau {_secondsLeft} giây', {'_secondsLeft': _secondsLeft}) : t('Gửi lại email xác nhận'),
           icon: LucideIcons.mail,
           variant: ButtonVariant.secondary,
           fullWidth: true,
@@ -227,7 +228,7 @@ class _ResendVerificationButtonState extends State<ResendVerificationButton> {
         ),
         if (_message != null) ...[
           const SizedBox(height: 8),
-          Text('$_message Hãy mở email mới nhất, liên kết cũ không còn dùng được.', style: AppText.meta, textAlign: TextAlign.center),
+          Text(t('{_message} Hãy mở email mới nhất, liên kết cũ không còn dùng được.', {'_message': _message}), style: AppText.meta, textAlign: TextAlign.center),
         ],
         if (_error != null) ...[
           const SizedBox(height: 8),
@@ -238,7 +239,7 @@ class _ResendVerificationButtonState extends State<ResendVerificationButton> {
                 TextSpan(text: _error!.message),
                 if (alreadyVerified)
                   TextSpan(
-                    text: ' Đăng nhập',
+                    text: t(' Đăng nhập'),
                     style: const TextStyle(fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
                     recognizer: TapGestureRecognizer()..onTap = () => context.pushReplacement('/login'),
                   ),
@@ -265,7 +266,7 @@ class PasswordChecklist extends StatelessWidget {
       children: [
         for (final rule in passwordRules)
           Semantics(
-            label: '${rule.label}: ${rule.test(password) ? 'đạt' : 'chưa đạt'}',
+            label: '${rule.label}: ${rule.test(password) ? t('đạt') : t('chưa đạt')}',
             excludeSemantics: true,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 4),

@@ -24,6 +24,7 @@ import 'live_badges.dart';
 import 'live_format.dart';
 import 'live_widgets.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// A stream, refreshed while it is live (the server re-measures the audience)
 /// and while its recording is being processed.
@@ -78,7 +79,7 @@ class LiveEnded extends ConsumerWidget {
                           text: stream.host.displayName,
                           style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.cream),
                         ),
-                        TextSpan(text: ' · phát lúc ${formatStart(stream.startedAt)}'),
+                        TextSpan(text: t(' · phát lúc {value}', {'value': formatStart(stream.startedAt)})),
                       ],
                     ),
                   ),
@@ -100,7 +101,7 @@ class LiveEnded extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(isHost ? 'Tổng kết buổi phát của bạn' : 'Thống kê buổi phát', style: AppText.h3),
+              Text(isHost ? t('Tổng kết buổi phát của bạn') : t('Thống kê buổi phát'), style: AppText.h3),
               const SizedBox(height: 12),
               LiveStats(stream: stream),
               if (isHost) ...[
@@ -111,15 +112,15 @@ class LiveEnded extends ConsumerWidget {
                   children: [
                     if (ready)
                       AppButton(
-                        label: stream.thumbnailUrl.isNotEmpty ? 'Đổi ảnh bìa' : 'Chọn ảnh bìa',
+                        label: stream.thumbnailUrl.isNotEmpty ? t('Đổi ảnh bìa') : t('Chọn ảnh bìa'),
                         icon: LucideIcons.image,
                         variant: ButtonVariant.secondary,
                         size: ButtonSize.sm,
                         onPressed: () =>
                             Navigator.of(context).push(MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => ThumbnailPicker(stream: stream))),
                       ),
-                    AppButton(label: 'Các buổi phát của tôi', size: ButtonSize.sm, onPressed: () => context.push('/users/${stream.host.id}?tab=live')),
-                    AppButton(label: 'Về Newsfeed', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/feed')),
+                    AppButton(label: t('Các buổi phát của tôi'), size: ButtonSize.sm, onPressed: () => context.push('/users/${stream.host.id}?tab=live')),
+                    AppButton(label: t('Về Newsfeed'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/feed')),
                   ],
                 ),
               ],
@@ -127,7 +128,7 @@ class LiveEnded extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 18),
-        LiveComments(comments: comments, onSend: (_) async {}, disabled: true, disabledReason: 'Livestream đã kết thúc.', hostId: stream.host.id, height: 360),
+        LiveComments(comments: comments, onSend: (_) async {}, disabled: true, disabledReason: t('Livestream đã kết thúc.'), hostId: stream.host.id, height: 360),
       ],
     );
   }
@@ -268,12 +269,12 @@ class _ReplayState extends State<_Replay> {
     }
 
     final (IconData icon, bool spin, String title, String text) = status == 'processing' || status == 'recording'
-        ? (LucideIcons.loaderCircle, true, 'Bản ghi đang được xử lý', 'Thường chỉ mất vài phút. Trang sẽ tự hiện video khi xong.')
+        ? (LucideIcons.loaderCircle, true, t('Bản ghi đang được xử lý'), t('Thường chỉ mất vài phút. Trang sẽ tự hiện video khi xong.'))
         : status == 'failed'
-        ? (LucideIcons.film, false, 'Livestream đã kết thúc', 'Buổi phát này không lưu được bản ghi.')
+        ? (LucideIcons.film, false, t('Livestream đã kết thúc'), t('Buổi phát này không lưu được bản ghi.'))
         : _failed
-        ? (LucideIcons.film, false, 'Không phát được bản ghi', 'Kiểm tra mạng rồi mở lại trang.')
-        : (LucideIcons.film, false, 'Livestream đã kết thúc', 'Buổi phát này không được lưu lại để xem lại.');
+        ? (LucideIcons.film, false, t('Không phát được bản ghi'), t('Kiểm tra mạng rồi mở lại trang.'))
+        : (LucideIcons.film, false, t('Livestream đã kết thúc'), t('Buổi phát này không được lưu lại để xem lại.'));
 
     return frame(
       Stack(
@@ -399,7 +400,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
     ref.invalidate(liveNowProvider);
     ref.invalidate(liveByAuthorsProvider);
     Navigator.of(context).pop();
-    toast(context, thumbnailUrl.isEmpty ? 'Đã gỡ ảnh bìa.' : 'Đã lưu ảnh bìa.');
+    toast(context, thumbnailUrl.isEmpty ? t('Đã gỡ ảnh bìa.') : t('Đã lưu ảnh bìa.'));
   }
 
   Future<void> _save() async {
@@ -410,7 +411,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
     });
     try {
       final path = _photo?.path ?? await videoFrame(_url, _time);
-      if (path == null) throw Exception('Không chụp được khung hình này. Vui lòng thử lại.');
+      if (path == null) throw Exception(t('Không chụp được khung hình này. Vui lòng thử lại.'));
       final url = await LivestreamService.setThumbnail(
         widget.stream.id,
         path,
@@ -420,7 +421,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
       );
       if (mounted) _done(url);
     } catch (error) {
-      if (mounted) setState(() => _error = errorMessage(error, 'Không lưu được ảnh bìa. Vui lòng thử lại.'));
+      if (mounted) setState(() => _error = errorMessage(error, t('Không lưu được ảnh bìa. Vui lòng thử lại.')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -445,11 +446,11 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
   Widget build(BuildContext context) {
     final canSave = _photo != null || (!_framesBlocked && _duration > 0);
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Ảnh bìa video xem lại')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Ảnh bìa video xem lại'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 24),
         children: [
-          Text('Chọn một khung hình trong video, hoặc tải ảnh của bạn lên. Ảnh bìa hiện trên Newsfeed và trang cá nhân.', style: AppText.meta),
+          Text(t('Chọn một khung hình trong video, hoặc tải ảnh của bạn lên. Ảnh bìa hiện trên Newsfeed và trang cá nhân.'), style: AppText.meta),
           const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -473,7 +474,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(color: const Color(0x14FFFFFF), borderRadius: BorderRadius.circular(AppRadius.md)),
               child: Text(
-                'Không lấy được khung hình từ video này. Bạn vẫn có thể tải ảnh của mình lên.',
+                t('Không lấy được khung hình từ video này. Bạn vẫn có thể tải ảnh của mình lên.'),
                 style: AppText.bodySmall.copyWith(color: AppColors.meta),
               ),
             )
@@ -486,7 +487,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
                     max: _duration <= 0 ? 1 : _duration,
                     onChanged: _duration == 0 || _busy ? null : (v) => setState(() => _time = v),
                     onChangeEnd: _duration == 0 || _busy ? null : _seek,
-                    semanticFormatterCallback: (v) => 'Thời điểm ${liveClock(v)}',
+                    semanticFormatterCallback: (v) => t('Thời điểm {value}', {'value': liveClock(v)}),
                   ),
                 ),
                 Text.rich(clockPair(_time, _duration), style: AppText.meta.copyWith(fontSize: 12)),
@@ -508,7 +509,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
                           child: i < _frames.length
                               ? Semantics(
                                   button: true,
-                                  label: 'Khung hình lúc ${liveClock(_frames[i].time)}',
+                                  label: t('Khung hình lúc {value}', {'value': liveClock(_frames[i].time)}),
                                   selected: _photo == null && (_frames[i].time - _time).abs() < 0.05,
                                   child: GestureDetector(
                                     onTap: _busy ? null : () => _seek(_frames[i].time),
@@ -541,7 +542,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
             runSpacing: 8,
             children: [
               AppButton(
-                label: 'Tải ảnh lên',
+                label: t('Tải ảnh lên'),
                 icon: LucideIcons.imageUp,
                 variant: ButtonVariant.outline,
                 size: ButtonSize.sm,
@@ -549,7 +550,7 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
               ),
               if (_photo != null && !_framesBlocked)
                 AppButton(
-                  label: 'Dùng khung hình trong video',
+                  label: t('Dùng khung hình trong video'),
                   variant: ButtonVariant.ghost,
                   size: ButtonSize.sm,
                   onPressed: _busy ? null : () => _seek(_time),
@@ -566,11 +567,11 @@ class _ThumbnailPickerState extends ConsumerState<ThumbnailPicker> {
           child: Row(
             children: [
               if (widget.stream.thumbnailUrl.isNotEmpty) ...[
-                AppButton(label: 'Gỡ ảnh bìa', icon: LucideIcons.trash, variant: ButtonVariant.ghost, onPressed: _busy ? null : _remove),
+                AppButton(label: t('Gỡ ảnh bìa'), icon: LucideIcons.trash, variant: ButtonVariant.ghost, onPressed: _busy ? null : _remove),
                 const Spacer(),
               ] else
                 const Spacer(),
-              AppButton(label: _busy ? 'Đang lưu${_progress > 0 ? ' $_progress%' : ''}' : 'Lưu ảnh bìa', loading: _busy, onPressed: canSave ? _save : null),
+              AppButton(label: _busy ? t('Đang lưu{value}', {'value': _progress > 0 ? ' $_progress%' : ''}) : t('Lưu ảnh bìa'), loading: _busy, onPressed: canSave ? _save : null),
             ],
           ),
         ),

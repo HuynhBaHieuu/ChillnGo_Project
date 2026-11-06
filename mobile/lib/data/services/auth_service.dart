@@ -8,6 +8,7 @@ import '../api.dart';
 import '../json.dart';
 import '../mock_db.dart';
 import '../models.dart';
+import '../../core/i18n.dart';
 
 /// The API stores an empty avatar/cover for new accounts; the app picks a travel photo.
 User withDefaultPhotos(User user) {
@@ -74,7 +75,7 @@ abstract final class AuthService {
 
   static Future<String> resendVerification(String email) async {
     final data = await Api.post('/api/auth/resend-verification', body: {'email': email.trim()}, auth: false);
-    return str(data['message'], 'Đã gửi lại email xác minh.');
+    return str(data['message'], t('Đã gửi lại email xác minh.'));
   }
 
   /// Emails a reset link if the account exists. Succeeds either way, so it does

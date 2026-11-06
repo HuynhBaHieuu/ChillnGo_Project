@@ -13,6 +13,7 @@ import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
 import 'auth_widgets.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// Đăng ký (web: RegisterPage).
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -47,15 +48,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     String? problem;
     if (_displayName.text.trim().isEmpty) {
-      problem = 'Vui lòng nhập tên hiển thị.';
+      problem = t('Vui lòng nhập tên hiển thị.');
     } else if (usernameProblem(_username.text) case final p?) {
       problem = p;
     } else if (!looksLikeEmail(_email.text)) {
-      problem = 'Email không hợp lệ.';
+      problem = t('Email không hợp lệ.');
     } else if (!passwordMeetsRules(_password.text)) {
-      problem = 'Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.';
+      problem = t('Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.');
     } else if (_password.text != _confirm.text) {
-      problem = 'Mật khẩu xác nhận không khớp.';
+      problem = t('Mật khẩu xác nhận không khớp.');
     }
     if (problem != null) {
       setState(() => _error = problem);
@@ -88,13 +89,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ? ListView(
               padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
               children: [
-                Text('Tạm ngừng đăng ký', style: AppText.h1),
+                Text(t('Tạm ngừng đăng ký'), style: AppText.h1),
                 const SizedBox(height: 8),
-                Text('ChillnGo đang tạm ngừng nhận tài khoản mới. Vui lòng quay lại sau.', style: AppText.meta),
+                Text(t('ChillnGo đang tạm ngừng nhận tài khoản mới. Vui lòng quay lại sau.'), style: AppText.meta),
                 const SizedBox(height: 16),
-                AppCard(child: Text('Người đã có tài khoản vẫn đăng nhập bình thường, bằng email hoặc Google.', style: AppText.bodySmall)),
+                AppCard(child: Text(t('Người đã có tài khoản vẫn đăng nhập bình thường, bằng email hoặc Google.'), style: AppText.bodySmall)),
                 const SizedBox(height: 16),
-                AppButton(label: 'Đăng nhập', onPressed: () => context.pushReplacement('/login')),
+                AppButton(label: t('Đăng nhập'), onPressed: () => context.pushReplacement('/login')),
               ],
             )
           : AutofillGroup(child: _form(context)),
@@ -107,9 +108,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
       children: [
-        Text('Bắt đầu ngay', style: AppText.h1),
+        Text(t('Bắt đầu ngay'), style: AppText.h1),
         const SizedBox(height: 8),
-        Text('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.', style: AppText.meta),
+        Text(t('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.'), style: AppText.meta),
         const SizedBox(height: 20),
         AppCard(
           child: Column(
@@ -117,7 +118,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               AppTextField(
                 controller: _displayName,
-                label: 'Tên hiển thị',
+                label: t('Tên hiển thị'),
                 maxLength: 60,
                 autofillHints: const [AutofillHints.name],
                 textCapitalization: TextCapitalization.words,
@@ -126,12 +127,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 16),
               AppTextField(
                 controller: _username,
-                label: 'Tên người dùng',
+                label: t('Tên người dùng'),
                 maxLength: 30,
                 autocorrect: false,
                 autofillHints: const [AutofillHints.newUsername],
                 textInputAction: TextInputAction.next,
-                helper: '3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @${handle.isEmpty ? '…' : handle}',
+                helper: t('3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @{value}', {'value': handle.isEmpty ? '…' : handle}),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
@@ -142,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 autocorrect: false,
                 autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.next,
-                helper: 'Chúng tôi sẽ gửi email xác nhận tới địa chỉ này.',
+                helper: t('Chúng tôi sẽ gửi email xác nhận tới địa chỉ này.'),
               ),
               const SizedBox(height: 16),
               PasswordField(
@@ -156,20 +157,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 12),
               PasswordField(
                 controller: _confirm,
-                label: 'Xác nhận mật khẩu',
+                label: t('Xác nhận mật khẩu'),
                 autofillHints: const [AutofillHints.newPassword],
-                error: mismatch ? 'Mật khẩu xác nhận không khớp.' : null,
+                error: mismatch ? t('Mật khẩu xác nhận không khớp.') : null,
                 textInputAction: TextInputAction.done,
                 onChanged: (_) => setState(() => _error = null),
                 onSubmitted: (_) => _submit(),
               ),
               if (!mismatch && _confirm.text.isNotEmpty) ...[
                 const SizedBox(height: 5),
-                Text('Mật khẩu đã khớp.', style: AppText.meta.copyWith(color: AppColors.teal, fontSize: 12)),
+                Text(t('Mật khẩu đã khớp.'), style: AppText.meta.copyWith(color: AppColors.teal, fontSize: 12)),
               ],
               if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
               const SizedBox(height: 16),
-              AppButton(label: 'Tạo tài khoản', size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _submit),
+              AppButton(label: t('Tạo tài khoản'), size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _submit),
               const SizedBox(height: 16),
               GoogleSignInButton(signUp: true, onSignedIn: (session) => completeSignIn(context, ref, session, widget.next)),
             ],
@@ -177,8 +178,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         const SizedBox(height: 20),
         AuthSwitchLink(
-          question: 'Đã có tài khoản?',
-          action: 'Đăng nhập',
+          question: t('Đã có tài khoản?'),
+          action: t('Đăng nhập'),
           onTap: () => context.pushReplacement(widget.next == null ? '/login' : '/login?next=${Uri.encodeComponent(widget.next!)}'),
         ),
       ],
@@ -197,9 +198,9 @@ class _CheckEmail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
       children: [
-        Text('Kiểm tra email', style: AppText.h1),
+        Text(t('Kiểm tra email'), style: AppText.h1),
         const SizedBox(height: 8),
-        Text('Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong.', style: AppText.meta),
+        Text(t('Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong.'), style: AppText.meta),
         const SizedBox(height: 16),
         AppCard(
           child: Column(
@@ -222,10 +223,10 @@ class _CheckEmail extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: emailSent
-                            ? [Text('Chúng tôi đã gửi email xác nhận tới', style: AppText.bodySmall), Text(email, style: AppText.label)]
+                            ? [Text(t('Chúng tôi đã gửi email xác nhận tới'), style: AppText.bodySmall), Text(email, style: AppText.label)]
                             : [
-                                Text('Chưa gửi được email xác nhận', style: AppText.label),
-                                Text('Tài khoản $email đã được tạo. Bấm nút bên dưới để gửi lại email.', style: AppText.bodySmall),
+                                Text(t('Chưa gửi được email xác nhận'), style: AppText.label),
+                                Text(t('Tài khoản {email} đã được tạo. Bấm nút bên dưới để gửi lại email.', {'email': email}), style: AppText.bodySmall),
                               ],
                       ),
                     ),
@@ -233,18 +234,18 @@ class _CheckEmail extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Text('1. Mở email có tiêu đề “Xác nhận email đăng ký tài khoản ChillnGo”.', style: AppText.bodySmall),
+              Text(t('1. Mở email có tiêu đề “Xác nhận email đăng ký tài khoản ChillnGo”.'), style: AppText.bodySmall),
               const SizedBox(height: 6),
-              Text('2. Bấm nút Xác nhận email. Nếu liên kết mở bằng trình duyệt, sau khi xác nhận bạn quay lại đây và đăng nhập.', style: AppText.bodySmall),
+              Text(t('2. Bấm nút Xác nhận email. Nếu liên kết mở bằng trình duyệt, sau khi xác nhận bạn quay lại đây và đăng nhập.'), style: AppText.bodySmall),
               const SizedBox(height: 8),
-              Text('Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 24 giờ.', style: AppText.meta),
+              Text(t('Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 24 giờ.'), style: AppText.meta),
               const SizedBox(height: 14),
               ResendVerificationButton(email: email, justSent: emailSent),
               const SizedBox(height: 10),
-              AppButton(label: 'Dán liên kết xác nhận', variant: ButtonVariant.outline, fullWidth: true, onPressed: () => context.push('/verify-email')),
+              AppButton(label: t('Dán liên kết xác nhận'), variant: ButtonVariant.outline, fullWidth: true, onPressed: () => context.push('/verify-email')),
               const SizedBox(height: 6),
               AppButton(
-                label: 'Đã xác nhận xong? Đăng nhập',
+                label: t('Đã xác nhận xong? Đăng nhập'),
                 variant: ButtonVariant.ghost,
                 fullWidth: true,
                 onPressed: () => context.pushReplacement('/login'),

@@ -11,6 +11,7 @@ import '../../ui/buttons.dart';
 import '../../ui/sheets.dart';
 import '../map/map_tiles.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// Vietnam, where most stops are, when the stop has no position yet.
 const _vietnam = LatLng(16.2, 106.2);
@@ -79,12 +80,12 @@ class _MapPickerState extends State<_MapPicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Chọn vị trí trên bản đồ')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Chọn vị trí trên bản đồ'))),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 10),
-            child: Text('Kéo bản đồ để đặt ghim đúng chỗ, hoặc chạm vào một điểm để đưa ghim tới đó.', style: AppText.meta),
+            child: Text(t('Kéo bản đồ để đặt ghim đúng chỗ, hoặc chạm vào một điểm để đưa ghim tới đó.'), style: AppText.meta),
           ),
           Expanded(
             child: Stack(
@@ -131,7 +132,7 @@ class _MapPickerState extends State<_MapPicker> {
                   bottom: 30,
                   child: AppIconButton(
                     icon: LucideIcons.locateFixed,
-                    label: 'Đến vị trí của tôi',
+                    label: t('Đến vị trí của tôi'),
                     tone: IconTone.overlay,
                     size: 46,
                     loading: _locating,
@@ -149,7 +150,7 @@ class _MapPickerState extends State<_MapPicker> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    _hasPosition ? 'Toạ độ: ${_center.latitude.toStringAsFixed(5)}, ${_center.longitude.toStringAsFixed(5)}' : 'Chưa chọn vị trí',
+                    _hasPosition ? t('Toạ độ: {value}, {value2}', {'value': _center.latitude.toStringAsFixed(5), 'value2': _center.longitude.toStringAsFixed(5)}) : t('Chưa chọn vị trí'),
                     style: AppText.meta,
                     textAlign: TextAlign.center,
                   ),
@@ -157,11 +158,11 @@ class _MapPickerState extends State<_MapPicker> {
                   Row(
                     children: [
                       Expanded(
-                        child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _confirming ? null : () => Navigator.of(context).pop()),
+                        child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _confirming ? null : () => Navigator.of(context).pop()),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: AppButton(label: 'Dùng vị trí này', loading: _confirming, onPressed: _hasPosition ? _confirm : null),
+                        child: AppButton(label: t('Dùng vị trí này'), loading: _confirming, onPressed: _hasPosition ? _confirm : null),
                       ),
                     ],
                   ),

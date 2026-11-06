@@ -10,6 +10,7 @@ import '../models.dart';
 import '../server_posts.dart';
 import 'auth_service.dart';
 import 'post_service.dart';
+import '../../core/i18n.dart';
 
 MockDb get _db => MockDb.instance;
 
@@ -22,7 +23,7 @@ abstract final class SocialService {
   static Future<User> getUserById(String id) async {
     if (isServerId(id)) return (await _profile(id)).user;
     await mockDelay();
-    return assertFound(_db.userById(id), 'Không tìm thấy người dùng này.').copy();
+    return assertFound(_db.userById(id), t('Không tìm thấy người dùng này.')).copy();
   }
 
   /// Ids of the accounts [viewerId] follows: server follows plus demo accounts followed this session.
@@ -55,7 +56,7 @@ abstract final class SocialService {
     }
 
     await mockDelay();
-    final target = assertFound(_db.userById(userId), 'Không tìm thấy người dùng này.');
+    final target = assertFound(_db.userById(userId), t('Không tìm thấy người dùng này.'));
     final viewer = _db.userById(viewerId);
     final index = _db.follows.indexWhere((f) => f.followerId == viewerId && f.followingId == userId);
     if (index == -1) {

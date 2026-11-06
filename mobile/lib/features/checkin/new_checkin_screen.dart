@@ -21,6 +21,7 @@ import '../../ui/surfaces.dart';
 import '../activity/activity_common.dart';
 import '../editor/place_search.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 const _captionMax = 500;
 
@@ -69,7 +70,7 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
     setState(() => _photoError = null);
     final room = maxCheckInPhotos - _photos.length;
     if (room <= 0) {
-      setState(() => _photoError = 'Mỗi check-in tối đa $maxCheckInPhotos ảnh.');
+      setState(() => _photoError = t('Mỗi check-in tối đa {maxCheckInPhotos} ảnh.', {'maxCheckInPhotos': maxCheckInPhotos}));
       return;
     }
     try {
@@ -100,7 +101,7 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
       ref.invalidate(checkinsProvider);
       invalidateActivity(ref);
       if (!mounted) return;
-      toast(context, 'Đã đăng check-in.');
+      toast(context, t('Đã đăng check-in.'));
       leavePage(context);
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
@@ -118,11 +119,11 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
     final leave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Bỏ check-in này?'),
-        content: const Text('Ảnh và nội dung bạn vừa nhập sẽ không được lưu.'),
+        title: Text(t('Bỏ check-in này?')),
+        content: Text(t('Ảnh và nội dung bạn vừa nhập sẽ không được lưu.')),
         actions: [
-          AppButton(label: 'Ở lại', variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: () => Navigator.of(dialogContext).pop(false)),
-          AppButton(label: 'Bỏ', variant: ButtonVariant.destructive, size: ButtonSize.sm, onPressed: () => Navigator.of(dialogContext).pop(true)),
+          AppButton(label: t('Ở lại'), variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: () => Navigator.of(dialogContext).pop(false)),
+          AppButton(label: t('Bỏ'), variant: ButtonVariant.destructive, size: ButtonSize.sm, onPressed: () => Navigator.of(dialogContext).pop(true)),
         ],
       ),
     );
@@ -148,9 +149,9 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 40),
             children: [
-              Text('Chia sẻ nơi bạn đang đến và cảm xúc lúc này, ${user?.displayName ?? ''}.', style: AppText.meta),
+              Text(t('Chia sẻ nơi bạn đang đến và cảm xúc lúc này, {value}.', {'value': user?.displayName ?? ''}), style: AppText.meta),
               const SizedBox(height: 18),
-              Text('Ảnh', style: AppText.label),
+              Text(t('Ảnh'), style: AppText.label),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
@@ -171,7 +172,7 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
                               right: 4,
                               child: AppIconButton(
                                 icon: LucideIcons.x,
-                                label: 'Bỏ ảnh ${i + 1}',
+                                label: t('Bỏ ảnh {value}', {'value': i + 1}),
                                 tone: IconTone.overlay,
                                 size: 26,
                                 onPressed: _posting ? null : () => setState(() => _photos.removeAt(i)),
@@ -182,18 +183,18 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
                       ),
                     ),
                   if (_photos.length < maxCheckInPhotos) ...[
-                    _AddTile(icon: LucideIcons.imagePlus, label: 'Thư viện', onTap: _posting ? null : () => _addPhotos(fromCamera: false)),
-                    _AddTile(icon: LucideIcons.camera, label: 'Chụp ảnh', onTap: _posting ? null : () => _addPhotos(fromCamera: true)),
+                    _AddTile(icon: LucideIcons.imagePlus, label: t('Thư viện'), onTap: _posting ? null : () => _addPhotos(fromCamera: false)),
+                    _AddTile(icon: LucideIcons.camera, label: t('Chụp ảnh'), onTap: _posting ? null : () => _addPhotos(fromCamera: true)),
                   ],
                 ],
               ),
               const SizedBox(height: 8),
-              Text('$acceptedImagesLabel, tối đa $maxCheckInPhotos ảnh. Ảnh được tự nén trước khi tải lên.', style: AppText.meta),
+              Text(t('{acceptedImagesLabel}, tối đa {maxCheckInPhotos} ảnh. Ảnh được tự nén trước khi tải lên.', {'acceptedImagesLabel': acceptedImagesLabel, 'maxCheckInPhotos': maxCheckInPhotos}), style: AppText.meta),
               if (_photoError != null) ...[const SizedBox(height: 6), ErrorText(_photoError)],
               const SizedBox(height: 18),
               AppTextField(
                 controller: _caption,
-                label: 'Bạn thấy nơi này thế nào?',
+                label: t('Bạn thấy nơi này thế nào?'),
                 maxLines: 6,
                 minLines: 3,
                 maxLength: _captionMax,
@@ -209,7 +210,7 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
               const SizedBox(height: 18),
               if (_error != null) ...[ErrorText(_error), const SizedBox(height: 10)],
               AppButton(
-                label: _progress != null && _progress! < 100 ? 'Đang tải ảnh… ${_progress!}%' : 'Đăng check-in',
+                label: _progress != null && _progress! < 100 ? t('Đang tải ảnh… {_progress}%', {'_progress': _progress!}) : t('Đăng check-in'),
                 size: ButtonSize.lg,
                 fullWidth: true,
                 loading: _posting,
@@ -217,7 +218,7 @@ class _NewCheckInScreenState extends ConsumerState<NewCheckInScreen> {
               ),
               if (!_hasContent) ...[
                 const SizedBox(height: 8),
-                Text('Thêm ảnh, cảm xúc hoặc vài dòng chia sẻ để đăng.', style: AppText.meta, textAlign: TextAlign.center),
+                Text(t('Thêm ảnh, cảm xúc hoặc vài dòng chia sẻ để đăng.'), style: AppText.meta, textAlign: TextAlign.center),
               ],
             ],
           ),
@@ -286,14 +287,14 @@ class _FeelingPickerState extends State<_FeelingPicker> {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Cảm xúc / Hoạt động', style: AppText.label)),
+            Expanded(child: Text(t('Cảm xúc / Hoạt động'), style: AppText.label)),
             if (widget.value != null)
-              AppButton(label: 'Bỏ chọn', variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: widget.disabled ? null : () => widget.onChanged(null)),
+              AppButton(label: t('Bỏ chọn'), variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: widget.disabled ? null : () => widget.onChanged(null)),
           ],
         ),
         const SizedBox(height: 10),
         SegmentTabs<bool>(
-          items: const [(value: true, label: 'Cảm xúc', count: null), (value: false, label: 'Hoạt động', count: null)],
+          items: [(value: true, label: t('Cảm xúc'), count: null), (value: false, label: t('Hoạt động'), count: null)],
           value: _feelings,
           onChanged: (v) => setState(() => _feelings = v),
         ),
@@ -388,7 +389,7 @@ class _PlacePickerState extends State<_PlacePicker> {
       final me = await getDevicePosition();
       final named = await placeAt(me.lat, me.lng).catchError((_) => null);
       widget.onChanged(
-        named ?? Place(name: 'Vị trí hiện tại', address: '${me.lat.toStringAsFixed(5)}, ${me.lng.toStringAsFixed(5)}', lat: me.lat, lng: me.lng),
+        named ?? Place(name: t('Vị trí hiện tại'), address: '${me.lat.toStringAsFixed(5)}, ${me.lng.toStringAsFixed(5)}', lat: me.lat, lng: me.lng),
       );
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
@@ -404,7 +405,7 @@ class _PlacePickerState extends State<_PlacePicker> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Địa điểm', style: AppText.label),
+          Text(t('Địa điểm'), style: AppText.label),
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(12),
@@ -426,7 +427,7 @@ class _PlacePickerState extends State<_PlacePicker> {
                     ],
                   ),
                 ),
-                AppButton(label: 'Đổi', variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: widget.disabled ? null : () => widget.onChanged(null)),
+                AppButton(label: t('Đổi'), variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: widget.disabled ? null : () => widget.onChanged(null)),
               ],
             ),
           ),
@@ -439,9 +440,9 @@ class _PlacePickerState extends State<_PlacePicker> {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Địa điểm', style: AppText.label)),
+            Expanded(child: Text(t('Địa điểm'), style: AppText.label)),
             AppButton(
-              label: 'Vị trí hiện tại',
+              label: t('Vị trí hiện tại'),
               icon: LucideIcons.locateFixed,
               variant: ButtonVariant.outline,
               size: ButtonSize.sm,
@@ -455,7 +456,7 @@ class _PlacePickerState extends State<_PlacePicker> {
           AppTextField(
             controller: _query,
             icon: LucideIcons.search,
-            hint: 'Hoặc tìm theo tên địa điểm',
+            hint: t('Hoặc tìm theo tên địa điểm'),
             enabled: !widget.disabled,
             autocorrect: false,
             suffix: _search.searching
@@ -481,12 +482,12 @@ class _PlacePickerState extends State<_PlacePicker> {
           ),
           if (q.length >= 2 && !_search.searching && _search.results.isEmpty && _search.error == null) ...[
             const SizedBox(height: 6),
-            Text('Không tìm thấy địa điểm phù hợp.', style: AppText.meta),
+            Text(t('Không tìm thấy địa điểm phù hợp.'), style: AppText.meta),
           ],
         ],
         if ((_error ?? _search.error) != null) ...[const SizedBox(height: 6), ErrorText(_error ?? _search.error)],
         const SizedBox(height: 6),
-        Text('Không bắt buộc. Check-in vẫn đăng được khi không có địa điểm.', style: AppText.meta),
+        Text(t('Không bắt buộc. Check-in vẫn đăng được khi không có địa điểm.'), style: AppText.meta),
       ],
     );
   }

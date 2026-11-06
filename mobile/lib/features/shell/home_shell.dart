@@ -10,12 +10,13 @@ import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/sheets.dart';
+import '../../core/i18n.dart';
 
-const _tabs = [
+List<({String label, IconData icon})> get _tabs => [
   (label: 'Newsfeed', icon: LucideIcons.house),
-  (label: 'Khám phá', icon: LucideIcons.compass),
-  (label: 'Đang live', icon: LucideIcons.radio),
-  (label: 'Cá nhân', icon: LucideIcons.user),
+  (label: t('Khám phá'), icon: LucideIcons.compass),
+  (label: t('Đang live'), icon: LucideIcons.radio),
+  (label: t('Cá nhân'), icon: LucideIcons.user),
 ];
 
 /// The public app's shell: four tabs and a "+" in the middle (the web's
@@ -82,7 +83,7 @@ class _Dock extends StatelessWidget {
                 tab(1),
                 Semantics(
                   button: true,
-                  label: 'Tạo mới: hành trình, check-in hoặc livestream',
+                  label: t('Tạo mới: hành trình, check-in hoặc livestream'),
                   excludeSemantics: true,
                   child: Material(
                     color: AppColors.primary,
@@ -125,7 +126,7 @@ class _TabButton extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      label: badge > 0 ? '$label, $badge người đang phát' : label,
+      label: badge > 0 ? t('{label}, {badge} người đang phát', {'label': label, 'badge': badge}) : label,
       excludeSemantics: true,
       child: Tooltip(
         message: label,
@@ -153,16 +154,16 @@ class _TabButton extends StatelessWidget {
   }
 }
 
-const _createActions = [
+List<({String path, String title, String description, IconData icon, Color tint})> get _createActions => [
   (
     path: '/posts/new',
-    title: 'Đăng hành trình',
-    description: 'Kể lại chuyến đi theo từng ngày, từng điểm dừng và chi phí.',
+    title: t('Đăng hành trình'),
+    description: t('Kể lại chuyến đi theo từng ngày, từng điểm dừng và chi phí.'),
     icon: LucideIcons.squarePen,
     tint: AppColors.primary,
   ),
-  (path: '/checkin/new', title: 'Check-in', description: 'Ảnh, cảm xúc và nơi bạn đang đến.', icon: LucideIcons.imagePlus, tint: AppColors.teal),
-  (path: '/live/new', title: 'Phát trực tiếp', description: 'Livestream chuyến đi cho người theo dõi bạn.', icon: LucideIcons.video, tint: AppColors.social),
+  (path: '/checkin/new', title: 'Check-in', description: t('Ảnh, cảm xúc và nơi bạn đang đến.'), icon: LucideIcons.imagePlus, tint: AppColors.teal),
+  (path: '/live/new', title: t('Phát trực tiếp'), description: t('Livestream chuyến đi cho người theo dõi bạn.'), icon: LucideIcons.video, tint: AppColors.social),
 ];
 
 /// The "+" in the tab bar: what the web's Newsfeed composer offers, in one sheet.
@@ -170,8 +171,8 @@ void showCreateSheet(BuildContext context, WidgetRef ref) {
   final signedIn = ref.read(sessionProvider).signedIn;
   showAppSheet<void>(
     context,
-    title: 'Tạo mới',
-    description: 'Bạn muốn chia sẻ gì hôm nay?',
+    title: t('Tạo mới'),
+    description: t('Bạn muốn chia sẻ gì hôm nay?'),
     builder: (sheetContext) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -229,7 +230,7 @@ void showCreateSheet(BuildContext context, WidgetRef ref) {
         if (!signedIn)
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text('Bạn cần đăng nhập để đăng bài, check-in hoặc phát trực tiếp.', style: AppText.meta, textAlign: TextAlign.center),
+            child: Text(t('Bạn cần đăng nhập để đăng bài, check-in hoặc phát trực tiếp.'), style: AppText.meta, textAlign: TextAlign.center),
           ),
       ],
     ),
@@ -258,7 +259,7 @@ class _AnnouncementBannerState extends ConsumerState<AnnouncementBanner> {
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         child: Semantics(
           container: true,
-          label: 'Thông báo từ ChillnGo',
+          label: t('Thông báo từ ChillnGo'),
           child: Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
             decoration: BoxDecoration(
@@ -281,7 +282,7 @@ class _AnnouncementBannerState extends ConsumerState<AnnouncementBanner> {
                 ),
                 AppIconButton(
                   icon: LucideIcons.x,
-                  label: 'Đóng thông báo',
+                  label: t('Đóng thông báo'),
                   size: 34,
                   onPressed: () {
                     setState(() => _dismissed = text);

@@ -4,6 +4,7 @@
 library;
 
 import 'text.dart';
+import '../core/i18n.dart';
 
 class PasswordRule {
   const PasswordRule(this.id, this.label, this.test);
@@ -13,10 +14,10 @@ class PasswordRule {
   final bool Function(String value) test;
 }
 
-final passwordRules = <PasswordRule>[
-  PasswordRule('length', 'Ít nhất 6 ký tự', (v) => chars(v).length >= 6),
-  PasswordRule('upper', 'Ít nhất 1 chữ viết hoa (A–Z)', (v) => chars(v).any(isUpperLetter)),
-  PasswordRule('special', 'Ít nhất 1 ký tự đặc biệt (! @ # \$ % …)', (v) => chars(v).any((ch) => !isLetter(ch) && !isDigit(ch) && !isSpace(ch))),
+List<PasswordRule> get passwordRules => <PasswordRule>[
+  PasswordRule('length', t('Ít nhất 6 ký tự'), (v) => chars(v).length >= 6),
+  PasswordRule('upper', t('Ít nhất 1 chữ viết hoa (A–Z)'), (v) => chars(v).any(isUpperLetter)),
+  PasswordRule('special', t('Ít nhất 1 ký tự đặc biệt (! @ # \$ % …)'), (v) => chars(v).any((ch) => !isLetter(ch) && !isDigit(ch) && !isSpace(ch))),
 ];
 
 bool passwordMeetsRules(String value) => value.length <= 72 && passwordRules.every((rule) => rule.test(value));
@@ -25,9 +26,9 @@ final usernamePattern = RegExp(r'^[a-z0-9._]{3,30}$');
 
 String? usernameProblem(String value) {
   final v = value.trim().toLowerCase();
-  if (v.isEmpty) return 'Vui lòng nhập tên người dùng';
+  if (v.isEmpty) return t('Vui lòng nhập tên người dùng');
   if (!usernamePattern.hasMatch(v)) {
-    return 'Tên người dùng dài 3–30 ký tự, chỉ gồm chữ không dấu, số, dấu chấm hoặc gạch dưới';
+    return t('Tên người dùng dài 3–30 ký tự, chỉ gồm chữ không dấu, số, dấu chấm hoặc gạch dưới');
   }
   return null;
 }

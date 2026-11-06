@@ -2,6 +2,7 @@
 library;
 
 import '../data/models.dart';
+import '../core/i18n.dart';
 
 /// Where a new stop sits until the author picks a place: never shown on a map.
 const unpinnedLng = 106.0;
@@ -33,7 +34,7 @@ String addDays(String date, int days) {
 /// "3 ngày · 5 địa điểm"
 String journeyStats(List<TripDay> days) {
   final places = days.fold(0, (sum, day) => sum + day.locations.length);
-  return '${days.length} ngày · $places địa điểm';
+  return t('{n} ngày · {places} địa điểm', {'n': days.length, 'places': places});
 }
 
 /// "Đà Nẵng → Hội An" from the first and last named stops.

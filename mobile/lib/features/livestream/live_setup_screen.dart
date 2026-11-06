@@ -18,6 +18,7 @@ import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
 import 'live_room.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 const _titleMax = 100;
 const _descriptionMax = 500;
@@ -89,7 +90,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
     if (!camera && !mic) {
       setState(() {
         _access = _Access.blocked;
-        _notice = 'Bạn đã chặn quyền camera và micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.';
+        _notice = t('Bạn đã chặn quyền camera và micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.');
       });
       return;
     }
@@ -98,7 +99,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
       setState(() {
         _cameraOn = false;
         _access = _Access.ready;
-        _notice = 'Không dùng được camera. Livestream sẽ chỉ có âm thanh.';
+        _notice = t('Không dùng được camera. Livestream sẽ chỉ có âm thanh.');
       });
       return;
     }
@@ -126,7 +127,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
       setState(() {
         _cameraOn = false;
         _access = _hasMic ? _Access.ready : _Access.blocked;
-        _notice = _hasMic ? 'Không dùng được camera. Livestream sẽ chỉ có âm thanh.' : mediaErrorMessage(error);
+        _notice = _hasMic ? t('Không dùng được camera. Livestream sẽ chỉ có âm thanh.') : mediaErrorMessage(error);
       });
     }
   }
@@ -151,7 +152,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
       if (mounted) context.pushReplacement('/live/${result.livestream.id}');
     } on ApiError catch (error) {
       if (mounted) {
-        setState(() => _error = error.code == 'ALREADY_LIVE' ? 'Bạn đang có một livestream khác. Hãy kết thúc nó trước khi phát buổi mới.' : error.message);
+        setState(() => _error = error.code == 'ALREADY_LIVE' ? t('Bạn đang có một livestream khác. Hãy kết thúc nó trước khi phát buổi mới.') : error.message);
       }
     } finally {
       if (mounted) setState(() => _starting = false);
@@ -166,13 +167,13 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
     final canGoLive = _access == _Access.ready && _title.text.trim().isNotEmpty && !_starting;
 
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Bắt đầu livestream')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Bắt đầu livestream'))),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 32),
           children: [
-            Text('Kiểm tra hình và tiếng trước khi phát trực tiếp, ${user?.displayName ?? ''}.', style: AppText.meta),
+            Text(t('Kiểm tra hình và tiếng trước khi phát trực tiếp, {value}.', {'value': user?.displayName ?? ''}), style: AppText.meta),
             const SizedBox(height: 14),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -195,7 +196,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                                 children: [
                                   const SizedBox(width: 26, height: 26, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.cream)),
                                   const SizedBox(height: 12),
-                                  Text('Đang xin quyền dùng camera và micro…', style: AppText.label, textAlign: TextAlign.center),
+                                  Text(t('Đang xin quyền dùng camera và micro…'), style: AppText.label, textAlign: TextAlign.center),
                                 ],
                               ),
                               _Access.blocked => Column(
@@ -212,8 +213,8 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                                   Wrap(
                                     spacing: 8,
                                     children: [
-                                      AppButton(label: 'Thử lại', variant: ButtonVariant.secondary, size: ButtonSize.sm, onPressed: _openDevices),
-                                      AppButton(label: 'Mở Cài đặt', variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: openAppSettings),
+                                      AppButton(label: t('Thử lại'), variant: ButtonVariant.secondary, size: ButtonSize.sm, onPressed: _openDevices),
+                                      AppButton(label: t('Mở Cài đặt'), variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: openAppSettings),
                                     ],
                                   ),
                                 ],
@@ -223,7 +224,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                                 children: [
                                   AppAvatar(url: user?.avatarUrl, name: user?.displayName ?? '', size: 80, ring: true),
                                   const SizedBox(height: 12),
-                                  Text('Chỉ phát âm thanh', style: AppText.label),
+                                  Text(t('Chỉ phát âm thanh'), style: AppText.label),
                                 ],
                               ),
                             },
@@ -240,7 +241,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                               children: [
                                 Icon(_hasMic ? LucideIcons.mic : LucideIcons.micOff, size: 14, color: AppColors.white),
                                 const SizedBox(width: 6),
-                                Text(_hasMic ? 'Micro sẵn sàng' : 'Không có micro', style: AppText.meta.copyWith(fontSize: 12, color: AppColors.white)),
+                                Text(_hasMic ? t('Micro sẵn sàng') : t('Không có micro'), style: AppText.meta.copyWith(fontSize: 12, color: AppColors.white)),
                               ],
                             ),
                           ),
@@ -258,7 +259,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                 runSpacing: 8,
                 children: [
                   AppButton(
-                    label: _cameraOn ? 'Tắt camera (chỉ âm thanh)' : 'Bật camera',
+                    label: _cameraOn ? t('Tắt camera (chỉ âm thanh)') : t('Bật camera'),
                     icon: _cameraOn ? LucideIcons.videoOff : LucideIcons.video,
                     variant: ButtonVariant.outline,
                     size: ButtonSize.sm,
@@ -269,7 +270,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
                   ),
                   if (_cameraOn)
                     AppButton(
-                      label: _front ? 'Dùng camera sau' : 'Dùng camera trước',
+                      label: _front ? t('Dùng camera sau') : t('Dùng camera trước'),
                       icon: LucideIcons.switchCamera,
                       variant: ButtonVariant.outline,
                       size: ButtonSize.sm,
@@ -284,7 +285,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
             const SizedBox(height: 18),
             AppTextField(
               controller: _title,
-              label: 'Tiêu đề',
+              label: t('Tiêu đề'),
               maxLength: _titleMax,
               onChanged: (_) => setState(() {}),
               textCapitalization: TextCapitalization.sentences,
@@ -292,7 +293,7 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
             const SizedBox(height: 14),
             AppTextField(
               controller: _description,
-              label: 'Mô tả (không bắt buộc)',
+              label: t('Mô tả (không bắt buộc)'),
               maxLines: 4,
               minLines: 2,
               maxLength: _descriptionMax,
@@ -300,26 +301,26 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
             ),
             const SizedBox(height: 14),
             SelectField<String>(
-              label: 'Ai được xem',
+              label: t('Ai được xem'),
               value: _audience,
-              options: const [
-                SelectOption('public', 'Công khai', 'Mọi người đã đăng nhập'),
-                SelectOption('followers', 'Người theo dõi', 'Chỉ những ai theo dõi bạn'),
-                SelectOption('private', 'Chỉ mình tôi', 'Để phát thử'),
+              options: [
+                SelectOption('public', t('Công khai'), t('Mọi người đã đăng nhập')),
+                SelectOption('followers', t('Người theo dõi'), t('Chỉ những ai theo dõi bạn')),
+                SelectOption('private', t('Chỉ mình tôi'), t('Để phát thử')),
               ],
               onChanged: (v) => setState(() => _audience = v),
             ),
             if (_audience != 'private') ...[
               const SizedBox(height: 6),
-              Text('Người theo dõi bạn sẽ nhận được thông báo khi bạn bắt đầu phát.', style: AppText.meta.copyWith(fontSize: 12)),
+              Text(t('Người theo dõi bạn sẽ nhận được thông báo khi bạn bắt đầu phát.'), style: AppText.meta.copyWith(fontSize: 12)),
             ],
             if (canRecord) ...[
               const SizedBox(height: 14),
               CheckboxRow(
                 checked: _record,
                 onChanged: (v) => setState(() => _record = v),
-                title: 'Lưu lại buổi phát',
-                description: 'Sau khi kết thúc, mọi người được xem lại trên trang cá nhân của bạn (cùng chế độ người xem như trên).',
+                title: t('Lưu lại buổi phát'),
+                description: t('Sau khi kết thúc, mọi người được xem lại trên trang cá nhân của bạn (cùng chế độ người xem như trên).'),
               ),
             ],
             if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
@@ -327,11 +328,11 @@ class _LiveSetupScreenState extends ConsumerState<LiveSetupScreen> {
             Row(
               children: [
                 Expanded(
-                  child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _starting ? null : () => leavePage(context)),
+                  child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _starting ? null : () => leavePage(context)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: AppButton(label: 'Phát trực tiếp', icon: LucideIcons.radio, loading: _starting, onPressed: canGoLive ? () => _start(canRecord) : null),
+                  child: AppButton(label: t('Phát trực tiếp'), icon: LucideIcons.radio, loading: _starting, onPressed: canGoLive ? () => _start(canRecord) : null),
                 ),
               ],
             ),

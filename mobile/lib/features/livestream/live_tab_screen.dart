@@ -13,6 +13,7 @@ import '../../ui/paged_list.dart';
 import '../../ui/surfaces.dart';
 import '../shell/tab_header.dart';
 import 'live_cards.dart';
+import '../../core/i18n.dart';
 
 /// /live: streams running now, then recorded ones to watch again (web: LiveNowPage).
 ///   "Đề xuất"        everyone you may watch
@@ -55,19 +56,19 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
     final goLive = user == null
         ? null
         : AppButton(
-            label: 'Phát trực tiếp',
+            label: t('Phát trực tiếp'),
             icon: LucideIcons.video,
             variant: ButtonVariant.social,
             size: ButtonSize.sm,
             onPressed: () => context.push('/live/new'),
           );
 
-    final showAll = AppButton(label: 'Xem đề xuất', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => setState(() => _tab = 'all'));
+    final showAll = AppButton(label: t('Xem đề xuất'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => setState(() => _tab = 'all'));
 
     return Scaffold(
       body: Column(
         children: [
-          const TabHeader(title: 'Đang live'),
+          TabHeader(title: t('Đang live')),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
@@ -81,13 +82,13 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 40),
                 children: [
-                  Text('Những chuyến đi đang được phát trực tiếp trên ChillnGo, và các buổi đã phát để xem lại.', style: AppText.meta),
+                  Text(t('Những chuyến đi đang được phát trực tiếp trên ChillnGo, và các buổi đã phát để xem lại.'), style: AppText.meta),
                   if (goLive != null) ...[const SizedBox(height: 12), Align(alignment: Alignment.centerLeft, child: goLive)],
                   const SizedBox(height: 16),
                   SegmentTabs<String>(
                     items: [
-                      (value: 'all', label: 'Đề xuất', count: everyone.value?.length ?? 0),
-                      if (viewerId != null) (value: 'following', label: 'Đang theo dõi', count: followedLiveCount),
+                      (value: 'all', label: t('Đề xuất'), count: everyone.value?.length ?? 0),
+                      if (viewerId != null) (value: 'following', label: t('Đang theo dõi'), count: followedLiveCount),
                     ],
                     value: tab,
                     onChanged: (t) => setState(() => _tab = t),
@@ -96,15 +97,15 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
                   if (noFollows)
                     EmptyState(
                       icon: LucideIcons.users,
-                      title: 'Bạn chưa theo dõi ai',
-                      description: 'Theo dõi những người đi cùng gu để thấy ngay khi họ phát trực tiếp.',
+                      title: t('Bạn chưa theo dõi ai'),
+                      description: t('Theo dõi những người đi cùng gu để thấy ngay khi họ phát trực tiếp.'),
                       action: Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         alignment: WrapAlignment.center,
                         children: [
                           showAll,
-                          AppButton(label: 'Khám phá', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
+                          AppButton(label: t('Khám phá'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
                         ],
                       ),
                     )
@@ -118,14 +119,14 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
                       empty: tab == 'all'
                           ? EmptyState(
                               icon: LucideIcons.radio,
-                              title: 'Chưa có ai đang live',
-                              description: 'Khi có người bắt đầu phát trực tiếp, buổi phát sẽ hiện ở đây. Trang tự cập nhật, bạn không cần tải lại.',
+                              title: t('Chưa có ai đang live'),
+                              description: t('Khi có người bắt đầu phát trực tiếp, buổi phát sẽ hiện ở đây. Trang tự cập nhật, bạn không cần tải lại.'),
                               action: goLive,
                             )
                           : EmptyState(
                               icon: LucideIcons.radio,
-                              title: 'Chưa có ai bạn theo dõi đang live',
-                              description: 'Bạn sẽ nhận thông báo khi họ bắt đầu phát. Trong lúc chờ, xem những buổi đang phát khác nhé.',
+                              title: t('Chưa có ai bạn theo dõi đang live'),
+                              description: t('Bạn sẽ nhận thông báo khi họ bắt đầu phát. Trong lúc chờ, xem những buổi đang phát khác nhé.'),
                               action: showAll,
                             ),
                     ),
@@ -134,7 +135,7 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
                       children: [
                         const Icon(LucideIcons.film, size: 20, color: AppColors.cream),
                         const SizedBox(width: 8),
-                        Text('Xem lại', style: AppText.h2),
+                        Text(t('Xem lại'), style: AppText.h2),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -144,10 +145,10 @@ class _LiveTabScreenState extends ConsumerState<LiveTabScreen> {
                         pageKey: tab == 'all' ? 'everyone' : 'following:$followedKey',
                         load: (before) => LivestreamService.listReplays(authors: tab == 'all' ? null : followingIds, before: before),
                         itemBuilder: (_, stream) => ReplayCard(stream: stream, showHost: true),
-                        empty: const EmptyState(
+                        empty: EmptyState(
                           icon: LucideIcons.film,
-                          title: 'Chưa có buổi nào để xem lại',
-                          description: 'Buổi phát có bật "Lưu lại buổi phát" sẽ xuất hiện ở đây sau khi kết thúc.',
+                          title: t('Chưa có buổi nào để xem lại'),
+                          description: t('Buổi phát có bật "Lưu lại buổi phát" sẽ xuất hiện ở đây sau khi kết thúc.'),
                         ),
                       ),
                   ],
@@ -179,12 +180,12 @@ class _LiveSection extends StatelessWidget {
           children: [
             const Icon(LucideIcons.radio, size: 20, color: AppColors.social),
             const SizedBox(width: 8),
-            Text('Đang phát', style: AppText.h2),
+            Text(t('Đang phát'), style: AppText.h2),
           ],
         ),
         const SizedBox(height: 16),
         if (error != null)
-          EmptyState(title: 'Không tải được danh sách livestream', description: error.toString(), compact: true)
+          EmptyState(title: t('Không tải được danh sách livestream'), description: error.toString(), compact: true)
         else if (pending)
           for (var i = 0; i < 2; i++) ...[const Skeleton(height: 320, radius: AppRadius.xl), const SizedBox(height: 16)]
         else if (list.isEmpty)

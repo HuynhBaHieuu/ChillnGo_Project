@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 
 import '../core/env.dart';
 import 'json.dart';
+import '../core/i18n.dart';
 
 /// Thrown for anything the API answers with a 4xx/5xx (status 0: no network).
 /// [code] is set for errors the UI reacts to, e.g. EMAIL_NOT_VERIFIED.
@@ -25,12 +26,12 @@ class ApiError implements Exception {
 
 /// A message for any error, ready to show.
 String errorMessage(Object? error, [String fallback = 'Đã có lỗi xảy ra. Vui lòng thử lại.']) {
-  if (error == null) return fallback;
+  if (error == null) return tx(fallback);
   if (error is ApiError) return error.message;
-  if (error is TimeoutException) return 'Thao tác quá lâu. Vui lòng thử lại.';
+  if (error is TimeoutException) return t('Thao tác quá lâu. Vui lòng thử lại.');
   final text = error.toString();
   if (text.startsWith('Exception: ')) return text.substring(11);
-  return text.isEmpty ? fallback : text;
+  return text.isEmpty ? tx(fallback) : text;
 }
 
 abstract final class Api {
@@ -94,7 +95,7 @@ abstract final class Api {
           error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.receiveTimeout ||
           error.type == DioExceptionType.sendTimeout;
-      throw ApiError(slow ? 'Máy chủ phản hồi quá lâu. Vui lòng thử lại.' : 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.', status: 0);
+      throw ApiError(slow ? t('Máy chủ phản hồi quá lâu. Vui lòng thử lại.') : t('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.'), status: 0);
     } finally {
       timer.cancel();
     }
@@ -106,7 +107,7 @@ abstract final class Api {
       // stops showing a signed-in user the server no longer recognises.
       if (status == 401 && token != null && readToken() == token) onUnauthorized(token);
       throw ApiError(
-        data != null && data['message'] is String ? data['message'] as String : 'Máy chủ trả về lỗi $status',
+        data != null && data['message'] is String ? tx(data['message'] as String) : t('Máy chủ trả về lỗi {status}', {'status': status}),
         status: status,
         code: data == null ? null : strOrNull(data['code']),
       );
@@ -133,7 +134,7 @@ abstract final class Api {
       );
     } on DioException catch (error) {
       if (CancelToken.isCancel(error)) return;
-      throw ApiError('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.', status: 0);
+      throw ApiError(t('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.'), status: 0);
     }
     // utf8.decoder keeps a Vietnamese character split across two chunks whole.
     final text = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
@@ -146,12 +147,12 @@ abstract final class Api {
       } on FormatException {
         data = null;
       }
-      throw ApiError(str(data?['message'], 'Máy chủ trả về lỗi $status'), status: status, code: strOrNull(data?['code']));
+      throw ApiError(tx(str(data?['message'], t('Máy chủ trả về lỗi {status}', {'status': status}))), status: status, code: strOrNull(data?['code']));
     }
     try {
       yield* text;
     } on DioException catch (error) {
-      if (!CancelToken.isCancel(error)) throw ApiError('Mất kết nối khi đang nhận câu trả lời.', status: 0);
+      if (!CancelToken.isCancel(error)) throw ApiError(t('Mất kết nối khi đang nhận câu trả lời.'), status: 0);
     }
   }
 
@@ -160,7 +161,7 @@ abstract final class Api {
   static Future<Json> uploadSigned(Json signed, String filePath, {void Function(int percent)? onProgress}) async {
     final uploadUrl = str(signed['uploadUrl']);
     final fields = mapOf(signed['fields']).map((k, v) => MapEntry(k, str(v)));
-    if (uploadUrl.isEmpty) throw ApiError('Máy chủ chưa cấu hình nơi lưu ảnh.', status: 0);
+    if (uploadUrl.isEmpty) throw ApiError(t('Máy chủ chưa cấu hình nơi lưu ảnh.'), status: 0);
 
     final name = filePath.split(RegExp(r'[\\/]')).last;
     final form = FormData.fromMap({...fields, 'file': await MultipartFile.fromFile(filePath, filename: name)});
@@ -178,13 +179,13 @@ abstract final class Api {
       final data = mapOrNull(response.data) ?? <String, dynamic>{};
       if (status < 200 || status >= 300) {
         final detail = str(mapOf(data['error'])['message']);
-        throw ApiError('Không tải được ảnh lên${detail.isEmpty ? '' : ': $detail'}.', status: status);
+        throw ApiError(t('Không tải được ảnh lên{value}.', {'value': detail.isEmpty ? '' : ': $detail'}), status: status);
       }
       onProgress?.call(100);
       return data;
     } on DioException catch (error) {
       final slow = error.type == DioExceptionType.sendTimeout || error.type == DioExceptionType.receiveTimeout;
-      throw ApiError(slow ? 'Tải ảnh lên quá lâu. Vui lòng thử lại.' : 'Không kết nối được tới máy chủ ảnh. Vui lòng thử lại.', status: 0);
+      throw ApiError(slow ? t('Tải ảnh lên quá lâu. Vui lòng thử lại.') : t('Không kết nối được tới máy chủ ảnh. Vui lòng thử lại.'), status: 0);
     }
   }
 

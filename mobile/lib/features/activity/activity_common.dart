@@ -14,6 +14,7 @@ import '../../data/services/post_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 String _me(Ref ref) => ref.watch(viewerIdProvider) ?? '';
 
@@ -77,14 +78,14 @@ void invalidateActivity(WidgetRef ref) {
 }
 
 /// The sections of Your Activity, in the web's order (web: ActivityPage).
-const activitySections = [
-  (slug: 'interactions', label: 'Lượt tương tác', hint: 'Lượt thích, bình luận, chia sẻ lại, phản hồi tin và đánh giá', icon: LucideIcons.heart),
-  (slug: 'media', label: 'Ảnh và video', hint: 'Bài viết, video, tin và phát trực tiếp', icon: LucideIcons.images),
-  (slug: 'journeys', label: 'Hành trình', hint: 'Hành trình nháp chưa đăng', icon: LucideIcons.map),
-  (slug: 'search-history', label: 'Lịch sử tìm kiếm', hint: 'Những gì bạn đã tìm', icon: LucideIcons.search),
-  (slug: 'account-history', label: 'Lịch sử tài khoản', hint: 'Các thay đổi trên tài khoản', icon: LucideIcons.clock),
-  (slug: 'recently-deleted', label: 'Đã xoá gần đây', hint: 'Khôi phục trong 30 ngày', icon: LucideIcons.trash),
-  (slug: 'saved', label: 'Đã lưu', hint: 'Hành trình bạn đã lưu', icon: LucideIcons.bookmark),
+List<({String slug, String label, String hint, IconData icon})> get activitySections => [
+  (slug: 'interactions', label: t('Lượt tương tác'), hint: t('Lượt thích, bình luận, chia sẻ lại, phản hồi tin và đánh giá'), icon: LucideIcons.heart),
+  (slug: 'media', label: t('Ảnh và video'), hint: t('Bài viết, video, tin và phát trực tiếp'), icon: LucideIcons.images),
+  (slug: 'journeys', label: t('Hành trình'), hint: t('Hành trình nháp chưa đăng'), icon: LucideIcons.map),
+  (slug: 'search-history', label: t('Lịch sử tìm kiếm'), hint: t('Những gì bạn đã tìm'), icon: LucideIcons.search),
+  (slug: 'account-history', label: t('Lịch sử tài khoản'), hint: t('Các thay đổi trên tài khoản'), icon: LucideIcons.clock),
+  (slug: 'recently-deleted', label: t('Đã xoá gần đây'), hint: t('Khôi phục trong 30 ngày'), icon: LucideIcons.trash),
+  (slug: 'saved', label: t('Đã lưu'), hint: t('Hành trình bạn đã lưu'), icon: LucideIcons.bookmark),
 ];
 
 class SectionIntro extends StatelessWidget {
@@ -162,7 +163,7 @@ class NotAvailable extends StatelessWidget {
   final String description;
 
   @override
-  Widget build(BuildContext context) => EmptyState(icon: icon, title: 'ChillnGo chưa có $feature', description: description);
+  Widget build(BuildContext context) => EmptyState(icon: icon, title: t('ChillnGo chưa có {feature}', {'feature': feature}), description: description);
 }
 
 /// A small square (or round) picture for a list row.

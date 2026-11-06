@@ -11,6 +11,7 @@ import '../../ui/surfaces.dart';
 import '../menu/server_settings.dart';
 import 'auth_widgets.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// Đăng nhập (web: LoginPage).
 class LoginScreen extends ConsumerStatefulWidget {
@@ -63,9 +64,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
           children: [
-            Text('Chào mừng trở lại', style: AppText.h1),
+            Text(t('Chào mừng trở lại'), style: AppText.h1),
             const SizedBox(height: 8),
-            Text('Đăng nhập để theo dõi hành trình của những người bạn đi cùng, và tiếp tục những lịch trình bạn đã lưu.', style: AppText.meta),
+            Text(t('Đăng nhập để theo dõi hành trình của những người bạn đi cùng, và tiếp tục những lịch trình bạn đã lưu.'), style: AppText.meta),
             const SizedBox(height: 20),
             AppCard(
               child: Column(
@@ -85,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: AppButton(
-                      label: 'Quên mật khẩu?',
+                      label: t('Quên mật khẩu?'),
                       variant: ButtonVariant.ghost,
                       size: ButtonSize.sm,
                       onPressed: () => context.push('/forgot-password?email=${Uri.encodeComponent(_email.text.trim())}'),
@@ -100,18 +101,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text('Email chưa được xác nhận', style: AppText.label),
+                          Text(t('Email chưa được xác nhận'), style: AppText.label),
                           const SizedBox(height: 6),
                           Text.rich(
                             TextSpan(
                               style: AppText.bodySmall,
                               children: [
-                                const TextSpan(text: 'Hãy mở email xác nhận chúng tôi đã gửi tới '),
+                                TextSpan(text: t('Hãy mở email xác nhận chúng tôi đã gửi tới ')),
                                 TextSpan(
                                   text: _email.text.trim(),
                                   style: const TextStyle(fontWeight: FontWeight.w700),
                                 ),
-                                const TextSpan(text: ' và bấm nút Xác nhận email. Không thấy email? Gửi lại một email mới:'),
+                                TextSpan(text: t(' và bấm nút Xác nhận email. Không thấy email? Gửi lại một email mới:')),
                               ],
                             ),
                           ),
@@ -119,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ResendVerificationButton(email: _email.text),
                           const SizedBox(height: 4),
                           AppButton(
-                            label: 'Tôi đã có liên kết xác nhận',
+                            label: t('Tôi đã có liên kết xác nhận'),
                             variant: ButtonVariant.ghost,
                             size: ButtonSize.sm,
                             onPressed: () => context.push('/verify-email'),
@@ -129,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  AppButton(label: 'Đăng nhập', size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _canSubmit ? _submit : null),
+                  AppButton(label: t('Đăng nhập'), size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _canSubmit ? _submit : null),
                   const SizedBox(height: 16),
                   GoogleSignInButton(onSignedIn: (session) => completeSignIn(context, ref, session, widget.next)),
                 ],
@@ -137,8 +138,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 20),
             AuthSwitchLink(
-              question: 'Chưa có tài khoản?',
-              action: 'Đăng ký',
+              question: t('Chưa có tài khoản?'),
+              action: t('Đăng ký'),
               onTap: () => context.pushReplacement(widget.next == null ? '/register' : '/register?next=${Uri.encodeComponent(widget.next!)}'),
             ),
             const SizedBox(height: 24),

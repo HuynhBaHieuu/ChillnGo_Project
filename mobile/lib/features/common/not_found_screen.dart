@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../ui/buttons.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// Any address the app does not know (web: NotFoundPage).
 class NotFoundScreen extends StatelessWidget {
@@ -21,15 +22,15 @@ class NotFoundScreen extends StatelessWidget {
             children: [
               Text('404', style: AppText.caps.copyWith(fontSize: 13)),
               const SizedBox(height: 14),
-              Text('Lạc đường rồi', style: AppText.hero.copyWith(fontSize: 40), textAlign: TextAlign.center),
+              Text(t('Lạc đường rồi'), style: AppText.hero.copyWith(fontSize: 40), textAlign: TextAlign.center),
               const SizedBox(height: 14),
               Text(
-                'Trang bạn tìm không tồn tại. Nhưng lạc đường đôi khi cũng là một phần của chuyến đi.',
+                t('Trang bạn tìm không tồn tại. Nhưng lạc đường đôi khi cũng là một phần của chuyến đi.'),
                 style: AppText.body.copyWith(color: AppColors.meta),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              AppButton(label: 'Về trang Khám phá', size: ButtonSize.lg, onPressed: () => context.go('/discover')),
+              AppButton(label: t('Về trang Khám phá'), size: ButtonSize.lg, onPressed: () => context.go('/discover')),
             ],
           ),
         ),

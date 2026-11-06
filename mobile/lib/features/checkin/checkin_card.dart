@@ -16,6 +16,7 @@ import '../../ui/buttons.dart';
 import '../../ui/photo_viewer.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// A photo check-in in the Newsfeed (web/src/features/checkin/CheckInCard.tsx).
 class CheckInCard extends ConsumerWidget {
@@ -63,10 +64,10 @@ class CheckInCard extends ConsumerWidget {
                             TextSpan(text: '${feeling.emoji} ${feeling.what}', style: bold),
                           ],
                           if (location != null) ...[
-                            TextSpan(text: feeling != null ? ' tại ' : ' đã check-in tại ', style: quiet),
+                            TextSpan(text: feeling != null ? t(' tại ') : t(' đã check-in tại '), style: quiet),
                             TextSpan(text: '📍 ${location.name}', style: bold),
                           ],
-                          if (feeling == null && location == null) TextSpan(text: checkin.photos.isNotEmpty ? ' đã chia sẻ ảnh' : ' đã chia sẻ', style: quiet),
+                          if (feeling == null && location == null) TextSpan(text: checkin.photos.isNotEmpty ? t(' đã chia sẻ ảnh') : t(' đã chia sẻ'), style: quiet),
                         ],
                       ),
                     ),
@@ -75,7 +76,7 @@ class CheckInCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (isMine) AppIconButton(icon: LucideIcons.trash, label: 'Xoá check-in', size: 36, onPressed: () => _confirmDelete(context, ref)),
+              if (isMine) AppIconButton(icon: LucideIcons.trash, label: t('Xoá check-in'), size: 36, onPressed: () => _confirmDelete(context, ref)),
             ],
           ),
           if (checkin.caption.isNotEmpty) ...[const SizedBox(height: 12), Text(checkin.caption, style: AppText.body)],
@@ -92,14 +93,14 @@ class CheckInCard extends ConsumerWidget {
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final done = await confirmAction(
       context,
-      title: 'Xoá check-in',
-      description: 'Check-in sẽ được chuyển vào mục Đã xoá gần đây (Hoạt động của bạn) và có thể khôi phục trong 30 ngày.',
-      confirmLabel: 'Xoá',
+      title: t('Xoá check-in'),
+      description: t('Check-in sẽ được chuyển vào mục Đã xoá gần đây (Hoạt động của bạn) và có thể khôi phục trong 30 ngày.'),
+      confirmLabel: t('Xoá'),
       destructive: true,
       onConfirm: () => CheckInService.delete(checkin.id),
     );
     if (!done || !context.mounted) return;
-    toast(context, 'Đã chuyển check-in vào mục Đã xoá gần đây.');
+    toast(context, t('Đã chuyển check-in vào mục Đã xoá gần đây.'));
     ref.invalidate(checkinsProvider);
     onDeleted?.call();
   }
@@ -123,7 +124,7 @@ class CheckInPhotoGrid extends StatelessWidget {
           height: height,
           child: Semantics(
             button: true,
-            label: 'Xem ảnh ${index + 1} cỡ lớn',
+            label: t('Xem ảnh {value} cỡ lớn', {'value': index + 1}),
             child: GestureDetector(
               onTap: () => onOpen(index),
               child: NetImage(photos[index].url, placeholderColor: AppColors.canopy),
@@ -184,7 +185,7 @@ class _LocationStrip extends StatelessWidget {
     final map = staticMapUrl(location.lat, location.lng, width.round(), 140);
     return Semantics(
       button: true,
-      label: 'Chỉ đường tới ${location.name}',
+      label: t('Chỉ đường tới {name}', {'name': location.name}),
       child: Material(
         color: AppColors.well,
         shape: RoundedRectangleBorder(
@@ -219,7 +220,7 @@ class _LocationStrip extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text('Chỉ đường', style: AppText.meta),
+                    Text(t('Chỉ đường'), style: AppText.meta),
                     const SizedBox(width: 4),
                     const Icon(LucideIcons.externalLink, size: 14, color: AppColors.meta),
                   ],

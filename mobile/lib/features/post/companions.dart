@@ -12,6 +12,7 @@ import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// As server/src/lib/companions.ts allows.
 const _maxCompanions = 10;
@@ -28,9 +29,9 @@ class CompanionsRow extends ConsumerWidget {
     final leaving = companion.userId == viewerId;
     final removed = await confirmAction(
       context,
-      title: leaving ? 'Rời hành trình?' : 'Gỡ ${companion.user?.displayName ?? 'người này'}?',
-      description: leaving ? 'Hành trình sẽ không còn hiện trên trang cá nhân của bạn.' : 'Họ sẽ không còn hiện là người đi cùng.',
-      confirmLabel: leaving ? 'Rời' : 'Gỡ',
+      title: leaving ? t('Rời hành trình?') : t('Gỡ {value}?', {'value': companion.user?.displayName ?? t('người này')}),
+      description: leaving ? t('Hành trình sẽ không còn hiện trên trang cá nhân của bạn.') : t('Họ sẽ không còn hiện là người đi cùng.'),
+      confirmLabel: leaving ? t('Rời') : t('Gỡ'),
       destructive: true,
       onConfirm: () => PostService.removeCompanion(post.id, companion.userId),
     );
@@ -51,7 +52,7 @@ class CompanionsRow extends ConsumerWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Text('Đi cùng', style: AppText.meta),
+          Text(t('Đi cùng'), style: AppText.meta),
           for (final c in shown)
             Opacity(
               opacity: c.status == 'pending' ? 0.6 : 1,
@@ -72,7 +73,7 @@ class CompanionsRow extends ConsumerWidget {
                           AppAvatar(url: c.user?.avatarUrl, name: c.user?.displayName ?? '?', size: 24),
                           const SizedBox(width: 6),
                           Text(c.user?.displayName ?? '', style: AppText.meta),
-                          if (c.status == 'pending') Text(' · đang chờ', style: AppText.meta),
+                          if (c.status == 'pending') Text(t(' · đang chờ'), style: AppText.meta),
                         ],
                       ),
                     ),
@@ -81,7 +82,7 @@ class CompanionsRow extends ConsumerWidget {
                         onTap: () => _remove(context, ref, c),
                         child: Padding(
                           padding: const EdgeInsets.all(4),
-                          child: Icon(LucideIcons.x, size: 14, semanticLabel: c.userId == viewerId ? 'Rời hành trình' : 'Gỡ'),
+                          child: Icon(LucideIcons.x, size: 14, semanticLabel: c.userId == viewerId ? t('Rời hành trình') : t('Gỡ')),
                         ),
                       )
                     else
@@ -116,7 +117,7 @@ class _InviteBannerState extends ConsumerState<InviteBanner> {
       await PostService.respondToInvite(widget.post.id, accept);
       invalidateJourneys(ref);
       if (!mounted) return;
-      toast(context, accept ? 'Bạn đã nhận lời đi cùng.' : 'Đã từ chối lời mời.');
+      toast(context, accept ? t('Bạn đã nhận lời đi cùng.') : t('Đã từ chối lời mời.'));
       // Declining a draft takes it out of your sight.
       if (!accept && widget.post.status != 'published') context.go('/feed');
     } catch (error) {
@@ -141,16 +142,16 @@ class _InviteBannerState extends ConsumerState<InviteBanner> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('${widget.post.author?.displayName ?? 'Tác giả'} mời bạn đi cùng hành trình này.', style: AppText.body),
+          Text(t('{value} mời bạn đi cùng hành trình này.', {'value': widget.post.author?.displayName ?? t('Tác giả')}), style: AppText.body),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: AppButton(label: 'Từ chối', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _pending ? null : () => _answer(false)),
+                child: AppButton(label: t('Từ chối'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _pending ? null : () => _answer(false)),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: AppButton(label: 'Đi cùng', size: ButtonSize.sm, loading: _pending, onPressed: () => _answer(true)),
+                child: AppButton(label: t('Đi cùng'), size: ButtonSize.sm, loading: _pending, onPressed: () => _answer(true)),
               ),
             ],
           ),
@@ -165,8 +166,8 @@ Future<void> showInviteSheet(BuildContext context, TripPost post) {
   final left = _maxCompanions - (post.companions?.length ?? 0);
   return showAppSheet<void>(
     context,
-    title: 'Mời bạn đi cùng',
-    description: 'Bạn bè là những người bạn theo dõi và cũng theo dõi bạn. Còn mời được $left người.',
+    title: t('Mời bạn đi cùng'),
+    description: t('Bạn bè là những người bạn theo dõi và cũng theo dõi bạn. Còn mời được {left} người.', {'left': left}),
     tall: true,
     builder: (_) => _InviteForm(post: post, left: left, parentContext: context),
   );
@@ -206,7 +207,7 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
       if (!mounted) return;
       Navigator.of(context).pop();
       final parent = widget.parentContext;
-      if (parent.mounted) toast(parent, 'Đã gửi lời mời.');
+      if (parent.mounted) toast(parent, t('Đã gửi lời mời.'));
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
     } finally {
@@ -227,7 +228,7 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppTextField(controller: _query, hint: 'Tìm bạn bè', icon: LucideIcons.search, onChanged: (_) => setState(() {})),
+        AppTextField(controller: _query, hint: t('Tìm bạn bè'), icon: LucideIcons.search, onChanged: (_) => setState(() {})),
         const SizedBox(height: 12),
         if (friends.isLoading)
           const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
@@ -236,7 +237,7 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
         else if (candidates.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Text(needle.isEmpty ? 'Chưa có bạn bè nào để mời.' : 'Không tìm thấy ai.', textAlign: TextAlign.center, style: AppText.meta),
+            child: Text(needle.isEmpty ? t('Chưa có bạn bè nào để mời.') : t('Không tìm thấy ai.'), textAlign: TextAlign.center, style: AppText.meta),
           ),
         for (final friend in candidates)
           InkWell(
@@ -265,11 +266,11 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
               ),
             ),
           ),
-        if (_picked.length > widget.left) ...[const SizedBox(height: 10), ErrorText('Chỉ còn mời được ${widget.left} người.')],
+        if (_picked.length > widget.left) ...[const SizedBox(height: 10), ErrorText(t('Chỉ còn mời được {left} người.', {'left': widget.left}))],
         if (_error != null) ...[const SizedBox(height: 10), ErrorText(_error)],
         const SizedBox(height: 18),
         AppButton(
-          label: _picked.isEmpty ? 'Gửi lời mời' : 'Gửi lời mời (${_picked.length})',
+          label: _picked.isEmpty ? t('Gửi lời mời') : t('Gửi lời mời ({n})', {'n': _picked.length}),
           icon: LucideIcons.userPlus,
           loading: _pending,
           onPressed: _picked.isEmpty || _picked.length > widget.left ? null : _invite,

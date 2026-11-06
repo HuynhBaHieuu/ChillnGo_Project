@@ -18,6 +18,7 @@ import '../../../ui/sheets.dart';
 import '../../../ui/surfaces.dart';
 import '../../post/post_actions.dart';
 import '../activity_common.dart';
+import '../../../core/i18n.dart';
 
 class RecentlyDeletedSection extends StatefulWidget {
   const RecentlyDeletedSection({super.key, this.initialTab});
@@ -29,11 +30,11 @@ class RecentlyDeletedSection extends StatefulWidget {
 }
 
 class _RecentlyDeletedSectionState extends State<RecentlyDeletedSection> {
-  static const _tabs = <({String value, String label, int? count})>[
-    (value: 'posts', label: 'Bài viết', count: null),
+  static List<({String value, String label, int? count})> get _tabs => <({String value, String label, int? count})>[
+    (value: 'posts', label: t('Bài viết'), count: null),
     (value: 'stories', label: 'Tin', count: null),
     (value: 'videos', label: 'Video', count: null),
-    (value: 'journeys', label: 'Hành trình', count: null),
+    (value: 'journeys', label: t('Hành trình'), count: null),
   ];
 
   late String _tab = _tabs.any((t) => t.value == widget.initialTab) ? widget.initialTab! : 'posts';
@@ -43,23 +44,23 @@ class _RecentlyDeletedSectionState extends State<RecentlyDeletedSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionIntro(
-          title: 'Đã xoá gần đây',
-          description: 'Nội dung đã xoá được giữ ở đây 30 ngày. Bạn có thể khôi phục, hoặc xoá vĩnh viễn trước thời hạn đó.',
+        SectionIntro(
+          title: t('Đã xoá gần đây'),
+          description: t('Nội dung đã xoá được giữ ở đây 30 ngày. Bạn có thể khôi phục, hoặc xoá vĩnh viễn trước thời hạn đó.'),
         ),
         const SizedBox(height: 16),
         SegmentTabs<String>(items: _tabs, value: _tab, onChanged: (t) => setState(() => _tab = t)),
         const SizedBox(height: 16),
         switch (_tab) {
-          'stories' => const NotAvailable(
+          'stories' => NotAvailable(
             icon: LucideIcons.clapperboard,
-            feature: 'tính năng tin (story)',
-            description: 'Khi có tính năng tin, những tin bạn xoá sẽ được giữ ở đây 30 ngày.',
+            feature: t('tính năng tin (story)'),
+            description: t('Khi có tính năng tin, những tin bạn xoá sẽ được giữ ở đây 30 ngày.'),
           ),
-          'videos' => const EmptyState(
+          'videos' => EmptyState(
             icon: LucideIcons.film,
-            title: 'Chưa xoá được video',
-            description: 'Bản ghi livestream được giữ cùng buổi phát. Khi có chức năng xoá, những video bạn xoá sẽ hiện ở đây.',
+            title: t('Chưa xoá được video'),
+            description: t('Bản ghi livestream được giữ cùng buổi phát. Khi có chức năng xoá, những video bạn xoá sẽ hiện ở đây.'),
           ),
           'journeys' => const _DeletedJourneys(),
           _ => const _DeletedCheckIns(),
@@ -90,14 +91,14 @@ class _DeletedCheckIns extends ConsumerWidget {
     if (checkins.hasError && !checkins.hasValue) return ErrorPanel(error: checkins.error, onRetry: () => ref.invalidate(deletedCheckInsProvider));
     return _DeletedList(
       icon: LucideIcons.camera,
-      noun: 'bài viết',
-      emptyText: 'Những check-in bạn xoá sẽ được giữ ở đây 30 ngày.',
+      noun: t('bài viết'),
+      emptyText: t('Những check-in bạn xoá sẽ được giữ ở đây 30 ngày.'),
       items: [
         for (final c in checkins.value!)
           _DeletedItem(
             id: c.id,
             title: c.caption.isNotEmpty ? c.caption : (c.location?.name ?? 'Check-in'),
-            subtitle: [if (c.photos.isNotEmpty) '${c.photos.length} ảnh', ?c.location?.name].join(' · ').ifEmpty('Check-in'),
+            subtitle: [if (c.photos.isNotEmpty) t('{n} ảnh', {'n': c.photos.length}), ?c.location?.name].join(' · ').ifEmpty('Check-in'),
             image: c.photos.isNotEmpty ? c.photos.first.url : null,
             deletedAt: c.deletedAt ?? c.createdAt,
             purgeAt: c.purgeAt ?? c.createdAt,
@@ -119,14 +120,14 @@ class _DeletedJourneys extends ConsumerWidget {
     if (journeys.hasError && !journeys.hasValue) return ErrorPanel(error: journeys.error, onRetry: () => ref.invalidate(deletedJourneysProvider));
     return _DeletedList(
       icon: LucideIcons.map,
-      noun: 'hành trình',
-      emptyText: 'Những hành trình và bản nháp bạn xoá sẽ được giữ ở đây 30 ngày.',
+      noun: t('hành trình'),
+      emptyText: t('Những hành trình và bản nháp bạn xoá sẽ được giữ ở đây 30 ngày.'),
       items: [
         for (final p in journeys.value!)
           _DeletedItem(
             id: p.id,
-            title: p.title.trim().isEmpty ? 'Hành trình chưa đặt tên' : p.title.trim(),
-            subtitle: '${p.status == 'draft' ? 'Bản nháp' : 'Đã đăng'} · ${journeyStats(p.days)}',
+            title: p.title.trim().isEmpty ? t('Hành trình chưa đặt tên') : p.title.trim(),
+            subtitle: '${p.status == 'draft' ? t('Bản nháp') : t('Đã đăng')} · ${journeyStats(p.days)}',
             image: p.coverUrl.isNotEmpty ? p.coverUrl : autoCover(p.title),
             deletedAt: p.deletedAt ?? p.updatedAt,
             purgeAt: p.purgeAt ?? p.updatedAt,
@@ -163,7 +164,7 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
     });
     try {
       await widget.restore(item.id);
-      if (mounted) toast(context, 'Đã khôi phục.');
+      if (mounted) toast(context, t('Đã khôi phục.'));
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
     } finally {
@@ -178,9 +179,9 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
   Future<void> _purge(_DeletedItem item) async {
     final done = await confirmAction(
       context,
-      title: 'Xoá vĩnh viễn ${widget.noun} này?',
-      description: '“${item.title}” sẽ bị xoá vĩnh viễn, kèm cả ảnh. Không thể hoàn tác.',
-      confirmLabel: 'Xoá vĩnh viễn',
+      title: t('Xoá vĩnh viễn {noun} này?', {'noun': widget.noun}),
+      description: t('“{title}” sẽ bị xoá vĩnh viễn, kèm cả ảnh. Không thể hoàn tác.', {'title': item.title}),
+      confirmLabel: t('Xoá vĩnh viễn'),
       destructive: true,
       onConfirm: () => widget.purge(item.id),
     );
@@ -189,7 +190,7 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items.isEmpty) return EmptyState(icon: widget.icon, title: 'Không có gì trong mục này', description: widget.emptyText);
+    if (widget.items.isEmpty) return EmptyState(icon: widget.icon, title: t('Không có gì trong mục này'), description: widget.emptyText);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -221,9 +222,9 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
                                 TextSpan(
                                   style: AppText.meta,
                                   children: [
-                                    TextSpan(text: 'Đã xoá ${timeAgo(item.deletedAt)} · '),
+                                    TextSpan(text: t('Đã xoá {time} · ', {'time': timeAgo(item.deletedAt)})),
                                     TextSpan(
-                                      text: left == 0 ? 'sẽ bị xoá hôm nay' : 'còn $left ngày',
+                                      text: left == 0 ? t('sẽ bị xoá hôm nay') : t('còn {left} ngày', {'left': left}),
                                       style: TextStyle(color: left <= 3 ? AppColors.social : AppColors.meta),
                                     ),
                                   ],
@@ -242,7 +243,7 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
                     children: [
                       Expanded(
                         child: AppButton(
-                          label: 'Khôi phục',
+                          label: t('Khôi phục'),
                           icon: LucideIcons.rotateCcw,
                           variant: ButtonVariant.outline,
                           size: ButtonSize.sm,
@@ -253,7 +254,7 @@ class _DeletedListState extends ConsumerState<_DeletedList> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: AppButton(
-                          label: 'Xoá vĩnh viễn',
+                          label: t('Xoá vĩnh viễn'),
                           icon: LucideIcons.trash,
                           variant: ButtonVariant.ghost,
                           size: ButtonSize.sm,
@@ -293,10 +294,10 @@ class _SavedSectionState extends State<SavedSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionIntro(title: 'Đã lưu', description: 'Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.'),
+        SectionIntro(title: t('Đã lưu'), description: t('Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')),
         const SizedBox(height: 16),
         SegmentTabs<String>(
-          items: const [(value: 'journeys', label: 'Hành trình', count: null), (value: 'places', label: 'Địa điểm', count: null)],
+          items: [(value: 'journeys', label: t('Hành trình'), count: null), (value: 'places', label: t('Địa điểm'), count: null)],
           value: _tab,
           onChanged: (t) => setState(() => _tab = t),
         ),
@@ -304,10 +305,10 @@ class _SavedSectionState extends State<SavedSection> {
         if (_tab == 'journeys')
           const _SavedJourneys()
         else
-          const NotAvailable(
+          NotAvailable(
             icon: LucideIcons.mapPin,
-            feature: 'tính năng lưu địa điểm',
-            description: 'Tính năng lưu từng địa điểm sắp có. Hiện tại, hãy lưu hành trình có địa điểm đó.',
+            feature: t('tính năng lưu địa điểm'),
+            description: t('Tính năng lưu từng địa điểm sắp có. Hiện tại, hãy lưu hành trình có địa điểm đó.'),
           ),
       ],
     );
@@ -327,9 +328,9 @@ class _SavedJourneys extends ConsumerWidget {
     if (list.isEmpty) {
       return EmptyState(
         icon: LucideIcons.bookmark,
-        title: 'Chưa lưu gì',
-        description: 'Bấm biểu tượng lưu ở một hành trình để giữ nó ở đây xem sau.',
-        action: AppButton(label: 'Khám phá hành trình', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
+        title: t('Chưa lưu gì'),
+        description: t('Bấm biểu tượng lưu ở một hành trình để giữ nó ở đây xem sau.'),
+        action: AppButton(label: t('Khám phá hành trình'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
       );
     }
     return Column(
@@ -357,7 +358,7 @@ class _SavedJourneys extends ConsumerWidget {
                             Text(post.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.h3),
                             const SizedBox(height: 4),
                             Text(
-                              'của ${post.author?.displayName ?? ''} · ${journeyStats(post.days)}',
+                              t('của {value} · {value2}', {'value': post.author?.displayName ?? '', 'value2': journeyStats(post.days)}),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppText.meta,
@@ -372,7 +373,7 @@ class _SavedJourneys extends ConsumerWidget {
                     top: 10,
                     child: AppIconButton(
                       icon: Icons.bookmark,
-                      label: 'Bỏ lưu ${post.title}',
+                      label: t('Bỏ lưu {title}', {'title': post.title}),
                       tone: IconTone.overlay,
                       onPressed: () async {
                         await toggleSave(context, ref, post);

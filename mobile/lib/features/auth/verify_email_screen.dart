@@ -12,6 +12,7 @@ import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
 import 'auth_widgets.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// The token inside a pasted confirmation link ("…/verify-email?token=…"), or the text itself when it is a bare token.
 String? tokenFrom(String text) {
@@ -75,7 +76,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       await ref.read(sessionProvider.notifier).signIn(session);
       if (mounted) setState(() => _welcome = session.user.displayName);
     } catch (error) {
-      if (mounted) setState(() => _failure = errorMessage(error, 'Không thể xác nhận email.'));
+      if (mounted) setState(() => _failure = errorMessage(error, t('Không thể xác nhận email.')));
     } finally {
       if (mounted) setState(() => _verifying = false);
     }
@@ -85,9 +86,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   Widget build(BuildContext context) {
     final welcome = _welcome;
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Xác nhận email')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Xác nhận email'))),
       body: _verifying
-          ? const LoadingView(message: 'Đang kiểm tra liên kết xác nhận…')
+          ? LoadingView(message: t('Đang kiểm tra liên kết xác nhận…'))
           : ListView(
               padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 40),
               children: welcome != null
@@ -105,16 +106,16 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('Đã xác nhận', style: AppText.h2),
+                                      Text(t('Đã xác nhận'), style: AppText.h2),
                                       const SizedBox(height: 4),
-                                      Text('Chào mừng $welcome đến với ChillnGo! Bạn đã được đăng nhập.', style: AppText.bodySmall),
+                                      Text(t('Chào mừng {welcome} đến với ChillnGo! Bạn đã được đăng nhập.', {'welcome': welcome}), style: AppText.bodySmall),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 14),
-                            AppButton(label: 'Vào ChillnGo ngay', fullWidth: true, onPressed: () => context.go('/')),
+                            AppButton(label: t('Vào ChillnGo ngay'), fullWidth: true, onPressed: () => context.go('/')),
                           ],
                         ),
                       ),
@@ -131,7 +132,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Chưa xác nhận được', style: AppText.label),
+                                    Text(t('Chưa xác nhận được'), style: AppText.label),
                                     const SizedBox(height: 4),
                                     Text(_failure!, style: AppText.bodySmall),
                                   ],
@@ -146,10 +147,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text('Dán liên kết xác nhận', style: AppText.h2),
+                            Text(t('Dán liên kết xác nhận'), style: AppText.h2),
                             const SizedBox(height: 8),
                             Text(
-                              'Trong email “Xác nhận email đăng ký tài khoản ChillnGo”, giữ lâu nút Xác nhận email để sao chép liên kết, rồi dán vào đây.',
+                              t('Trong email “Xác nhận email đăng ký tài khoản ChillnGo”, giữ lâu nút Xác nhận email để sao chép liên kết, rồi dán vào đây.'),
                               style: AppText.meta,
                             ),
                             const SizedBox(height: 12),
@@ -163,14 +164,14 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                             if (_linkError != null) ...[const SizedBox(height: 6), ErrorText(_linkError)],
                             const SizedBox(height: 12),
                             AppButton(
-                              label: 'Xác nhận email',
+                              label: t('Xác nhận email'),
                               fullWidth: true,
                               onPressed: _link.text.trim().isEmpty
                                   ? null
                                   : () {
                                       final token = tokenFrom(_link.text);
                                       if (token == null) {
-                                        setState(() => _linkError = 'Không tìm thấy mã xác nhận trong liên kết này.');
+                                        setState(() => _linkError = t('Không tìm thấy mã xác nhận trong liên kết này.'));
                                         return;
                                       }
                                       _requested = null;
@@ -185,11 +186,11 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text('Cần liên kết mới?', style: AppText.h3),
+                            Text(t('Cần liên kết mới?'), style: AppText.h3),
                             const SizedBox(height: 12),
                             AppTextField(
                               controller: _resendEmail,
-                              label: 'Email đã dùng để đăng ký',
+                              label: t('Email đã dùng để đăng ký'),
                               keyboardType: TextInputType.emailAddress,
                               autocorrect: false,
                               onChanged: (_) => setState(() {}),
@@ -200,7 +201,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      AuthSwitchLink(question: 'Email đã được xác nhận trước đó?', action: 'Đăng nhập', onTap: () => context.pushReplacement('/login')),
+                      AuthSwitchLink(question: t('Email đã được xác nhận trước đó?'), action: t('Đăng nhập'), onTap: () => context.pushReplacement('/login')),
                     ],
             ),
     );

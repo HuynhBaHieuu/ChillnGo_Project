@@ -12,6 +12,7 @@ import '../../ui/surfaces.dart';
 import '../auth/auth_widgets.dart';
 import 'admin_common.dart';
 import 'admin_panels.dart';
+import '../../core/i18n.dart';
 
 class _Section {
   const _Section({required this.path, required this.label, required this.title, required this.description, required this.icon, required this.allowed});
@@ -26,55 +27,55 @@ class _Section {
 
 /// Every screen of the admin console, in sidebar order (web: ADMIN_SECTIONS).
 /// `allowed` only decides what is shown; the API enforces the same rules.
-final _sections = [
+List<_Section> get _sections => [
   _Section(
     path: 'overview',
-    label: 'Tổng quan',
-    title: 'Tổng quan hệ thống',
+    label: t('Tổng quan'),
+    title: t('Tổng quan hệ thống'),
     description: (user) =>
-        isSuperAdmin(user) ? 'Số liệu toàn bộ tài khoản và hoạt động quản trị.' : 'Số liệu tài khoản người dùng thường, trong phạm vi bạn được cấp.',
+        isSuperAdmin(user) ? t('Số liệu toàn bộ tài khoản và hoạt động quản trị.') : t('Số liệu tài khoản người dùng thường, trong phạm vi bạn được cấp.'),
     icon: LucideIcons.chartColumn,
     allowed: (user) => hasModule(user, 'stats'),
   ),
   _Section(
     path: 'users',
-    label: 'Người dùng',
-    title: 'Quản lý người dùng',
+    label: t('Người dùng'),
+    title: t('Quản lý người dùng'),
     description: (user) => isSuperAdmin(user)
-        ? 'Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu, phân quyền và xoá mọi tài khoản trừ Super Admin.'
-        : 'Người dùng thường. Khoá, mở khoá và đặt lại mật khẩu.',
+        ? t('Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu, phân quyền và xoá mọi tài khoản trừ Super Admin.')
+        : t('Người dùng thường. Khoá, mở khoá và đặt lại mật khẩu.'),
     icon: LucideIcons.users,
     allowed: (user) => hasModule(user, 'users'),
   ),
   _Section(
     path: 'admins',
-    label: 'Quản trị viên',
-    title: 'Quản trị viên',
-    description: (_) => 'Tạo, khoá, xoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.',
+    label: t('Quản trị viên'),
+    title: t('Quản trị viên'),
+    description: (_) => t('Tạo, khoá, xoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.'),
     icon: LucideIcons.shieldCheck,
     allowed: isSuperAdmin,
   ),
   _Section(
     path: 'content',
-    label: 'Nội dung',
-    title: 'Kiểm duyệt nội dung',
-    description: (_) => 'Bài đăng, lịch trình, bình luận, báo cáo vi phạm và danh mục.',
+    label: t('Nội dung'),
+    title: t('Kiểm duyệt nội dung'),
+    description: (_) => t('Bài đăng, lịch trình, bình luận, báo cáo vi phạm và danh mục.'),
     icon: LucideIcons.construction,
     allowed: contentAllowed,
   ),
   _Section(
     path: 'audit',
-    label: 'Nhật ký',
-    title: 'Nhật ký hoạt động',
-    description: (_) => 'Mọi thao tác của Admin và Super Admin. Không sửa hay xoá được.',
+    label: t('Nhật ký'),
+    title: t('Nhật ký hoạt động'),
+    description: (_) => t('Mọi thao tác của Admin và Super Admin. Không sửa hay xoá được.'),
     icon: LucideIcons.clipboardList,
     allowed: isSuperAdmin,
   ),
   _Section(
     path: 'settings',
-    label: 'Cấu hình',
-    title: 'Cấu hình hệ thống',
-    description: (_) => 'Đóng hoặc mở đăng ký và thông báo toàn trang. Có hiệu lực ngay.',
+    label: t('Cấu hình'),
+    title: t('Cấu hình hệ thống'),
+    description: (_) => t('Đóng hoặc mở đăng ký và thông báo toàn trang. Có hiệu lực ngay.'),
     icon: LucideIcons.settings,
     allowed: isSuperAdmin,
   ),
@@ -125,12 +126,12 @@ class AdminScreen extends ConsumerWidget {
                               'ChillnGo',
                               style: TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.cream),
                             ),
-                            Text('QUẢN TRỊ HỆ THỐNG', style: AppText.caps.copyWith(fontSize: 10, letterSpacing: 2)),
+                            Text(t('QUẢN TRỊ HỆ THỐNG'), style: AppText.caps.copyWith(fontSize: 10, letterSpacing: 2)),
                           ],
                         ),
                       ),
                       RoleBadge(role: user.role),
-                      AppIconButton(icon: LucideIcons.logOut, label: 'Đăng xuất', onPressed: signOut),
+                      AppIconButton(icon: LucideIcons.logOut, label: t('Đăng xuất'), onPressed: signOut),
                     ],
                   ),
                 ),
@@ -175,13 +176,13 @@ class AdminScreen extends ConsumerWidget {
           ),
           Expanded(
             child: current == null
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.all(kGutter),
                     child: Center(
                       child: EmptyState(
                         icon: LucideIcons.shieldOff,
-                        title: 'Chưa được cấp quyền',
-                        description: 'Tài khoản Admin của bạn chưa được Super Admin cấp quyền cho mục nào.',
+                        title: t('Chưa được cấp quyền'),
+                        description: t('Tài khoản Admin của bạn chưa được Super Admin cấp quyền cho mục nào.'),
                       ),
                     ),
                   )

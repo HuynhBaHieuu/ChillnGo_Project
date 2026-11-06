@@ -5,6 +5,7 @@ library;
 import '../api.dart';
 import '../json.dart';
 import '../models.dart';
+import '../../core/i18n.dart';
 
 AdminUser _user(Json data) => AdminUser.fromJson(mapOf(data['user']));
 
@@ -26,7 +27,7 @@ abstract final class AdminService {
   static Future<AdminUser> unlockUser(String id) async => _user(await Api.post('/api/admin/users/$id/unlock'));
 
   static Future<String> resetPassword(String id) async =>
-      str((await Api.post('/api/admin/users/$id/reset-password'))['message'], 'Đã gửi mật khẩu tạm qua email.');
+      str((await Api.post('/api/admin/users/$id/reset-password'))['message'], t('Đã gửi mật khẩu tạm qua email.'));
 
   static Future<AdminUser> createAdmin({
     required String displayName,

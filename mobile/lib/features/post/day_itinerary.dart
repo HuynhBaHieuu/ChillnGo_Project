@@ -11,6 +11,7 @@ import '../../core/travel.dart';
 import '../../data/models.dart';
 import '../../ui/photo_viewer.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// One day of a trip: its stops as a timeline, with notes, costs and photos (web: DayItinerary).
 class DayItinerary extends StatelessWidget {
@@ -40,11 +41,11 @@ class DayItinerary extends StatelessWidget {
                           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                         ),
                         const SizedBox(width: 6),
-                        Text('NGÀY ${day.dayNumber}', style: AppText.caps),
+                        Text(t('NGÀY {dayNumber}', {'dayNumber': day.dayNumber}), style: AppText.caps),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(day.title.isEmpty ? 'Chưa đặt tên' : day.title, style: AppText.h3),
+                    Text(day.title.isEmpty ? t('Chưa đặt tên') : day.title, style: AppText.h3),
                     if (day.date.isNotEmpty) Text(formatLongDate(day.date), style: AppText.meta),
                   ],
                 ),
@@ -53,7 +54,7 @@ class DayItinerary extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Ước tính', style: AppText.meta),
+                  Text(t('Ước tính'), style: AppText.meta),
                   Text(
                     formatVnd(dayCostOf(day)),
                     style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.cream),
@@ -75,7 +76,7 @@ class DayItinerary extends StatelessWidget {
                 separatorBuilder: (_, _) => const SizedBox(width: 10),
                 itemBuilder: (context, i) => Semantics(
                   button: true,
-                  label: 'Ảnh ${i + 1} của ngày ${day.dayNumber}',
+                  label: t('Ảnh {value} của ngày {dayNumber}', {'value': i + 1, 'dayNumber': day.dayNumber}),
                   child: GestureDetector(
                     onTap: () => showPhotoViewer(context, day.photos, i),
                     child: NetImage(day.photos[i], width: 168, height: 124, radius: AppRadius.md, placeholderColor: AppColors.canopy),
@@ -156,9 +157,9 @@ class _Stop extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: Text(location.name.isEmpty ? 'Điểm dừng ${index + 1}' : location.name, style: AppText.label)),
+                          Expanded(child: Text(location.name.isEmpty ? t('Điểm dừng {value}', {'value': index + 1}) : location.name, style: AppText.label)),
                           const SizedBox(width: 10),
-                          Text(location.estCost > 0 ? formatVnd(location.estCost) : 'Miễn phí', style: AppText.meta),
+                          Text(location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí'), style: AppText.meta),
                         ],
                       ),
                       if (address.isNotEmpty || pinned) ...[
@@ -180,7 +181,7 @@ class _Stop extends StatelessWidget {
                                     if (address.isNotEmpty && pinned) const TextSpan(text: ' · '),
                                     if (pinned)
                                       TextSpan(
-                                        text: 'Chỉ đường',
+                                        text: t('Chỉ đường'),
                                         style: const TextStyle(decoration: TextDecoration.underline, color: AppColors.body),
                                         recognizer: TapGestureRecognizer()..onTap = () => openExternal(googleDirectionsUrl(location.lat, location.lng)),
                                       ),
@@ -196,7 +197,7 @@ class _Stop extends StatelessWidget {
                         const SizedBox(height: 8),
                         Semantics(
                           button: true,
-                          label: 'Xem ảnh ${location.name.isEmpty ? 'điểm dừng ${index + 1}' : location.name} cỡ lớn',
+                          label: t('Xem ảnh {value} cỡ lớn', {'value': location.name.isEmpty ? t('điểm dừng {value}', {'value': index + 1}) : location.name}),
                           child: GestureDetector(
                             onTap: () => showPhotoViewer(context, [location.photoUrl!], 0),
                             child: ConstrainedBox(
@@ -251,7 +252,7 @@ class _PostGalleryState extends State<PostGallery> {
             onPageChanged: (i) => setState(() => _index = i),
             itemBuilder: (context, i) => Semantics(
               button: true,
-              label: 'Ảnh ${i + 1} trên ${photos.length}',
+              label: t('Ảnh {value} trên {n}', {'value': i + 1, 'n': photos.length}),
               child: GestureDetector(
                 onTap: () => showPhotoViewer(context, photos, i),
                 child: NetImage(photos[i], placeholderColor: AppColors.canopy),

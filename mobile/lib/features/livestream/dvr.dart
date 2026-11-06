@@ -15,11 +15,12 @@ import 'package:video_player/video_player.dart';
 
 import '../../data/api.dart';
 import '../../data/services/livestream_service.dart';
+import '../../core/i18n.dart';
 
 String _dvrError(Object error) {
-  if (error is ApiError && error.code == 'DVR_UNAVAILABLE') return 'Buổi phát này không được ghi lại nên không tua được.';
-  if (error is ApiError && error.code == 'DVR_NOT_READY') return 'Chưa có đoạn nào để tua. Thử lại sau vài giây nhé.';
-  return 'Không tải được đoạn đã phát. Vui lòng thử lại.';
+  if (error is ApiError && error.code == 'DVR_UNAVAILABLE') return t('Buổi phát này không được ghi lại nên không tua được.');
+  if (error is ApiError && error.code == 'DVR_NOT_READY') return t('Chưa có đoạn nào để tua. Thử lại sau vài giây nhé.');
+  return t('Không tải được đoạn đã phát. Vui lòng thử lại.');
 }
 
 class DvrController extends ChangeNotifier {

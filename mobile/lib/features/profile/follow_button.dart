@@ -10,6 +10,7 @@ import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/sheets.dart';
 import '../post/post_actions.dart';
+import '../../core/i18n.dart';
 
 /// Follow or unfollow, flipping the moment it is pressed (web: FollowButton).
 class FollowButton extends ConsumerStatefulWidget {
@@ -56,7 +57,7 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
     final loading = viewerId != null && overlay == null && (server?.isLoading ?? false) && !(server?.hasValue ?? false);
 
     return AppButton(
-      label: following ? 'Đang theo dõi' : 'Theo dõi',
+      label: following ? t('Đang theo dõi') : t('Theo dõi'),
       icon: following ? LucideIcons.check : LucideIcons.userPlus,
       variant: following ? ButtonVariant.secondary : ButtonVariant.primary,
       size: widget.size,

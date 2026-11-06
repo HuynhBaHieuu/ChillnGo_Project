@@ -15,6 +15,7 @@ import '../checkin/checkin_card.dart';
 import '../livestream/live_cards.dart';
 import '../post/trip_card.dart';
 import '../shell/tab_header.dart';
+import '../../core/i18n.dart';
 
 /// Recorded streams that are over, for the Newsfeed (comma-joined authors, '' for everyone).
 final _feedReplaysProvider = FutureProvider.family<CursorPage<Livestream>, String>((ref, authorsKey) {
@@ -104,14 +105,14 @@ class FeedScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           user != null
-                              ? 'Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.'
-                              : 'Những hành trình và check-in mới nhất trên ChillnGo. Đăng nhập để chỉ xem người bạn theo dõi.',
+                              ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.')
+                              : t('Những hành trình và check-in mới nhất trên ChillnGo. Đăng nhập để chỉ xem người bạn theo dõi.'),
                           style: AppText.meta,
                         ),
                         const SizedBox(height: 14),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: AppButton(label: 'Khám phá thêm', icon: LucideIcons.compass, onPressed: () => context.go('/discover')),
+                          child: AppButton(label: t('Khám phá thêm'), icon: LucideIcons.compass, onPressed: () => context.go('/discover')),
                         ),
                         const SizedBox(height: 22),
                         if (user != null) ...[PostComposer(user: user), const SizedBox(height: 16)],
@@ -123,9 +124,9 @@ class FeedScreen extends ConsumerWidget {
                         if (posts.hasValue && items.isEmpty && liveNow.isEmpty)
                           EmptyState(
                             icon: LucideIcons.users,
-                            title: 'Newsfeed đang trống',
-                            description: 'Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá.',
-                            action: AppButton(label: 'Khám phá hành trình', onPressed: () => context.go('/discover')),
+                            title: t('Newsfeed đang trống'),
+                            description: t('Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá.'),
+                            action: AppButton(label: t('Khám phá hành trình'), onPressed: () => context.go('/discover')),
                           ),
                       ],
                     ),
@@ -192,7 +193,7 @@ class PostComposer extends StatelessWidget {
           Expanded(
             child: Semantics(
               button: true,
-              label: 'Đăng hành trình mới',
+              label: t('Đăng hành trình mới'),
               child: Material(
                 color: AppColors.well,
                 shape: const StadiumBorder(side: BorderSide(color: Color(0x99000000))),
@@ -203,16 +204,16 @@ class PostComposer extends StatelessWidget {
                     height: 44,
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Text('Bạn vừa đi đâu?', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta),
+                    child: Text(t('Bạn vừa đi đâu?'), maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta),
                   ),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          round(LucideIcons.imagePlus, AppColors.teal, 'Check-in: ảnh, cảm xúc và địa điểm', () => context.push('/checkin/new?start=photos')),
+          round(LucideIcons.imagePlus, AppColors.teal, t('Check-in: ảnh, cảm xúc và địa điểm'), () => context.push('/checkin/new?start=photos')),
           const SizedBox(width: 8),
-          round(LucideIcons.video, AppColors.social, 'Phát trực tiếp', () => context.push('/live/new')),
+          round(LucideIcons.video, AppColors.social, t('Phát trực tiếp'), () => context.push('/live/new')),
         ],
       ),
     );

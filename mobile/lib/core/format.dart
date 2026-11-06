@@ -1,5 +1,14 @@
-/// Numbers, money and dates in Vietnamese (web/src/lib/format.ts).
+/// Numbers, money and dates (web/src/lib/format.ts). Dates read the Vietnamese
+/// way in Vietnamese, and as intl formats them in the other languages.
 library;
+
+import 'package:intl/intl.dart';
+
+import 'i18n.dart';
+
+bool get _vi => locale.value == 'vi';
+
+String get _tag => localeTags[locale.value]!;
 
 /// 1910000 → "1.910.000"
 String groupThousands(num amount) {
@@ -61,41 +70,41 @@ String relativeTime(String iso) {
 
   String text;
   if (seconds < 30) {
-    text = 'dưới 1 phút';
+    text = t('dưới 1 phút');
   } else if (minutes < 45) {
-    text = '${minutes < 1 ? 1 : minutes} phút';
+    text = t('{value} phút', {'value': minutes < 1 ? 1 : minutes});
   } else if (minutes < 90) {
-    text = 'khoảng 1 giờ';
+    text = t('khoảng 1 giờ');
   } else if (minutes < 1440) {
-    text = 'khoảng ${(minutes / 60).round()} giờ';
+    text = t('khoảng {value} giờ', {'value': (minutes / 60).round()});
   } else if (minutes < 2520) {
-    text = '1 ngày';
+    text = t('1 ngày');
   } else if (minutes < 43200) {
-    text = '${(minutes / 1440).round()} ngày';
+    text = t('{value} ngày', {'value': (minutes / 1440).round()});
   } else if (minutes < 86400) {
-    text = 'khoảng ${(minutes / 43200).round()} tháng';
+    text = t('khoảng {value} tháng', {'value': (minutes / 43200).round()});
   } else if (minutes < 525600) {
-    text = '${(minutes / 43200).round()} tháng';
+    text = t('{value} tháng', {'value': (minutes / 43200).round()});
   } else {
     final years = minutes / 525600;
     final whole = years.floor();
     final rest = years - whole;
     if (rest < 0.25) {
-      text = 'khoảng $whole năm';
+      text = t('khoảng {whole} năm', {'whole': whole});
     } else if (rest < 0.75) {
-      text = 'hơn $whole năm';
+      text = t('hơn {whole} năm', {'whole': whole});
     } else {
-      text = 'gần ${whole + 1} năm';
+      text = t('gần {value} năm', {'value': whole + 1});
     }
   }
-  return future ? '$text nữa' : '$text trước';
+  return future ? t('{text} nữa', {'text': text}) : t('{text} trước', {'text': text});
 }
 
 /// "vừa xong" under a minute, otherwise [relativeTime].
 String timeAgo(String iso) {
   final date = parseDate(iso);
   if (date == null) return '';
-  if (DateTime.now().difference(date).inSeconds.abs() < 60) return 'vừa xong';
+  if (DateTime.now().difference(date).inSeconds.abs() < 60) return t('vừa xong');
   return relativeTime(iso);
 }
 
@@ -103,6 +112,7 @@ String timeAgo(String iso) {
 String formatLongDate(String date) {
   final d = parseDate(date);
   if (d == null) return date;
+  if (!_vi) return DateFormat.yMMMMEEEEd(_tag).format(d);
   return '${_weekdays[d.weekday - 1]}, ${d.day} thg ${d.month} ${d.year}';
 }
 
@@ -110,6 +120,7 @@ String formatLongDate(String date) {
 String formatShortDate(String date) {
   final d = parseDate(date);
   if (d == null) return date;
+  if (!_vi) return DateFormat.yMd(_tag).format(d);
   return '${_two(d.day)}/${_two(d.month)}/${d.year}';
 }
 
@@ -118,6 +129,7 @@ String formatDateRange(String start, String end) {
   final from = parseDate(start);
   final to = parseDate(end);
   if (from == null || to == null) return '$start – $end';
+  if (!_vi) return '${DateFormat.MMMd(_tag).format(from)} – ${DateFormat.yMMMd(_tag).format(to)}';
   if (from.year == to.year && from.month == to.month) {
     return '${from.day} – ${to.day} thg ${to.month}, ${to.year}';
   }
@@ -127,7 +139,8 @@ String formatDateRange(String start, String end) {
 /// "14:05, 12/03/2026"; "Chưa từng" when there is no date.
 String formatDateTime(String? iso) {
   final d = parseDate(iso);
-  if (d == null) return iso == null || iso.isEmpty ? 'Chưa từng' : iso;
+  if (d == null) return iso == null || iso.isEmpty ? t('Chưa từng') : iso;
+  if (!_vi) return DateFormat.yMd(_tag).add_Hm().format(d);
   return '${_two(d.hour)}:${_two(d.minute)}, ${_two(d.day)}/${_two(d.month)}/${d.year}';
 }
 
@@ -156,7 +169,7 @@ int daysUntil(String iso) {
 }
 
 /// "4N3Đ" from a day count.
-String tripLengthLabel(int dayCount) => '${dayCount}N${dayCount - 1 < 0 ? 0 : dayCount - 1}Đ';
+String tripLengthLabel(int dayCount) => t('{days}N{nights}Đ', {'days': dayCount, 'nights': dayCount - 1 < 0 ? 0 : dayCount - 1});
 
 /// "1:05:12" or "12:04"
 String clockDuration(num totalSeconds) {

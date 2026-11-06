@@ -6,6 +6,7 @@ import '../core/text.dart';
 import '../core/theme.dart';
 import '../data/api.dart';
 import 'buttons.dart';
+import '../core/i18n.dart';
 
 enum Surface { card, surface, featured, well, live }
 
@@ -370,12 +371,12 @@ class ErrorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: LucideIcons.triangleAlert,
-      title: title,
+      title: tx(title),
       description: errorMessage(error),
       compact: true,
       action: onRetry == null
           ? null
-          : AppButton(label: 'Thử lại', icon: LucideIcons.refreshCw, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: onRetry),
+          : AppButton(label: t('Thử lại'), icon: LucideIcons.refreshCw, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: onRetry),
     );
   }
 }

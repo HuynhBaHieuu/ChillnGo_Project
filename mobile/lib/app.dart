@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/i18n.dart';
 import 'core/theme.dart';
 import 'data/api.dart';
 import 'data/services/auth_service.dart';
@@ -23,6 +24,7 @@ class _ChillnGoAppState extends ConsumerState<ChillnGoApp> {
   void initState() {
     super.initState();
     _syncSession();
+    locale.addListener(_relabel);
     // Back in the app: re-read the account (it may have been locked) and refresh live data.
     _lifecycle = AppLifecycleListener(
       onResume: () {
@@ -36,7 +38,19 @@ class _ChillnGoAppState extends ConsumerState<ChillnGoApp> {
   @override
   void dispose() {
     _lifecycle.dispose();
+    locale.removeListener(_relabel);
     super.dispose();
+  }
+
+  /// A new language rebuilds every screen, const ones too, so plain t() calls read it (web: App.tsx remounts).
+  void _relabel() {
+    void mark(Element element) {
+      element.markNeedsBuild();
+      element.visitChildren(mark);
+    }
+
+    setState(() {});
+    (context as Element).visitChildren(mark);
   }
 
   /// SessionSync: the stored user is refreshed from /api/auth/me. A rejected
@@ -61,8 +75,8 @@ class _ChillnGoAppState extends ConsumerState<ChillnGoApp> {
       darkTheme: buildTheme(),
       themeMode: ThemeMode.dark,
       routerConfig: appRouter,
-      locale: const Locale('vi'),
-      supportedLocales: const [Locale('vi'), Locale('en')],
+      locale: Locale(locale.value),
+      supportedLocales: [for (final code in locales.keys) Locale(code)],
       localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
     );
   }

@@ -126,7 +126,10 @@ Map<String, Object?> parseTripReply(String raw, Slot? asking, List<({String valu
     out['pace'] = 'moderate';
   }
 
-  final picked = [for (final i in interests) if (text.contains(i.label.toLowerCase())) i.value];
+  final picked = [
+    for (final i in interests)
+      if (text.contains(i.label.toLowerCase())) i.value,
+  ];
   if (picked.isNotEmpty) {
     out['interests'] = picked;
   } else if (asking == Slot.interests && RegExp(r'^(tất cả|all|gì cũng được)$').hasMatch(text)) {

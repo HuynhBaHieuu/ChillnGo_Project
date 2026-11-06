@@ -15,16 +15,17 @@ import '../../ui/navigation.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../map/route_map.dart';
+import '../../core/i18n.dart';
 
 /// What a change did, and its colour in the diff.
 (String, Color) _labelOf(AiChange c) => switch ((c.type, c.status)) {
-  ('keep', _) => ('Giữ nguyên', AppColors.sage),
-  ('replace', 'reverted') => ('Dùng điểm gốc', AppColors.sage),
-  ('replace', _) => ('Thay thế', AppColors.ochre),
-  ('add', 'reverted') => ('Bạn đã bỏ', AppColors.meta),
-  ('add', _) => ('Thêm mới', AppColors.teal),
-  (_, 'reverted') => ('Khôi phục', AppColors.sage),
-  _ => ('Đã bỏ', AppColors.destructive),
+  ('keep', _) => (t('Giữ nguyên'), AppColors.sage),
+  ('replace', 'reverted') => (t('Dùng điểm gốc'), AppColors.sage),
+  ('replace', _) => (t('Thay thế'), AppColors.ochre),
+  ('add', 'reverted') => (t('Bạn đã bỏ'), AppColors.meta),
+  ('add', _) => (t('Thêm mới'), AppColors.teal),
+  (_, 'reverted') => (t('Khôi phục'), AppColors.sage),
+  _ => (t('Đã bỏ'), AppColors.destructive),
 };
 
 /// The buttons a change offers in its current state: label, the status it sets, icon.
@@ -32,22 +33,22 @@ List<(String, String, IconData)> _actionsOf(AiChange c) {
   final pending = c.status == 'pending';
   return switch ((c.type, c.status)) {
     ('keep', _) => [],
-    ('replace', 'reverted') => [('Dùng gợi ý AI', 'pending', LucideIcons.sparkles)],
-    ('replace', _) => [if (pending) ('Chấp nhận', 'accepted', LucideIcons.check), ('Hoàn tác', 'reverted', LucideIcons.undo2)],
-    ('add', 'reverted') => [('Thêm lại', 'pending', LucideIcons.rotateCcw)],
-    ('add', _) => [if (pending) ('Chấp nhận', 'accepted', LucideIcons.check), ('Bỏ điểm này', 'reverted', LucideIcons.undo2)],
-    (_, 'reverted') => [('Bỏ lại', 'pending', LucideIcons.undo2)],
-    _ => [if (pending) ('Đồng ý bỏ', 'accepted', LucideIcons.check), ('Khôi phục', 'reverted', LucideIcons.rotateCcw)],
+    ('replace', 'reverted') => [(t('Dùng gợi ý AI'), 'pending', LucideIcons.sparkles)],
+    ('replace', _) => [if (pending) (t('Chấp nhận'), 'accepted', LucideIcons.check), (t('Hoàn tác'), 'reverted', LucideIcons.undo2)],
+    ('add', 'reverted') => [(t('Thêm lại'), 'pending', LucideIcons.rotateCcw)],
+    ('add', _) => [if (pending) (t('Chấp nhận'), 'accepted', LucideIcons.check), (t('Bỏ điểm này'), 'reverted', LucideIcons.undo2)],
+    (_, 'reverted') => [(t('Bỏ lại'), 'pending', LucideIcons.undo2)],
+    _ => [if (pending) (t('Đồng ý bỏ'), 'accepted', LucideIcons.check), (t('Khôi phục'), 'reverted', LucideIcons.rotateCcw)],
   };
 }
 
 /// Facts ChillnGo has about a place; unknown ones are left out.
 List<String> _factsOf(AiPlace p) => [
-  ?p.category,
-  if (p.opens != null && p.closes != null) 'Mở ${p.opens} - ${p.closes}',
-  if (p.isOutdoor == true) 'Ngoài trời',
-  if (p.isOutdoor == false) 'Trong nhà',
-  if (p.requiresBooking == true) 'Cần đặt trước',
+  if (p.category != null) tx(p.category!),
+  if (p.opens != null && p.closes != null) t('Mở {opens} - {closes}', {'opens': p.opens, 'closes': p.closes}),
+  if (p.isOutdoor == true) t('Ngoài trời'),
+  if (p.isOutdoor == false) t('Trong nhà'),
+  if (p.requiresBooking == true) t('Cần đặt trước'),
   if (p.rating != null) '★ ${p.rating!.toStringAsFixed(1).replaceAll('.', ',')}',
 ];
 
@@ -115,8 +116,8 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
   void _optimize(int day) => _edit('route$day', () async {
     final r = await AiCloneService.optimizeRoute(widget.id, day);
     _routeNotes[day] = r.changed
-        ? 'Đã sắp lại tuyến: quãng đường ước tính từ ${_km(r.beforeKm)} còn ${_km(r.afterKm)}. Bữa ăn giữ nguyên giờ.'
-        : 'Thứ tự hiện tại đã cho tuyến ngắn hơn, nên giữ nguyên.';
+        ? t('Đã sắp lại tuyến: quãng đường ước tính từ {value} còn {value2}. Bữa ăn giữ nguyên giờ.', {'value': _km(r.beforeKm), 'value2': _km(r.afterKm)})
+        : t('Thứ tự hiện tại đã cho tuyến ngắn hơn, nên giữ nguyên.');
     return r.draft;
   });
 
@@ -139,7 +140,7 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
 
   void _openChat(AiDraft draft) => showAppSheet<void>(
     context,
-    title: 'Chỉnh bằng lời',
+    title: t('Chỉnh bằng lời'),
     tall: true,
     scroll: false,
     builder: (_) => _ChatSheet(draft: draft, onDraft: (d) => setState(() => _draft = d)),
@@ -157,9 +158,9 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
               ? ListView(children: [const Skeleton(height: 34), for (var i = 0; i < 3; i++) ...[const SizedBox(height: 14), const Skeleton(height: 140, radius: AppRadius.lg)]])
               : Center(
                   child: EmptyState(
-                    title: 'Không mở được bản nháp',
-                    description: errorMessage(_loadError, 'Bản nháp có thể đã hết hạn.'),
-                    action: AppButton(label: 'Về lịch trình của tôi', variant: ButtonVariant.outline, onPressed: () => context.pushReplacement('/itineraries?tab=cloned')),
+                    title: t('Không mở được bản nháp'),
+                    description: errorMessage(_loadError, t('Bản nháp có thể đã hết hạn.')),
+                    action: AppButton(label: t('Về lịch trình của tôi'), variant: ButtonVariant.outline, onPressed: () => context.pushReplacement('/itineraries?tab=cloned')),
                   ),
                 ),
         ),
@@ -170,15 +171,15 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
     final form = draft.form;
     final shown = _day == 0 ? draft.days : draft.days.where((d) => d.dayIndex == _day).toList();
     final season = [
-      if (draft.rainy) 'Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở ${draft.destination ?? 'điểm đến'}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.',
-      if (draft.peak) 'Đang mùa cao điểm: nên đặt phòng và vé sớm.',
-      for (final f in draft.festivals) 'Trong thời gian này có ${f.name} (tháng ${f.month}).',
+      if (draft.rainy) t('Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở {value}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.', {'value': draft.destination ?? t('điểm đến')}),
+      if (draft.peak) t('Đang mùa cao điểm: nên đặt phòng và vé sớm.'),
+      for (final f in draft.festivals) t('Trong thời gian này có {name} (tháng {month}).', {'name': f.name, 'month': f.month}),
     ];
 
     return Scaffold(
       appBar: AppBar(
         leading: const BackOrHome(),
-        title: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(LucideIcons.sparkles, size: 18, color: AppColors.teal), const SizedBox(width: 8), const Text('Bản nháp AI')]),
+        title: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(LucideIcons.sparkles, size: 18, color: AppColors.teal), const SizedBox(width: 8), Text(t('Bản nháp AI'))]),
       ),
       bottomNavigationBar: _BottomBar(
         committed: committed,
@@ -193,26 +194,25 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 32),
           children: [
-            Text('${draft.destination ?? 'Lịch trình'} ${form.days} ngày cho ${form.groupSize} người', style: AppText.h1),
+            Text(t('{value} {days} ngày cho {groupSize} người', {'value': draft.destination ?? t('Lịch trình'), 'days': form.days, 'groupSize': form.groupSize}), style: AppText.h1),
             const SizedBox(height: 6),
             Text(
-              '${draft.sources.length > 1 ? 'Gộp từ các hành trình' : 'Phỏng theo hành trình'} '
-              '${draft.sources.map((s) => '“${s.title}”${s.author == null ? '' : ' của @${s.author}'}').join(', ')}. Khởi hành ${formatLongDate(form.startDate)}.',
+              t('{value} {value2}. Khởi hành {date}.', {'value': draft.sources.length > 1 ? t('Gộp từ các hành trình') : t('Phỏng theo hành trình'), 'value2': draft.sources.map((s) => '“${s.title}”${s.author == null ? '' : t(' của @{author}', {'author': s.author})}').join(', '), 'date': formatLongDate(form.startDate)}),
               style: AppText.meta,
             ),
             if (draft.sources.isNotEmpty)
               Align(
                 alignment: Alignment.centerLeft,
-                child: TextLink(label: 'Xem hành trình gốc', icon: LucideIcons.arrowUpRight, onPressed: () => context.push('/posts/${draft.sources.first.postId}')),
+                child: TextLink(label: t('Xem hành trình gốc'), icon: LucideIcons.arrowUpRight, onPressed: () => context.push('/posts/${draft.sources.first.postId}')),
               ),
             for (final note in season) _Note(icon: LucideIcons.cloudRain, color: AppColors.teal, text: note),
             const SizedBox(height: 12),
             _CostCard(draft: draft, failure: _failure, busy: _busy != null, onAcceptAll: () => _edit('all', () => AiCloneService.acceptAll(widget.id))),
             const SizedBox(height: 16),
-            RouteMap(days: draft.mapDays, height: 220, label: 'Bản đồ các điểm trong bản nháp'),
+            RouteMap(days: draft.mapDays, height: 220, label: t('Bản đồ các điểm trong bản nháp')),
             const SizedBox(height: 16),
             SegmentTabs<int>(
-              items: [(value: 0, label: 'Tất cả', count: null), for (final d in draft.days) (value: d.dayIndex, label: 'Ngày ${d.dayIndex}', count: null)],
+              items: [(value: 0, label: t('Tất cả'), count: null), for (final d in draft.days) (value: d.dayIndex, label: t('Ngày {dayIndex}', {'dayIndex': d.dayIndex}), count: null)],
               value: _day,
               onChanged: (v) => setState(() => _day = v),
             ),
@@ -222,10 +222,10 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
                 children: [
                   Container(width: 10, height: 10, decoration: BoxDecoration(color: dayColor(d.dayIndex), shape: BoxShape.circle)),
                   const SizedBox(width: 8),
-                  Expanded(child: Text('Ngày ${d.dayIndex}', style: AppText.h2)),
+                  Expanded(child: Text(t('Ngày {dayIndex}', {'dayIndex': d.dayIndex}), style: AppText.h2)),
                   if (!committed && d.stops.length >= 3)
                     AppButton(
-                      label: 'Tối ưu tuyến',
+                      label: t('Tối ưu tuyến'),
                       icon: LucideIcons.route,
                       size: ButtonSize.sm,
                       variant: ButtonVariant.outline,
@@ -236,11 +236,11 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${formatLongDate(d.date)} · ước tính ${formatVnd(d.cost)}${d.missing > 0 ? ', ${d.missing} điểm chưa có giá' : ''}',
+                t('{date} · ước tính {amount}{value}', {'date': formatLongDate(d.date), 'amount': formatVnd(d.cost), 'value': d.missing > 0 ? t(', {missing} điểm chưa có giá', {'missing': d.missing}) : ''}),
                 style: AppText.meta,
               ),
               if (_routeNotes[d.dayIndex] != null) _Note(icon: LucideIcons.route, color: AppColors.teal, text: _routeNotes[d.dayIndex]!),
-              if (d.stops.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text('Ngày này chưa có điểm nào.', style: AppText.meta)),
+              if (d.stops.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(t('Ngày này chưa có điểm nào.'), style: AppText.meta)),
               for (final (i, stop) in d.stops.indexed)
                 _StopCard(
                   stop: stop,
@@ -253,9 +253,9 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
             ],
             if (draft.notInPlan.isNotEmpty) ...[
               const SizedBox(height: 26),
-              Text('Không có trong lịch trình', style: AppText.h2),
+              Text(t('Không có trong lịch trình'), style: AppText.h2),
               const SizedBox(height: 4),
-              Text('Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.', style: AppText.meta),
+              Text(t('Điểm của hành trình gốc mà AI đã bỏ, và gợi ý bạn đã gạt đi. Khôi phục để đưa lại vào lịch trình.'), style: AppText.meta),
               for (final item in draft.notInPlan)
                 _StopCard(
                   stop: item,
@@ -266,13 +266,13 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
             ],
             const SizedBox(height: 26),
             SectionHeader(
-              title: 'Chuẩn bị cho chuyến đi',
+              title: t('Chuẩn bị cho chuyến đi'),
               icon: LucideIcons.listChecks,
               iconColor: AppColors.teal,
               action: committed
                   ? null
                   : AppButton(
-                      label: draft.checklist == null ? 'Tạo checklist' : 'Tạo lại',
+                      label: draft.checklist == null ? t('Tạo checklist') : t('Tạo lại'),
                       size: ButtonSize.sm,
                       variant: ButtonVariant.outline,
                       loading: _busy == 'checklist',
@@ -282,10 +282,10 @@ class _AiDraftScreenState extends ConsumerState<AiDraftScreen> {
             const SizedBox(height: 6),
             Text(
               draft.checklist == null
-                  ? 'Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.'
+                  ? t('Đồ cần mang và chỗ cần đặt trước, chọn theo các điểm, mùa và nhóm của bạn. AI chỉ sắp xếp, không thêm mục.')
                   : draft.checklist!.sortedByAi
-                  ? 'AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.'
-                  : 'Theo thứ tự mặc định của ChillnGo.',
+                  ? t('AI đã sắp theo chuyến đi của bạn, từ danh sách có sẵn của ChillnGo.')
+                  : t('Theo thứ tự mặc định của ChillnGo.'),
               style: AppText.meta,
             ),
             if (draft.checklist != null) ChecklistGroups(draft.checklist!),
@@ -354,26 +354,26 @@ class _CostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Tổng chi phí ước tính', style: AppText.meta),
+          Text(t('Tổng chi phí ước tính'), style: AppText.meta),
           Text(formatVnd(draft.cost), style: AppText.hero.copyWith(color: draft.overBudget ? AppColors.destructive : null)),
-          if (budget != null) Text('Ngân sách ${formatVnd(budget)}', style: AppText.meta),
+          if (budget != null) Text(t('Ngân sách {amount}', {'amount': formatVnd(budget)}), style: AppText.meta),
           const SizedBox(height: 6),
           Text(
             [
-              if (draft.overBudget && budget != null) 'Vượt ngân sách ${formatVnd(draft.cost - budget)}.',
-              draft.costMissing > 0 ? '${draft.costMissing} điểm chưa có dữ liệu giá, chưa tính vào tổng.' : 'Tính từ giá trung bình trong dữ liệu ChillnGo nhân số người.',
+              if (draft.overBudget && budget != null) t('Vượt ngân sách {amount}.', {'amount': formatVnd(draft.cost - budget)}),
+              draft.costMissing > 0 ? t('{costMissing} điểm chưa có dữ liệu giá, chưa tính vào tổng.', {'costMissing': draft.costMissing}) : t('Tính từ giá trung bình trong dữ liệu ChillnGo nhân số người.'),
             ].join(' '),
             style: AppText.meta.copyWith(color: draft.overBudget ? AppColors.destructive : null),
           ),
-          Text('Bản nháp tự xoá sau 24 giờ, lúc ${formatDateTime(draft.expiresAt)}.', style: AppText.meta),
+          Text(t('Bản nháp tự xoá sau 24 giờ, lúc {time}.', {'time': formatDateTime(draft.expiresAt)}), style: AppText.meta),
           for (final w in draft.warnings) _Note(icon: LucideIcons.triangleAlert, color: AppColors.ochre, text: w),
           if (!committed) ...[
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: Text(draft.pendingCount > 0 ? 'Còn ${draft.pendingCount} thay đổi chờ duyệt' : 'Đã duyệt hết thay đổi', style: AppText.label)),
+                Expanded(child: Text(draft.pendingCount > 0 ? t('Còn {n} thay đổi chờ duyệt', {'n': draft.pendingCount}) : t('Đã duyệt hết thay đổi'), style: AppText.label)),
                 AppButton(
-                  label: 'Chấp nhận tất cả',
+                  label: t('Chấp nhận tất cả'),
                   icon: LucideIcons.checkCheck,
                   size: ButtonSize.sm,
                   variant: ButtonVariant.outline,
@@ -406,11 +406,11 @@ class _StopCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final place = stop.place;
     final (label, tone) = _labelOf(stop);
-    final cost = place.cost == null ? 'Chưa có dữ liệu' : place.cost == 0 ? 'Miễn phí' : formatVnd(place.cost!);
+    final cost = place.cost == null ? t('Chưa có dữ liệu') : place.cost == 0 ? t('Miễn phí') : formatVnd(place.cost!);
     final costNote = place.costBasis == 'perPerson' && place.avgCost != null
-        ? '${formatVnd(place.avgCost!)}/người'
+        ? t('{amount}/người', {'amount': formatVnd(place.avgCost!)})
         : place.costBasis == 'author'
-        ? 'theo chi phí tác giả ghi'
+        ? t('theo chi phí tác giả ghi')
         : null;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -438,7 +438,7 @@ class _StopCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              [if (order != null) '${stop.startTime} - ${stop.endTime}', ..._factsOf(place), if (stop.status == 'accepted' && stop.type != 'keep') 'đã chấp nhận'].join(' · '),
+              [if (order != null) '${stop.startTime} - ${stop.endTime}', ..._factsOf(place), if (stop.status == 'accepted' && stop.type != 'keep') t('đã chấp nhận')].join(' · '),
               style: AppText.meta,
             ),
             if (order != null) Text([cost, ?costNote].join(', '), style: AppText.bodySmall.copyWith(color: AppColors.cream, fontWeight: FontWeight.w600)),
@@ -491,12 +491,12 @@ class _BottomBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(kGutter, 10, kGutter, 10),
         child: committed
-            ? AppButton(label: 'Đã lưu, mở lịch trình', icon: LucideIcons.checkCheck, fullWidth: true, onPressed: onOpen)
+            ? AppButton(label: t('Đã lưu, mở lịch trình'), icon: LucideIcons.checkCheck, fullWidth: true, onPressed: onOpen)
             : Row(
                 children: [
-                  Expanded(child: AppButton(label: 'Chỉnh bằng lời', icon: LucideIcons.messageSquare, variant: ButtonVariant.outline, onPressed: busy ? null : onChat)),
+                  Expanded(child: AppButton(label: t('Chỉnh bằng lời'), icon: LucideIcons.messageSquare, variant: ButtonVariant.outline, onPressed: busy ? null : onChat)),
                   const SizedBox(width: 10),
-                  Expanded(child: AppButton(label: 'Lưu lịch trình', icon: LucideIcons.save, loading: saving, onPressed: busy ? null : onSave)),
+                  Expanded(child: AppButton(label: t('Lưu lịch trình'), icon: LucideIcons.save, loading: saving, onPressed: busy ? null : onSave)),
                 ],
               ),
       ),
@@ -505,7 +505,7 @@ class _BottomBar extends StatelessWidget {
 }
 
 /// Requests people often make; a tap puts one in the box, it does not spend a request.
-const _suggestions = ['Rẻ hơn một chút', 'Thêm một quán ăn địa phương', 'Thêm điểm trong nhà phòng khi mưa', 'Bớt một điểm để đi thong thả hơn'];
+List<String> get _suggestions => [t('Rẻ hơn một chút'), t('Thêm một quán ăn địa phương'), t('Thêm điểm trong nhà phòng khi mưa'), t('Bớt một điểm để đi thong thả hơn')];
 
 /// Edit the draft in words (web: ChatPanel). Each message is one AI request.
 class _ChatSheet extends StatefulWidget {
@@ -557,9 +557,9 @@ class _ChatSheetState extends State<_ChatSheet> {
   Widget build(BuildContext context) {
     final sending = _sending;
     final items = [
-      ChatBubble(mine: false, child: Text('Ví dụ: “Bỏ chợ đêm, thêm một quán cà phê sáng ngày 2”. AI chỉ chọn địa điểm có trong dữ liệu ChillnGo.', style: AppText.meta)),
+      ChatBubble(mine: false, child: Text(t('Ví dụ: “Bỏ chợ đêm, thêm một quán cà phê sáng ngày 2”. AI chỉ chọn địa điểm có trong dữ liệu ChillnGo.'), style: AppText.meta)),
       for (final m in _draft.chat) ChatBubble(mine: m.mine, text: m.text),
-      if (sending != null) ...[ChatBubble(mine: true, text: sending), const ChatPending('AI đang sửa lịch trình…')],
+      if (sending != null) ...[ChatBubble(mine: true, text: sending), ChatPending(t('AI đang sửa lịch trình…'))],
       if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(_error!, style: AppText.bodySmall.copyWith(color: AppColors.destructive))),
     ];
     return Column(
@@ -578,9 +578,9 @@ class _ChatSheetState extends State<_ChatSheet> {
               ],
             ),
           ),
-        ChatComposer(controller: _text, hint: 'Bạn muốn đổi gì?', enabled: sending == null && _draft.callsLeft > 0, onSend: _send),
+        ChatComposer(controller: _text, hint: t('Bạn muốn đổi gì?'), enabled: sending == null && _draft.callsLeft > 0, onSend: _send),
         const SizedBox(height: 6),
-        Text('Mỗi tin nhắn dùng một lượt AI, còn ${_draft.callsLeft}/${_draft.dailyLimit} lượt hôm nay.', style: AppText.meta.copyWith(fontSize: 12)),
+        Text(t('Mỗi tin nhắn dùng một lượt AI, còn {callsLeft}/{dailyLimit} lượt hôm nay.', {'callsLeft': _draft.callsLeft, 'dailyLimit': _draft.dailyLimit}), style: AppText.meta.copyWith(fontSize: 12)),
       ],
     );
   }

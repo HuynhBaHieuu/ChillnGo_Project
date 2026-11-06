@@ -5,6 +5,7 @@ import '../core/theme.dart';
 import '../data/api.dart';
 import 'buttons.dart';
 import 'fields.dart';
+import '../core/i18n.dart';
 
 /// A bottom sheet with a title, optional description, content and footer
 /// (web: Dialog, which phones show as a sheet).
@@ -96,6 +97,17 @@ Future<SelectOption<T>?> showOptionsSheet<T>(BuildContext context, {required Str
       ],
     ),
   );
+}
+
+/// Pick the app's language (web: LanguageSwitcher).
+Future<void> pickLanguage(BuildContext context) async {
+  final picked = await showOptionsSheet<String>(
+    context,
+    title: t('Ngôn ngữ'),
+    selected: locale.value,
+    options: [for (final l in locales.entries) SelectOption(l.key, l.value)],
+  );
+  if (picked != null) await setLocale(picked.value);
 }
 
 class _OptionTile<T> extends StatelessWidget {
@@ -202,8 +214,8 @@ Future<bool> confirmAction(
       title: title,
       description: description,
       content: content,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
+      confirmLabel: tx(confirmLabel),
+      cancelLabel: tx(cancelLabel),
       destructive: destructive,
       onConfirm: onConfirm,
     ),

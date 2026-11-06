@@ -4,6 +4,7 @@ import '../data/api.dart';
 import '../data/models.dart';
 import 'buttons.dart';
 import 'surfaces.dart';
+import '../core/i18n.dart';
 
 /// A list loaded page by page with "Xem thêm" (web: useInfiniteQuery + a
 /// "load more" button). Change [pageKey] to start over.
@@ -113,7 +114,7 @@ class PagedListState<T> extends State<PagedList<T>> {
         if (_error != null) ...[Text(errorMessage(_error), textAlign: TextAlign.center), const SizedBox(height: 8)],
         if (_next != null)
           Center(
-            child: AppButton(label: 'Xem thêm', variant: ButtonVariant.outline, loading: _loadingMore, onPressed: _more),
+            child: AppButton(label: t('Xem thêm'), variant: ButtonVariant.outline, loading: _loadingMore, onPressed: _more),
           ),
       ],
     );

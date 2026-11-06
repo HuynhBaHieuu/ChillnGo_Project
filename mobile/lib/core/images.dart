@@ -10,7 +10,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-const acceptedImagesLabel = 'Ảnh JPG, PNG, WebP hoặc HEIC';
+import '../core/i18n.dart';
+
+String get acceptedImagesLabel => t('Ảnh JPG, PNG, WebP hoặc HEIC');
 
 /// Originals larger than this are refused.
 const _maxBytes = 30 * 1024 * 1024;
@@ -38,19 +40,19 @@ final _picker = ImagePicker();
 Never _explain(PlatformException error) {
   final code = error.code.toLowerCase();
   if (code.contains('camera')) {
-    throw ImagePickError('Bạn chưa cho ChillnGo dùng camera. Hãy bật quyền Camera trong Cài đặt của điện thoại.');
+    throw ImagePickError(t('Bạn chưa cho ChillnGo dùng camera. Hãy bật quyền Camera trong Cài đặt của điện thoại.'));
   }
   if (code.contains('photo') || code.contains('access')) {
-    throw ImagePickError('Bạn chưa cho ChillnGo truy cập ảnh. Hãy bật quyền Ảnh trong Cài đặt của điện thoại.');
+    throw ImagePickError(t('Bạn chưa cho ChillnGo truy cập ảnh. Hãy bật quyền Ảnh trong Cài đặt của điện thoại.'));
   }
-  throw ImagePickError('Không mở được ảnh. Vui lòng thử lại.');
+  throw ImagePickError(t('Không mở được ảnh. Vui lòng thử lại.'));
 }
 
 Future<PickedImage?> _checked(XFile? file) async {
   if (file == null) return null;
   final mime = file.mimeType;
-  if (mime != null && !mime.startsWith('image/')) throw ImagePickError('Tệp này không phải ảnh.');
-  if (await file.length() > _maxBytes) throw ImagePickError('Ảnh quá lớn. Vui lòng chọn ảnh dưới 30 MB.');
+  if (mime != null && !mime.startsWith('image/')) throw ImagePickError(t('Tệp này không phải ảnh.'));
+  if (await file.length() > _maxBytes) throw ImagePickError(t('Ảnh quá lớn. Vui lòng chọn ảnh dưới 30 MB.'));
   return PickedImage(path: file.path, name: file.name);
 }
 
