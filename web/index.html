@@ -12,6 +12,18 @@
     <meta name="theme-color" content="#000000" />
     <meta name="keywords" content="mạng xã hội du lịch, lịch trình du lịch, chia sẻ hành trình, ChillnGo API" />
     <link rel="api-catalog" href="/.well-known/api-catalog" />
+    <link rel="canonical" href="https://chillgo-project-web.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ChillnGo" />
+    <meta property="og:title" content="ChillnGo — Mạng xã hội du lịch của những chuyến đi có thật" />
+    <meta property="og:description" content="Chia sẻ hành trình thật từng ngày, từng điểm dừng, từng khoản chi, và sao chép lịch trình du lịch chỉ với một chạm." />
+    <meta property="og:url" content="https://chillgo-project-web.vercel.app/" />
+    <meta property="og:image" content="https://chillgo-project-web.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ChillnGo — mạng xã hội du lịch" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Who ChillnGo is, for search engines and agents. Keep `keywords` to terms the page text uses. -->
     <script type="application/ld+json">
@@ -34,8 +46,15 @@
             "name": "ChillnGo",
             "url": "https://chillgo-project-web.vercel.app/",
             "logo": "https://chillgo-project-web.vercel.app/favicon.svg",
+            "description": "ChillnGo là mạng xã hội du lịch của những chuyến đi có thật, với ChillnGo API công khai cho nhà phát triển.",
             "knowsAbout": ["mạng xã hội du lịch", "lịch trình du lịch", "chia sẻ hành trình"],
-            "sameAs": ["https://github.com/HuynhBaHieuu/ChillnGo_Project"]
+            "sameAs": ["https://github.com/HuynhBaHieuu/ChillnGo_Project"],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "url": "https://chillgo-project-web.vercel.app/contact",
+              "availableLanguage": ["vi", "en"]
+            }
           }
         ]
       }
@@ -111,6 +130,13 @@
           <li><a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">ChillnGo trên GitHub</a></li>
         </ul>
         <p>Các trang công khai có bản Markdown khi gửi <code>Accept: text/markdown</code>.</p>
+
+        <h2>Về ChillnGo</h2>
+        <ul>
+          <li><a href="/about">Giới thiệu</a> — ChillnGo là gì và vì sao có ChillnGo.</li>
+          <li><a href="/contact">Liên hệ</a> — báo lỗi, góp ý, hỗ trợ tài khoản.</li>
+          <li><a href="/privacy">Chính sách quyền riêng tư</a> — ChillnGo lưu dữ liệu gì và vì sao.</li>
+        </ul>
       </main>
     </div>
     <script type="module" src="/src/main.tsx"></script>

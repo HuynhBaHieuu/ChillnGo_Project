@@ -6,6 +6,9 @@
     { "source": "/openapi.json", "destination": "https://chillgo-project.vercel.app/api/openapi.json" },
     { "source": "/developers", "destination": "/developers.html" },
     { "source": "/developers/cli", "destination": "/developers-cli.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
