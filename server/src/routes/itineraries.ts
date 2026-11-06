@@ -19,7 +19,7 @@ import { rateLimit } from 'express-rate-limit'
 import { Types, isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { addDays, creditClone, isServerPostId, readableJourney, rekeyDays, totalCostOf } from '../lib/journeys.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
@@ -36,7 +36,7 @@ const writeLimiter = rateLimit({
   limit: 120,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn thao tác quá nhanh. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn thao tác quá nhanh. Vui lòng đợi vài phút.'),
 })
 
 const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày không hợp lệ')

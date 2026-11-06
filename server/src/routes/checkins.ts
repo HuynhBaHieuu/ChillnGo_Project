@@ -15,7 +15,7 @@ import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
 import { confirmCheckinPhoto, destroyImages, signCheckinUpload } from '../lib/cloudinary.js'
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { FEELINGS } from '../lib/feelings.js'
 import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { requireAuth } from '../middleware/requireAuth.js'
@@ -33,7 +33,7 @@ const writeLimiter = rateLimit({
   limit: 60,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn thao tác quá nhanh. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn thao tác quá nhanh. Vui lòng đợi vài phút.'),
 })
 
 type CheckInDoc = InstanceType<typeof CheckIn>

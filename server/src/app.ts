@@ -3,7 +3,8 @@ import express from 'express'
 
 import { connectDb } from './db.js'
 import { env } from './env.js'
-import { HttpError, errorHandler } from './lib/errors.js'
+import { API_DOCS_PATH, HttpError, errorBody, errorHandler } from './lib/errors.js'
+import { OPENAPI_SERVERS, buildOpenApi } from './lib/openapi.js'
 import { getSettings } from './models/Setting.js'
 import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
@@ -34,6 +35,13 @@ app.use(express.json({ limit: '100kb' }))
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
+})
+
+// The machine-readable description of every route. No database needed. The
+// web app's domain proxies /api/* here too, so it lists both origins.
+const openApiDocument = buildOpenApi(OPENAPI_SERVERS)
+app.get(API_DOCS_PATH, (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=300').json(openApiDocument)
 })
 
 // Every other API route needs the database. Connecting here, lazily, keeps a
@@ -76,7 +84,7 @@ app.get('/api/settings/public', async (_req, res) => {
 })
 
 app.use((_req, res) => {
-  res.status(404).json({ message: 'Không tìm thấy' })
+  res.status(404).json(errorBody(404, 'Không tìm thấy', 'NOT_FOUND'))
 })
 
 app.use(errorHandler)

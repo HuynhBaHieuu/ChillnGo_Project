@@ -8,7 +8,7 @@ import { resetPasswordMessage } from '../emails/resetPassword.js'
 import { verifyEmailMessage } from '../emails/verifyEmail.js'
 import { assertNotLocked } from '../lib/accountStatus.js'
 import { env } from '../env.js'
-import { HttpError, duplicateKeyField } from '../lib/errors.js'
+import { HttpError, duplicateKeyField, rateLimitBody } from '../lib/errors.js'
 import { verifyGoogleCredential } from '../lib/google.js'
 import { findOrCreateGoogleUser } from '../lib/googleAccount.js'
 import { sendMail } from '../lib/mailer.js'
@@ -84,7 +84,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn thử quá nhiều lần. Vui lòng đợi vài phút rồi thử lại.' },
+  message: rateLimitBody('Bạn thử quá nhiều lần. Vui lòng đợi vài phút rồi thử lại.'),
 })
 
 /** Resend always answers 200, so every request counts here. */
@@ -93,7 +93,7 @@ const resendLimiter = rateLimit({
   limit: 5,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn đã yêu cầu gửi lại quá nhiều lần. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn đã yêu cầu gửi lại quá nhiều lần. Vui lòng đợi vài phút.'),
 })
 
 /** Forgot password always answers 200, so every request counts here too. */
@@ -102,7 +102,7 @@ const forgotLimiter = rateLimit({
   limit: 5,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn đã yêu cầu gửi lại quá nhiều lần. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn đã yêu cầu gửi lại quá nhiều lần. Vui lòng đợi vài phút.'),
 })
 
 function session(user: UserRecord) {

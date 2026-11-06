@@ -29,7 +29,7 @@ import { z } from 'zod'
 
 import { pauseIfSpent, providers } from '../ai/llm.js'
 import { TOOLS, runTool } from '../lib/assistantTools.js'
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 
@@ -122,7 +122,7 @@ const limiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   keyGenerator: (_req, res) => String(res.locals.userId),
-  message: { message: 'Bạn hỏi hơi nhanh. Đợi một chút rồi hỏi tiếp nhé.' },
+  message: rateLimitBody('Bạn hỏi hơi nhanh. Đợi một chút rồi hỏi tiếp nhé.'),
 })
 
 const bodySchema = z.object({

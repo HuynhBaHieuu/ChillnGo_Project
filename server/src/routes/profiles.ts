@@ -14,7 +14,7 @@ import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { isValidObjectId } from 'mongoose'
 
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { Follow, followingIdsOf, follows, friendIdsOf } from '../models/Follow.js'
@@ -79,7 +79,7 @@ const followLimiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   keyGenerator: (_req, res) => String(res.locals.userId),
-  message: { message: 'Bạn thao tác theo dõi quá nhanh. Đợi một chút rồi thử lại.' },
+  message: rateLimitBody('Bạn thao tác theo dõi quá nhanh. Đợi một chút rồi thử lại.'),
 })
 
 profilesRouter.post('/:id/follow', requireAuth, loadCurrentUser, followLimiter, async (req, res) => {

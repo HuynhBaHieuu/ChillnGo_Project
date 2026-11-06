@@ -34,7 +34,7 @@ import { isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
 import { confirmLiveThumbnail, removeLiveThumbnail, signLiveThumbnailUpload } from '../lib/cloudinary.js'
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import {
   broadcast,
   closeRoom,
@@ -250,7 +250,7 @@ function perUser(windowMs: number, limit: number, message: string, code?: string
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     keyGenerator: (_req, res) => String(res.locals.userId),
-    message: { message, ...(code && { code }) },
+    message: rateLimitBody(message, code),
   })
 }
 
@@ -358,7 +358,7 @@ const startLimiter = rateLimit({
   limit: 10,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn bắt đầu livestream quá nhiều lần. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn bắt đầu livestream quá nhiều lần. Vui lòng đợi vài phút.'),
 })
 
 /** POST /api/livestreams — the signed-in user goes live. */
@@ -489,7 +489,7 @@ const previewLimiter = rateLimit({
   limit: 30,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Quá nhiều yêu cầu xem trước. Vui lòng đợi một chút.' },
+  message: rateLimitBody('Quá nhiều yêu cầu xem trước. Vui lòng đợi một chút.'),
 })
 
 /** POST /api/livestreams/:id/preview — a hidden, watch-only token: not in the room list, not counted. */
@@ -525,7 +525,7 @@ const playlistLimiter = rateLimit({
   limit: 120,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Quá nhiều yêu cầu. Vui lòng đợi một chút.' },
+  message: rateLimitBody('Quá nhiều yêu cầu. Vui lòng đợi một chút.'),
 })
 
 /** GET /api/livestreams/:id/dvr.m3u8?access=… — the rewind playlist, every segment a signed link. */
