@@ -116,6 +116,22 @@ export const useAssistantStore = create<AssistantState>()((set, get) => ({
   },
 }))
 
+/**
+ * Follows a conversation held elsewhere (the phone app's assistant screen,
+ * through RobotEmbed.tsx), so the robot reacts to it as it does to this one:
+ * a new reply is said at the same pace.
+ */
+export function follow(messages: AssistantMessage[], busy: boolean, error: string | null) {
+  const before = useAssistantStore.getState().messages
+  const next = messages.map((message, i) => ({ ...message, id: i + 1 }))
+  // A reply starting now is said; replies already there (the screen opened again) are not said over.
+  const newReply = busy && next.length > before.length && next.at(-1)?.role === 'assistant'
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const spoken = newReply && !reduced ? 0 : next.length !== before.length ? Infinity : undefined
+  useAssistantStore.setState({ messages: next, busy, error, ...(spoken !== undefined && { spoken }) })
+  if (spoken === 0) speak()
+}
+
 /** Says the newest reply, a few characters every 50 ms, until all of it has arrived and been said. */
 function speak() {
   if (speaking) return

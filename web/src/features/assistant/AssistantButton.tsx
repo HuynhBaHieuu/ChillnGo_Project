@@ -1,6 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
 import { ArrowUpRight, Loader2, Send, Square, X } from 'lucide-react'
-import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -12,7 +12,7 @@ import { isTalking, useAssistantStore } from './assistant.store'
 import { parseReply } from './replyTags'
 import type { ParsedReply } from './replyTags'
 import { RobotFace } from './RobotFace'
-import { useRobotMood } from './robotMood'
+import { useRobotCues, useRobotMood } from './robotMood'
 import { t } from '@/i18n'
 import type { MessageKey } from '@/i18n'
 
@@ -26,8 +26,6 @@ const SUGGESTIONS: MessageKey[] = [
 ]
 
 const QUESTION_MAX = 4000
-/** A gesture cue fires this many characters before its word, so the gesture's stroke lands as the word appears. */
-const CUE_LEAD = 18
 
 /**
  * The AI travel assistant, in the bottom-right corner. Closed, it is the
@@ -41,16 +39,7 @@ export function AssistantButton() {
   const [text, setText] = useState('')
   const [petting, setPetting] = useState(false)
   const { mood, poke, greet } = useRobotMood({ typing: text.trim().length > 0, petting })
-  // The reply being said, for the robot's gestures: which one, what it is doing, and which of its cues are due.
-  const reply = useAssistantStore((s) => {
-    const last = s.messages.at(-1)
-    return isTalking(s) && last?.role === 'assistant' ? last : null
-  })
-  const spoken = useAssistantStore((s) => s.spoken)
-  const parsed = useMemo(() => (reply ? parseReply(reply.content) : null), [reply])
-  // Known once the opening tag is in, or the text has started without one.
-  const intent = parsed && (parsed.intent || parsed.text) ? parsed.intent : undefined
-  const due = parsed ? parsed.cues.filter((cue) => cue.at <= spoken + CUE_LEAD).length : 0
+  const { replyId, intent, cues, due } = useRobotCues()
   const wide = useMediaQuery('(min-width: 768px)')
   const launcher = useRef<HTMLButtonElement>(null)
 
@@ -90,7 +79,7 @@ export function AssistantButton() {
             className="size-full drop-shadow-[0_14px_16px_rgba(0,0,0,0.55)] animate-in fade-in-0 duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Suspense fallback={<RobotFace mood={mood} className="mx-auto mt-[22%] w-3/4" />}>
-              <AssistantRobot mood={mood} replyId={reply?.id ?? null} intent={intent} cues={parsed?.cues ?? NO_CUES} due={due} onReady={greet} />
+              <AssistantRobot mood={mood} replyId={replyId} intent={intent} cues={cues} due={due} onReady={greet} />
             </Suspense>
           </button>
         ) : (
@@ -287,7 +276,6 @@ function AssistantChat({ text, setText, onClose }: AssistantChatProps) {
   )
 }
 
-const NO_CUES: [] = []
 const NO_LINKS: ParsedReply['links'] = []
 
 /** A message's text, with a link to each journey it names right after that journey's title. */

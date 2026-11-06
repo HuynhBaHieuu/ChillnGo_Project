@@ -65,6 +65,8 @@ export interface AssistantRobotProps {
   due: number
   /** Fires once the model is loaded and on screen, so a greeting is not spent while it loads. */
   onReady?: () => void
+  /** Where the model comes from, when not the site's own file (the phone app embeds it). */
+  modelUrl?: string
 }
 
 export default function AssistantRobot(props: AssistantRobotProps) {
@@ -106,8 +108,8 @@ function StudioLight() {
 
 const seconds = () => performance.now() / 1000
 
-function Robot({ mood, replyId, intent, cues, due, onReady }: AssistantRobotProps) {
-  const gltf = useLoader(GLTFLoader, MODEL_URL)
+function Robot({ mood, replyId, intent, cues, due, onReady, modelUrl = MODEL_URL }: AssistantRobotProps) {
+  const gltf = useLoader(GLTFLoader, modelUrl)
   // Mounted only after the model has loaded (Suspense), so this is the moment it appears.
   useEffect(() => onReady?.(), [onReady])
   const pivot = useRef<THREE.Group>(null)

@@ -11,14 +11,20 @@ import '../../ui/chat.dart';
 import '../../ui/navigation.dart';
 import '../../ui/surfaces.dart';
 import '../../core/i18n.dart';
+import 'robot_view.dart';
 
-List<String> get _suggestions => [t('ChillnGo có hành trình đi biển nào?'), t('So sánh chi phí các hành trình 3 ngày'), t('Làm sao lưu nháp rồi đăng một hành trình?')];
+List<String> get _suggestions => [
+  t('ChillnGo có hành trình đi biển nào?'),
+  t('So sánh chi phí các hành trình 3 ngày'),
+  t('Làm sao lưu nháp rồi đăng một hành trình?'),
+];
 
 /// Odd, so the history sent still starts with a question. The server takes 20.
 const _sentHistory = 19;
 
 /// /assistant: the AI travel assistant (server/src/routes/assistant.ts; web:
-/// AssistantButton, without its robot). The reply streams in as it is written.
+/// AssistantButton). The web's robot sits above the chat and follows it; the
+/// reply appears at the pace the robot says it, as on the web.
 class AssistantScreen extends StatefulWidget {
   const AssistantScreen({super.key});
 
@@ -38,6 +44,8 @@ class _AssistantScreenState extends State<AssistantScreen> {
   final _text = TextEditingController();
   CancelToken? _inFlight;
   String? _error;
+  final _robot = RobotBridge();
+  bool _typing = false;
 
   @override
   void initState() {
@@ -47,6 +55,17 @@ class _AssistantScreenState extends State<AssistantScreen> {
       _conversation.clear();
       _owner = me;
     }
+    _robot.follow(_messages, busy: false);
+    _text.addListener(() {
+      final typing = _text.text.trim().isNotEmpty;
+      if (typing != _typing) _robot.typing(_typing = typing);
+    });
+  }
+
+  /// A change to the conversation, shown here and followed by the robot.
+  void _change(VoidCallback fn) {
+    setState(fn);
+    _robot.follow(_messages, busy: _inFlight != null, error: _error);
   }
 
   @override
@@ -55,6 +74,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     if (_inFlight != null && _messages.last.text.isEmpty) _messages.removeRange(_messages.length - 2, _messages.length);
     _inFlight?.cancel();
     _text.dispose();
+    _robot.dispose();
     super.dispose();
   }
 
@@ -63,7 +83,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     if (text.isEmpty || _inFlight != null) return;
     final cancel = CancelToken();
     final history = [..._messages, (mine: true, text: text)];
-    setState(() {
+    _change(() {
       _messages
         ..add((mine: true, text: text))
         ..add((mine: false, text: ''));
@@ -79,7 +99,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     try {
       await for (final piece in Api.postStream('/api/assistant/chat', body: body, cancel: cancel)) {
         if (!mounted) return;
-        setState(() => _messages.last = (mine: false, text: _messages.last.text + piece));
+        _change(() => _messages.last = (mine: false, text: _messages.last.text + piece));
       }
       if (mounted && parseAssistantReply(_messages.last.text).text.trim().isEmpty && !cancel.isCancelled) {
         _drop(text, t('Trợ lý chưa trả lời được câu này. Bạn thử hỏi cách khác nhé.'));
@@ -87,12 +107,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
     } catch (error) {
       if (mounted) _drop(text, errorMessage(error));
     } finally {
-      if (mounted) setState(() => _inFlight = null);
+      if (mounted) _change(() => _inFlight = null);
     }
   }
 
   /// Drops an unanswered question with its empty reply, so the history keeps alternating, and gives the text back.
-  void _drop(String question, String error) => setState(() {
+  void _drop(String question, String error) => _change(() {
     _messages.removeRange(_messages.length - 2, _messages.length);
     _error = error;
     if (_text.text.isEmpty) _text.text = question;
@@ -107,7 +127,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
         title: Text(t('Trợ lý du lịch')),
         actions: [
           if (_messages.isNotEmpty && !busy)
-            AppIconButton(icon: LucideIcons.squarePen, label: t('Bắt đầu cuộc trò chuyện mới'), onPressed: () => setState(() {
+            AppIconButton(
+              icon: LucideIcons.squarePen,
+              label: t('Bắt đầu cuộc trò chuyện mới'),
+              onPressed: () => _change(() {
                 _messages.clear();
                 _error = null;
               }),
@@ -117,36 +140,50 @@ class _AssistantScreenState extends State<AssistantScreen> {
       ),
       body: Column(
         children: [
+          // Smaller while the keyboard is up, so the conversation keeps its room.
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: MediaQuery.viewInsetsOf(context).bottom > 0 ? 120 : 200,
+            child: RobotView(bridge: _robot),
+          ),
           Expanded(
             child: _messages.isEmpty
                 ? ListView(
                     padding: const EdgeInsets.all(kGutter),
                     children: [
-                      Text(t('Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng ứng dụng. Câu trả lời do AI tạo nên có thể chưa chính xác.'), style: AppText.meta),
+                      Text(
+                        t('Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng ứng dụng. Câu trả lời do AI tạo nên có thể chưa chính xác.'),
+                        style: AppText.meta,
+                      ),
                       const SizedBox(height: 18),
                       Text(t('Thử hỏi:'), style: AppText.label),
                       for (final s in _suggestions) ...[
                         const SizedBox(height: 8),
-                        AppCard(surface: Surface.well, onTap: () => _ask(s), child: Text(s, style: AppText.body)),
+                        AppCard(
+                          surface: Surface.well,
+                          onTap: () => _ask(s),
+                          child: Text(s, style: AppText.body),
+                        ),
                       ],
                     ],
                   )
-                : ListView(
-                    // Newest at the bottom, in view, as the reply arrives.
-                    reverse: true,
-                    padding: const EdgeInsets.all(kGutter),
-                    children: [
-                      for (final m in _messages.reversed)
-                        m.mine
-                            ? ChatBubble(mine: true, text: m.text)
-                            : m.text.isEmpty
-                            ? ChatPending(t('Đang soạn câu trả lời…'))
-                            : ChatBubble(mine: false, child: _Reply(m.text)),
-                    ],
+                : ValueListenableBuilder(
+                    valueListenable: _robot.spoken,
+                    builder: (context, spoken, _) => ListView(
+                      // Newest at the bottom, in view, as the reply arrives.
+                      reverse: true,
+                      padding: const EdgeInsets.all(kGutter),
+                      children: [
+                        for (final (i, m) in _messages.indexed.toList().reversed)
+                          if (m.mine) ChatBubble(mine: true, text: m.text) else _Reply(m.text, limit: i == _messages.length - 1 ? spoken : null),
+                      ],
+                    ),
                   ),
           ),
           DecoratedBox(
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: AppColors.border)),
+            ),
             child: SafeArea(
               top: false,
               child: Padding(
@@ -154,7 +191,11 @@ class _AssistantScreenState extends State<AssistantScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(_error!, style: AppText.bodySmall.copyWith(color: AppColors.destructive))),
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(_error!, style: AppText.bodySmall.copyWith(color: AppColors.destructive)),
+                      ),
                     ChatComposer(
                       controller: _text,
                       hint: t('Hỏi về chuyến đi của bạn…'),
@@ -175,31 +216,46 @@ class _AssistantScreenState extends State<AssistantScreen> {
 
 /// A reply's text, with a "Xem hành trình" link right after each journey it names.
 class _Reply extends StatelessWidget {
-  const _Reply(this.raw);
+  const _Reply(this.raw, {this.limit});
 
   final String raw;
+
+  /// How much the robot has said (whole words are shown); null or -1: all of it.
+  final int? limit;
 
   @override
   Widget build(BuildContext context) {
     final reply = parseAssistantReply(raw);
+    final text = limit == null || limit! < 0 ? reply.text : reply.text.substring(0, _wordEnd(reply.text, limit!));
+    if (text.trim().isEmpty) return ChatPending(t('Đang soạn câu trả lời…'));
     var from = 0;
-    return Text.rich(
-      TextSpan(
-        children: [
-          for (final link in reply.links) ...[
-            TextSpan(text: reply.text.substring(from, from = link.at)),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: AppChip(label: t('Xem hành trình'), icon: LucideIcons.arrowUpRight, onTap: () => context.push('/posts/${link.id}')),
+    return ChatBubble(
+      mine: false,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            for (final link in reply.links.where((l) => l.at <= text.length)) ...[
+              TextSpan(text: text.substring(from, from = link.at)),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: AppChip(label: t('Xem hành trình'), icon: LucideIcons.arrowUpRight, onTap: () => context.push('/posts/${link.id}')),
+                ),
               ),
-            ),
+            ],
+            TextSpan(text: text.substring(from)),
           ],
-          TextSpan(text: reply.text.substring(from)),
-        ],
+        ),
+        style: AppText.body.copyWith(color: AppColors.cream),
       ),
-      style: AppText.body.copyWith(color: AppColors.cream),
     );
   }
+}
+
+/// Up to the end of the word at [n]: a reply being said shows whole words (web: wordEnd).
+int _wordEnd(String text, int n) {
+  if (n >= text.length) return text.length;
+  final space = text.indexOf(RegExp(r'\s'), n);
+  return space < 0 ? text.length : space;
 }

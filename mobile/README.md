@@ -6,7 +6,8 @@ for phones:
 - Newsfeed, Discover (search, regions, interests) and the welcome page.
 - Journeys: read, write and edit (days, stops, maps, photos), drafts, clone, merge.
 - AI clone: adapt a journey to your trip in a short chat, review each change, edit it in words, save it.
-- The AI travel assistant (the sparkles button at the top of every tab).
+- The AI travel assistant (the sparkles button at the top of every tab), with the web's 3D robot.
+- Five languages, as on the web: the account menu, or the button beside "Bắt đầu ngay" when signed out.
 - Check-ins, profiles, follows and notifications.
 - Livestreams: go live, watch, comment, react, rewind, replays.
 - Your Activity, and the admin area for staff accounts.
@@ -14,6 +15,15 @@ for phones:
 It talks to the same API as the web (`../server`). Like the web, it still reads
 seed journeys, likes, comments and bookmarks from JSON fixtures:
 `assets/mocks/` is a copy of `web/src/mocks/`, so copy them again when those change.
+
+Two more things come from `web/`; build them again when they change there:
+
+- `assets/i18n/web.json`, the web's translations: `node scripts/export-i18n.mjs`.
+  The app's own strings are in `assets/i18n/mobile.json`; `test/i18n_test.dart`
+  fails when a `t()` key has no translation.
+- `assets/robot/robot.html`, the assistant's robot (model, moods, gestures) built
+  from `web/src/features/assistant/RobotEmbed.tsx`: `node scripts/export-robot.mjs`.
+  The app shows it in a WebView above the chat.
 
 ## Requirements
 

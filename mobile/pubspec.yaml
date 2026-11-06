@@ -49,6 +49,7 @@ dependencies:
   # Icons: Lucide, the set the web app uses
   lucide_icons_flutter: ^3.1.21
   cupertino_icons: ^1.0.8
+  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +64,8 @@ flutter:
     - assets/mocks/
     # Translations: web.json from web/src/i18n (node scripts/export-i18n.mjs), mobile.json the app's own.
     - assets/i18n/
+    # The web's assistant robot in one page (node scripts/export-robot.mjs).
+    - assets/robot/
 
   # The web's "void" theme (web/src/styles/theme-void.css), turned on by
   # data-theme="void" in web/index.html.

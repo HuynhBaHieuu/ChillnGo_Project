@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { AssistantIntent } from './replyTags'
+import type { AssistantIntent, Cue } from './replyTags'
 
 import { isTalking, replyLength, useAssistantStore } from './assistant.store'
 import { parseReply } from './replyTags'
@@ -132,4 +132,22 @@ export function useRobotMood({ typing, petting }: MoodInput) {
   else if (asleep) mood = 'sleepy'
 
   return { mood, poke, greet }
+}
+
+/** A gesture cue fires this many characters before its word, so the gesture's stroke lands as the word appears. */
+const CUE_LEAD = 18
+const NO_CUES: Cue[] = []
+
+/** The reply being said, for the robot's gestures: which one, what it is doing, and which of its cues are due. */
+export function useRobotCues() {
+  const reply = useAssistantStore((s) => {
+    const last = s.messages.at(-1)
+    return isTalking(s) && last?.role === 'assistant' ? last : null
+  })
+  const spoken = useAssistantStore((s) => s.spoken)
+  const parsed = useMemo(() => (reply ? parseReply(reply.content) : null), [reply])
+  // Known once the opening tag is in, or the text has started without one.
+  const intent = parsed && (parsed.intent || parsed.text) ? parsed.intent : undefined
+  const due = parsed ? parsed.cues.filter((cue) => cue.at <= spoken + CUE_LEAD).length : 0
+  return { replyId: reply?.id ?? null, intent, cues: parsed?.cues ?? NO_CUES, due }
 }
