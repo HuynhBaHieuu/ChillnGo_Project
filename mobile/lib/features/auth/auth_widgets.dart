@@ -98,10 +98,14 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       final session = await AuthService.loginWithGoogle(idToken);
       await widget.onSignedIn(session);
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled || e.code == GoogleSignInExceptionCode.interrupted) return;
+      // An app Google does not know (no Android OAuth client for this package and
+      // SHA-1) comes back as "canceled" with "[16] Account reauth failed", not as a
+      // configuration error: only a real cancel is silent.
+      final unregistered = e.description?.contains('reauth failed') ?? false;
+      if (!unregistered && (e.code == GoogleSignInExceptionCode.canceled || e.code == GoogleSignInExceptionCode.interrupted)) return;
       if (mounted) {
         setState(
-          () => _error = e.code == GoogleSignInExceptionCode.clientConfigurationError || e.code == GoogleSignInExceptionCode.providerConfigurationError
+          () => _error = unregistered || e.code == GoogleSignInExceptionCode.clientConfigurationError || e.code == GoogleSignInExceptionCode.providerConfigurationError
               ? t('Đăng nhập Google chưa được cấu hình cho ứng dụng này (OAuth client Android và SHA-1). Xem README của ứng dụng.')
               : t('Không đăng nhập được bằng Google. Vui lòng thử lại.'),
         );
