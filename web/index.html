@@ -10,6 +10,36 @@
       content="ChillnGo — chia sẻ hành trình thật, clone lịch trình chỉ với một chạm."
     />
     <meta name="theme-color" content="#000000" />
+    <meta name="keywords" content="mạng xã hội du lịch, lịch trình du lịch, chia sẻ hành trình, ChillnGo API" />
+    <link rel="api-catalog" href="/.well-known/api-catalog" />
+
+    <!-- Who ChillnGo is, for search engines and agents. Keep `keywords` to terms the page text uses. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://chillgo-project-web.vercel.app/#website",
+            "name": "ChillnGo",
+            "url": "https://chillgo-project-web.vercel.app/",
+            "inLanguage": "vi",
+            "description": "ChillnGo là mạng xã hội du lịch: chia sẻ hành trình thật từng ngày, từng điểm dừng, từng khoản chi, và sao chép lịch trình du lịch chỉ với một chạm.",
+            "keywords": "mạng xã hội du lịch, lịch trình du lịch, chia sẻ hành trình, ChillnGo API",
+            "publisher": { "@id": "https://chillgo-project-web.vercel.app/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://chillgo-project-web.vercel.app/#organization",
+            "name": "ChillnGo",
+            "url": "https://chillgo-project-web.vercel.app/",
+            "logo": "https://chillgo-project-web.vercel.app/favicon.svg",
+            "knowsAbout": ["mạng xã hội du lịch", "lịch trình du lịch", "chia sẻ hành trình"],
+            "sameAs": ["https://github.com/HuynhBaHieuu/ChillnGo_Project"]
+          }
+        ]
+      }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,12 +67,12 @@
   <body>
     <div id="root">
       <main id="prerender">
-        <h1>ChillnGo — Mạng xã hội của những chuyến đi</h1>
+        <h1>ChillnGo — Mạng xã hội du lịch của những chuyến đi có thật</h1>
         <p><strong>Những chuyến đi có thật, kể lại bởi chính người đã đi.</strong></p>
         <p>
-          ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng,
-          từng khoản chi. Thấy một hành trình hợp ý? Sao chép về làm của bạn chỉ với một chạm, rồi
-          sửa theo cách bạn muốn đi.
+          ChillnGo là mạng xã hội du lịch để chia sẻ hành trình có thật, kể lại trọn vẹn — từng
+          ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép lịch trình du lịch
+          đó về làm của bạn chỉ với một chạm, rồi sửa theo cách bạn muốn đi.
         </p>
         <p>
           Lịch trình hay nhất không nằm trong cẩm nang, mà nằm trong chuyến đi của ai đó vừa trở về.
@@ -73,11 +103,14 @@
           <li><a href="/live">Đang phát trực tiếp</a> — livestream từ những người đang trên đường.</li>
           <li><a href="/register">Đăng ký</a> hoặc <a href="/login">đăng nhập</a>.</li>
         </ul>
-        <p>
-          Dành cho agent và nhà phát triển: <a href="/llms.txt">llms.txt</a> ·
-          <a href="/openapi.json">OpenAPI</a>. Các trang công khai có bản Markdown khi gửi
-          <code>Accept: text/markdown</code>.
-        </p>
+        <h2>Dành cho nhà phát triển</h2>
+        <ul>
+          <li><a href="/developers">ChillnGo API — Developer Portal</a>: tài liệu API, quickstart, xác thực.</li>
+          <li><a href="/developers/cli">ChillnGo CLI</a>: công cụ dòng lệnh <code>chillngo</code>.</li>
+          <li><a href="/openapi.json">OpenAPI</a> · <a href="/llms.txt">llms.txt</a></li>
+          <li><a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">ChillnGo trên GitHub</a></li>
+        </ul>
+        <p>Các trang công khai có bản Markdown khi gửi <code>Accept: text/markdown</code>.</p>
       </main>
     </div>
     <script type="module" src="/src/main.tsx"></script>

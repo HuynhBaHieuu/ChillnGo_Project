@@ -36,6 +36,32 @@ describe('GET /api/openapi.json', () => {
   })
 })
 
+describe('GET /api', () => {
+  it('is an index of the public API, without the database', async () => {
+    const response = await fetch(`${base}/api`)
+    assert.equal(response.status, 200)
+    assert.match(response.headers.get('content-type') ?? '', /^application\/json/)
+    const index = (await response.json()) as {
+      name: string
+      docs: { openapi: string; portal: string; cli: string }
+      publicEndpoints: { method: string; path: string }[]
+    }
+    assert.equal(index.name, 'ChillnGo API')
+    assert.equal(index.docs.openapi, '/api/openapi.json')
+    assert.match(index.docs.portal, /^https:\/\/.+\/developers$/)
+    const paths = index.publicEndpoints.map((e) => e.path)
+    for (const path of ['/api/posts', '/api/posts/{id}', '/api/checkins', '/api/livestreams', '/api/users/{id}']) {
+      assert.ok(paths.includes(path), path)
+    }
+    assert.ok(index.publicEndpoints.every((e) => e.method === 'GET'))
+    assert.ok(!paths.some((p) => p.startsWith('/api/admin')), 'no admin routes in the public list')
+  })
+
+  it('also answers with a trailing slash', async () => {
+    assert.equal((await fetch(`${base}/api/`)).status, 200)
+  })
+})
+
 describe('unknown routes', () => {
   it('answer 404 with a structured JSON error', async () => {
     const response = await fetch(`${base}/no-such-route`)

@@ -10,6 +10,7 @@ own plans with one tap.
 | --- | --- | --- |
 | [`web/`](./web) | React + Vite + TypeScript client | **Built.** Accounts, journeys, check-ins, follows, notifications and livestreams use the API. Seed journeys, likes, comments, bookmarks and cloned itineraries are still mock fixtures. |
 | [`server/`](./server) | Node + Express + MongoDB Atlas API | **Running.** Auth, profiles and follows, journeys, check-ins, livestreams, notifications, Your Activity and the admin back office. Likes, comments, bookmarks and itineraries not started. |
+| [`cli/`](./cli) | `chillngo`, the command-line tool for the API (npm package, no dependencies) | **Built.** Not yet published to npm. `cd cli && npm test`. |
 | [`mobile/`](./mobile) | Flutter app (Android, iOS) | **Built.** Every web screen, laid out for phones. Same API and the same mock fixtures as the web. Open it in Android Studio. |
 
 Start with [`web/README.md`](./web/README.md).

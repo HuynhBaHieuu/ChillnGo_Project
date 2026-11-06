@@ -2,7 +2,22 @@
 
 > ChillnGo is a Vietnamese travel social network. People publish real multi-day trip journeys — day by day, stop by stop, with what each stop actually cost — and clone each other's journeys into their own editable itineraries with one tap.
 
-The site is in Vietnamese by default; the app can also switch to English, Chinese, Japanese and Korean. Pages are a JavaScript app; request any page below with `Accept: text/markdown` to get a Markdown version. Data is available from a JSON API under `/api`, described by an OpenAPI 3.1 document. Errors from the API are JSON with `message`, `code`, `status`, `hint` and `docs` fields. Unknown pages answer HTTP 404.
+The site is in Vietnamese by default; the app can also switch to English, Chinese, Japanese and Korean. Pages are a JavaScript app; request the public pages below with `Accept: text/markdown` to get a Markdown version. Data is available from the ChillnGo API, a public JSON REST API under `/api`, described by an OpenAPI 3.1 document and documented in the developer portal. Errors from the API are JSON with `message`, `code`, `status`, `hint` and `docs` fields. Unknown pages answer HTTP 404.
+
+## Developers
+
+- [ChillnGo API — Developer Portal](https://chillgo-project-web.vercel.app/developers): quickstart, authentication, public endpoints, errors and rate limits.
+- [ChillnGo CLI](https://chillgo-project-web.vercel.app/developers/cli): `chillngo`, the official command-line tool for the API (npm package `chillngo`).
+- [OpenAPI description](https://chillgo-project-web.vercel.app/openapi.json): every endpoint, its parameters, who may call it, and the error shape.
+- [API index](https://chillgo-project-web.vercel.app/api): what the API offers and its public endpoints, as JSON.
+- [API catalog](https://chillgo-project-web.vercel.app/.well-known/api-catalog): RFC 9727 linkset pointing to the description and docs.
+- [Source code on GitHub](https://github.com/HuynhBaHieuu/ChillnGo_Project): the web app, the API server, the mobile app and the CLI.
+
+## API
+
+- [Published journeys](https://chillgo-project-web.vercel.app/api/posts): `GET`, no sign-in needed. One journey: `GET /api/posts/{id}`.
+- [Check-ins](https://chillgo-project-web.vercel.app/api/checkins): `GET`, no sign-in needed.
+- [Live now](https://chillgo-project-web.vercel.app/api/livestreams): `GET`, no sign-in needed.
 
 ## Pages
 
@@ -10,13 +25,6 @@ The site is in Vietnamese by default; the app can also switch to English, Chines
 - [Discover](https://chillgo-project-web.vercel.app/discover): published journeys, filterable by region, season and budget.
 - [Feed](https://chillgo-project-web.vercel.app/feed): the newest journeys and check-ins.
 - [Live](https://chillgo-project-web.vercel.app/live): livestreams from people on the road, and recorded replays.
-
-## API
-
-- [OpenAPI description](https://chillgo-project-web.vercel.app/openapi.json): every endpoint, its parameters, who may call it, and the error shape.
-- [Published journeys](https://chillgo-project-web.vercel.app/api/posts): `GET`, no sign-in needed. One journey: `GET /api/posts/{id}`.
-- [Check-ins](https://chillgo-project-web.vercel.app/api/checkins): `GET`, no sign-in needed.
-- [Live now](https://chillgo-project-web.vercel.app/api/livestreams): `GET`, no sign-in needed.
 
 ## Optional
 

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChillnGo API — Developer Portal</title>
+    <meta
+      name="description"
+      content="ChillnGo API docs: a public JSON REST API for real multi-day travel journeys, check-ins and livestreams. Quickstart, authentication, errors, OpenAPI 3.1 and the chillngo CLI."
+    />
+    <link rel="canonical" href="https://chillgo-project-web.vercel.app/developers" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="service-desc" type="application/vnd.oai.openapi+json" href="/openapi.json" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebAPI",
+        "name": "ChillnGo API",
+        "description": "Public JSON REST API of ChillnGo, a Vietnamese travel social network of real multi-day trip journeys.",
+        "url": "https://chillgo-project-web.vercel.app/api",
+        "documentation": "https://chillgo-project-web.vercel.app/developers",
+        "termsOfService": "https://chillgo-project-web.vercel.app/",
+        "provider": {
+          "@type": "Organization",
+          "name": "ChillnGo",
+          "url": "https://chillgo-project-web.vercel.app/",
+          "sameAs": ["https://github.com/HuynhBaHieuu/ChillnGo_Project"]
+        }
+      }
+    </script>
+    <style>
+      :root { color-scheme: dark; --ink: #fff; --muted: #999; --accent: #33adff; --surface: #111; --line: #333; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #000; color: var(--ink); font: 16px/1.65 Inter, ui-sans-serif, system-ui, sans-serif; }
+      header, main, footer { max-width: 52rem; margin: 0 auto; padding: 0 1.5rem; }
+      header { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+      header .brand { font: 700 1.1rem 'Plus Jakarta Sans', Inter, sans-serif; color: var(--ink); text-decoration: none; margin-right: auto; }
+      header nav { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+      header nav a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+      header nav a:hover, header nav a[aria-current] { color: var(--ink); }
+      main { padding-top: 3rem; padding-bottom: 4rem; }
+      h1, h2, h3 { font-family: 'Plus Jakarta Sans', Inter, sans-serif; line-height: 1.2; letter-spacing: -0.01em; }
+      h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); margin: 0 0 1rem; }
+      h2 { font-size: 1.5rem; margin: 3rem 0 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+      h3 { font-size: 1.1rem; margin: 1.75rem 0 0.5rem; }
+      p, li { color: #ddd; }
+      .lede { font-size: 1.15rem; color: var(--ink); }
+      a { color: var(--accent); }
+      code, pre { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.88em; }
+      :not(pre) > code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0.1em 0.35em; }
+      pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; line-height: 1.5; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+      th, td { text-align: left; padding: 0.55rem 0.75rem 0.55rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 500; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+      .card { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.25rem; background: var(--surface); }
+      .card-title { margin: 0 0 0.5rem; font: 600 1.1rem/1.2 'Plus Jakarta Sans', Inter, sans-serif; }
+      .card p:not(.card-title) { margin-bottom: 0; color: var(--muted); }
+      footer { padding-bottom: 3rem; color: var(--muted); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">ChillnGo</a>
+      <nav aria-label="Developer">
+        <a href="/developers" aria-current="page">API</a>
+        <a href="/developers/cli">CLI</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>ChillnGo API</h1>
+      <p class="lede">
+        The ChillnGo API is a public JSON REST API for ChillnGo, a Vietnamese travel social network
+        of real multi-day trip journeys — day by day, stop by stop, with what each stop actually cost.
+        Read published journeys, check-ins, livestreams and profiles without an account; sign in to
+        create journeys and clone itineraries.
+      </p>
+      <p>Base URL: <code>https://chillgo-project-web.vercel.app/api</code></p>
+
+      <div class="cards">
+        <div class="card">
+          <p class="card-title"><a href="#quickstart">Quickstart</a></p>
+          <p>Your first request in one line of <code>curl</code>.</p>
+        </div>
+        <div class="card">
+          <p class="card-title"><a href="/openapi.json">OpenAPI 3.1</a></p>
+          <p>Every endpoint, parameter, permission and error, machine-readable.</p>
+        </div>
+        <div class="card">
+          <p class="card-title"><a href="/developers/cli">ChillnGo CLI</a></p>
+          <p>The <code>chillngo</code> command for terminals and scripts.</p>
+        </div>
+      </div>
+
+      <h2 id="quickstart">Quickstart</h2>
+      <p>Public data needs no account and no key. Try it:</p>
+      <pre><code># Published journeys, newest first
+curl https://chillgo-project-web.vercel.app/api/posts
+
+# One journey, day by day and stop by stop
+curl https://chillgo-project-web.vercel.app/api/posts/{id}
+
+# What the API offers, and where its docs are
+curl https://chillgo-project-web.vercel.app/api</code></pre>
+      <p>Or with the CLI:</p>
+      <pre><code>npx chillngo posts
+npx chillngo post {id}</code></pre>
+
+      <h2 id="authentication">Authentication</h2>
+      <p>
+        There are no separate API keys. Reading public data needs no credentials. To act as a user,
+        sign in with the account's email and password, then send the returned token as a bearer token:
+      </p>
+      <pre><code>curl -X POST https://chillgo-project-web.vercel.app/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","password":"…"}'
+# → { "token": "…", "user": { … } }
+
+curl https://chillgo-project-web.vercel.app/api/auth/me \
+  -H 'Authorization: Bearer &lt;token&gt;'</code></pre>
+      <p>Create an account at <a href="/register">/register</a>. Tokens expire; sign in again when a request answers <code>401 UNAUTHORIZED</code>.</p>
+
+      <h2 id="endpoints">Public endpoints</h2>
+      <table>
+        <thead>
+          <tr><th>Endpoint</th><th>What it returns</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>GET /api/posts</code></td><td>Published journeys, newest first. <code>?author=&lt;userId&gt;</code> narrows to one author.</td></tr>
+          <tr><td><code>GET /api/posts/{id}</code></td><td>One journey: days, stops with coordinates, notes and estimated cost.</td></tr>
+          <tr><td><code>GET /api/posts/{id}/comments</code></td><td>A journey's comments.</td></tr>
+          <tr><td><code>GET /api/checkins</code></td><td>Recent check-ins. <code>?authors=a,b</code> and <code>?before=&lt;ISO time&gt;</code>.</td></tr>
+          <tr><td><code>GET /api/livestreams</code></td><td>Streams live now; <code>/history</code> and <code>/replays</code> for past ones.</td></tr>
+          <tr><td><code>GET /api/users/{id}</code></td><td>A public profile.</td></tr>
+          <tr><td><code>GET /api/settings/public</code></td><td>Whether sign-up is open, and the site announcement.</td></tr>
+        </tbody>
+      </table>
+      <p>Signed-in endpoints cover writing journeys, comments and likes, cloning itineraries, AI-assisted drafts, check-ins, livestreaming and notifications. The <a href="/openapi.json">OpenAPI description</a> lists all of them.</p>
+
+      <h2 id="errors">Errors</h2>
+      <p>Every error is JSON with the same fields:</p>
+      <pre><code>{
+  "message": "Không tìm thấy",
+  "code": "NOT_FOUND",
+  "status": 404,
+  "hint": "No such resource or route. Check the path and id against the OpenAPI description.",
+  "docs": "/api/openapi.json"
+}</code></pre>
+      <p>
+        <code>message</code> is Vietnamese text for people. <code>code</code> is a stable identifier
+        (<code>NOT_FOUND</code>, <code>VALIDATION_FAILED</code>, <code>UNAUTHORIZED</code>,
+        <code>RATE_LIMITED</code>, …). <code>hint</code> says what to do next. Validation errors add
+        <code>issues</code>, one entry per field.
+      </p>
+
+      <h2 id="rate-limits">Rate limits</h2>
+      <p>
+        Sign-in and write routes are rate-limited per account or IP address. A limited request gets
+        <code>429 RATE_LIMITED</code> with <code>RateLimit</code> and <code>RateLimit-Policy</code>
+        headers (IETF draft 8); wait as they say, then retry.
+      </p>
+
+      <h2 id="sandbox">Sandbox</h2>
+      <p>
+        There is no separate sandbox environment. The public read endpoints are safe to call against
+        production. Use a test account for anything that writes, and run the server locally
+        (<a href="https://github.com/HuynhBaHieuu/ChillnGo_Project/tree/master/server">server/ on GitHub</a>)
+        to experiment freely.
+      </p>
+
+      <h2 id="for-agents">For AI agents</h2>
+      <ul>
+        <li><a href="/llms.txt">llms.txt</a> maps the site for language models.</li>
+        <li>Pages answer <code>Accept: text/markdown</code> with a Markdown version.</li>
+        <li><a href="/.well-known/api-catalog">/.well-known/api-catalog</a> (RFC 9727) points to this API's description and docs.</li>
+        <li>Unknown pages answer a real <code>404</code>.</li>
+      </ul>
+    </main>
+
+    <footer>
+      <a href="/">ChillnGo</a> · <a href="/developers/cli">ChillnGo CLI</a> ·
+      <a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">Source on GitHub</a>
+    </footer>
+  </body>
+</html>
