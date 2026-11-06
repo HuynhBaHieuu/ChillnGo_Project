@@ -47,6 +47,8 @@ class TabHeader extends ConsumerWidget {
             ),
             ...actions.expand((a) => [a, const SizedBox(width: 8)]),
             if (user != null) ...[
+              AppIconButton(icon: LucideIcons.sparkles, label: 'Trợ lý du lịch AI', tone: IconTone.well, size: 38, onPressed: () => context.push('/assistant')),
+              const SizedBox(width: 8),
               AppIconButton(
                 icon: LucideIcons.bell,
                 label: unread > 0 ? 'Thông báo ($unread chưa đọc)' : 'Thông báo',

@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
@@ -111,6 +112,47 @@ abstract final class Api {
       );
     }
     return data ?? <String, dynamic>{};
+  }
+
+  /// A POST answered in plain text that arrives piece by piece (the travel
+  /// assistant). Cancelling [cancel] ends the stream quietly.
+  static Stream<String> postStream(String path, {Object? body, CancelToken? cancel}) async* {
+    final token = readToken();
+    final Response<ResponseBody> response;
+    try {
+      response = await _dio.post<ResponseBody>(
+        url(path),
+        data: body,
+        cancelToken: cancel,
+        options: Options(
+          responseType: ResponseType.stream,
+          contentType: Headers.jsonContentType,
+          receiveTimeout: const Duration(minutes: 2),
+          headers: {'Accept': 'text/plain', if (token != null) 'Authorization': 'Bearer $token'},
+        ),
+      );
+    } on DioException catch (error) {
+      if (CancelToken.isCancel(error)) return;
+      throw ApiError('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.', status: 0);
+    }
+    // utf8.decoder keeps a Vietnamese character split across two chunks whole.
+    final text = response.data!.stream.cast<List<int>>().transform(utf8.decoder);
+    final status = response.statusCode ?? 0;
+    if (status < 200 || status >= 300) {
+      if (status == 401 && token != null && readToken() == token) onUnauthorized(token);
+      Json? data;
+      try {
+        data = mapOrNull(jsonDecode(await text.join()));
+      } on FormatException {
+        data = null;
+      }
+      throw ApiError(str(data?['message'], 'Máy chủ trả về lỗi $status'), status: status, code: strOrNull(data?['code']));
+    }
+    try {
+      yield* text;
+    } on DioException catch (error) {
+      if (!CancelToken.isCancel(error)) throw ApiError('Mất kết nối khi đang nhận câu trả lời.', status: 0);
+    }
   }
 
   /// Sends one file straight to Cloudinary with a signature from our API,

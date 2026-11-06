@@ -15,6 +15,9 @@ import 'core/roles.dart';
 import 'features/activity/activity_screen.dart';
 import 'features/activity/activity_section_screen.dart';
 import 'features/admin/admin_screen.dart';
+import 'features/ai_clone/ai_clone_screen.dart';
+import 'features/ai_clone/ai_draft_screen.dart';
+import 'features/assistant/assistant_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
@@ -47,7 +50,8 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 /// Paths that need a signed-in account.
 bool _needsAccount(String path) {
   if (path == '/posts/new' || path == '/profile/edit' || path == '/live/new' || path == '/checkin/new') return true;
-  if (path == '/notifications' || path == '/menu') return true;
+  if (path == '/notifications' || path == '/menu' || path == '/assistant') return true;
+  if (RegExp(r'^/posts/[^/]+/ai-clone$').hasMatch(path) || path.startsWith('/ai-drafts/')) return true;
   if (RegExp(r'^/posts/[^/]+/edit$').hasMatch(path)) return true;
   if (RegExp(r'^/live/[^/]+$').hasMatch(path)) return true;
   return path.startsWith('/activity') || path.startsWith('/itineraries') || path.startsWith('/admin');
@@ -164,6 +168,15 @@ final appRouter = GoRouter(
       path: '/posts/:id',
       builder: (_, state) => PostDetailScreen(id: state.pathParameters['id'] ?? ''),
     ),
+    GoRoute(
+      path: '/posts/:id/ai-clone',
+      pageBuilder: (_, state) => _modal(state, AiCloneScreen(postId: state.pathParameters['id'] ?? '')),
+    ),
+    GoRoute(
+      path: '/ai-drafts/:id',
+      builder: (_, state) => AiDraftScreen(id: state.pathParameters['id'] ?? ''),
+    ),
+    GoRoute(path: '/assistant', builder: (_, _) => const AssistantScreen()),
     GoRoute(
       path: '/posts/:id/edit',
       builder: (_, state) => PostEditorScreen(postId: state.pathParameters['id']),

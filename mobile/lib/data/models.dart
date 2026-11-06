@@ -497,6 +497,8 @@ class ClonedItinerary {
     required this.days,
     this.totalEstCost = 0,
     this.status = 'planning',
+    this.cloneType = 'manual',
+    this.checklist,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -504,6 +506,12 @@ class ClonedItinerary {
   String id;
   String ownerId;
   List<String> sourcePostIds;
+
+  /// 'manual' (copied as is) | 'ai' (adapted by AI) | 'merge' (merged by AI).
+  String cloneType;
+
+  /// The preparation checklist made for its AI draft.
+  Checklist? checklist;
   String title;
   String note;
   String coverUrl;
@@ -527,6 +535,8 @@ class ClonedItinerary {
     days: listOf(json['days'], (d) => TripDay.fromJson(mapOf(d))),
     totalEstCost: intOf(json['totalEstCost']),
     status: str(json['status'], 'planning'),
+    cloneType: str(json['cloneType'], 'manual'),
+    checklist: Checklist.fromJson(json['checklist']),
     createdAt: str(json['createdAt']),
     updatedAt: str(json['updatedAt']),
   );
@@ -535,6 +545,8 @@ class ClonedItinerary {
     '_id': id,
     'ownerId': ownerId,
     'sourcePostIds': sourcePostIds,
+    'cloneType': cloneType,
+    if (checklist != null) 'checklist': checklist!.toJson(),
     'title': title,
     'note': note,
     'coverUrl': coverUrl,
@@ -547,6 +559,35 @@ class ClonedItinerary {
   };
 
   ClonedItinerary copy() => ClonedItinerary.fromJson(toJson());
+}
+
+/// What to pack and book, grouped (server/src/ai/checklist.ts).
+class Checklist {
+  const Checklist({required this.groups, required this.sortedByAi});
+
+  final List<({String group, List<String> items})> groups;
+
+  /// False when it is in template order (no AI request left, or the AI failed).
+  final bool sortedByAi;
+
+  static Checklist? fromJson(Object? value) {
+    final json = mapOrNull(value);
+    if (json == null) return null;
+    return Checklist(
+      groups: listOf(json['groups'], (g) {
+        final group = mapOf(g);
+        return (group: str(group['group']), items: listOf(group['items'], (i) => str(mapOf(i)['text'])));
+      }),
+      sortedByAi: boolOf(json['sortedByAi']),
+    );
+  }
+
+  Json toJson() => {
+    'groups': [
+      for (final g in groups) {'group': g.group, 'items': [for (final (i, text) in g.items.indexed) {'id': '$i', 'text': text}]},
+    ],
+    'sortedByAi': sortedByAi,
+  };
 }
 
 class AppNotification {
