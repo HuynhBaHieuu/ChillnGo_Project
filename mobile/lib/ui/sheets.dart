@@ -16,6 +16,7 @@ Future<T?> showAppSheet<T>(
   WidgetBuilder? footer,
   bool tall = false,
   bool dismissible = true,
+  bool scroll = true,
 }) {
   return showModalBottomSheet<T>(
     context: context,
@@ -30,7 +31,7 @@ Future<T?> showAppSheet<T>(
         padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: media.size.height * (tall ? 0.92 : 0.85)),
-          child: SheetBody(title: title, description: description, footer: footer?.call(sheetContext), child: builder(sheetContext)),
+          child: SheetBody(title: title, description: description, footer: footer?.call(sheetContext), scroll: scroll, child: builder(sheetContext)),
         ),
       );
     },

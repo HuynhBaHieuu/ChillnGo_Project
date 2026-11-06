@@ -8,6 +8,7 @@ import '../../core/labels.dart';
 import '../../core/links.dart';
 import '../../core/theme.dart';
 import '../../data/models.dart';
+import '../../data/services/ai_clone_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
@@ -235,11 +236,23 @@ class _ActionBar extends ConsumerWidget {
             child: AppButton(
               label: 'Dùng làm lịch trình',
               icon: LucideIcons.copy,
+              variant: AiCloneService.canAiClone(post.id) ? ButtonVariant.secondary : ButtonVariant.primary,
               onPressed: () {
                 if (requireSignIn(context, ref)) showCloneSheet(context, post);
               },
             ),
           ),
+          // Only journeys the API stores: the AI may only use what ChillnGo's database holds.
+          if (AiCloneService.canAiClone(post.id)) ...[
+            const SizedBox(width: 8),
+            AppButton(
+              label: 'AI',
+              icon: LucideIcons.sparkles,
+              onPressed: () {
+                if (requireSignIn(context, ref)) context.push('/posts/${post.id}/ai-clone');
+              },
+            ),
+          ],
         ],
       ),
     );

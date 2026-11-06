@@ -13,6 +13,7 @@ import '../../state/providers.dart';
 import '../../ui/buttons.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../ai_clone/ai_draft_screen.dart';
 import '../map/route_map.dart';
 import 'itineraries_screen.dart';
 import 'merge_sheet.dart';
@@ -136,6 +137,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               AppBadge(itineraryStatusLabels[itinerary.status] ?? itinerary.status, tone: BadgeTone.outline),
+              if (itinerary.cloneType != 'manual') const AppBadge('Điều chỉnh bằng AI', icon: LucideIcons.sparkles, tone: BadgeTone.outline),
               Text('${tripLengthLabel(days.length)} · khởi hành ${formatShortDate(itinerary.startDate)}', style: AppText.meta),
             ],
           ),
@@ -269,6 +271,11 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
           Text('Bản đồ tuyến', style: AppText.h2),
           const SizedBox(height: 12),
           RouteMap(days: days, height: 260, label: 'Bản đồ tuyến đường của ${itinerary.title}'),
+          if (itinerary.checklist?.groups.isNotEmpty ?? false) ...[
+            const SizedBox(height: 24),
+            Text('Chuẩn bị', style: AppText.h2),
+            ChecklistGroups(itinerary.checklist!),
+          ],
           const SizedBox(height: 24),
           Text('Bài viết gốc', style: AppText.h2),
           const SizedBox(height: 12),

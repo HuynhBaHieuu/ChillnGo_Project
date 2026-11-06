@@ -5,6 +5,8 @@ for phones:
 
 - Newsfeed, Discover (search, regions, interests) and the welcome page.
 - Journeys: read, write and edit (days, stops, maps, photos), drafts, clone, merge.
+- AI clone: adapt a journey to your trip in a short chat, review each change, edit it in words, save it.
+- The AI travel assistant (the sparkles button at the top of every tab).
 - Check-ins, profiles, follows and notifications.
 - Livestreams: go live, watch, comment, react, rewind, replays.
 - Your Activity, and the admin area for staff accounts.
@@ -185,7 +187,7 @@ lib/
   ui/                   shared widgets: buttons, fields, sheets, cards
   features/             one folder per area: feed, discover, post, editor, map,
                         checkin, livestream, profile, itinerary, activity,
-                        admin, auth, menu, notifications, welcome
+                        ai_clone, assistant, admin, auth, menu, notifications, welcome
 assets/mocks/           fixtures copied from web/src/mocks
 android/, ios/          native projects
 test/                   unit tests
