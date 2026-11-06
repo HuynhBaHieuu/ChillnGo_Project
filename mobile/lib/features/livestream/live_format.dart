@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
 import '../../core/i18n.dart';
@@ -10,6 +11,7 @@ Map<String, String> get reactionLabel => {'heart': t('Thả tim'), 'fire': t('Ch
 
 /// 1234 → "1,2 N", 2_500_000 → "2,5 Tr" (Vietnamese compact notation).
 String compact(num n) {
+  if (locale.value != 'vi') return NumberFormat.compact(locale: localeTags[locale.value]).format(n);
   String one(double value) {
     final rounded = (value * 10).round() / 10;
     final text = rounded == rounded.roundToDouble() ? rounded.toInt().toString() : rounded.toString();
@@ -49,7 +51,7 @@ TextSpan clockPair(num positionSec, num lengthSec) => TextSpan(
 );
 
 /// "18:01, 26/09/2026"
-String formatStart(String iso) => '${formatClockTime(iso)}, ${formatShortDate(iso)}';
+String formatStart(String iso) => formatDateTime(iso);
 
 int totalReactions(Map<String, int> reactions) => reactions.values.fold(0, (sum, n) => sum + n);
 

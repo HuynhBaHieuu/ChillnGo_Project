@@ -7,6 +7,7 @@ import '../../core/format.dart';
 import '../../core/itinerary.dart';
 import '../../core/theme.dart';
 import '../../data/api.dart';
+import '../../data/json.dart';
 import '../../data/models.dart';
 import '../../data/services/itinerary_service.dart';
 import '../../state/providers.dart';
@@ -144,7 +145,7 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
           ),
           const SizedBox(height: 10),
           Text(itinerary.title, style: AppText.h1),
-          if (itinerary.note.isNotEmpty) ...[const SizedBox(height: 6), Text(itinerary.note, style: AppText.meta)],
+          if (itinerary.note.isNotEmpty) ...[const SizedBox(height: 6), Text(tx(itinerary.note), style: AppText.meta)],
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerLeft,
@@ -249,17 +250,22 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  location.name.isEmpty ? t('Điểm dừng') : location.name,
+                                  [?location.startTime, location.name.isEmpty ? t('Điểm dừng') : location.name].join('  '),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppText.bodySmall,
                                 ),
                                 if (location.note.isNotEmpty) Text(location.note, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta),
+                                if (location.planB != null)
+                                  Text(
+                                    t('Plan B: {name} · cách khoảng {km} km', {'name': location.planB!['name'], 'km': formatDecimal(doubleOf(location.planB!['distanceKm']))}),
+                                    style: AppText.meta,
+                                  ),
                               ],
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí'), style: AppText.meta),
+                          Text(location.costUnknown ? t('Chưa có dữ liệu') : location.estCost > 0 ? formatVnd(location.estCost) : t('Miễn phí'), style: AppText.meta),
                         ],
                       ),
                     ),

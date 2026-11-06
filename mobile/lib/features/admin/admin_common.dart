@@ -135,10 +135,10 @@ class Pagination extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text('Trang $page / $pageCount', style: AppText.meta),
+          child: Text(t('Trang {page} / {pages}', {'page': page, 'pages': pageCount}), style: AppText.meta),
         ),
         AppButton(
-          label: 'Sau',
+          label: t('Sau'),
           icon: LucideIcons.chevronRight,
           iconRight: true,
           variant: ButtonVariant.outline,

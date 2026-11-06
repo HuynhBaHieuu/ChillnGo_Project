@@ -13,7 +13,7 @@ import '../../ui/sheets.dart';
 import '../../core/i18n.dart';
 
 List<({String label, IconData icon})> get _tabs => [
-  (label: 'Newsfeed', icon: LucideIcons.house),
+  (label: t('Newsfeed'), icon: LucideIcons.house),
   (label: t('Khám phá'), icon: LucideIcons.compass),
   (label: t('Đang live'), icon: LucideIcons.radio),
   (label: t('Cá nhân'), icon: LucideIcons.user),

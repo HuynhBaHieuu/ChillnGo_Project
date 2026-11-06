@@ -33,8 +33,8 @@ class MediaSection extends StatefulWidget {
 class _MediaSectionState extends State<MediaSection> {
   static List<({String value, String label, int? count})> get _tabs => <({String value, String label, int? count})>[
     (value: 'posts', label: t('Bài viết'), count: null),
-    (value: 'videos', label: 'Video', count: null),
-    (value: 'stories', label: 'Tin', count: null),
+    (value: 'videos', label: t('Video'), count: null),
+    (value: 'stories', label: t('Tin'), count: null),
     (value: 'live', label: t('Trực tiếp'), count: null),
   ];
 

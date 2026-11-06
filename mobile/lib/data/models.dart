@@ -122,6 +122,11 @@ class TripLocation {
     this.travelMode,
     this.placeTypes,
     this.legRoute,
+    this.placeId,
+    this.startTime,
+    this.durationMin,
+    this.costUnknown = false,
+    this.planB,
   });
 
   String id;
@@ -138,6 +143,17 @@ class TripLocation {
   List<String>? placeTypes;
   LegRoute? legRoute;
 
+  /// Set on stops an AI draft planned: the place, arrival ("HH:mm") and stay.
+  String? placeId;
+  String? startTime;
+  int? durationMin;
+
+  /// No cost data: `estCost` is 0 for want of one, not because the stop is free.
+  bool costUnknown;
+
+  /// The nearest open place of the same kind, saved from an AI draft (name, distanceKm, reason…).
+  Json? planB;
+
   factory TripLocation.fromJson(Json json) => TripLocation(
     id: str(json['_id']),
     name: str(json['name']),
@@ -150,6 +166,11 @@ class TripLocation {
     travelMode: strOrNull(json['travelMode']),
     placeTypes: json['placeTypes'] is List ? stringList(json['placeTypes']) : null,
     legRoute: mapOrNull(json['legRoute']) != null ? LegRoute.fromJson(mapOf(json['legRoute'])) : null,
+    placeId: strOrNull(json['placeId']),
+    startTime: strOrNull(json['startTime']),
+    durationMin: json['durationMin'] is num ? intOf(json['durationMin']) : null,
+    costUnknown: boolOf(json['costUnknown']),
+    planB: mapOrNull(json['planB']),
   );
 
   Json toJson() => {
@@ -164,6 +185,11 @@ class TripLocation {
     if (travelMode != null) 'travelMode': travelMode,
     if (placeTypes != null) 'placeTypes': placeTypes,
     if (legRoute != null) 'legRoute': legRoute!.toJson(),
+    'placeId': ?placeId,
+    'startTime': ?startTime,
+    'durationMin': ?durationMin,
+    if (costUnknown) 'costUnknown': true,
+    'planB': ?planB,
   };
 
   TripLocation copy() => TripLocation.fromJson(toJson());

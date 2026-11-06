@@ -387,7 +387,7 @@ class LandingContent extends ConsumerWidget {
                 runSpacing: 6,
                 children: [
                   TextLink(label: t('Khám phá'), color: AppColors.meta, onPressed: () => context.go('/discover')),
-                  TextLink(label: 'Newsfeed', color: AppColors.meta, onPressed: () => context.go('/feed')),
+                  TextLink(label: t('Newsfeed'), color: AppColors.meta, onPressed: () => context.go('/feed')),
                   TextLink(label: t('Hành trình của tôi'), color: AppColors.meta, onPressed: () => context.push('/itineraries')),
                   TextLink(label: t('Đăng bài mới'), color: AppColors.meta, onPressed: () => context.push('/posts/new')),
                 ],
