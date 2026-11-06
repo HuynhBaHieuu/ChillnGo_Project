@@ -106,7 +106,11 @@ accepts it with no change. Google also requires the app itself to be registered:
    - Package name: `vn.chillngo.chillngo`.
    - SHA-1: the fingerprint of the key that signs the app. For debug builds, get it with
      `keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android`.
-     Each computer has its own debug key, so add one fingerprint per developer.
+     Each computer has its own debug key, and an Android client holds one
+     fingerprint: each developer creates their own Android client (same package
+     name, their SHA-1). The release key needs one too.
+   - Nothing from this client goes into the app: the JSON Google offers to
+     download is not needed (`client_secret_*.json` is git-ignored).
 2. Set `GOOGLE_WEB_CLIENT_ID` to the **Web** client id, not the Android one.
 3. iOS:
    - Create an **iOS** client for bundle id `vn.chillngo.chillngo` and put it in `GOOGLE_IOS_CLIENT_ID`.

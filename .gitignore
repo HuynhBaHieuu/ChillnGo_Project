@@ -12,6 +12,9 @@ build/
 .env.*
 !.env.example
 
+# OAuth client files downloaded from Google Cloud: the apps don't read them
+client_secret_*.json
+
 # Logs
 *.log
 npm-debug.log*

@@ -7,6 +7,7 @@ import '../../core/theme.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
+import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../../core/i18n.dart';
 
@@ -68,9 +69,13 @@ class TabHeader extends ConsumerWidget {
                   child: AppAvatar(url: user.avatarUrl, name: user.displayName, size: 38),
                 ),
               ),
-            ] else
+            ] else ...[
+              // Signed in, the language is in the account menu; signed out, here (web: LanguageSwitcher in the navbar).
+              AppIconButton(icon: LucideIcons.languages, label: t('Ngôn ngữ'), tone: IconTone.well, size: 38, onPressed: () => pickLanguage(context)),
+              const SizedBox(width: 8),
               // As on the web at phone width: one button; sign-in is a link on that page.
               BeamButton(label: t('Bắt đầu ngay'), onPressed: () => context.push('/register')),
+            ],
           ],
         ),
       ),
