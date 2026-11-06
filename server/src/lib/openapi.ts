@@ -54,6 +54,7 @@ interface Operation {
 const OPERATIONS: Operation[] = [
   // Service
   { method: 'get', path: '/api/health', summary: 'Liveness check. Needs no database.', access: 'public' },
+  { method: 'get', path: '/api', summary: 'API index: what this API is, where its docs are, and the public endpoints.', access: 'public' },
   { method: 'get', path: API_DOCS_PATH, summary: 'This OpenAPI description.', access: 'public' },
   {
     method: 'get',
@@ -216,6 +217,29 @@ const OPERATIONS: Operation[] = [
   { method: 'put', path: '/api/admin/settings', summary: 'Change site settings.', access: 'superadmin', body: true },
 ]
 
+/** The developer portal and CLI, on the web app's domain. */
+export const DEVELOPER_PORTAL_URL = 'https://chillgo-project-web.vercel.app/developers'
+
+/** The body of GET /api: a starting point for an agent or developer that found the API. */
+export function apiIndex() {
+  return {
+    name: 'ChillnGo API',
+    description:
+      'Public JSON REST API of ChillnGo, a Vietnamese travel social network of real multi-day trip journeys.',
+    version: '0.1.0',
+    docs: {
+      openapi: API_DOCS_PATH,
+      portal: DEVELOPER_PORTAL_URL,
+      cli: `${DEVELOPER_PORTAL_URL}/cli`,
+    },
+    authentication:
+      'Public GET endpoints need no credentials. Others need "Authorization: Bearer <token>" from POST /api/auth/login.',
+    publicEndpoints: OPERATIONS.filter((op) => op.access === 'public' || op.access === 'optional')
+      .filter((op) => op.method === 'get')
+      .map((op) => ({ method: 'GET', path: toOpenApiPath(op.path), summary: op.summary })),
+  }
+}
+
 /** method + Express path of every operation, for the drift test. */
 export function documentedRoutes(): string[] {
   return OPERATIONS.map((op) => `${op.method.toUpperCase()} ${op.path}`)
@@ -259,6 +283,7 @@ const TAGS: Record<string, string> = {
 }
 
 function tagOf(op: Operation): string {
+  if (op.path === '/api') return 'Service'
   if (op.path.includes('/ai-clone') || op.path.endsWith('/ai-merge')) return 'AI clone'
   return TAGS[op.path.split('/')[2]] ?? 'Other'
 }

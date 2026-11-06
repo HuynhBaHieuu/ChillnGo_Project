@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /activity
+Disallow: /itineraries
+Disallow: /ai-drafts
+Disallow: /profile/edit
+
+Sitemap: https://chillgo-project-web.vercel.app/sitemap.xml

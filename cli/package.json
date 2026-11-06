@@ -1,0 +1,40 @@
+{
+  "name": "chillngo",
+  "version": "0.1.0",
+  "description": "Official command-line tool for the ChillnGo API: read travel journeys, check-ins and livestreams, sign in, and call any endpoint.",
+  "type": "module",
+  "bin": {
+    "chillngo": "bin/chillngo.js"
+  },
+  "exports": {
+    ".": "./src/client.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "!src/**/*.test.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.3"
+  },
+  "scripts": {
+    "test": "node --test \"src/**/*.test.js\""
+  },
+  "keywords": [
+    "chillngo",
+    "cli",
+    "api",
+    "travel",
+    "itinerary"
+  ],
+  "homepage": "https://chillgo-project-web.vercel.app/developers/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HuynhBaHieuu/ChillnGo_Project.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/HuynhBaHieuu/ChillnGo_Project/issues"
+  }
+}

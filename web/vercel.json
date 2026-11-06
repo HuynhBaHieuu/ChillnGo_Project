@@ -1,14 +1,27 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/api", "destination": "https://chillgo-project.vercel.app/api" },
     { "source": "/api/:path*", "destination": "https://chillgo-project.vercel.app/api/:path*" },
     { "source": "/openapi.json", "destination": "https://chillgo-project.vercel.app/api/openapi.json" },
+    { "source": "/developers", "destination": "/developers.html" },
+    { "source": "/developers/cli", "destination": "/developers-cli.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
       "source": "/((?!api/|assets/).*)",
       "headers": [{ "key": "Vary", "value": "Accept" }]
+    },
+    {
+      "source": "/",
+      "headers": [{ "key": "Link", "value": "</.well-known/api-catalog>; rel=\"api-catalog\"" }]
+    },
+    {
+      "source": "/.well-known/api-catalog",
+      "headers": [
+        { "key": "Content-Type", "value": "application/linkset+json; profile=\"https://www.rfc-editor.org/info/rfc9727\"" }
+      ]
     }
   ]
 }

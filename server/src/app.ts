@@ -4,7 +4,7 @@ import express from 'express'
 import { connectDb } from './db.js'
 import { env } from './env.js'
 import { API_DOCS_PATH, HttpError, errorBody, errorHandler } from './lib/errors.js'
-import { OPENAPI_SERVERS, buildOpenApi } from './lib/openapi.js'
+import { OPENAPI_SERVERS, apiIndex, buildOpenApi } from './lib/openapi.js'
 import { getSettings } from './models/Setting.js'
 import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
@@ -42,6 +42,12 @@ app.get('/api/health', (_req, res) => {
 const openApiDocument = buildOpenApi(OPENAPI_SERVERS)
 app.get(API_DOCS_PATH, (_req, res) => {
   res.set('Cache-Control', 'public, max-age=300').json(openApiDocument)
+})
+
+// GET /api: what this API is, where its docs are, and what anyone may call.
+const index = apiIndex()
+app.get('/api', (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=300').json(index)
 })
 
 // Every other API route needs the database. Connecting here, lazily, keeps a

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChillnGo CLI — the official command-line tool for the ChillnGo API</title>
+    <meta
+      name="description"
+      content="chillngo, the official ChillnGo CLI: read travel journeys, check-ins and livestreams, sign in, and call any ChillnGo API endpoint from a terminal or script."
+    />
+    <link rel="canonical" href="https://chillgo-project-web.vercel.app/developers/cli" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "ChillnGo CLI",
+        "alternateName": "chillngo",
+        "description": "The official command-line tool for the ChillnGo API.",
+        "url": "https://chillgo-project-web.vercel.app/developers/cli",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux",
+        "softwareRequirements": "Node.js 18.3 or newer",
+        "installUrl": "https://www.npmjs.com/package/chillngo",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "publisher": {
+          "@type": "Organization",
+          "name": "ChillnGo",
+          "url": "https://chillgo-project-web.vercel.app/",
+          "sameAs": ["https://github.com/HuynhBaHieuu/ChillnGo_Project"]
+        }
+      }
+    </script>
+    <style>
+      :root { color-scheme: dark; --ink: #fff; --muted: #999; --accent: #33adff; --surface: #111; --line: #333; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #000; color: var(--ink); font: 16px/1.65 Inter, ui-sans-serif, system-ui, sans-serif; }
+      header, main, footer { max-width: 52rem; margin: 0 auto; padding: 0 1.5rem; }
+      header { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+      header .brand { font: 700 1.1rem 'Plus Jakarta Sans', Inter, sans-serif; color: var(--ink); text-decoration: none; margin-right: auto; }
+      header nav { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+      header nav a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+      header nav a:hover, header nav a[aria-current] { color: var(--ink); }
+      main { padding-top: 3rem; padding-bottom: 4rem; }
+      h1, h2 { font-family: 'Plus Jakarta Sans', Inter, sans-serif; line-height: 1.2; letter-spacing: -0.01em; }
+      h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); margin: 0 0 1rem; }
+      h2 { font-size: 1.5rem; margin: 3rem 0 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+      p, li { color: #ddd; }
+      .lede { font-size: 1.15rem; color: var(--ink); }
+      a { color: var(--accent); }
+      code, pre { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.88em; }
+      :not(pre) > code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0.1em 0.35em; }
+      pre { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; line-height: 1.5; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+      th, td { text-align: left; padding: 0.55rem 0.75rem 0.55rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 500; }
+      footer { padding-bottom: 3rem; color: var(--muted); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">ChillnGo</a>
+      <nav aria-label="Developer">
+        <a href="/developers">API</a>
+        <a href="/developers/cli" aria-current="page">CLI</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>ChillnGo CLI</h1>
+      <p class="lede">
+        <code>chillngo</code> is the official command-line tool for the
+        <a href="/developers">ChillnGo API</a>. Read travel journeys, check-ins and livestreams,
+        sign in, and call any endpoint from a terminal or a script.
+      </p>
+
+      <h2 id="install">Install</h2>
+      <pre><code>npm install -g chillngo
+
+# or run it without installing
+npx chillngo posts</code></pre>
+      <p>Needs Node.js 18.3 or newer. Source: <a href="https://github.com/HuynhBaHieuu/ChillnGo_Project/tree/master/cli">cli/ on GitHub</a>.</p>
+
+      <h2 id="commands">Commands</h2>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>chillngo posts [--author &lt;userId&gt;]</code></td><td>Published journeys, newest first.</td></tr>
+          <tr><td><code>chillngo post &lt;id&gt;</code></td><td>One journey, day by day and stop by stop, with costs.</td></tr>
+          <tr><td><code>chillngo checkins [--authors &lt;ids&gt;]</code></td><td>Recent check-ins, optionally from given authors.</td></tr>
+          <tr><td><code>chillngo live</code></td><td>Streams live now.</td></tr>
+          <tr><td><code>chillngo user &lt;id&gt;</code></td><td>A public profile.</td></tr>
+          <tr><td><code>chillngo login --email &lt;email&gt;</code></td><td>Sign in and save the token.</td></tr>
+          <tr><td><code>chillngo me</code></td><td>The signed-in account.</td></tr>
+          <tr><td><code>chillngo logout</code></td><td>Forget the saved token.</td></tr>
+          <tr><td><code>chillngo api &lt;METHOD&gt; &lt;path&gt; [--data &lt;json&gt;]</code></td><td>Call any endpoint.</td></tr>
+          <tr><td><code>chillngo openapi</code></td><td>Print the OpenAPI 3.1 description.</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="scripting">Scripting</h2>
+      <p>Add <code>--json</code> to any command for the raw JSON response. Errors go to stderr; the exit code is 1 for an API error and 2 for a usage error.</p>
+      <pre><code>chillngo posts --json | jq '.items[] | {id: ._id, title}'
+chillngo api GET /api/posts/{id}</code></pre>
+
+      <h2 id="signing-in">Signing in</h2>
+      <p>
+        <code>chillngo login --email you@example.com</code> reads the password from
+        <code>CHILLNGO_PASSWORD</code>, a hidden prompt, or piped standard input. The token is saved
+        in <code>~/.config/chillngo/config.json</code> (<code>%APPDATA%\chillngo</code> on Windows),
+        readable by your user only.
+      </p>
+
+      <h2 id="configuration">Configuration</h2>
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>CHILLNGO_API_URL</code></td><td>API server (same as <code>--base-url</code>). Default <code>https://chillgo-project.vercel.app</code>.</td></tr>
+          <tr><td><code>CHILLNGO_TOKEN</code></td><td>Bearer token to use instead of the saved one.</td></tr>
+          <tr><td><code>CHILLNGO_PASSWORD</code></td><td>Password for <code>login</code>.</td></tr>
+          <tr><td><code>CHILLNGO_CONFIG_DIR</code></td><td>Where to keep <code>config.json</code>.</td></tr>
+        </tbody>
+      </table>
+    </main>
+
+    <footer>
+      <a href="/">ChillnGo</a> · <a href="/developers">ChillnGo API docs</a> ·
+      <a href="https://github.com/HuynhBaHieuu/ChillnGo_Project">Source on GitHub</a>
+    </footer>
+  </body>
+</html>

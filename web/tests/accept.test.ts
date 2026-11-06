@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { prefersMarkdown } from './accept.ts'
+import { prefersMarkdown } from '../middleware.ts'
 
 describe('prefersMarkdown', () => {
   it('is true when the client asks for Markdown', () => {
