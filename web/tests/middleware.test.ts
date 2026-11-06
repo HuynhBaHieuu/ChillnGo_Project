@@ -72,7 +72,7 @@ describe('middleware: Markdown negotiation', () => {
   })
 
   it('serves public inner pages and the developer pages as Markdown', async () => {
-    for (const path of ['/discover', '/feed', '/live', '/feed/', '/developers', '/developers/cli']) {
+    for (const path of ['/discover', '/feed', '/live', '/feed/', '/developers', '/developers/cli', '/about', '/contact', '/privacy']) {
       const response = await middleware(request(path, 'text/markdown'))
       assert.equal(response.status, 200, path)
       assert.match(await response.text(), /^# /, path)
@@ -84,12 +84,29 @@ describe('middleware: Markdown negotiation', () => {
     assert.match(await (await middleware(request('/developers/cli', 'text/markdown'))).text(), /^# ChillnGo CLI/)
   })
 
+  it('keeps the Markdown of the about, contact and privacy pages in step with their HTML', async () => {
+    const { readFileSync } = await import('node:fs')
+    for (const page of ['about', 'contact', 'privacy']) {
+      const html = readFileSync(new URL(`../public/${page}.html`, import.meta.url), 'utf8')
+      const markdown = await (await middleware(request(`/${page}`, 'text/markdown'))).text()
+      const h1 = html.match(/<h1>([^<]+)<\/h1>/)![1]
+      assert.ok(markdown.startsWith(`# ${h1}`), `${page}: Markdown H1 matches "${h1}"`)
+      for (const [, h2] of html.matchAll(/<h2 id="[^"]+">([^<]+)<\/h2>/g)) {
+        assert.ok(markdown.includes(`
+## ${h2}
+`), `${page}: Markdown lacks the section "${h2}"`)
+      }
+      assert.ok(markdown.length >= 500, `${page}: ${markdown.length} characters`)
+    }
+  })
+
   it('lets browsers through to the HTML app and pages', async () => {
     assertContinues(await middleware(request('/', BROWSER)), '/')
     assertContinues(await middleware(request('/', 'text/html')), '/ html')
     assertContinues(await middleware(request('/discover')), '/discover')
     assertContinues(await middleware(request('/developers', BROWSER)), '/developers')
     assertContinues(await middleware(request('/developers/cli', BROWSER)), '/developers/cli')
+    for (const path of ['/about', '/contact', '/privacy']) assertContinues(await middleware(request(path, BROWSER)), path)
   })
 
   it('lets pages without a Markdown version through to the HTML app', async () => {

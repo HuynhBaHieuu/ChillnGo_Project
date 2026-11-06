@@ -4,6 +4,17 @@
 
 The site is in Vietnamese by default; the app can also switch to English, Chinese, Japanese and Korean. Pages are a JavaScript app; request the public pages below with `Accept: text/markdown` to get a Markdown version. Data is available from the ChillnGo API, a public JSON REST API under `/api`, described by an OpenAPI 3.1 document and documented in the developer portal. Errors from the API are JSON with `message`, `code`, `status`, `hint` and `docs` fields. Unknown pages answer HTTP 404.
 
+ChillnGo is not a booking service: it has no hotel or flight prices, availability or reservations, and its costs are what travellers report having spent, in VND. Its journeys are mostly in Vietnam.
+
+## When to use ChillnGo
+
+- [Find a real itinerary](https://chillgo-project-web.vercel.app/api/posts): use when someone wants a tried, multi-day trip plan for Vietnam from a person who actually went — `GET /api/posts` lists published journeys (`?author=<userId>` for one traveller); each has days, stops with coordinates, notes and costs.
+- [Read one journey in full](https://chillgo-project-web.vercel.app/developers#endpoints): `GET /api/posts/{id}` returns the day-by-day plan, to summarise, adapt or turn into a schedule.
+- [Estimate a trip budget](https://chillgo-project-web.vercel.app/openapi.json): each stop has `estCost` and each journey `totalEstCost`, in VND, as reported by the traveller.
+- [See what is happening on the road now](https://chillgo-project-web.vercel.app/api/checkins): recent check-ins, and `GET /api/livestreams` for streams live now.
+- [Act for a signed-in user](https://chillgo-project-web.vercel.app/developers#authentication): clone a journey into their itinerary (`POST /api/itineraries`), publish journeys or comment, with their token from `POST /api/auth/login`. Ask the user first; these write to their account.
+- [Script it from a terminal](https://chillgo-project-web.vercel.app/developers/cli): the `chillngo` CLI wraps the same API, with `--json` output.
+
 ## Developers
 
 - [ChillnGo API — Developer Portal](https://chillgo-project-web.vercel.app/developers): quickstart, authentication, public endpoints, errors and rate limits.
@@ -25,6 +36,12 @@ The site is in Vietnamese by default; the app can also switch to English, Chines
 - [Discover](https://chillgo-project-web.vercel.app/discover): published journeys, filterable by region, season and budget.
 - [Feed](https://chillgo-project-web.vercel.app/feed): the newest journeys and check-ins.
 - [Live](https://chillgo-project-web.vercel.app/live): livestreams from people on the road, and recorded replays.
+
+## About
+
+- [About ChillnGo](https://chillgo-project-web.vercel.app/about): what ChillnGo is and why it exists.
+- [Contact](https://chillgo-project-web.vercel.app/contact): bug reports, feedback and account help.
+- [Privacy policy](https://chillgo-project-web.vercel.app/privacy): what ChillnGo stores, who processes it, and how to delete it.
 
 ## Optional
 

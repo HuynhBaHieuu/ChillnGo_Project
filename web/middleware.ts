@@ -59,7 +59,7 @@ export const APP_ROUTES = [
  * Plain HTML pages outside the app, in public/ and mapped to these paths by
  * rewrites in vercel.json.
  */
-export const STATIC_PAGES = ['/developers', '/developers/cli'] as const
+export const STATIC_PAGES = ['/developers', '/developers/cli', '/about', '/contact', '/privacy'] as const
 
 function segments(path: string): string[] {
   return path.split('/').filter(Boolean)
@@ -304,6 +304,101 @@ chillngo openapi                     # print the OpenAPI description
 Add \`--json\` to any command for raw JSON. \`--base-url\` or \`CHILLNGO_API_URL\` points it at another server; \`CHILLNGO_TOKEN\` supplies a token without signing in.
 
 ${developerLinks(origin)}`,
+
+  // Markdown versions of public/about.html, contact.html and privacy.html; keep them in step.
+  '/about': (origin) => `# Giới thiệu ChillnGo
+
+ChillnGo là mạng xã hội du lịch của những chuyến đi có thật. Người vừa đi về kể lại trọn vẹn hành trình của mình — từng ngày, từng điểm dừng, từng khoản chi — và bất kỳ ai thấy hợp ý đều có thể sao chép lịch trình đó về làm của mình chỉ với một chạm.
+
+## Vì sao có ChillnGo
+
+Lên kế hoạch cho một chuyến đi nhiều ngày thường mất hàng tuần. Lịch trình đáng tin nhất lại nằm trong chuyến đi của ai đó vừa trở về — họ biết chỗ nào đáng ghé, đi mất bao lâu và tốn bao nhiêu tiền. ChillnGo giữ những hành trình đó ở dạng có cấu trúc, để người đi sau dùng lại được ngay.
+
+## ChillnGo làm được gì
+
+- **Khám phá hành trình thật:** lọc theo vùng, mùa và ngân sách; xem từng ngày với điểm dừng có toạ độ, ghi chú, ảnh và chi phí ước tính.
+- **Sao chép và chỉnh lịch trình:** biến chuyến đi của người khác thành bản nháp của bạn, đổi thứ tự ngày, ghép những ngày hay nhất từ nhiều hành trình.
+- **Trợ lý AI:** đề xuất thay đổi cho bản nháp, sắp xếp lại điểm dừng, gợi ý phương án dự phòng và danh sách đồ cần chuẩn bị.
+- **Check-in và livestream:** chia sẻ khoảnh khắc trên đường đi, phát trực tiếp và xem lại các buổi phát đã ghi.
+- **Đi xong, chia sẻ lại:** đăng hành trình của bạn để người sau sao chép tiếp.
+
+Giao diện mặc định là tiếng Việt và có thể chuyển sang tiếng Anh, tiếng Trung, tiếng Nhật và tiếng Hàn.
+
+## Mở cho nhà phát triển
+
+Dữ liệu công khai đọc được qua ChillnGo API ([Developer Portal](${origin}/developers)) và [ChillnGo CLI](${origin}/developers/cli). Mã nguồn được công bố trên [GitHub](${GITHUB_URL}).
+
+## Tìm hiểu thêm
+
+- [Khám phá hành trình](${origin}/discover)
+- [Liên hệ](${origin}/contact)
+- [Chính sách quyền riêng tư](${origin}/privacy)
+`,
+
+  '/contact': (origin) => `# Liên hệ ChillnGo
+
+Bạn gặp lỗi, muốn góp ý một tính năng hay có câu hỏi về ChillnGo? Đây là cách nhanh nhất để chúng tôi nhận được và trả lời.
+
+## Báo lỗi và góp ý
+
+ChillnGo nhận báo lỗi và góp ý qua [GitHub Issues](${GITHUB_URL}/issues). Hãy ghi trang bạn đang mở, bạn đã làm gì, bạn mong đợi điều gì và điều gì đã xảy ra, cùng trình duyệt hoặc thiết bị.
+
+GitHub Issues là nơi công khai: đừng ghi mật khẩu, mã xác nhận, email hay thông tin cá nhân vào đó.
+
+## Hỗ trợ tài khoản
+
+- **Quên mật khẩu:** dùng trang [Quên mật khẩu](${origin}/forgot-password).
+- **Chưa nhận được email xác nhận:** đăng nhập lại để gửi lại email xác nhận; kiểm tra cả thư mục spam.
+- **Lỡ xoá hành trình hoặc check-in:** mục "Đã xoá gần đây" trong trang Hoạt động giữ chúng 30 ngày.
+- **Tài khoản bị khoá:** mở issue (không kèm thông tin cá nhân) để được hướng dẫn.
+
+## Nội dung không phù hợp
+
+Tác giả có thể ẩn bình luận trên hành trình của mình, người phát livestream có thể mời người xem ra khỏi buổi phát. Với nội dung vi phạm khác, mở issue kèm đường dẫn tới nội dung đó.
+
+## Nhà phát triển
+
+Câu hỏi về ChillnGo API hay CLI: đọc [Developer Portal](${origin}/developers), rồi mở issue nếu vẫn cần hỗ trợ, kèm \`code\` và \`hint\` của lỗi API.
+`,
+
+  '/privacy': (origin) => `# Chính sách quyền riêng tư — ChillnGo
+
+Cập nhật ngày 6 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nào về bạn, dùng chúng để làm gì, dịch vụ nào xử lý chúng, phần nào ai cũng xem được, và cách bạn xoá chúng.
+
+## Dữ liệu ChillnGo lưu
+
+- **Tài khoản:** email, tên đăng nhập, tên hiển thị và mật khẩu (chỉ lưu dạng băm bcrypt). Đăng nhập bằng Google: email, tên và ảnh đại diện từ tài khoản Google đó.
+- **Hồ sơ:** ảnh đại diện, ảnh bìa, giới thiệu và nơi sống bạn tự điền.
+- **Nội dung bạn đăng:** hành trình, bình luận, lượt thích, check-in (kèm ảnh và địa điểm nếu bạn gắn), livestream cùng bình luận, cảm xúc và bản ghi khi tính năng ghi hình bật.
+- **Hoạt động:** người bạn theo dõi, thông báo, lịch sử tìm kiếm, lịch sử thay đổi tài khoản.
+- **Tính năng AI:** bản nháp lịch trình AI và nội dung trò chuyện với trợ lý.
+
+## ChillnGo dùng dữ liệu để làm gì
+
+Để chạy các tính năng bạn dùng, gửi email xác nhận và đặt lại mật khẩu, gửi thông báo, chống lạm dụng và xử lý tài khoản vi phạm. ChillnGo không hiển thị quảng cáo và không dùng công cụ phân tích hay theo dõi của bên thứ ba.
+
+## Dịch vụ xử lý dữ liệu
+
+Vercel (lưu trữ), MongoDB Atlas (cơ sở dữ liệu), Cloudinary (ảnh), LiveKit và kho lưu trữ tương thích S3 (livestream và bản ghi), Google (đăng nhập bằng Google, Google Fonts), nhà cung cấp AI — Google Gemini hoặc API tương thích OpenAI (tính năng AI), máy chủ email SMTP.
+
+## Những gì ai cũng xem được
+
+Hành trình đã đăng, bình luận, check-in và hồ sơ công khai (không gồm email) hiển thị cho mọi người và đọc được qua ChillnGo API. Bản nháp chỉ mình bạn thấy. Livestream có ba mức: công khai, chỉ người theo dõi, hoặc riêng tư.
+
+## Trong trình duyệt của bạn
+
+localStorage lưu phiên đăng nhập, ngôn ngữ bạn chọn và thông báo bạn đã đóng. Không có cookie quảng cáo.
+
+## Xoá dữ liệu
+
+- Hành trình và check-in đã xoá nằm trong "Đã xoá gần đây" 30 ngày rồi bị xoá hẳn; bạn cũng có thể xoá hẳn ngay.
+- Bình luận xoá được bất cứ lúc nào; lịch sử tìm kiếm xoá được từng mục hoặc toàn bộ.
+- Để xoá cả tài khoản, [liên hệ ChillnGo](${origin}/contact).
+
+## Thay đổi chính sách
+
+Khi chính sách thay đổi, ngày cập nhật ở đầu trang đổi theo.
+`,
 }
 
 /** The Markdown version of the page at `pathname`, or null when it has none. */

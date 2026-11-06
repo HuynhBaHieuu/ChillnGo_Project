@@ -140,7 +140,7 @@ curl https://chillgo-project-web.vercel.app/api/auth/me \
           <tr><td><code>GET /api/posts/{id}</code></td><td>One journey: days, stops with coordinates, notes and estimated cost.</td></tr>
           <tr><td><code>GET /api/posts/{id}/comments</code></td><td>A journey's comments.</td></tr>
           <tr><td><code>GET /api/checkins</code></td><td>Recent check-ins. <code>?authors=a,b</code> and <code>?before=&lt;ISO time&gt;</code>.</td></tr>
-          <tr><td><code>GET /api/livestreams</code></td><td>Streams live now; <code>/history</code> and <code>/replays</code> for past ones.</td></tr>
+          <tr><td><code>GET /api/livestreams</code></td><td>Streams live now. <code>/replays</code> lists recorded streams; <code>/history?host=&lt;userId&gt;</code> one host's past streams.</td></tr>
           <tr><td><code>GET /api/users/{id}</code></td><td>A public profile.</td></tr>
           <tr><td><code>GET /api/settings/public</code></td><td>Whether sign-up is open, and the site announcement.</td></tr>
         </tbody>
