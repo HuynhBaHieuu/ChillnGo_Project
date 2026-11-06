@@ -167,18 +167,6 @@
   "ko": "3–30자: 악센트 없는 문자, 숫자, 마침표, 밑줄. 현재 @{value}",
   "zh": "3–30 个字符：无音标字母、数字、点或下划线。当前为 @{value}"
  },
- "AI chưa lập được lịch trình hợp lệ sau vài lần thử. Bạn thử lại, hoặc đổi số ngày, nhịp độ cho dễ hơn nhé.": {
-  "en": "The AI couldn't make a valid itinerary after a few tries. Try again, or choose fewer days or an easier pace.",
-  "ja": "AIは何度か試しましたが、有効な旅程を作れませんでした。もう一度試すか、日数やペースをゆるめてください。",
-  "ko": "AI가 몇 번 시도했지만 유효한 일정을 만들지 못했습니다. 다시 시도하거나 일수와 속도를 더 여유롭게 바꿔 보세요.",
-  "zh": "AI 尝试几次后仍未能生成有效的行程。请重试，或调整天数和节奏使其更轻松。"
- },
- "AI chưa đưa ra được thay đổi hợp lệ sau vài lần thử. Bạn thử nói rõ hơn, ví dụ tên điểm và ngày muốn đổi nhé.": {
-  "en": "The AI couldn't make a valid change after a few tries. Try saying it more clearly, e.g. the place and the day to change.",
-  "ja": "AIは何度か試しましたが、有効な変更を出せませんでした。変更したい場所や日など、もう少し具体的に伝えてください。",
-  "ko": "AI가 몇 번 시도했지만 유효한 변경을 만들지 못했습니다. 바꾸고 싶은 장소와 날처럼 더 구체적으로 말해 보세요.",
-  "zh": "AI 尝试几次后仍未能给出有效的修改。请说得更具体些，例如要修改的地点和日期。"
- },
  "Biến chuyến đi của người khác thành bản nháp của bạn.": {
   "en": "Turn someone else's trip into your own draft.",
   "ja": "誰かの旅をあなたの下書きに。",
@@ -203,12 +191,6 @@
   "ko": "{displayName}님의 댓글",
   "zh": "{displayName} 的评论"
  },
- "Bình luận không hợp lệ": {
-  "en": "Invalid comment",
-  "ja": "コメントが無効です",
-  "ko": "잘못된 댓글입니다",
-  "zh": "评论无效"
- },
  "Bình luận không được để trống.": {
   "en": "A comment can't be empty.",
   "ja": "コメントを入力してください。",
@@ -223,12 +205,6 @@
   "ja": "友達とは、あなたがフォローしていて、あなたをフォローしている人です。あと{left}人招待できます。",
   "ko": "친구는 서로 팔로우하는 사람이에요. {left}명 더 초대할 수 있어요.",
   "zh": "好友是你关注且也关注你的人。还可以邀请 {left} 人。"
- },
- "Bạn bình luận hơi nhanh. Đợi vài giây rồi thử lại nhé.": {
-  "en": "You're commenting a bit fast. Wait a few seconds and try again.",
-  "ja": "コメントの投稿が早すぎます。数秒待ってからもう一度お試しください。",
-  "ko": "댓글을 너무 빨리 달고 있습니다. 몇 초 뒤 다시 시도하세요.",
-  "zh": "你评论得有点快。请稍等几秒后再试。"
  },
  "Bạn chưa cho ChillnGo dùng camera. Hãy bật quyền Camera trong Cài đặt của điện thoại.": {
   "en": "You haven't let ChillnGo use the camera. Turn on Camera access in your phone's Settings.",
@@ -260,35 +236,17 @@
   "ko": "내 여정만 편집할 수 있습니다.",
   "zh": "你只能编辑自己的行程。"
  },
- "Bạn chỉ quản lý được tài khoản người dùng thường.": {
-  "en": "You can only manage regular user accounts.",
-  "ja": "管理できるのは一般ユーザーのアカウントだけです。",
-  "ko": "일반 사용자 계정만 관리할 수 있습니다.",
-  "zh": "你只能管理普通用户账户。"
- },
  "Bạn cần đăng nhập để đăng bài, check-in hoặc phát trực tiếp.": {
   "en": "Log in to post, check in or go live.",
   "ja": "投稿、チェックイン、ライブ配信にはログインが必要です。",
   "ko": "게시, 체크인, 라이브 방송을 하려면 로그인하세요.",
   "zh": "登录后即可发帖、打卡或直播。"
  },
- "Bạn không thể thao tác trên chính tài khoản của mình.": {
-  "en": "You can't do this to your own account.",
-  "ja": "自分のアカウントにはこの操作はできません。",
-  "ko": "내 계정에는 이 작업을 할 수 없습니다.",
-  "zh": "你不能对自己的账户执行此操作。"
- },
  "Bạn muốn chia sẻ gì hôm nay?": {
   "en": "What would you like to share today?",
   "ja": "今日は何をシェアしますか？",
   "ko": "오늘 무엇을 공유할까요?",
   "zh": "今天想分享什么？"
- },
- "Bạn thả cảm xúc hơi nhanh. Đợi một chút nhé.": {
-  "en": "You're reacting a bit fast. Wait a moment.",
-  "ja": "リアクションが早すぎます。少しお待ちください。",
-  "ko": "반응을 너무 빨리 보내고 있습니다. 잠시 기다리세요.",
-  "zh": "你的互动有点快。请稍等一下。"
  },
  "Bạn đang phát livestream này ở một thiết bị khác.": {
   "en": "You're streaming this live on another device.",
@@ -313,12 +271,6 @@
   "ja": "招待を承諾しました。",
   "ko": "초대를 수락했습니다.",
   "zh": "你已接受邀请。"
- },
- "Bạn đổi ảnh bìa quá nhiều lần. Vui lòng đợi vài phút.": {
-  "en": "You've changed your cover photo too many times. Please wait a few minutes.",
-  "ja": "カバー写真の変更回数が多すぎます。数分お待ちください。",
-  "ko": "커버 사진을 너무 자주 바꿨습니다. 몇 분 기다리세요.",
-  "zh": "你更换封面照片的次数太多了。请等几分钟。"
  },
  "Bản nháp được lưu vào tài khoản của bạn. Xem lại ở Hoạt động của bạn, mục Hành trình.": {
   "en": "The draft is saved to your account. Find it under Your activity, Journeys.",
@@ -470,12 +422,6 @@
   "ko": "{displayName}님을 차단할까요?",
   "zh": "屏蔽 {displayName}？"
  },
- "Chế độ người xem không hợp lệ": {
-  "en": "Invalid audience",
-  "ja": "公開範囲が無効です",
-  "ko": "잘못된 공개 대상입니다",
-  "zh": "观众设置无效"
- },
  "Chỉ còn mời được {left} người.": {
   "en": [
    "You can only invite {left} more person.",
@@ -551,12 +497,6 @@
   "ko": "공개",
   "zh": "公开"
  },
- "Cảm xúc không hợp lệ": {
-  "en": "Invalid feeling",
-  "ja": "気分が無効です",
-  "ko": "잘못된 기분입니다",
-  "zh": "心情无效"
- },
  "Cần liên kết mới?": {
   "en": "Need a new link?",
   "ja": "新しいリンクが必要ですか？",
@@ -629,12 +569,6 @@
   "ko": "기본값 사용",
   "zh": "使用默认值"
  },
- "Email hoặc mật khẩu không đúng": {
-  "en": "Incorrect email or password",
-  "ja": "メールアドレスまたはパスワードが正しくありません",
-  "ko": "이메일 또는 비밀번호가 올바르지 않습니다",
-  "zh": "邮箱或密码不正确"
- },
  "Email không hợp lệ.": {
   "en": "Invalid email.",
   "ja": "メールアドレスが無効です。",
@@ -646,18 +580,6 @@
   "ja": "複数の旅を統合",
   "ko": "여러 여행 합치기",
   "zh": "合并多个旅程"
- },
- "Giá trị không hợp lệ": {
-  "en": "Invalid value",
-  "ja": "値が無効です",
-  "ko": "잘못된 값입니다",
-  "zh": "值无效"
- },
- "Giới thiệu không hợp lệ": {
-  "en": "Invalid bio",
-  "ja": "自己紹介が無効です",
-  "ko": "잘못된 소개입니다",
-  "zh": "简介无效"
  },
  "Google không trả về thông tin đăng nhập. Vui lòng thử lại.": {
   "en": "Google returned no sign-in details. Please try again.",
@@ -761,18 +683,6 @@
   "ko": "확인 이메일을 보낸 주소: ",
   "zh": "请打开我们发送到 "
  },
- "Hãy nhập số ngày": {
-  "en": "Enter the number of days",
-  "ja": "日数を入力してください",
-  "ko": "일수를 입력하세요",
-  "zh": "请输入天数"
- },
- "Hãy nhập số người": {
-  "en": "Enter the number of people",
-  "ja": "人数を入力してください",
-  "ko": "인원수를 입력하세요",
-  "zh": "请输入人数"
- },
  "Họ sẽ không còn hiện là người đi cùng.": {
   "en": "They will no longer show as a companion.",
   "ja": "同行者として表示されなくなります。",
@@ -797,12 +707,6 @@
   "ko": "나를 팔로우하거나 내가 팔로우하는 사람이 라이브를 시작하면 여기에 알림이 표시됩니다.",
   "zh": "当关注你的人或你关注的人开始直播时，通知会显示在这里。"
  },
- "Khu vực không hợp lệ": {
-  "en": "Invalid region",
-  "ja": "地域が無効です",
-  "ko": "잘못된 지역입니다",
-  "zh": "地区无效"
- },
  "Khung hình lúc {value}": {
   "en": "Frame at {value}",
   "ja": "{value} のフレーム",
@@ -820,12 +724,6 @@
   "ja": "編集できません",
   "ko": "편집할 수 없음",
   "zh": "无法编辑"
- },
- "Không có trong lịch trình AI đề xuất.": {
-  "en": "Not in the AI's suggested itinerary.",
-  "ja": "AIが提案した旅程に含まれていません。",
-  "ko": "AI가 제안한 일정에 없습니다.",
-  "zh": "不在 AI 建议的行程中。"
  },
  "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.": {
   "en": "Can't reach the server. Check your connection and try again.",
@@ -857,12 +755,6 @@
   "ko": "녹화를 재생할 수 없습니다",
   "zh": "无法播放录像"
  },
- "Không thể thao tác trên tài khoản Super Admin.": {
-  "en": "Super Admin accounts can't be changed.",
-  "ja": "Super Adminのアカウントは操作できません。",
-  "ko": "Super Admin 계정에는 작업할 수 없습니다.",
-  "zh": "无法对超级管理员账户执行操作。"
- },
  "Không tìm thấy hành trình này.": {
   "en": "Journey not found.",
   "ja": "この旅が見つかりません。",
@@ -892,12 +784,6 @@
   "ja": "ユーザーが見つかりません。",
   "ko": "사용자를 찾을 수 없습니다.",
   "zh": "找不到该用户。"
- },
- "Không tìm thấy thay đổi này trong bản nháp.": {
-  "en": "This change isn't in the draft.",
-  "ja": "この変更は下書きにありません。",
-  "ko": "초안에서 이 변경을 찾을 수 없습니다.",
-  "zh": "草稿中找不到此修改。"
  },
  "Không tải được bình luận": {
   "en": "Couldn't load comments",
@@ -983,24 +869,6 @@
   "ko": "이메일의 링크",
   "zh": "邮件中的链接"
  },
- "Liên kết xác nhận không hợp lệ, đã được dùng hoặc đã hết hạn.": {
-  "en": "The confirmation link is invalid, already used or expired.",
-  "ja": "確認リンクが無効、使用済み、または期限切れです。",
-  "ko": "확인 링크가 잘못되었거나 이미 사용되었거나 만료되었습니다.",
-  "zh": "确认链接无效、已使用或已过期。"
- },
- "Loại tìm kiếm không hợp lệ": {
-  "en": "Invalid search type",
-  "ja": "検索の種類が無効です",
-  "ko": "잘못된 검색 유형입니다",
-  "zh": "搜索类型无效"
- },
- "Loại ảnh không hợp lệ": {
-  "en": "Invalid image type",
-  "ja": "画像の種類が無効です",
-  "ko": "잘못된 이미지 유형입니다",
-  "zh": "图片类型无效"
- },
  "Lý do khoá: {lockedReason}": {
   "en": "Lock reason: {lockedReason}",
   "ja": "ロックの理由: {lockedReason}",
@@ -1085,12 +953,6 @@
   "ko": "서버: {apiUrl}",
   "zh": "服务器：{apiUrl}"
  },
- "Mùa không hợp lệ": {
-  "en": "Invalid season",
-  "ja": "季節が無効です",
-  "ko": "잘못된 계절입니다",
-  "zh": "季节无效"
- },
  "Mất kết nối khi đang nhận câu trả lời.": {
   "en": "Lost connection while receiving the answer.",
   "ja": "回答の受信中に接続が切れました。",
@@ -1129,12 +991,6 @@
   "ja": "1回のチェックインにつき写真は最大{maxCheckInPhotos}枚です。",
   "ko": "체크인마다 사진은 최대 {maxCheckInPhotos}장이에요.",
   "zh": "每次打卡最多 {maxCheckInPhotos} 张照片。"
- },
- "Mỗi hành trình chỉ chọn một lần.": {
-  "en": "Choose each journey only once.",
-  "ja": "各旅は1回だけ選べます。",
-  "ko": "각 여정은 한 번만 고를 수 있습니다.",
-  "zh": "每个行程只能选择一次。"
  },
  "Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.": {
   "en": "Every journey is told day by day, stop by stop, cost by cost.",
@@ -1183,12 +1039,6 @@
   "ja": "営業 {opens} - {closes}",
   "ko": "영업 {opens} - {closes}",
   "zh": "营业 {opens} - {closes}"
- },
- "Mức chi tiêu không hợp lệ": {
-  "en": "Invalid budget level",
-  "ja": "予算レベルが無効です",
-  "ko": "잘못된 예산 수준입니다",
-  "zh": "预算等级无效"
  },
  "NGÀY {dayNumber}": {
   "en": "DAY {dayNumber}",
@@ -1244,12 +1094,6 @@
   "ko": "예산 {amount}",
   "zh": "预算 {amount}"
  },
- "Nhịp độ không hợp lệ": {
-  "en": "Invalid pace",
-  "ja": "ペースが無効です",
-  "ko": "잘못된 속도입니다",
-  "zh": "节奏无效"
- },
  "Những gì bạn vừa nhập chưa được lưu. Rời trang sẽ mất các thay đổi này.": {
   "en": "What you just entered isn't saved. Leaving will lose these changes.",
   "ja": "入力した内容はまだ保存されていません。移動すると変更が失われます。",
@@ -1268,24 +1112,6 @@
   "ko": "커뮤니티가 믿고 쓰는 일정입니다. 열어서 하루하루 보고 내 것으로 복사하세요.",
   "zh": "社区信赖的行程。打开查看每一天，再复制成你自己的。"
  },
- "Nơi sống không hợp lệ": {
-  "en": "Invalid place of residence",
-  "ja": "居住地が無効です",
-  "ko": "잘못된 거주지입니다",
-  "zh": "所在地无效"
- },
- "Nếu email này có tài khoản ChillnGo, chúng tôi đã gửi liên kết đặt lại mật khẩu.": {
-  "en": "If this email has a ChillnGo account, we've sent a password reset link.",
-  "ja": "このメールアドレスにChillnGoのアカウントがある場合、パスワード再設定のリンクを送りました。",
-  "ko": "이 이메일로 가입된 ChillnGo 계정이 있다면 비밀번호 재설정 링크를 보냈습니다.",
-  "zh": "如果该邮箱已注册 ChillnGo，我们已发送重置密码链接。"
- },
- "Nội dung không hợp lệ": {
-  "en": "Invalid content",
-  "ja": "内容が無効です",
-  "ko": "잘못된 내용입니다",
-  "zh": "内容无效"
- },
  "Phân quyền cho {displayName}": {
   "en": "Permissions for {displayName}",
   "ja": "{displayName} の権限設定",
@@ -1303,12 +1129,6 @@
   "ja": "システム管理",
   "ko": "시스템 관리",
   "zh": "系统管理"
- },
- "Quyền không hợp lệ": {
-  "en": "Invalid permission",
-  "ja": "権限が無効です",
-  "ko": "잘못된 권한입니다",
-  "zh": "权限无效"
  },
  "Quyền: {value}": {
   "en": "Permissions: {value}",
@@ -1343,12 +1163,6 @@
   "ko": "날 순서 바꾸기",
   "zh": "调整日期顺序"
  },
- "Sở thích không hợp lệ": {
-  "en": "Invalid interest",
-  "ja": "興味が無効です",
-  "ko": "잘못된 관심사입니다",
-  "zh": "兴趣无效"
- },
  "Sửa hành trình": {
   "en": "Edit journey",
   "ja": "旅を編集",
@@ -1378,12 +1192,6 @@
   "ja": "{displayName}（@{username}）への操作",
   "ko": "{displayName}(@{username}) 작업",
   "zh": "对 {displayName}（@{username}）的操作"
- },
- "Thao tác ảnh không hợp lệ": {
-  "en": "Invalid image action",
-  "ja": "画像の操作が無効です",
-  "ko": "잘못된 이미지 작업입니다",
-  "zh": "图片操作无效"
  },
  "Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở {value}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.": {
   "en": "ChillnGo's data says your trip falls in {value}'s rainy season: the AI favours indoor spots, and outdoor stops get an indoor Plan B.",
@@ -1487,18 +1295,6 @@
   "ko": "Google 지도에서 장소를 열고 공유, 링크 복사를 누른 뒤 \"링크 붙여넣기\"를 누르세요.",
   "zh": "在 Google 地图中：打开地点，点击“分享”、“复制链接”，再点“粘贴链接”。"
  },
- "Trùng với một điểm đã có trong lịch trình.": {
-  "en": "Same as a stop already in the itinerary.",
-  "ja": "旅程にすでにある立ち寄り先と重複しています。",
-  "ko": "일정에 이미 있는 장소와 겹칩니다.",
-  "zh": "与行程中已有的站点重复。"
- },
- "Trạng thái không hợp lệ": {
-  "en": "Invalid status",
-  "ja": "状態が無効です",
-  "ko": "잘못된 상태입니다",
-  "zh": "状态无效"
- },
  "Trả lời {displayName}…": {
   "en": "Reply to {displayName}…",
   "ja": "{displayName}さんに返信…",
@@ -1597,12 +1393,6 @@
   "ja": "合計 {total}件 · 最大 {value}件/日",
   "ko": "총 {total}개 계정 · 최고 {value}/일",
   "zh": "共 {total} 个账户 · 单日最高 {value}"
- },
- "Vai trò không hợp lệ": {
-  "en": "Invalid role",
-  "ja": "役割が無効です",
-  "ko": "잘못된 역할입니다",
-  "zh": "角色无效"
  },
  "Viết bình luận…": {
   "en": "Write a comment…",
@@ -2240,12 +2030,6 @@
   "ko": "장소 {value}",
   "zh": "站点 {value}"
  },
- "Điểm này được giữ nguyên, không có gì để hoàn tác.": {
-  "en": "This stop is kept as is; there's nothing to undo.",
-  "ja": "この立ち寄り先は変更されていないため、元に戻すものはありません。",
-  "ko": "이 장소는 그대로 유지되어 되돌릴 것이 없습니다.",
-  "zh": "该站点保持不变，没有可撤销的内容。"
- },
  "Điểm đến": {
   "en": "Destination",
   "ja": "目的地",
@@ -2440,12 +2224,6 @@
   "ja": "旅を投稿しました。",
   "ko": "여정을 올렸습니다.",
   "zh": "已发布行程。"
- },
- "Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.": {
-  "en": "Password reset. Log in with your new password.",
-  "ja": "パスワードを再設定しました。新しいパスワードでログインしてください。",
-  "ko": "비밀번호를 재설정했습니다. 새 비밀번호로 로그인하세요.",
-  "zh": "密码已重置。请使用新密码登录。"
  },
  "Đã đổi máy chủ: {apiUrl}. Kéo xuống để tải lại dữ liệu.": {
   "en": "Server changed: {apiUrl}. Pull down to reload.",
@@ -2645,29 +2423,11 @@
   "ko": "JPG, PNG, WebP, HEIC 이미지",
   "zh": "JPG、PNG、WebP 或 HEIC 图片"
  },
- "Ảnh bị trùng": {
-  "en": "Duplicate photo",
-  "ja": "写真が重複しています",
-  "ko": "중복된 사진입니다",
-  "zh": "照片重复"
- },
- "Ảnh không hợp lệ": {
-  "en": "Invalid image",
-  "ja": "画像が無効です",
-  "ko": "잘못된 이미지입니다",
-  "zh": "图片无效"
- },
  "Ảnh ngang, tỉ lệ khoảng 3:1. {acceptedImagesLabel}. Ảnh được tự nén trước khi tải lên.": {
   "en": "A landscape image, about 3:1. {acceptedImagesLabel}. Images are compressed before upload.",
   "ja": "横長の画像（約3:1）。{acceptedImagesLabel}。画像はアップロード前に自動で圧縮されます。",
   "ko": "가로 이미지, 약 3:1 비율. {acceptedImagesLabel}. 이미지는 업로드 전에 자동으로 압축됩니다.",
   "zh": "横向图片，比例约 3:1。{acceptedImagesLabel}。图片会在上传前自动压缩。"
- },
- "Ảnh phải là địa chỉ https": {
-  "en": "Images must be https addresses",
-  "ja": "画像はhttpsのアドレスである必要があります",
-  "ko": "이미지는 https 주소여야 합니다",
-  "zh": "图片必须是 https 地址"
  },
  "Ảnh quá lớn. Vui lòng chọn ảnh dưới 30 MB.": {
   "en": "The image is too large. Please choose one under 30 MB.",

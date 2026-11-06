@@ -22,7 +22,8 @@ String groupThousands(num amount) {
 }
 
 /// 1_910_000 → "1.910.000 ₫"
-String formatVnd(num amount) => '${groupThousands(amount)} ₫';
+String formatVnd(num amount) =>
+    _vi ? '${groupThousands(amount)} ₫' : NumberFormat.currency(locale: _tag, name: 'VND', symbol: '₫', decimalDigits: 0).format(amount);
 
 String _decimal(double value) {
   final rounded = (value * 10).round() / 10;
@@ -32,6 +33,7 @@ String _decimal(double value) {
 
 /// 1_910_000 → "1,9tr"
 String formatVndShort(num amount) {
+  if (!_vi) return NumberFormat.compactCurrency(locale: _tag, symbol: '₫', decimalDigits: 1).format(amount);
   if (amount >= 1000000) {
     final millions = amount / 1000000;
     return millions >= 10 ? '${millions.round()}tr' : '${_decimal(millions.toDouble())}tr';
@@ -42,13 +44,17 @@ String formatVndShort(num amount) {
 
 /// 1284 → "1,3k"
 String formatCount(num count) {
+  if (!_vi) return NumberFormat.compact(locale: _tag).format(count);
   if (count >= 1000000) return '${_decimal(count / 1000000)}tr';
   if (count >= 1000) return '${_decimal(count / 1000)}k';
   return count.round().toString();
 }
 
+/// 3.2 → "3,2" in Vietnamese, "3.2" in English.
+String formatDecimal(num n) => NumberFormat.decimalPatternDigits(locale: _tag, decimalDigits: 1).format(n);
+
 /// 12345 → "12.345"
-String formatNumber(num n) => groupThousands(n);
+String formatNumber(num n) => _vi ? groupThousands(n) : NumberFormat.decimalPattern(_tag).format(n);
 
 DateTime? parseDate(String? iso) {
   if (iso == null || iso.isEmpty) return null;

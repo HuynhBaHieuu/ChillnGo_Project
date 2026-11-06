@@ -32,8 +32,8 @@ class RecentlyDeletedSection extends StatefulWidget {
 class _RecentlyDeletedSectionState extends State<RecentlyDeletedSection> {
   static List<({String value, String label, int? count})> get _tabs => <({String value, String label, int? count})>[
     (value: 'posts', label: t('Bài viết'), count: null),
-    (value: 'stories', label: 'Tin', count: null),
-    (value: 'videos', label: 'Video', count: null),
+    (value: 'stories', label: t('Tin'), count: null),
+    (value: 'videos', label: t('Video'), count: null),
     (value: 'journeys', label: t('Hành trình'), count: null),
   ];
 

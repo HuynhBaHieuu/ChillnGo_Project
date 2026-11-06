@@ -25,7 +25,7 @@ List<({String value, String label, int? count})> get _tabs => [
   (value: 'posts', label: t('Bài viết'), count: null),
   (value: 'saved', label: t('Đã lưu'), count: null),
   (value: 'cloned', label: t('Lịch trình đã sao chép'), count: null),
-  (value: 'live', label: 'Livestream', count: null),
+  (value: 'live', label: t('Livestream'), count: null),
 ];
 
 /// A member's profile (web: ProfilePage).

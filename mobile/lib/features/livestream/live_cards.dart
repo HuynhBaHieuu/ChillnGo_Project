@@ -110,7 +110,7 @@ class LivestreamCard extends StatelessWidget {
           const SizedBox(height: 12),
           Semantics(
             button: true,
-            label: 'Xem livestream ${stream.title}',
+            label: '${t('Xem livestream')} ${stream.title}',
             child: GestureDetector(
               onTap: open,
               child: ClipRRect(
@@ -158,7 +158,7 @@ class LivestreamCard extends StatelessWidget {
               AppIconButton(icon: LucideIcons.messageCircle, label: t('Bình luận trong livestream'), onPressed: open),
               AppIconButton(icon: LucideIcons.share2, label: t('Chia sẻ livestream'), onPressed: () => sharePath('/live/${stream.id}', stream.title)),
               const Spacer(),
-              AppButton(label: 'Xem livestream', size: ButtonSize.sm, onPressed: open),
+              AppButton(label: t('Xem livestream'), size: ButtonSize.sm, onPressed: open),
             ],
           ),
         ],
