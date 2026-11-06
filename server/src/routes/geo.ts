@@ -14,7 +14,7 @@ import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { loadCurrentUser } from '../middleware/staff.js'
 
@@ -26,7 +26,7 @@ const limiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   keyGenerator: (_req, res) => String(res.locals.userId),
-  message: { message: 'Bạn dán link quá nhanh. Vui lòng đợi một chút.' },
+  message: rateLimitBody('Bạn dán link quá nhanh. Vui lòng đợi một chút.'),
 })
 
 const MAX_HOPS = 5

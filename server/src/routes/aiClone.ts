@@ -41,7 +41,7 @@ import { chat } from '../ai/llm.js'
 import { formSchema } from '../ai/schemas.js'
 import type { FormInput } from '../ai/schemas.js'
 import { draftView, itineraryDays, planBList } from '../ai/view.js'
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { creditClone, isServerPostId, readableJourney } from '../lib/journeys.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
@@ -63,7 +63,7 @@ const writeLimiter = rateLimit({
   limit: 120,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn thao tác quá nhanh. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn thao tác quá nhanh. Vui lòng đợi vài phút.'),
 })
 
 /** A draft as stored (lean). */

@@ -1,3 +1,14 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://chillgo-project.vercel.app/api/:path*" },
+    { "source": "/openapi.json", "destination": "https://chillgo-project.vercel.app/api/openapi.json" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/((?!api/|assets/).*)",
+      "headers": [{ "key": "Vary", "value": "Accept" }]
+    }
+  ]
 }

@@ -20,9 +20,66 @@
     />
 
     <title>ChillnGo — Review &amp; Clone Your Journey</title>
+
+    <!--
+      #prerender below is the page for clients that run no JavaScript (crawlers,
+      AI agents, reader tools). With JavaScript on, it stays hidden until React
+      replaces it, so visitors see the app exactly as before.
+    -->
+    <script>document.documentElement.setAttribute('data-js', '')</script>
+    <style>
+      [data-js] #prerender { display: none; }
+      #prerender { max-width: 44rem; margin: 0 auto; padding: 4rem 1.5rem; line-height: 1.65; font-family: Lora, Georgia, serif; }
+      #prerender h1, #prerender h2, #prerender h3 { font-family: Merriweather, Georgia, serif; line-height: 1.25; }
+      #prerender a { color: inherit; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main id="prerender">
+        <h1>ChillnGo — Mạng xã hội của những chuyến đi</h1>
+        <p><strong>Những chuyến đi có thật, kể lại bởi chính người đã đi.</strong></p>
+        <p>
+          ChillnGo là nơi những chuyến đi có thật được kể lại trọn vẹn — từng ngày, từng điểm dừng,
+          từng khoản chi. Thấy một hành trình hợp ý? Sao chép về làm của bạn chỉ với một chạm, rồi
+          sửa theo cách bạn muốn đi.
+        </p>
+        <p>
+          Lịch trình hay nhất không nằm trong cẩm nang, mà nằm trong chuyến đi của ai đó vừa trở về.
+          Lên kế hoạch mất ba tuần. Sao chép một chuyến đi có thật chỉ mất một chạm.
+        </p>
+
+        <h2>Cách ChillnGo hoạt động</h2>
+        <h3>1. Khám phá hành trình thật</h3>
+        <ul>
+          <li>Lọc theo vùng, mùa và ngân sách để ra đúng kiểu chuyến bạn muốn.</li>
+          <li>Xem từng ngày: mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.</li>
+        </ul>
+        <h3>2. Sao chép về và sửa theo ý bạn</h3>
+        <ul>
+          <li>Sao chép một chạm biến chuyến đi của người khác thành bản nháp của bạn.</li>
+          <li>Kéo thả để đổi thứ tự ngày, ngày tháng tự cập nhật theo.</li>
+          <li>Ghép nhiều chuyến: lấy những ngày hay nhất từ nhiều bài.</li>
+        </ul>
+        <h3>3. Đi xong, chia sẻ lại</h3>
+        <ul>
+          <li>Đăng hành trình của bạn cho người đi sau tham khảo và sao chép tiếp.</li>
+        </ul>
+
+        <h2>Bắt đầu</h2>
+        <ul>
+          <li><a href="/discover">Khám phá hành trình</a> — lọc theo vùng, mùa và ngân sách.</li>
+          <li><a href="/feed">Bảng tin</a> — hành trình và check-in mới nhất.</li>
+          <li><a href="/live">Đang phát trực tiếp</a> — livestream từ những người đang trên đường.</li>
+          <li><a href="/register">Đăng ký</a> hoặc <a href="/login">đăng nhập</a>.</li>
+        </ul>
+        <p>
+          Dành cho agent và nhà phát triển: <a href="/llms.txt">llms.txt</a> ·
+          <a href="/openapi.json">OpenAPI</a>. Các trang công khai có bản Markdown khi gửi
+          <code>Accept: text/markdown</code>.
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

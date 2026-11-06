@@ -7,7 +7,7 @@ import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
 import { IMAGE_KINDS, confirmUpload, removeImage, signUpload } from '../lib/cloudinary.js'
-import { HttpError, duplicateKeyField } from '../lib/errors.js'
+import { HttpError, duplicateKeyField, rateLimitBody } from '../lib/errors.js'
 import { displayNameSchema, usernameSchema } from '../lib/schemas.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
@@ -23,7 +23,7 @@ const uploadLimiter = rateLimit({
   limit: 30,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { message: 'Bạn đổi ảnh quá nhiều lần. Vui lòng đợi vài phút.' },
+  message: rateLimitBody('Bạn đổi ảnh quá nhiều lần. Vui lòng đợi vài phút.'),
 })
 
 const signatureSchema = z.object({ kind: z.enum(IMAGE_KINDS, 'Loại ảnh không hợp lệ') })

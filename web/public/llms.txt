@@ -1,0 +1,23 @@
+# ChillnGo
+
+> ChillnGo is a Vietnamese travel social network. People publish real multi-day trip journeys — day by day, stop by stop, with what each stop actually cost — and clone each other's journeys into their own editable itineraries with one tap.
+
+The site is in Vietnamese by default; the app can also switch to English, Chinese, Japanese and Korean. Pages are a JavaScript app; request any page below with `Accept: text/markdown` to get a Markdown version. Data is available from a JSON API under `/api`, described by an OpenAPI 3.1 document. Errors from the API are JSON with `message`, `code`, `status`, `hint` and `docs` fields. Unknown pages answer HTTP 404.
+
+## Pages
+
+- [Home](https://chillgo-project-web.vercel.app/): what ChillnGo is and how discovering, cloning and sharing journeys works.
+- [Discover](https://chillgo-project-web.vercel.app/discover): published journeys, filterable by region, season and budget.
+- [Feed](https://chillgo-project-web.vercel.app/feed): the newest journeys and check-ins.
+- [Live](https://chillgo-project-web.vercel.app/live): livestreams from people on the road, and recorded replays.
+
+## API
+
+- [OpenAPI description](https://chillgo-project-web.vercel.app/openapi.json): every endpoint, its parameters, who may call it, and the error shape.
+- [Published journeys](https://chillgo-project-web.vercel.app/api/posts): `GET`, no sign-in needed. One journey: `GET /api/posts/{id}`.
+- [Check-ins](https://chillgo-project-web.vercel.app/api/checkins): `GET`, no sign-in needed.
+- [Live now](https://chillgo-project-web.vercel.app/api/livestreams): `GET`, no sign-in needed.
+
+## Optional
+
+- [Sign up](https://chillgo-project-web.vercel.app/register): creating journeys, cloning itineraries and commenting need an account; the API takes its token as `Authorization: Bearer <token>`.

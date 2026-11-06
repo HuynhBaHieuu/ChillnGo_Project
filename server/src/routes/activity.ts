@@ -17,7 +17,7 @@ import { rateLimit } from 'express-rate-limit'
 import { isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
-import { HttpError } from '../lib/errors.js'
+import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { AccountEvent } from '../models/AccountEvent.js'
@@ -36,7 +36,7 @@ const searchLimiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   keyGenerator: (_req, res) => String(res.locals.userId),
-  message: { message: 'Bạn tìm kiếm quá nhanh. Vui lòng đợi một chút.' },
+  message: rateLimitBody('Bạn tìm kiếm quá nhanh. Vui lòng đợi một chút.'),
 })
 
 /* --------------------------------------------------------- search history */
