@@ -1,0 +1,2726 @@
+{
+ "  (bạn)": {
+  "en": "  (you)",
+  "ja": "  (あなた)",
+  "ko": "  (나)",
+  "zh": "  (你)"
+ },
+ " (ước tính)": {
+  "en": " (estimated)",
+  "ja": "（概算）",
+  "ko": " (예상)",
+  "zh": "（估算）"
+ },
+ " của @{author}": {
+  "en": " by @{author}",
+  "ja": "（@{author}）",
+  "ko": " · @{author}",
+  "zh": "，作者 @{author}"
+ },
+ " tại ": {
+  "en": " at ",
+  "ja": " で ",
+  "ko": " - ",
+  "zh": " 在 "
+ },
+ " và bấm nút Xác nhận email. Không thấy email? Gửi lại một email mới:": {
+  "en": " and tap Confirm email. Can't find it? Send a new one:",
+  "ja": "。メールを開いて「メールを確認」をタップしてください。届いていませんか？新しいメールを送信：",
+  "ko": ". 이메일을 열고 이메일 확인 버튼을 누르세요. 이메일이 없나요? 새로 보내기:",
+  "zh": " 的确认邮件，然后点击“确认邮箱”。没收到邮件？重新发送一封："
+ },
+ " · bắt đầu {time}{value}{value2}": {
+  "en": " · started {time}{value}{value2}",
+  "ja": " · {time}に開始{value}{value2}",
+  "ko": " · {time} 시작{value}{value2}",
+  "zh": " · 开始于 {time}{value}{value2}"
+ },
+ " · ghép từ {n} bài": {
+  "en": [
+   " · merged from {n} post",
+   " · merged from {n} posts"
+  ],
+  "ja": " · {n}件の投稿から統合",
+  "ko": " · {n}개 게시물에서 합침",
+  "zh": " · 合并自 {n} 篇帖子"
+ },
+ " · live của {displayName}": {
+  "en": " · {displayName}'s live",
+  "ja": " · {displayName}のライブ",
+  "ko": " · {displayName}님의 라이브",
+  "zh": " · {displayName} 的直播"
+ },
+ " · phát lúc {value}": {
+  "en": " · streamed at {value}",
+  "ja": " · {value}に配信",
+  "ko": " · {value} 방송",
+  "zh": " · 直播于 {value}"
+ },
+ " · Đang được ghi lại": {
+  "en": " · Being recorded",
+  "ja": " · 録画中",
+  "ko": " · 녹화 중",
+  "zh": " · 正在录制"
+ },
+ " · đang chờ": {
+  "en": " · pending",
+  "ja": " · 返答待ち",
+  "ko": " · 대기 중",
+  "zh": " · 待回应"
+ },
+ " · đã ghép trước đó": {
+  "en": " · merged before",
+  "ja": " · 統合済み",
+  "ko": " · 이전에 합침",
+  "zh": " · 之前已合并"
+ },
+ " Đăng nhập": {
+  "en": " Log in",
+  "ja": " ログイン",
+  "ko": " 로그인",
+  "zh": " 登录"
+ },
+ " đang phát trực tiếp": {
+  "en": " is live",
+  "ja": " がライブ配信中",
+  "ko": " 님이 라이브 중",
+  "zh": " 正在直播"
+ },
+ " đã check-in tại ": {
+  "en": " checked in at ",
+  "ja": " がチェックイン: ",
+  "ko": " 님이 체크인: ",
+  "zh": " 打卡于 "
+ },
+ " đã chia sẻ": {
+  "en": " shared",
+  "ja": " がシェアしました",
+  "ko": " 님이 공유했습니다",
+  "zh": " 分享了"
+ },
+ " đã chia sẻ ảnh": {
+  "en": " shared a photo",
+  "ja": " が写真をシェアしました",
+  "ko": " 님이 사진을 공유했습니다",
+  "zh": " 分享了照片"
+ },
+ " đã phát trực tiếp": {
+  "en": " went live",
+  "ja": " がライブ配信しました",
+  "ko": " 님이 라이브 방송을 했습니다",
+  "zh": " 进行了直播"
+ },
+ " để tham gia bình luận.": {
+  "en": " to join the conversation.",
+  "ja": "して、コメントに参加しましょう。",
+  "ko": "하고 댓글에 참여하세요.",
+  "zh": "，参与评论。"
+ },
+ ", {missing} điểm chưa có giá": {
+  "en": [
+   ", {missing} stop without a price",
+   ", {missing} stops without a price"
+  ],
+  "ja": "、{missing}か所は価格なし",
+  "ko": ", 가격 없는 장소 {missing}곳",
+  "zh": "，{missing} 个站点暂无价格"
+ },
+ "1 ngày": {
+  "en": "1 day",
+  "ja": "1日",
+  "ko": "1일",
+  "zh": "1 天"
+ },
+ "1. Mở email có tiêu đề “Xác nhận email đăng ký tài khoản ChillnGo”.": {
+  "en": "1. Open the email titled “Xác nhận email đăng ký tài khoản ChillnGo”.",
+  "ja": "1. 件名が「Xác nhận email đăng ký tài khoản ChillnGo」のメールを開きます。",
+  "ko": "1. 제목이 “Xác nhận email đăng ký tài khoản ChillnGo”인 이메일을 여세요.",
+  "zh": "1. 打开标题为“Xác nhận email đăng ký tài khoản ChillnGo”的邮件。"
+ },
+ "1. Mở email có tiêu đề “Đặt lại mật khẩu tài khoản ChillnGo”.": {
+  "en": "1. Open the email titled “Đặt lại mật khẩu tài khoản ChillnGo”.",
+  "ja": "1. 件名が「Đặt lại mật khẩu tài khoản ChillnGo」のメールを開きます。",
+  "ko": "1. 제목이 “Đặt lại mật khẩu tài khoản ChillnGo”인 이메일을 여세요.",
+  "zh": "1. 打开标题为“Đặt lại mật khẩu tài khoản ChillnGo”的邮件。"
+ },
+ "2. Bấm nút Xác nhận email. Nếu liên kết mở bằng trình duyệt, sau khi xác nhận bạn quay lại đây và đăng nhập.": {
+  "en": "2. Tap Confirm email. If the link opens in a browser, come back here and log in once it's confirmed.",
+  "ja": "2. 「メールを確認」をタップします。リンクがブラウザで開いた場合は、確認後ここに戻ってログインしてください。",
+  "ko": "2. 이메일 확인 버튼을 누르세요. 링크가 브라우저에서 열리면 확인 후 여기로 돌아와 로그인하세요.",
+  "zh": "2. 点击“确认邮箱”按钮。如果链接在浏览器中打开，确认后回到这里登录。"
+ },
+ "2. Bấm nút Đặt lại mật khẩu để đổi ngay trên trình duyệt, hoặc giữ lâu nút đó để sao chép liên kết rồi dán vào ứng dụng.": {
+  "en": "2. Tap Reset password to change it in the browser, or long-press that button to copy the link and paste it into the app.",
+  "ja": "2. 「パスワードを再設定」をタップしてブラウザで変更するか、ボタンを長押ししてリンクをコピーし、アプリに貼り付けます。",
+  "ko": "2. 비밀번호 재설정 버튼을 눌러 브라우저에서 바꾸거나, 버튼을 길게 눌러 링크를 복사한 뒤 앱에 붙여 넣으세요.",
+  "zh": "2. 点击“重置密码”在浏览器中修改，或长按该按钮复制链接并粘贴到应用中。"
+ },
+ "3 ngày (1 đến 14)": {
+  "en": "3 days (1 to 14)",
+  "ja": "3日（1〜14）",
+  "ko": "3일 (1~14)",
+  "zh": "3 天（1 到 14）"
+ },
+ "3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @{value}": {
+  "en": "3–30 characters: unaccented letters, digits, dots or underscores. Currently @{value}",
+  "ja": "3〜30文字：アクセントなしの英字・数字・ピリオド・アンダースコア。現在は @{value}",
+  "ko": "3–30자: 악센트 없는 문자, 숫자, 마침표, 밑줄. 현재 @{value}",
+  "zh": "3–30 个字符：无音标字母、数字、点或下划线。当前为 @{value}"
+ },
+ "AI chưa lập được lịch trình hợp lệ sau vài lần thử. Bạn thử lại, hoặc đổi số ngày, nhịp độ cho dễ hơn nhé.": {
+  "en": "The AI couldn't make a valid itinerary after a few tries. Try again, or choose fewer days or an easier pace.",
+  "ja": "AIは何度か試しましたが、有効な旅程を作れませんでした。もう一度試すか、日数やペースをゆるめてください。",
+  "ko": "AI가 몇 번 시도했지만 유효한 일정을 만들지 못했습니다. 다시 시도하거나 일수와 속도를 더 여유롭게 바꿔 보세요.",
+  "zh": "AI 尝试几次后仍未能生成有效的行程。请重试，或调整天数和节奏使其更轻松。"
+ },
+ "AI chưa đưa ra được thay đổi hợp lệ sau vài lần thử. Bạn thử nói rõ hơn, ví dụ tên điểm và ngày muốn đổi nhé.": {
+  "en": "The AI couldn't make a valid change after a few tries. Try saying it more clearly, e.g. the place and the day to change.",
+  "ja": "AIは何度か試しましたが、有効な変更を出せませんでした。変更したい場所や日など、もう少し具体的に伝えてください。",
+  "ko": "AI가 몇 번 시도했지만 유효한 변경을 만들지 못했습니다. 바꾸고 싶은 장소와 날처럼 더 구체적으로 말해 보세요.",
+  "zh": "AI 尝试几次后仍未能给出有效的修改。请说得更具体些，例如要修改的地点和日期。"
+ },
+ "Biến chuyến đi của người khác thành bản nháp của bạn.": {
+  "en": "Turn someone else's trip into your own draft.",
+  "ja": "誰かの旅をあなたの下書きに。",
+  "ko": "다른 사람의 여행을 내 초안으로 만드세요.",
+  "zh": "把别人的旅行变成你的草稿。"
+ },
+ "Bài bạn đăng và lịch trình đã sao chép": {
+  "en": "Your posts and copied itineraries",
+  "ja": "投稿した旅とコピーした旅程",
+  "ko": "내가 올린 글과 복사한 일정",
+  "zh": "你发布的帖子和复制的行程"
+ },
+ "Bình luận ": {
+  "en": "Comments ",
+  "ja": "コメント ",
+  "ko": "댓글 ",
+  "zh": "评论 "
+ },
+ "Bình luận của {displayName}": {
+  "en": "{displayName}'s comment",
+  "ja": "{displayName}さんのコメント",
+  "ko": "{displayName}님의 댓글",
+  "zh": "{displayName} 的评论"
+ },
+ "Bình luận không hợp lệ": {
+  "en": "Invalid comment",
+  "ja": "コメントが無効です",
+  "ko": "잘못된 댓글입니다",
+  "zh": "评论无效"
+ },
+ "Bình luận không được để trống.": {
+  "en": "A comment can't be empty.",
+  "ja": "コメントを入力してください。",
+  "ko": "댓글을 입력하세요.",
+  "zh": "评论不能为空。"
+ },
+ "Bạn bè là những người bạn theo dõi và cũng theo dõi bạn. Còn mời được {left} người.": {
+  "en": [
+   "Friends are people you follow who also follow you. You can invite {left} more person.",
+   "Friends are people you follow who also follow you. You can invite {left} more people."
+  ],
+  "ja": "友達とは、あなたがフォローしていて、あなたをフォローしている人です。あと{left}人招待できます。",
+  "ko": "친구는 서로 팔로우하는 사람이에요. {left}명 더 초대할 수 있어요.",
+  "zh": "好友是你关注且也关注你的人。还可以邀请 {left} 人。"
+ },
+ "Bạn bình luận hơi nhanh. Đợi vài giây rồi thử lại nhé.": {
+  "en": "You're commenting a bit fast. Wait a few seconds and try again.",
+  "ja": "コメントの投稿が早すぎます。数秒待ってからもう一度お試しください。",
+  "ko": "댓글을 너무 빨리 달고 있습니다. 몇 초 뒤 다시 시도하세요.",
+  "zh": "你评论得有点快。请稍等几秒后再试。"
+ },
+ "Bạn chưa cho ChillnGo dùng camera. Hãy bật quyền Camera trong Cài đặt của điện thoại.": {
+  "en": "You haven't let ChillnGo use the camera. Turn on Camera access in your phone's Settings.",
+  "ja": "ChillnGoにカメラの使用を許可していません。端末の設定でカメラを許可してください。",
+  "ko": "ChillnGo에 카메라 권한을 허용하지 않았습니다. 휴대폰 설정에서 카메라 권한을 켜세요.",
+  "zh": "你尚未允许 ChillnGo 使用相机。请在手机设置中开启相机权限。"
+ },
+ "Bạn chưa cho ChillnGo dùng vị trí. Hãy bật quyền Vị trí trong Cài đặt, hoặc tìm địa điểm bằng tên.": {
+  "en": "You haven't let ChillnGo use your location. Turn on Location in Settings, or search for the place by name.",
+  "ja": "ChillnGoに位置情報の使用を許可していません。設定で位置情報を許可するか、名前で場所を検索してください。",
+  "ko": "ChillnGo에 위치 권한을 허용하지 않았습니다. 설정에서 위치 권한을 켜거나 이름으로 장소를 검색하세요.",
+  "zh": "你尚未允许 ChillnGo 使用位置。请在设置中开启位置权限，或按名称搜索地点。"
+ },
+ "Bạn chưa cho ChillnGo truy cập ảnh. Hãy bật quyền Ảnh trong Cài đặt của điện thoại.": {
+  "en": "You haven't let ChillnGo access your photos. Turn on Photos access in your phone's Settings.",
+  "ja": "ChillnGoに写真へのアクセスを許可していません。端末の設定で写真を許可してください。",
+  "ko": "ChillnGo에 사진 접근을 허용하지 않았습니다. 휴대폰 설정에서 사진 권한을 켜세요.",
+  "zh": "你尚未允许 ChillnGo 访问照片。请在手机设置中开启照片权限。"
+ },
+ "Bạn chưa đăng nhập": {
+  "en": "You're not logged in",
+  "ja": "ログインしていません",
+  "ko": "로그인하지 않았습니다",
+  "zh": "你还未登录"
+ },
+ "Bạn chỉ chỉnh sửa được hành trình của chính mình.": {
+  "en": "You can only edit your own journeys.",
+  "ja": "編集できるのは自分の旅だけです。",
+  "ko": "내 여정만 편집할 수 있습니다.",
+  "zh": "你只能编辑自己的行程。"
+ },
+ "Bạn chỉ quản lý được tài khoản người dùng thường.": {
+  "en": "You can only manage regular user accounts.",
+  "ja": "管理できるのは一般ユーザーのアカウントだけです。",
+  "ko": "일반 사용자 계정만 관리할 수 있습니다.",
+  "zh": "你只能管理普通用户账户。"
+ },
+ "Bạn cần đăng nhập để đăng bài, check-in hoặc phát trực tiếp.": {
+  "en": "Log in to post, check in or go live.",
+  "ja": "投稿、チェックイン、ライブ配信にはログインが必要です。",
+  "ko": "게시, 체크인, 라이브 방송을 하려면 로그인하세요.",
+  "zh": "登录后即可发帖、打卡或直播。"
+ },
+ "Bạn không thể thao tác trên chính tài khoản của mình.": {
+  "en": "You can't do this to your own account.",
+  "ja": "自分のアカウントにはこの操作はできません。",
+  "ko": "내 계정에는 이 작업을 할 수 없습니다.",
+  "zh": "你不能对自己的账户执行此操作。"
+ },
+ "Bạn muốn chia sẻ gì hôm nay?": {
+  "en": "What would you like to share today?",
+  "ja": "今日は何をシェアしますか？",
+  "ko": "오늘 무엇을 공유할까요?",
+  "zh": "今天想分享什么？"
+ },
+ "Bạn thả cảm xúc hơi nhanh. Đợi một chút nhé.": {
+  "en": "You're reacting a bit fast. Wait a moment.",
+  "ja": "リアクションが早すぎます。少しお待ちください。",
+  "ko": "반응을 너무 빨리 보내고 있습니다. 잠시 기다리세요.",
+  "zh": "你的互动有点快。请稍等一下。"
+ },
+ "Bạn đang phát livestream này ở một thiết bị khác.": {
+  "en": "You're streaming this live on another device.",
+  "ja": "このライブは別の端末で配信中です。",
+  "ko": "다른 기기에서 이 라이브를 방송하고 있습니다.",
+  "zh": "你正在另一台设备上进行这场直播。"
+ },
+ "Bạn đã chặn quyền camera hoặc micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.": {
+  "en": "You've blocked camera or microphone access. Allow it in your phone's Settings and try again.",
+  "ja": "カメラまたはマイクへのアクセスがブロックされています。端末の設定で許可してから再試行してください。",
+  "ko": "카메라 또는 마이크 권한을 차단했습니다. 휴대폰 설정에서 허용한 뒤 다시 시도하세요.",
+  "zh": "你已阻止相机或麦克风权限。请在手机设置中允许后重试。"
+ },
+ "Bạn đã chặn quyền camera và micro. Hãy cho phép trong Cài đặt của điện thoại rồi thử lại.": {
+  "en": "You've blocked camera and microphone access. Allow them in your phone's Settings and try again.",
+  "ja": "カメラとマイクへのアクセスがブロックされています。端末の設定で許可してから再試行してください。",
+  "ko": "카메라와 마이크 권한을 차단했습니다. 휴대폰 설정에서 허용한 뒤 다시 시도하세요.",
+  "zh": "你已阻止相机和麦克风权限。请在手机设置中允许后重试。"
+ },
+ "Bạn đã nhận lời đi cùng.": {
+  "en": "You've accepted the invite.",
+  "ja": "招待を承諾しました。",
+  "ko": "초대를 수락했습니다.",
+  "zh": "你已接受邀请。"
+ },
+ "Bạn đổi ảnh bìa quá nhiều lần. Vui lòng đợi vài phút.": {
+  "en": "You've changed your cover photo too many times. Please wait a few minutes.",
+  "ja": "カバー写真の変更回数が多すぎます。数分お待ちください。",
+  "ko": "커버 사진을 너무 자주 바꿨습니다. 몇 분 기다리세요.",
+  "zh": "你更换封面照片的次数太多了。请等几分钟。"
+ },
+ "Bản nháp được lưu vào tài khoản của bạn. Xem lại ở Hoạt động của bạn, mục Hành trình.": {
+  "en": "The draft is saved to your account. Find it under Your activity, Journeys.",
+  "ja": "下書きはアカウントに保存されました。「アクティビティ」の「旅」で確認できます。",
+  "ko": "초안이 계정에 저장되었습니다. 내 활동의 여정에서 확인하세요.",
+  "zh": "草稿已保存到你的账户。可在“你的动态”中的“行程”查看。"
+ },
+ "Bản nháp, chỉ bạn thấy": {
+  "en": "Draft, only you can see it",
+  "ja": "下書き（自分だけに表示）",
+  "ko": "초안, 나만 볼 수 있음",
+  "zh": "草稿，仅自己可见"
+ },
+ "Bấm nút “+” rồi chọn Phát trực tiếp để livestream lần đầu. Các buổi phát sẽ được lưu ở đây.": {
+  "en": "Tap “+” and choose Go live to stream for the first time. Your streams will be saved here.",
+  "ja": "「+」をタップして「ライブ配信」を選ぶと初めての配信ができます。配信はここに保存されます。",
+  "ko": "“+”를 누르고 라이브 방송을 선택해 첫 방송을 시작하세요. 방송은 여기에 저장됩니다.",
+  "zh": "点击“+”并选择“直播”开始你的第一次直播。直播记录会保存在这里。"
+ },
+ "Bấm nút “+” rồi chọn Phát trực tiếp. Mọi buổi bạn phát sẽ được liệt kê ở đây.": {
+  "en": "Tap “+” and choose Go live. Every stream you broadcast will be listed here.",
+  "ja": "「+」をタップして「ライブ配信」を選びます。配信したライブはすべてここに表示されます。",
+  "ko": "“+”를 누르고 라이브 방송을 선택하세요. 방송한 모든 라이브가 여기에 표시됩니다.",
+  "zh": "点击“+”并选择“直播”。你的每场直播都会列在这里。"
+ },
+ "Bỏ": {
+  "en": "Discard",
+  "ja": "破棄",
+  "ko": "버리기",
+  "zh": "放弃"
+ },
+ "Bỏ check-in này?": {
+  "en": "Discard this check-in?",
+  "ja": "このチェックインを破棄しますか？",
+  "ko": "이 체크인을 버릴까요?",
+  "zh": "放弃这条打卡？"
+ },
+ "Bỏ thay đổi": {
+  "en": "Discard changes",
+  "ja": "変更を破棄",
+  "ko": "변경 사항 버리기",
+  "zh": "放弃更改"
+ },
+ "Bỏ thay đổi?": {
+  "en": "Discard changes?",
+  "ja": "変更を破棄しますか？",
+  "ko": "변경 사항을 버릴까요?",
+  "zh": "放弃更改？"
+ },
+ "Bỏ ảnh {value}": {
+  "en": "Remove photo {value}",
+  "ja": "写真 {value} を外す",
+  "ko": "사진 {value} 제거",
+  "zh": "移除照片 {value}"
+ },
+ "Bộ nhớ tạm đang trống. Hãy sao chép link Google Maps trước.": {
+  "en": "The clipboard is empty. Copy a Google Maps link first.",
+  "ja": "クリップボードが空です。先にGoogleマップのリンクをコピーしてください。",
+  "ko": "클립보드가 비어 있습니다. 먼저 Google 지도 링크를 복사하세요.",
+  "zh": "剪贴板为空。请先复制一个 Google 地图链接。"
+ },
+ "Bởi {value}": {
+  "en": "By {value}",
+  "ja": "投稿者：{value}",
+  "ko": "작성자: {value}",
+  "zh": "作者：{value}"
+ },
+ "Chia sẻ hành trình": {
+  "en": "Share journey",
+  "ja": "旅をシェア",
+  "ko": "여정 공유",
+  "zh": "分享行程"
+ },
+ "Chia sẻ hành trình thật. Sao chép lịch trình chỉ với một chạm.": {
+  "en": "Share real journeys. Copy an itinerary in one tap.",
+  "ja": "本当の旅をシェア。旅程はワンタップでコピー。",
+  "ko": "진짜 여정을 공유하고, 일정은 한 번에 복사하세요.",
+  "zh": "分享真实的旅程，一键复制行程。"
+ },
+ "Chia sẻ livestream": {
+  "en": "Share livestream",
+  "ja": "ライブをシェア",
+  "ko": "라이브 공유",
+  "zh": "分享直播"
+ },
+ "Chia sẻ nơi bạn đang đến và cảm xúc lúc này, {value}.": {
+  "en": "Share where you are and how you feel right now, {value}.",
+  "ja": "{value}さん、今いる場所と今の気分をシェアしよう。",
+  "ko": "{value}님, 지금 있는 곳과 기분을 공유해 보세요.",
+  "zh": "{value}，分享你现在所在的地方和此刻的心情吧。"
+ },
+ "Chia sẻ trang cá nhân": {
+  "en": "Share profile",
+  "ja": "プロフィールをシェア",
+  "ko": "프로필 공유",
+  "zh": "分享个人主页"
+ },
+ "ChillnGo là mạng xã hội của những chuyến đi có thật.": {
+  "en": "ChillnGo is the social network of real trips.",
+  "ja": "ChillnGoは本当の旅のためのSNSです。",
+  "ko": "ChillnGo는 진짜 여행을 위한 소셜 네트워크입니다.",
+  "zh": "ChillnGo 是真实旅行的社交网络。"
+ },
+ "ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép nó về làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn phải dựng lịch trình từ con số không.": {
+  "en": "ChillnGo is where real trips are told in full: every day, every stop, every expense. Found a journey you like? Copy it as your own in one tap, then change it to travel your way. No more building an itinerary from scratch.",
+  "ja": "ChillnGoでは本当の旅が丸ごと語られます。毎日、立ち寄り先、出費まで。気に入った旅を見つけたら、ワンタップで自分の旅程にコピーして、好きなように調整できます。もう旅程をゼロから作る必要はありません。",
+  "ko": "ChillnGo에서는 진짜 여행이 하루하루, 장소마다, 지출마다 그대로 기록됩니다. 마음에 드는 여정을 찾았나요? 한 번에 내 일정으로 복사하고 원하는 대로 바꾸세요. 이제 일정을 처음부터 짤 필요가 없습니다.",
+  "zh": "ChillnGo 让真实的旅行被完整讲述：每一天、每一站、每一笔花费。看到喜欢的行程？一键复制成你自己的，再按你的方式修改。不必再从零开始规划行程。"
+ },
+ "Chuyến đi này có gì đặc biệt?": {
+  "en": "What made this trip special?",
+  "ja": "この旅の特別なところは？",
+  "ko": "이번 여행의 특별한 점은?",
+  "zh": "这次旅行有什么特别之处？"
+ },
+ "Chào mừng {welcome} đến với ChillnGo! Bạn đã được đăng nhập.": {
+  "en": "Welcome to ChillnGo, {welcome}! You're logged in.",
+  "ja": "{welcome}さん、ChillnGoへようこそ！ログインしました。",
+  "ko": "{welcome}님, ChillnGo에 오신 것을 환영합니다! 로그인되었습니다.",
+  "zh": "欢迎 {welcome} 来到 ChillnGo！你已登录。"
+ },
+ "Chưa có thông báo nào": {
+  "en": "No notifications yet",
+  "ja": "通知はまだありません",
+  "ko": "아직 알림이 없습니다",
+  "zh": "暂无通知"
+ },
+ "Chưa có điểm dừng nào được ghim trên bản đồ.": {
+  "en": "No stops are pinned on the map yet.",
+  "ja": "地図にピン留めされた立ち寄り先はまだありません。",
+  "ko": "지도에 고정된 장소가 아직 없습니다.",
+  "zh": "地图上还没有标记任何站点。"
+ },
+ "Chạm để chọn tối đa {maxCoverImages} ảnh": {
+  "en": "Tap to choose up to {maxCoverImages} photos",
+  "ja": "タップして最大{maxCoverImages}枚の写真を選択",
+  "ko": "눌러서 사진을 최대 {maxCoverImages}장 선택하세요",
+  "zh": "点击选择最多 {maxCoverImages} 张照片"
+ },
+ "Chặn {displayName}": {
+  "en": "Block {displayName}",
+  "ja": "{displayName} をブロック",
+  "ko": "{displayName} 차단",
+  "zh": "屏蔽 {displayName}"
+ },
+ "Chặn {displayName}?": {
+  "en": "Block {displayName}?",
+  "ja": "{displayName} をブロックしますか？",
+  "ko": "{displayName}님을 차단할까요?",
+  "zh": "屏蔽 {displayName}？"
+ },
+ "Chế độ người xem không hợp lệ": {
+  "en": "Invalid audience",
+  "ja": "公開範囲が無効です",
+  "ko": "잘못된 공개 대상입니다",
+  "zh": "观众设置无效"
+ },
+ "Chỉ còn mời được {left} người.": {
+  "en": [
+   "You can only invite {left} more person.",
+   "You can only invite {left} more people."
+  ],
+  "ja": "あと{left}人しか招待できません。",
+  "ko": "{left}명만 더 초대할 수 있어요.",
+  "zh": "只能再邀请 {left} 人。"
+ },
+ "Chỉ những ai theo dõi bạn": {
+  "en": "Only people who follow you",
+  "ja": "あなたをフォローしている人だけ",
+  "ko": "나를 팔로우하는 사람만",
+  "zh": "仅关注你的人"
+ },
+ "Chỉ những điểm dừng đã ghim mới hiện trên bản đồ. Ghim bằng ô Địa chỉ: chọn gợi ý, dán link Google Maps, hoặc chọn trên bản đồ.": {
+  "en": "Only pinned stops appear on the map. Pin one from the Address box: pick a suggestion, paste a Google Maps link, or choose on the map.",
+  "ja": "地図に表示されるのはピン留めした立ち寄り先だけです。「住所」欄で候補を選ぶ、Googleマップのリンクを貼る、または地図で選んでピン留めします。",
+  "ko": "고정된 장소만 지도에 표시됩니다. 주소 칸에서 추천을 고르거나 Google 지도 링크를 붙여 넣거나 지도에서 선택해 고정하세요.",
+  "zh": "只有已标记的站点会显示在地图上。在“地址”栏中标记：选择建议、粘贴 Google 地图链接，或在地图上选择。"
+ },
+ "Chỉ đường tới {name}": {
+  "en": "Directions to {name}",
+  "ja": "{name}への経路",
+  "ko": "{name} 길찾기",
+  "zh": "前往 {name} 的路线"
+ },
+ "Chọn": {
+  "en": "Choose",
+  "ja": "選択",
+  "ko": "선택",
+  "zh": "选择"
+ },
+ "Chọn ngày": {
+  "en": "Pick a date",
+  "ja": "日付を選択",
+  "ko": "날짜 선택",
+  "zh": "选择日期"
+ },
+ "Chọn những ngày bạn muốn thêm. Ngày được ghép sẽ nối vào cuối và đánh số lại.": {
+  "en": "Choose the days you want to add. Merged days go at the end and are renumbered.",
+  "ja": "追加したい日を選びます。統合した日は末尾に追加され、番号が振り直されます。",
+  "ko": "추가할 날을 고르세요. 합친 날은 끝에 붙고 번호가 다시 매겨집니다.",
+  "zh": "选择要添加的日期。合并的日期会接在末尾并重新编号。"
+ },
+ "Chọn tối đa {maxCoverImages} ảnh": {
+  "en": "Choose up to {maxCoverImages} photos",
+  "ja": "最大{maxCoverImages}枚の写真を選択",
+  "ko": "사진을 최대 {maxCoverImages}장 선택",
+  "zh": "最多选择 {maxCoverImages} 张照片"
+ },
+ "Chọn…": {
+  "en": "Choose…",
+  "ja": "選択…",
+  "ko": "선택…",
+  "zh": "选择…"
+ },
+ "CÁCH CHILLNGO HOẠT ĐỘNG": {
+  "en": "HOW CHILLNGO WORKS",
+  "ja": "CHILLNGOのしくみ",
+  "ko": "CHILLNGO 이용 방법",
+  "zh": "CHILLNGO 如何运作"
+ },
+ "Cá nhân": {
+  "en": "Me",
+  "ja": "マイページ",
+  "ko": "내 정보",
+  "zh": "我的"
+ },
+ "Công khai": {
+  "en": "Public",
+  "ja": "公開",
+  "ko": "공개",
+  "zh": "公开"
+ },
+ "Cảm xúc không hợp lệ": {
+  "en": "Invalid feeling",
+  "ja": "気分が無効です",
+  "ko": "잘못된 기분입니다",
+  "zh": "心情无效"
+ },
+ "Cần liên kết mới?": {
+  "en": "Need a new link?",
+  "ja": "新しいリンクが必要ですか？",
+  "ko": "새 링크가 필요하세요?",
+  "zh": "需要新链接？"
+ },
+ "Cập nhật": {
+  "en": "Update",
+  "ja": "更新",
+  "ko": "업데이트",
+  "zh": "更新"
+ },
+ "Cập nhật {time}{value}": {
+  "en": "Updated {time}{value}",
+  "ja": "{time}に更新{value}",
+  "ko": "{time} 업데이트{value}",
+  "zh": "更新于 {time}{value}"
+ },
+ "Dán link": {
+  "en": "Paste link",
+  "ja": "リンクを貼り付け",
+  "ko": "링크 붙여넣기",
+  "zh": "粘贴链接"
+ },
+ "Dán liên kết xác nhận": {
+  "en": "Paste the confirmation link",
+  "ja": "確認リンクを貼り付け",
+  "ko": "확인 링크 붙여넣기",
+  "zh": "粘贴确认链接"
+ },
+ "Dán liên kết đặt lại": {
+  "en": "Paste the reset link",
+  "ja": "再設定リンクを貼り付け",
+  "ko": "재설정 링크 붙여넣기",
+  "zh": "粘贴重置链接"
+ },
+ "Dùng camera sau": {
+  "en": "Use rear camera",
+  "ja": "背面カメラを使う",
+  "ko": "후면 카메라 사용",
+  "zh": "使用后置摄像头"
+ },
+ "Dùng camera trước": {
+  "en": "Use front camera",
+  "ja": "前面カメラを使う",
+  "ko": "전면 카메라 사용",
+  "zh": "使用前置摄像头"
+ },
+ "Dùng khi chạy trên điện thoại thật: nhập địa chỉ IP của máy tính đang chạy server (cùng mạng Wi-Fi), ví dụ http://192.168.1.10:4000.": {
+  "en": "For a real phone: enter the IP address of the computer running the server (same Wi-Fi), e.g. http://192.168.1.10:4000.",
+  "ja": "実機で使う場合：サーバーを動かしているPCのIPアドレス（同じWi-Fi）を入力します。例：http://192.168.1.10:4000",
+  "ko": "실제 휴대폰에서 사용할 때: 서버를 실행 중인 컴퓨터의 IP 주소(같은 Wi-Fi)를 입력하세요. 예: http://192.168.1.10:4000",
+  "zh": "在真机上使用：输入运行服务器的电脑 IP 地址（同一 Wi-Fi），例如 http://192.168.1.10:4000。"
+ },
+ "Dùng làm lịch trình": {
+  "en": "Use as itinerary",
+  "ja": "自分の旅程にする",
+  "ko": "내 일정으로 사용",
+  "zh": "用作我的行程"
+ },
+ "Dùng mũi tên để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại theo thứ tự mới.": {
+  "en": "Use the arrows to reorder days. Days are renumbered and re-dated in the new order.",
+  "ja": "矢印で日の順番を変えられます。新しい順番で番号と日付が振り直されます。",
+  "ko": "화살표로 날의 순서를 바꾸세요. 새 순서에 맞춰 번호와 날짜가 다시 매겨집니다.",
+  "zh": "用箭头调整日期顺序。日期会按新顺序重新编号并更新日期。"
+ },
+ "Dùng mặc định": {
+  "en": "Use default",
+  "ja": "デフォルトを使う",
+  "ko": "기본값 사용",
+  "zh": "使用默认值"
+ },
+ "Email hoặc mật khẩu không đúng": {
+  "en": "Incorrect email or password",
+  "ja": "メールアドレスまたはパスワードが正しくありません",
+  "ko": "이메일 또는 비밀번호가 올바르지 않습니다",
+  "zh": "邮箱或密码不正确"
+ },
+ "Email không hợp lệ.": {
+  "en": "Invalid email.",
+  "ja": "メールアドレスが無効です。",
+  "ko": "잘못된 이메일입니다.",
+  "zh": "邮箱无效。"
+ },
+ "Ghép nhiều chuyến": {
+  "en": "Merge trips",
+  "ja": "複数の旅を統合",
+  "ko": "여러 여행 합치기",
+  "zh": "合并多个旅程"
+ },
+ "Giá trị không hợp lệ": {
+  "en": "Invalid value",
+  "ja": "値が無効です",
+  "ko": "잘못된 값입니다",
+  "zh": "值无效"
+ },
+ "Giới thiệu không hợp lệ": {
+  "en": "Invalid bio",
+  "ja": "自己紹介が無効です",
+  "ko": "잘못된 소개입니다",
+  "zh": "简介无效"
+ },
+ "Google không trả về thông tin đăng nhập. Vui lòng thử lại.": {
+  "en": "Google returned no sign-in details. Please try again.",
+  "ja": "Googleからログイン情報が返されませんでした。もう一度お試しください。",
+  "ko": "Google에서 로그인 정보를 받지 못했습니다. 다시 시도하세요.",
+  "zh": "Google 未返回登录信息。请重试。"
+ },
+ "Gộp từ các hành trình": {
+  "en": "Merged from the journeys",
+  "ja": "次の旅から統合",
+  "ko": "다음 여정에서 합침",
+  "zh": "合并自以下行程"
+ },
+ "Gỡ": {
+  "en": "Remove",
+  "ja": "外す",
+  "ko": "내보내기",
+  "zh": "移除"
+ },
+ "Gỡ {value}?": {
+  "en": "Remove {value}?",
+  "ja": "{value}を外しますか？",
+  "ko": "{value}님을 내보낼까요?",
+  "zh": "移除 {value}？"
+ },
+ "Gỡ ảnh đại diện": {
+  "en": "Remove profile photo",
+  "ja": "プロフィール写真を削除",
+  "ko": "프로필 사진 삭제",
+  "zh": "移除头像"
+ },
+ "Gợi ý": {
+  "en": "Suggestions",
+  "ja": "候補",
+  "ko": "추천",
+  "zh": "建议"
+ },
+ "Gửi lại email sau {_secondsLeft} giây": {
+  "en": [
+   "Resend in {_secondsLeft} second",
+   "Resend in {_secondsLeft} seconds"
+  ],
+  "ja": "{_secondsLeft}秒後に再送できます",
+  "ko": "{_secondsLeft}초 후 다시 보내기",
+  "zh": "{_secondsLeft} 秒后可重新发送"
+ },
+ "Gửi lời mời ({n})": {
+  "en": [
+   "Send invite ({n})",
+   "Send invites ({n})"
+  ],
+  "ja": "招待を送る（{n}）",
+  "ko": "초대 보내기 ({n})",
+  "zh": "发送邀请（{n}）"
+ },
+ "Gửi trả lời": {
+  "en": "Send reply",
+  "ja": "返信を送信",
+  "ko": "답글 보내기",
+  "zh": "发送回复"
+ },
+ "Hiện thành một dải thông báo trên mọi trang, ví dụ lịch bảo trì. Để trống để tắt.": {
+  "en": "Shown as a banner on every page, such as a maintenance notice. Leave empty to turn it off.",
+  "ja": "メンテナンスのお知らせなど、全ページにバナーとして表示されます。空欄にすると非表示になります。",
+  "ko": "점검 안내처럼 모든 페이지에 배너로 표시됩니다. 비워 두면 꺼집니다.",
+  "zh": "以横幅形式显示在每个页面，例如维护通知。留空即关闭。"
+ },
+ "HÀNH TRÌNH NHÁP{value}": {
+  "en": "DRAFT JOURNEYS{value}",
+  "ja": "下書きの旅{value}",
+  "ko": "초안 여정{value}",
+  "zh": "草稿行程{value}"
+ },
+ "Hà Nội": {
+  "en": "Hanoi",
+  "ja": "ハノイ",
+  "ko": "하노이",
+  "zh": "河内"
+ },
+ "Hành trình này chưa có ngày nào.": {
+  "en": "This journey has no days yet.",
+  "ja": "この旅にはまだ日がありません。",
+  "ko": "이 여정에는 아직 날이 없습니다.",
+  "zh": "这个行程还没有任何一天。"
+ },
+ "Hành trình nổi bật": {
+  "en": "Featured journeys",
+  "ja": "注目の旅",
+  "ko": "추천 여정",
+  "zh": "精选行程"
+ },
+ "Hành trình sẽ không còn hiện trên trang cá nhân của bạn.": {
+  "en": "The journey will no longer show on your profile.",
+  "ja": "この旅はプロフィールに表示されなくなります。",
+  "ko": "이 여정은 더 이상 내 프로필에 표시되지 않습니다.",
+  "zh": "该行程将不再显示在你的个人主页上。"
+ },
+ "Hãy mở email xác nhận chúng tôi đã gửi tới ": {
+  "en": "Open the confirmation email we sent to ",
+  "ja": "確認メールの送信先: ",
+  "ko": "확인 이메일을 보낸 주소: ",
+  "zh": "请打开我们发送到 "
+ },
+ "Hãy nhập số ngày": {
+  "en": "Enter the number of days",
+  "ja": "日数を入力してください",
+  "ko": "일수를 입력하세요",
+  "zh": "请输入天数"
+ },
+ "Hãy nhập số người": {
+  "en": "Enter the number of people",
+  "ja": "人数を入力してください",
+  "ko": "인원수를 입력하세요",
+  "zh": "请输入人数"
+ },
+ "Họ sẽ không còn hiện là người đi cùng.": {
+  "en": "They will no longer show as a companion.",
+  "ja": "同行者として表示されなくなります。",
+  "ko": "더 이상 동행자로 표시되지 않습니다.",
+  "zh": "对方将不再显示为同行者。"
+ },
+ "Hỏi về hành trình trên ChillnGo, cách lên lịch trình, hay cách dùng ứng dụng. Câu trả lời do AI tạo nên có thể chưa chính xác.": {
+  "en": "Ask about journeys on ChillnGo, planning an itinerary, or using the app. Answers are made by AI and may not be accurate.",
+  "ja": "ChillnGoの旅、旅程の立て方、アプリの使い方について質問できます。回答はAIによるもので、正確でない場合があります。",
+  "ko": "ChillnGo의 여정, 일정 짜는 법, 앱 사용법을 물어보세요. 답변은 AI가 만들어 정확하지 않을 수 있습니다.",
+  "zh": "询问 ChillnGo 上的行程、如何规划行程或如何使用应用。回答由 AI 生成，可能不准确。"
+ },
+ "Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.": {
+  "en": "When you find a journey you like, tap “Use as itinerary” to copy it here, then change it to travel your way.",
+  "ja": "気に入った旅を見つけたら「自分の旅程にする」をタップしてここにコピーし、好きなように調整しましょう。",
+  "ko": "마음에 드는 여정을 찾으면 “내 일정으로 사용”을 눌러 여기로 복사한 뒤 원하는 대로 바꾸세요.",
+  "zh": "看到喜欢的行程时，点击“用作我的行程”把它复制到这里，再按你的方式修改。"
+ },
+ "Khi có người theo dõi bạn hoặc người bạn theo dõi phát trực tiếp, thông báo sẽ hiện ở đây.": {
+  "en": "When your followers or people you follow go live, notifications show up here.",
+  "ja": "フォロワーやフォロー中の人がライブ配信を始めると、ここに通知が表示されます。",
+  "ko": "나를 팔로우하거나 내가 팔로우하는 사람이 라이브를 시작하면 여기에 알림이 표시됩니다.",
+  "zh": "当关注你的人或你关注的人开始直播时，通知会显示在这里。"
+ },
+ "Khu vực không hợp lệ": {
+  "en": "Invalid region",
+  "ja": "地域が無効です",
+  "ko": "잘못된 지역입니다",
+  "zh": "地区无效"
+ },
+ "Khung hình lúc {value}": {
+  "en": "Frame at {value}",
+  "ja": "{value} のフレーム",
+  "ko": "{value} 장면",
+  "zh": "{value} 处的画面"
+ },
+ "Khám phá ngay": {
+  "en": "Explore now",
+  "ja": "今すぐ探す",
+  "ko": "지금 둘러보기",
+  "zh": "立即探索"
+ },
+ "Không chỉnh sửa được": {
+  "en": "Can't edit",
+  "ja": "編集できません",
+  "ko": "편집할 수 없음",
+  "zh": "无法编辑"
+ },
+ "Không có trong lịch trình AI đề xuất.": {
+  "en": "Not in the AI's suggested itinerary.",
+  "ja": "AIが提案した旅程に含まれていません。",
+  "ko": "AI가 제안한 일정에 없습니다.",
+  "zh": "不在 AI 建议的行程中。"
+ },
+ "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.": {
+  "en": "Can't reach the server. Check your connection and try again.",
+  "ja": "サーバーに接続できません。接続を確認して再試行してください。",
+  "ko": "서버에 연결할 수 없습니다. 네트워크를 확인하고 다시 시도하세요.",
+  "zh": "无法连接服务器。请检查网络后重试。"
+ },
+ "Không kết nối được. Kiểm tra địa chỉ, cổng 4000 và tường lửa của máy tính.": {
+  "en": "Couldn't connect. Check the address, port 4000 and the computer's firewall.",
+  "ja": "接続できません。アドレス、ポート4000、PCのファイアウォールを確認してください。",
+  "ko": "연결할 수 없습니다. 주소, 4000번 포트, 컴퓨터 방화벽을 확인하세요.",
+  "zh": "无法连接。请检查地址、4000 端口和电脑的防火墙。"
+ },
+ "Không mở được hành trình": {
+  "en": "Couldn't open the journey",
+  "ja": "旅を開けませんでした",
+  "ko": "여정을 열 수 없습니다",
+  "zh": "无法打开行程"
+ },
+ "Không mở được ảnh. Vui lòng thử lại.": {
+  "en": "Couldn't open the photo. Please try again.",
+  "ja": "写真を開けませんでした。もう一度お試しください。",
+  "ko": "사진을 열 수 없습니다. 다시 시도하세요.",
+  "zh": "无法打开照片。请重试。"
+ },
+ "Không phát được bản ghi": {
+  "en": "Couldn't play the recording",
+  "ja": "録画を再生できませんでした",
+  "ko": "녹화를 재생할 수 없습니다",
+  "zh": "无法播放录像"
+ },
+ "Không thể thao tác trên tài khoản Super Admin.": {
+  "en": "Super Admin accounts can't be changed.",
+  "ja": "Super Adminのアカウントは操作できません。",
+  "ko": "Super Admin 계정에는 작업할 수 없습니다.",
+  "zh": "无法对超级管理员账户执行操作。"
+ },
+ "Không tìm thấy hành trình này.": {
+  "en": "Journey not found.",
+  "ja": "この旅が見つかりません。",
+  "ko": "여정을 찾을 수 없습니다.",
+  "zh": "找不到这个行程。"
+ },
+ "Không tìm thấy hành trình này. Có thể nó đã bị xoá.": {
+  "en": "Journey not found. It may have been deleted.",
+  "ja": "この旅が見つかりません。削除された可能性があります。",
+  "ko": "여정을 찾을 수 없습니다. 삭제되었을 수 있습니다.",
+  "zh": "找不到这个行程，可能已被删除。"
+ },
+ "Không tìm thấy mã xác nhận trong liên kết này.": {
+  "en": "No confirmation code found in this link.",
+  "ja": "このリンクに確認コードが見つかりません。",
+  "ko": "이 링크에서 확인 코드를 찾을 수 없습니다.",
+  "zh": "此链接中没有确认码。"
+ },
+ "Không tìm thấy mã đặt lại trong liên kết này.": {
+  "en": "No reset code found in this link.",
+  "ja": "このリンクに再設定コードが見つかりません。",
+  "ko": "이 링크에서 재설정 코드를 찾을 수 없습니다.",
+  "zh": "此链接中没有重置码。"
+ },
+ "Không tìm thấy người dùng này.": {
+  "en": "User not found.",
+  "ja": "ユーザーが見つかりません。",
+  "ko": "사용자를 찾을 수 없습니다.",
+  "zh": "找不到该用户。"
+ },
+ "Không tìm thấy thay đổi này trong bản nháp.": {
+  "en": "This change isn't in the draft.",
+  "ja": "この変更は下書きにありません。",
+  "ko": "초안에서 이 변경을 찾을 수 없습니다.",
+  "zh": "草稿中找不到此修改。"
+ },
+ "Không tải được bình luận": {
+  "en": "Couldn't load comments",
+  "ja": "コメントを読み込めませんでした",
+  "ko": "댓글을 불러올 수 없습니다",
+  "zh": "无法加载评论"
+ },
+ "Không tải được dữ liệu": {
+  "en": "Couldn't load data",
+  "ja": "データを読み込めませんでした",
+  "ko": "데이터를 불러올 수 없습니다",
+  "zh": "无法加载数据"
+ },
+ "Không tải được ảnh lên{value}.": {
+  "en": "Couldn't upload the photo{value}.",
+  "ja": "写真をアップロードできませんでした{value}。",
+  "ko": "사진을 올릴 수 없습니다{value}.",
+  "zh": "无法上传照片{value}。"
+ },
+ "Không xác định được vị trí của điện thoại. Hãy tìm địa điểm bằng tên.": {
+  "en": "Couldn't find your phone's location. Search for the place by name.",
+  "ja": "端末の位置を特定できませんでした。名前で場所を検索してください。",
+  "ko": "휴대폰 위치를 확인할 수 없습니다. 이름으로 장소를 검색하세요.",
+  "zh": "无法确定手机的位置。请按名称搜索地点。"
+ },
+ "Không đăng nhập được bằng Google. Vui lòng thử lại.": {
+  "en": "Couldn't sign in with Google. Please try again.",
+  "ja": "Googleでログインできませんでした。もう一度お試しください。",
+  "ko": "Google로 로그인할 수 없습니다. 다시 시도하세요.",
+  "zh": "无法使用 Google 登录。请重试。"
+ },
+ "Kiểm tra": {
+  "en": "Check",
+  "ja": "確認",
+  "ko": "확인",
+  "zh": "检查"
+ },
+ "Kiểm tra hình và tiếng trước khi phát trực tiếp, {value}.": {
+  "en": "Check your video and sound before going live, {value}.",
+  "ja": "{value}さん、ライブ配信の前に映像と音声を確認しましょう。",
+  "ko": "{value}님, 라이브 전에 화면과 소리를 확인하세요.",
+  "zh": "{value}，开播前先检查一下画面和声音吧。"
+ },
+ "Kiểm tra mạng rồi mở lại trang.": {
+  "en": "Check your connection and reopen the page.",
+  "ja": "接続を確認して、ページを開き直してください。",
+  "ko": "네트워크를 확인하고 페이지를 다시 여세요.",
+  "zh": "请检查网络后重新打开页面。"
+ },
+ "Kéo bản đồ để đặt ghim đúng chỗ, hoặc chạm vào một điểm để đưa ghim tới đó.": {
+  "en": "Drag the map to place the pin, or tap a spot to move the pin there.",
+  "ja": "地図をドラッグしてピンを合わせるか、地点をタップしてピンを移動します。",
+  "ko": "지도를 끌어 핀을 맞추거나, 한 곳을 눌러 핀을 옮기세요.",
+  "zh": "拖动地图放置图钉，或点击某处把图钉移到那里。"
+ },
+ "Kết nối được tới máy chủ.": {
+  "en": "Connected to the server.",
+  "ja": "サーバーに接続しました。",
+  "ko": "서버에 연결되었습니다.",
+  "zh": "已连接到服务器。"
+ },
+ "Kể lại chuyến đi theo từng ngày, từng điểm dừng và chi phí.": {
+  "en": "Tell your trip day by day, stop by stop, with costs.",
+  "ja": "旅を1日ごと、立ち寄り先ごとに、費用とともに記録します。",
+  "ko": "여행을 하루하루, 장소마다 비용과 함께 기록하세요.",
+  "zh": "按天、按站点讲述你的旅行，附上花费。"
+ },
+ "Link Google Maps này không có vị trí. Hãy mở địa điểm trên Google Maps rồi bấm Chia sẻ, Sao chép đường liên kết.": {
+  "en": "This Google Maps link has no location. Open the place in Google Maps, tap Share, then Copy link.",
+  "ja": "このGoogleマップのリンクには位置情報がありません。Googleマップで場所を開き、「共有」から「リンクをコピー」をタップしてください。",
+  "ko": "이 Google 지도 링크에는 위치가 없습니다. Google 지도에서 장소를 열고 공유, 링크 복사를 누르세요.",
+  "zh": "这个 Google 地图链接没有位置信息。请在 Google 地图中打开地点，点击“分享”，再点“复制链接”。"
+ },
+ "Livestream chuyến đi cho người theo dõi bạn.": {
+  "en": "Livestream your trip for your followers.",
+  "ja": "フォロワーに向けて旅をライブ配信します。",
+  "ko": "팔로워를 위해 여행을 라이브로 방송하세요.",
+  "zh": "为关注你的人直播你的旅行。"
+ },
+ "Liên kết trong email": {
+  "en": "Link in the email",
+  "ja": "メール内のリンク",
+  "ko": "이메일의 링크",
+  "zh": "邮件中的链接"
+ },
+ "Liên kết xác nhận không hợp lệ, đã được dùng hoặc đã hết hạn.": {
+  "en": "The confirmation link is invalid, already used or expired.",
+  "ja": "確認リンクが無効、使用済み、または期限切れです。",
+  "ko": "확인 링크가 잘못되었거나 이미 사용되었거나 만료되었습니다.",
+  "zh": "确认链接无效、已使用或已过期。"
+ },
+ "Loại tìm kiếm không hợp lệ": {
+  "en": "Invalid search type",
+  "ja": "検索の種類が無効です",
+  "ko": "잘못된 검색 유형입니다",
+  "zh": "搜索类型无效"
+ },
+ "Loại ảnh không hợp lệ": {
+  "en": "Invalid image type",
+  "ja": "画像の種類が無効です",
+  "ko": "잘못된 이미지 유형입니다",
+  "zh": "图片类型无效"
+ },
+ "Lý do khoá: {lockedReason}": {
+  "en": "Lock reason: {lockedReason}",
+  "ja": "ロックの理由: {lockedReason}",
+  "ko": "잠금 사유: {lockedReason}",
+  "zh": "锁定原因：{lockedReason}"
+ },
+ "Lý do: {value}": {
+  "en": "Reason: {value}",
+  "ja": "理由：{value}",
+  "ko": "사유: {value}",
+  "zh": "原因：{value}"
+ },
+ "Lưu": {
+  "en": "Save",
+  "ja": "保存",
+  "ko": "저장",
+  "zh": "保存"
+ },
+ "Lưu hành trình bạn thích, sao chép lịch trình về làm của mình, check-in và phát trực tiếp chuyến đi.": {
+  "en": "Save journeys you like, copy itineraries as your own, check in and go live from your trips.",
+  "ja": "気に入った旅を保存し、旅程を自分用にコピーし、旅先からチェックインやライブ配信ができます。",
+  "ko": "마음에 드는 여정을 저장하고, 일정을 내 것으로 복사하고, 여행 중 체크인과 라이브 방송을 하세요.",
+  "zh": "收藏喜欢的行程，复制行程为己用，打卡并直播你的旅行。"
+ },
+ "Lưu lịch trình": {
+  "en": "Save itinerary",
+  "ja": "旅程を保存",
+  "ko": "일정 저장",
+  "zh": "保存行程"
+ },
+ "Lượt thích, bình luận, bản nháp, đã xoá…": {
+  "en": "Likes, comments, drafts, deleted…",
+  "ja": "いいね、コメント、下書き、削除済み…",
+  "ko": "좋아요, 댓글, 초안, 삭제됨…",
+  "zh": "点赞、评论、草稿、已删除…"
+ },
+ "Lấy những ngày hay nhất từ nhiều bài, gộp vào một lịch trình.": {
+  "en": "Take the best days from several posts and merge them into one itinerary.",
+  "ja": "複数の投稿からいちばん良い日を選んで、1つの旅程にまとめます。",
+  "ko": "여러 게시물에서 가장 좋은 날을 골라 하나의 일정으로 합치세요.",
+  "zh": "从多篇帖子中挑选最好的日子，合并成一个行程。"
+ },
+ "Lịch trình thật, lọc theo vùng, mùa và ngân sách.": {
+  "en": "Real itineraries, filtered by region, season and budget.",
+  "ja": "地域、季節、予算で絞り込める本当の旅程。",
+  "ko": "지역, 계절, 예산으로 거를 수 있는 진짜 일정.",
+  "zh": "真实行程，可按地区、季节和预算筛选。"
+ },
+ "Micro sẵn sàng": {
+  "en": "Microphone ready",
+  "ja": "マイク準備完了",
+  "ko": "마이크 준비됨",
+  "zh": "麦克风已就绪"
+ },
+ "Máy chủ API": {
+  "en": "API server",
+  "ja": "APIサーバー",
+  "ko": "API 서버",
+  "zh": "API 服务器"
+ },
+ "Máy chủ chưa cấu hình nơi lưu ảnh.": {
+  "en": "The server has no image storage set up.",
+  "ja": "サーバーに画像の保存先が設定されていません。",
+  "ko": "서버에 이미지 저장소가 설정되지 않았습니다.",
+  "zh": "服务器尚未配置图片存储。"
+ },
+ "Máy chủ phản hồi quá lâu. Vui lòng thử lại.": {
+  "en": "The server took too long to respond. Please try again.",
+  "ja": "サーバーの応答に時間がかかりすぎています。もう一度お試しください。",
+  "ko": "서버 응답이 너무 늦습니다. 다시 시도하세요.",
+  "zh": "服务器响应超时。请重试。"
+ },
+ "Máy chủ trả về lỗi {statusCode}.": {
+  "en": "The server returned error {statusCode}.",
+  "ja": "サーバーがエラー {statusCode} を返しました。",
+  "ko": "서버가 오류 {statusCode}를 반환했습니다.",
+  "zh": "服务器返回错误 {statusCode}。"
+ },
+ "Máy chủ: {apiUrl}": {
+  "en": "Server: {apiUrl}",
+  "ja": "サーバー: {apiUrl}",
+  "ko": "서버: {apiUrl}",
+  "zh": "服务器：{apiUrl}"
+ },
+ "Mùa không hợp lệ": {
+  "en": "Invalid season",
+  "ja": "季節が無効です",
+  "ko": "잘못된 계절입니다",
+  "zh": "季节无效"
+ },
+ "Mất kết nối khi đang nhận câu trả lời.": {
+  "en": "Lost connection while receiving the answer.",
+  "ja": "回答の受信中に接続が切れました。",
+  "ko": "답변을 받는 중 연결이 끊겼습니다.",
+  "zh": "接收回答时连接中断。"
+ },
+ "Mất kết nối tới livestream. Kiểm tra mạng rồi thử lại.": {
+  "en": "Lost connection to the livestream. Check your connection and try again.",
+  "ja": "ライブとの接続が切れました。接続を確認して再試行してください。",
+  "ko": "라이브 연결이 끊겼습니다. 네트워크를 확인하고 다시 시도하세요.",
+  "zh": "与直播的连接已断开。请检查网络后重试。"
+ },
+ "Mặc định: {defaultApiUrl}": {
+  "en": "Default: {defaultApiUrl}",
+  "ja": "デフォルト：{defaultApiUrl}",
+  "ko": "기본값: {defaultApiUrl}",
+  "zh": "默认：{defaultApiUrl}"
+ },
+ "Mẹo, giờ mở cửa, món nên thử…": {
+  "en": "Tips, opening hours, dishes to try…",
+  "ja": "ヒント、営業時間、おすすめの料理…",
+  "ko": "팁, 영업시간, 추천 메뉴…",
+  "zh": "小贴士、营业时间、推荐菜…"
+ },
+ "Mọi người đã đăng nhập": {
+  "en": "Everyone who's logged in",
+  "ja": "ログインしている全員",
+  "ko": "로그인한 모든 사람",
+  "zh": "所有已登录的人"
+ },
+ "Mỗi check-in tối đa {maxCheckInPhotos} ảnh.": {
+  "en": [
+   "Each check-in can have up to {maxCheckInPhotos} photo.",
+   "Each check-in can have up to {maxCheckInPhotos} photos."
+  ],
+  "ja": "1回のチェックインにつき写真は最大{maxCheckInPhotos}枚です。",
+  "ko": "체크인마다 사진은 최대 {maxCheckInPhotos}장이에요.",
+  "zh": "每次打卡最多 {maxCheckInPhotos} 张照片。"
+ },
+ "Mỗi hành trình chỉ chọn một lần.": {
+  "en": "Choose each journey only once.",
+  "ja": "各旅は1回だけ選べます。",
+  "ko": "각 여정은 한 번만 고를 수 있습니다.",
+  "zh": "每个行程只能选择一次。"
+ },
+ "Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.": {
+  "en": "Every journey is told day by day, stop by stop, cost by cost.",
+  "ja": "どの旅も1日ごと、立ち寄り先ごと、出費ごとに語られます。",
+  "ko": "모든 여정은 하루하루, 장소마다, 지출마다 기록됩니다.",
+  "zh": "每段行程都按天、按站点、按花费讲述。"
+ },
+ "Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.": {
+  "en": "Each colour is a day, and the number is the stop's order that day. Pick a day or a stop to see the route: roads follow real roads, dashed lines are flights, boats or ferries. Tap a leg to see the transport and time.",
+  "ja": "色は日ごと、数字はその日の立ち寄り順です。日または立ち寄り先を選ぶと経路が表示されます。陸路は実際の道に沿い、破線は飛行機、船、フェリーです。区間をタップすると交通手段と所要時間が見られます。",
+  "ko": "색은 날마다, 숫자는 그날 장소의 순서입니다. 날이나 장소를 고르면 경로가 보입니다. 육로는 실제 도로를 따르고, 점선은 비행기, 배, 페리입니다. 구간을 누르면 교통수단과 시간을 볼 수 있습니다.",
+  "zh": "每种颜色代表一天，数字是当天站点的顺序。选择一天或一个站点查看路线：陆路沿真实道路显示，虚线表示飞机、船或渡轮。点击某一段可查看交通方式和时间。"
+ },
+ "Mỗi tin nhắn dùng một lượt AI, còn {callsLeft}/{dailyLimit} lượt hôm nay.": {
+  "en": "Each message uses one AI request, {callsLeft}/{dailyLimit} left today.",
+  "ja": "メッセージ1件ごとにAIを1回使います。今日の残り {callsLeft}/{dailyLimit} 回。",
+  "ko": "메시지 하나에 AI 1회가 사용됩니다. 오늘 {callsLeft}/{dailyLimit}회 남음.",
+  "zh": "每条消息消耗一次 AI 次数，今天还剩 {callsLeft}/{dailyLimit} 次。"
+ },
+ "Mỗi toạ độ là một chuyến đi có thật.": {
+  "en": "Every coordinate is a real trip.",
+  "ja": "どの座標も本当の旅です。",
+  "ko": "모든 좌표는 진짜 여행입니다.",
+  "zh": "每个坐标都是一次真实的旅行。"
+ },
+ "Mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.": {
+  "en": "Each stop has notes, photos and an estimated cost.",
+  "ja": "立ち寄り先ごとにメモ、写真、概算費用があります。",
+  "ko": "장소마다 메모, 사진, 예상 비용이 있습니다.",
+  "zh": "每个站点都有备注、照片和估算花费。"
+ },
+ "Mở Cài đặt": {
+  "en": "Open Settings",
+  "ja": "設定を開く",
+  "ko": "설정 열기",
+  "zh": "打开设置"
+ },
+ "Mở bản đồ toàn màn hình": {
+  "en": "Open full-screen map",
+  "ja": "地図を全画面で開く",
+  "ko": "전체 화면 지도 열기",
+  "zh": "打开全屏地图"
+ },
+ "Mở {opens} - {closes}": {
+  "en": "Open {opens} - {closes}",
+  "ja": "営業 {opens} - {closes}",
+  "ko": "영업 {opens} - {closes}",
+  "zh": "营业 {opens} - {closes}"
+ },
+ "Mức chi tiêu không hợp lệ": {
+  "en": "Invalid budget level",
+  "ja": "予算レベルが無効です",
+  "ko": "잘못된 예산 수준입니다",
+  "zh": "预算等级无效"
+ },
+ "NGÀY {dayNumber}": {
+  "en": "DAY {dayNumber}",
+  "ja": "{dayNumber}日目",
+  "ko": "{dayNumber}일차",
+  "zh": "第 {dayNumber} 天"
+ },
+ "NGÀY {value}": {
+  "en": "DAY {value}",
+  "ja": "{value}日目",
+  "ko": "{value}일차",
+  "zh": "第 {value} 天"
+ },
+ "Ngày này: ": {
+  "en": "This day: ",
+  "ja": "この日: ",
+  "ko": "이날: ",
+  "zh": "这一天："
+ },
+ "Ngày {dayIndex}": {
+  "en": "Day {dayIndex}",
+  "ja": "{dayIndex}日目",
+  "ko": "{dayIndex}일차",
+  "zh": "第 {dayIndex} 天"
+ },
+ "Ngày {dayNumber}: {value}": {
+  "en": "Day {dayNumber}: {value}",
+  "ja": "{dayNumber}日目: {value}",
+  "ko": "{dayNumber}일차: {value}",
+  "zh": "第 {dayNumber} 天：{value}"
+ },
+ "Ngày {day}": {
+  "en": "Day {day}",
+  "ja": "{day}日目",
+  "ko": "{day}일차",
+  "zh": "第 {day} 天"
+ },
+ "Ngày {day} · {order}. {value}": {
+  "en": "Day {day} · {order}. {value}",
+  "ja": "{day}日目 · {order}. {value}",
+  "ko": "{day}일차 · {order}. {value}",
+  "zh": "第 {day} 天 · {order}. {value}"
+ },
+ "Ngày {number}": {
+  "en": "Day {number}",
+  "ja": "{number}日目",
+  "ko": "{number}일차",
+  "zh": "第 {number} 天"
+ },
+ "Ngân sách {amount}": {
+  "en": "Budget {amount}",
+  "ja": "予算 {amount}",
+  "ko": "예산 {amount}",
+  "zh": "预算 {amount}"
+ },
+ "Nhịp độ không hợp lệ": {
+  "en": "Invalid pace",
+  "ja": "ペースが無効です",
+  "ko": "잘못된 속도입니다",
+  "zh": "节奏无效"
+ },
+ "Những gì bạn vừa nhập chưa được lưu. Rời trang sẽ mất các thay đổi này.": {
+  "en": "What you just entered isn't saved. Leaving will lose these changes.",
+  "ja": "入力した内容はまだ保存されていません。移動すると変更が失われます。",
+  "ko": "방금 입력한 내용이 저장되지 않았습니다. 나가면 변경 사항이 사라집니다.",
+  "zh": "你刚输入的内容尚未保存。离开将丢失这些更改。"
+ },
+ "Những hành trình hợp nhất với {seasonName}": {
+  "en": "Journeys made for {seasonName}",
+  "ja": "{seasonName}にぴったりの旅程",
+  "ko": "{seasonName}에 딱 맞는 여정",
+  "zh": "最适合{seasonName}的行程"
+ },
+ "Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi sao chép về làm của bạn.": {
+  "en": "Itineraries the community trusts. Open one to see each day, then copy it as your own.",
+  "ja": "コミュニティが信頼する旅程。開いて1日ずつ確認し、自分用にコピーしましょう。",
+  "ko": "커뮤니티가 믿고 쓰는 일정입니다. 열어서 하루하루 보고 내 것으로 복사하세요.",
+  "zh": "社区信赖的行程。打开查看每一天，再复制成你自己的。"
+ },
+ "Nơi sống không hợp lệ": {
+  "en": "Invalid place of residence",
+  "ja": "居住地が無効です",
+  "ko": "잘못된 거주지입니다",
+  "zh": "所在地无效"
+ },
+ "Nếu email này có tài khoản ChillnGo, chúng tôi đã gửi liên kết đặt lại mật khẩu.": {
+  "en": "If this email has a ChillnGo account, we've sent a password reset link.",
+  "ja": "このメールアドレスにChillnGoのアカウントがある場合、パスワード再設定のリンクを送りました。",
+  "ko": "이 이메일로 가입된 ChillnGo 계정이 있다면 비밀번호 재설정 링크를 보냈습니다.",
+  "zh": "如果该邮箱已注册 ChillnGo，我们已发送重置密码链接。"
+ },
+ "Nội dung không hợp lệ": {
+  "en": "Invalid content",
+  "ja": "内容が無効です",
+  "ko": "잘못된 내용입니다",
+  "zh": "内容无效"
+ },
+ "Phân quyền cho {displayName}": {
+  "en": "Permissions for {displayName}",
+  "ja": "{displayName} の権限設定",
+  "ko": "{displayName}님 권한 설정",
+  "zh": "为 {displayName} 分配权限"
+ },
+ "Phỏng theo hành trình": {
+  "en": "Adapted from the journey",
+  "ja": "次の旅をもとに調整",
+  "ko": "다음 여정을 바탕으로 조정",
+  "zh": "改编自行程"
+ },
+ "QUẢN TRỊ HỆ THỐNG": {
+  "en": "SYSTEM ADMINISTRATION",
+  "ja": "システム管理",
+  "ko": "시스템 관리",
+  "zh": "系统管理"
+ },
+ "Quyền không hợp lệ": {
+  "en": "Invalid permission",
+  "ja": "権限が無効です",
+  "ko": "잘못된 권한입니다",
+  "zh": "权限无效"
+ },
+ "Quyền: {value}": {
+  "en": "Permissions: {value}",
+  "ja": "権限：{value}",
+  "ko": "권한: {value}",
+  "zh": "权限：{value}"
+ },
+ "Rời": {
+  "en": "Leave",
+  "ja": "抜ける",
+  "ko": "나가기",
+  "zh": "退出"
+ },
+ "Rời hành trình?": {
+  "en": "Leave the journey?",
+  "ja": "この旅から抜けますか？",
+  "ko": "이 여정에서 나갈까요?",
+  "zh": "退出这个行程？"
+ },
+ "Sao chép {n} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể đổi thứ tự và ghép thêm ngày từ bài khác sau.": {
+  "en": [
+   "Copy {n} day from this journey into your own itinerary. You can reorder and merge in days from other posts later.",
+   "Copy {n} days from this journey into your own itinerary. You can reorder and merge in days from other posts later."
+  ],
+  "ja": "この旅の{n}日分を自分の旅程にコピーします。あとで順番を変えたり、他の投稿の日を統合したりできます。",
+  "ko": "이 여정의 {n}일을 내 일정으로 복사합니다. 나중에 순서를 바꾸고 다른 게시물의 날을 합칠 수 있습니다.",
+  "zh": "把这个行程的 {n} 天复制成你自己的行程。之后可以调整顺序，并合并其他帖子的日子。"
+ },
+ "Sắp xếp lại ngày": {
+  "en": "Reorder days",
+  "ja": "日の並べ替え",
+  "ko": "날 순서 바꾸기",
+  "zh": "调整日期顺序"
+ },
+ "Sở thích không hợp lệ": {
+  "en": "Invalid interest",
+  "ja": "興味が無効です",
+  "ko": "잘못된 관심사입니다",
+  "zh": "兴趣无效"
+ },
+ "Sửa hành trình": {
+  "en": "Edit journey",
+  "ja": "旅を編集",
+  "ko": "여정 편집",
+  "zh": "编辑行程"
+ },
+ "Sửa lần cuối": {
+  "en": "Last edited",
+  "ja": "最終編集",
+  "ko": "마지막 편집",
+  "zh": "最后编辑"
+ },
+ "TRỰC TIẾP": {
+  "en": "LIVE",
+  "ja": "ライブ",
+  "ko": "라이브",
+  "zh": "直播"
+ },
+ "Thao tác quá lâu. Vui lòng thử lại.": {
+  "en": "That took too long. Please try again.",
+  "ja": "時間がかかりすぎました。もう一度お試しください。",
+  "ko": "작업이 너무 오래 걸렸습니다. 다시 시도하세요.",
+  "zh": "操作超时。请重试。"
+ },
+ "Thao tác với {displayName} (@{username})": {
+  "en": "Actions for {displayName} (@{username})",
+  "ja": "{displayName}（@{username}）への操作",
+  "ko": "{displayName}(@{username}) 작업",
+  "zh": "对 {displayName}（@{username}）的操作"
+ },
+ "Thao tác ảnh không hợp lệ": {
+  "en": "Invalid image action",
+  "ja": "画像の操作が無効です",
+  "ko": "잘못된 이미지 작업입니다",
+  "zh": "图片操作无效"
+ },
+ "Theo dữ liệu ChillnGo, chuyến đi rơi vào mùa mưa ở {value}: AI ưu tiên điểm trong nhà, và Plan B của điểm ngoài trời là chỗ trong nhà.": {
+  "en": "ChillnGo's data says your trip falls in {value}'s rainy season: the AI favours indoor spots, and outdoor stops get an indoor Plan B.",
+  "ja": "ChillnGoのデータによると、旅行期間は{value}の雨季にあたります。AIは屋内スポットを優先し、屋外スポットのプランBは屋内にしています。",
+  "ko": "ChillnGo 데이터에 따르면 여행 기간이 {value}의 우기예요. AI가 실내 장소를 우선하고, 야외 장소의 플랜 B는 실내로 정했어요.",
+  "zh": "根据 ChillnGo 的数据，你的旅行正值{value}的雨季：AI 优先安排室内地点，户外站点的备选方案也是室内场所。"
+ },
+ "Theo dữ liệu ChillnGo, {value} đang vào mùa mưa: AI sẽ ưu tiên điểm trong nhà.": {
+  "en": "ChillnGo's data says {value} is in its rainy season: the AI will favour indoor spots.",
+  "ja": "ChillnGoのデータによると{value}は雨季です。AIは屋内のスポットを優先します。",
+  "ko": "ChillnGo 데이터에 따르면 {value}은(는) 우기예요. AI가 실내 장소를 우선해요.",
+  "zh": "根据 ChillnGo 的数据，{value} 正值雨季：AI 会优先安排室内地点。"
+ },
+ "Thêm thẻ, nhấn Enter hoặc dấu phẩy": {
+  "en": "Add tags, press Enter or a comma",
+  "ja": "タグを追加（Enterまたはカンマ）",
+  "ko": "태그 추가, Enter 또는 쉼표",
+  "zh": "添加标签，按回车或逗号"
+ },
+ "Thêm ảnh ({n}/{maxCoverImages})": {
+  "en": "Add photos ({n}/{maxCoverImages})",
+  "ja": "写真を追加（{n}/{maxCoverImages}）",
+  "ko": "사진 추가 ({n}/{maxCoverImages})",
+  "zh": "添加照片（{n}/{maxCoverImages}）"
+ },
+ "Thích": {
+  "en": "Like",
+  "ja": "いいね",
+  "ko": "좋아요",
+  "zh": "点赞"
+ },
+ "Thông báo ({unread} chưa đọc)": {
+  "en": "Notifications ({unread} unread)",
+  "ja": "通知（未読 {unread} 件）",
+  "ko": "알림 (읽지 않음 {unread}개)",
+  "zh": "通知（{unread} 条未读）"
+ },
+ "Thư viện": {
+  "en": "Gallery",
+  "ja": "ライブラリ",
+  "ko": "갤러리",
+  "zh": "相册"
+ },
+ "Thường mất từ 20 giây đến một phút. Đừng rời màn hình này nhé.": {
+  "en": "This usually takes 20 seconds to a minute. Please don't leave this screen.",
+  "ja": "通常20秒から1分ほどかかります。この画面から移動しないでください。",
+  "ko": "보통 20초에서 1분 정도 걸립니다. 이 화면을 떠나지 마세요.",
+  "zh": "通常需要 20 秒到 1 分钟。请不要离开此页面。"
+ },
+ "Thấy hợp ý? Sao chép về làm của bạn chỉ với một chạm.": {
+  "en": "Like it? Copy it as your own in one tap.",
+  "ja": "気に入りましたか？ワンタップで自分用にコピー。",
+  "ko": "마음에 드나요? 한 번에 내 것으로 복사하세요.",
+  "zh": "喜欢吗？一键复制成你自己的。"
+ },
+ "Thời điểm {value}": {
+  "en": "Time {value}",
+  "ja": "時刻 {value}",
+  "ko": "시점 {value}",
+  "zh": "时间 {value}"
+ },
+ "Thử một từ khoá khác hoặc chọn khu vực “Tất cả”.": {
+  "en": "Try another keyword or choose the “All” region.",
+  "ja": "別のキーワードを試すか、地域で「すべて」を選んでください。",
+  "ko": "다른 키워드를 시도하거나 “전체” 지역을 선택하세요.",
+  "zh": "试试其他关键词，或选择“全部”地区。"
+ },
+ "Tiêu đề ngày {number}": {
+  "en": "Day {number} title",
+  "ja": "{number}日目のタイトル",
+  "ko": "{number}일차 제목",
+  "zh": "第 {number} 天标题"
+ },
+ "Tiếp tục với Google": {
+  "en": "Continue with Google",
+  "ja": "Googleで続ける",
+  "ko": "Google로 계속하기",
+  "zh": "使用 Google 继续"
+ },
+ "Toạ độ: {value}, {value2}": {
+  "en": "Coordinates: {value}, {value2}",
+  "ja": "座標: {value}, {value2}",
+  "ko": "좌표: {value}, {value2}",
+  "zh": "坐标：{value}, {value2}"
+ },
+ "Trang cá nhân": {
+  "en": "Profile",
+  "ja": "プロフィール",
+  "ko": "프로필",
+  "zh": "个人主页"
+ },
+ "Trong email “Xác nhận email đăng ký tài khoản ChillnGo”, giữ lâu nút Xác nhận email để sao chép liên kết, rồi dán vào đây.": {
+  "en": "In the email “Xác nhận email đăng ký tài khoản ChillnGo”, long-press Confirm email to copy the link, then paste it here.",
+  "ja": "メール「Xác nhận email đăng ký tài khoản ChillnGo」で「メールを確認」ボタンを長押ししてリンクをコピーし、ここに貼り付けてください。",
+  "ko": "“Xác nhận email đăng ký tài khoản ChillnGo” 이메일에서 이메일 확인 버튼을 길게 눌러 링크를 복사한 뒤 여기에 붙여 넣으세요.",
+  "zh": "在邮件“Xác nhận email đăng ký tài khoản ChillnGo”中，长按“确认邮箱”按钮复制链接，然后粘贴到这里。"
+ },
+ "Trên Google Maps: mở địa điểm, bấm Chia sẻ, Sao chép đường liên kết, rồi bấm \"Dán link\".": {
+  "en": "In Google Maps: open the place, tap Share, Copy link, then tap \"Paste link\".",
+  "ja": "Googleマップで場所を開き、「共有」、「リンクをコピー」をタップしてから「リンクを貼り付け」をタップします。",
+  "ko": "Google 지도에서 장소를 열고 공유, 링크 복사를 누른 뒤 \"링크 붙여넣기\"를 누르세요.",
+  "zh": "在 Google 地图中：打开地点，点击“分享”、“复制链接”，再点“粘贴链接”。"
+ },
+ "Trùng với một điểm đã có trong lịch trình.": {
+  "en": "Same as a stop already in the itinerary.",
+  "ja": "旅程にすでにある立ち寄り先と重複しています。",
+  "ko": "일정에 이미 있는 장소와 겹칩니다.",
+  "zh": "与行程中已有的站点重复。"
+ },
+ "Trạng thái không hợp lệ": {
+  "en": "Invalid status",
+  "ja": "状態が無効です",
+  "ko": "잘못된 상태입니다",
+  "zh": "状态无效"
+ },
+ "Trả lời {displayName}…": {
+  "en": "Reply to {displayName}…",
+  "ja": "{displayName}さんに返信…",
+  "ko": "{displayName}님에게 답글…",
+  "zh": "回复 {displayName}…"
+ },
+ "Trực tiếp, đã phát {value}": {
+  "en": "Live, {value} in",
+  "ja": "ライブ中、{value}経過",
+  "ko": "라이브, {value} 경과",
+  "zh": "直播中，已播 {value}"
+ },
+ "Tuỳ chọn bình luận của {displayName}": {
+  "en": "Options for {displayName}'s comment",
+  "ja": "{displayName} のコメントのオプション",
+  "ko": "{displayName}님 댓글 옵션",
+  "zh": "{displayName} 的评论选项"
+ },
+ "Tác giả": {
+  "en": "Author",
+  "ja": "投稿者",
+  "ko": "작성자",
+  "zh": "作者"
+ },
+ "Tên người dùng dài 3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới.": {
+  "en": "A username is 3-30 characters: unaccented letters, numbers, dots or underscores.",
+  "ja": "ユーザー名は3〜30文字で、アクセントなしの英字、数字、ピリオド、アンダースコアが使えます。",
+  "ko": "사용자 이름은 3~30자이며, 악센트 없는 영문자, 숫자, 마침표, 밑줄을 쓸 수 있습니다.",
+  "zh": "用户名为 3-30 个字符：不带声调的字母、数字、点或下划线。"
+ },
+ "Tìm theo tên, tên người dùng hoặc email": {
+  "en": "Search by name, username or email",
+  "ja": "名前、ユーザー名、メールで検索",
+  "ko": "이름, 사용자 이름, 이메일로 검색",
+  "zh": "按姓名、用户名或邮箱搜索"
+ },
+ "Tính từ giá trung bình trong dữ liệu ChillnGo nhân số người.": {
+  "en": "Based on average prices in ChillnGo's data times the number of people.",
+  "ja": "ChillnGoのデータの平均価格に人数を掛けて計算しています。",
+  "ko": "ChillnGo 데이터의 평균 가격에 인원수를 곱해 계산합니다.",
+  "zh": "根据 ChillnGo 数据中的平均价格乘以人数计算。"
+ },
+ "Tôi đã có liên kết xác nhận": {
+  "en": "I already have a confirmation link",
+  "ja": "確認リンクを持っています",
+  "ko": "확인 링크가 있어요",
+  "zh": "我已有确认链接"
+ },
+ "Tại {where} · {time}": {
+  "en": "At {where} · {time}",
+  "ja": "{where} · {time}",
+  "ko": "{where} · {time}",
+  "zh": "在 {where} · {time}"
+ },
+ "Tạo mới: hành trình, check-in hoặc livestream": {
+  "en": "Create: journey, check-in or livestream",
+  "ja": "作成: 旅、チェックイン、ライブ配信",
+  "ko": "만들기: 여정, 체크인, 라이브",
+  "zh": "创建：行程、打卡或直播"
+ },
+ "Tải ảnh lên quá lâu. Vui lòng thử lại.": {
+  "en": "The photo upload took too long. Please try again.",
+  "ja": "写真のアップロードに時間がかかりすぎました。もう一度お試しください。",
+  "ko": "사진 업로드가 너무 오래 걸렸습니다. 다시 시도하세요.",
+  "zh": "照片上传超时。请重试。"
+ },
+ "Tắt camera (chỉ âm thanh)": {
+  "en": "Turn off camera (audio only)",
+  "ja": "カメラをオフ（音声のみ）",
+  "ko": "카메라 끄기 (오디오만)",
+  "zh": "关闭摄像头（仅音频）"
+ },
+ "Tệp này không phải ảnh.": {
+  "en": "This file isn't an image.",
+  "ja": "このファイルは画像ではありません。",
+  "ko": "이 파일은 이미지가 아닙니다.",
+  "zh": "该文件不是图片。"
+ },
+ "Tối đa {maxCoverImages} ảnh, ảnh đầu tiên là ảnh bìa. {acceptedImagesLabel}. Ảnh được tự nén trước khi tải lên.": {
+  "en": "Up to {maxCoverImages} photos, the first is the cover. {acceptedImagesLabel}. Photos are compressed before upload.",
+  "ja": "最大{maxCoverImages}枚、1枚目がカバーになります。{acceptedImagesLabel}。写真はアップロード前に自動で圧縮されます。",
+  "ko": "최대 {maxCoverImages}장, 첫 장이 커버가 됩니다. {acceptedImagesLabel}. 사진은 업로드 전에 자동으로 압축됩니다.",
+  "zh": "最多 {maxCoverImages} 张照片，第一张为封面。{acceptedImagesLabel}。照片会在上传前自动压缩。"
+ },
+ "Tối đa {maxCoverImages} ảnh.": {
+  "en": [
+   "Up to {maxCoverImages} photo.",
+   "Up to {maxCoverImages} photos."
+  ],
+  "ja": "写真は最大{maxCoverImages}枚です。",
+  "ko": "사진은 최대 {maxCoverImages}장이에요.",
+  "zh": "最多 {maxCoverImages} 张照片。"
+ },
+ "Tổng {total} tài khoản · cao nhất {value}/ngày": {
+  "en": "{total} accounts in total · peak {value}/day",
+  "ja": "合計 {total}件 · 最大 {value}件/日",
+  "ko": "총 {total}개 계정 · 최고 {value}/일",
+  "zh": "共 {total} 个账户 · 单日最高 {value}"
+ },
+ "Vai trò không hợp lệ": {
+  "en": "Invalid role",
+  "ja": "役割が無効です",
+  "ko": "잘못된 역할입니다",
+  "zh": "角色无效"
+ },
+ "Viết bình luận…": {
+  "en": "Write a comment…",
+  "ja": "コメントを書く…",
+  "ko": "댓글 쓰기…",
+  "zh": "写评论…"
+ },
+ "Vui lòng nhập tên hiển thị.": {
+  "en": "Please enter a display name.",
+  "ja": "表示名を入力してください。",
+  "ko": "표시 이름을 입력하세요.",
+  "zh": "请输入显示名称。"
+ },
+ "Vui lòng nhập tên người dùng": {
+  "en": "Please enter a username",
+  "ja": "ユーザー名を入力してください",
+  "ko": "사용자 이름을 입력하세요",
+  "zh": "请输入用户名"
+ },
+ "Ví dụ: Hà Giang Loop 4N3Đ": {
+  "en": "e.g. Ha Giang Loop 4D3N",
+  "ja": "例: ハザン・ループ 4日間",
+  "ko": "예: 하장 루프 4박 3일",
+  "zh": "例如：河江环线 4天3晚"
+ },
+ "Ví dụ: Hà Nội → Hà Giang": {
+  "en": "e.g. Hanoi → Ha Giang",
+  "ja": "例: ハノイ → ハザン",
+  "ko": "예: 하노이 → 하장",
+  "zh": "例如：河内 → 河江"
+ },
+ "Về Khám phá": {
+  "en": "Back to Discover",
+  "ja": "探すに戻る",
+  "ko": "탐색으로 돌아가기",
+  "zh": "返回探索"
+ },
+ "Xem bài viết gốc{value}": {
+  "en": "View original post{value}",
+  "ja": "元の投稿を見る{value}",
+  "ko": "원본 게시물 보기{value}",
+  "zh": "查看原帖{value}"
+ },
+ "Xem hành trình gốc": {
+  "en": "View the original journey",
+  "ja": "元の旅を見る",
+  "ko": "원본 여정 보기",
+  "zh": "查看原行程"
+ },
+ "Xem từng ngày": {
+  "en": "See each day",
+  "ja": "1日ずつ見る",
+  "ko": "하루하루 보기",
+  "zh": "查看每一天"
+ },
+ "Xem ảnh {value} cỡ lớn": {
+  "en": "View full-size photo of {value}",
+  "ja": "{value} の大きな画像を見る",
+  "ko": "{value} 큰 사진 보기",
+  "zh": "查看 {value} 的大图"
+ },
+ "Xoá lọc": {
+  "en": "Clear filters",
+  "ja": "絞り込みを解除",
+  "ko": "필터 지우기",
+  "zh": "清除筛选"
+ },
+ "Xoá ngày": {
+  "en": "Delete day",
+  "ja": "日を削除",
+  "ko": "날 삭제",
+  "zh": "删除这一天"
+ },
+ "Xoá ngày này?": {
+  "en": "Delete this day?",
+  "ja": "この日を削除しますか？",
+  "ko": "이 날을 삭제할까요?",
+  "zh": "删除这一天？"
+ },
+ "Xoá ngày {number}": {
+  "en": "Remove day {number}",
+  "ja": "{number}日目を削除",
+  "ko": "{number}일차 삭제",
+  "zh": "删除第 {number} 天"
+ },
+ "Xoá ngày {value}": {
+  "en": "Remove day {value}",
+  "ja": "{value}日目を削除",
+  "ko": "{value}일차 삭제",
+  "zh": "删除第 {value} 天"
+ },
+ "Xoá tìm kiếm": {
+  "en": "Clear search",
+  "ja": "検索をクリア",
+  "ko": "검색 지우기",
+  "zh": "清除搜索"
+ },
+ "Xoá vĩnh viễn {noun} này?": {
+  "en": "Permanently delete this {noun}?",
+  "ja": "この{noun}を完全に削除しますか？",
+  "ko": "이 {noun}을(를) 영구 삭제할까요?",
+  "zh": "永久删除这个{noun}？"
+ },
+ "Xoá địa điểm {number}": {
+  "en": "Remove place {number}",
+  "ja": "場所 {number} を削除",
+  "ko": "장소 {number} 삭제",
+  "zh": "删除地点 {number}"
+ },
+ "Xoá ảnh {value}": {
+  "en": "Remove photo {value}",
+  "ja": "写真 {value} を削除",
+  "ko": "사진 {value} 삭제",
+  "zh": "删除照片 {value}"
+ },
+ "Xác minh địa chỉ email": {
+  "en": "Verify email address",
+  "ja": "メールアドレスの確認",
+  "ko": "이메일 주소 인증",
+  "zh": "验证邮箱地址"
+ },
+ "Xác nhận": {
+  "en": "Confirm",
+  "ja": "確認",
+  "ko": "확인",
+  "zh": "确认"
+ },
+ "bài viết": {
+  "en": "post",
+  "ja": "投稿",
+  "ko": "게시물",
+  "zh": "帖子"
+ },
+ "cao nhất {n}{value}": {
+  "en": "peak {n}{value}",
+  "ja": "最大 {n}{value}",
+  "ko": "최고 {n}{value}",
+  "zh": "最高 {n}{value}"
+ },
+ "chưa đạt": {
+  "en": "not met",
+  "ja": "未達成",
+  "ko": "미충족",
+  "zh": "未达到"
+ },
+ "còn {left} ngày": {
+  "en": [
+   "{left} day left",
+   "{left} days left"
+  ],
+  "ja": "残り{left}日",
+  "ko": "{left}일 남음",
+  "zh": "剩余 {left} 天"
+ },
+ "của {value} · {value2}": {
+  "en": "by {value} · {value2}",
+  "ja": "{value} · {value2}",
+  "ko": "{value} · {value2}",
+  "zh": "作者 {value} · {value2}"
+ },
+ "dưới 1 phút": {
+  "en": "less than a minute",
+  "ja": "1分未満",
+  "ko": "1분 미만",
+  "zh": "不到 1 分钟"
+ },
+ "gần {value} năm": {
+  "en": [
+   "almost {value} year",
+   "almost {value} years"
+  ],
+  "ja": "約{value}年",
+  "ko": "거의 {value}년",
+  "zh": "将近 {value} 年"
+ },
+ "hành trình": {
+  "en": "journey",
+  "ja": "旅",
+  "ko": "여정",
+  "zh": "行程"
+ },
+ "hơn {whole} năm": {
+  "en": [
+   "over {whole} year",
+   "over {whole} years"
+  ],
+  "ja": "{whole}年以上",
+  "ko": "{whole}년 넘게",
+  "zh": "{whole} 年多"
+ },
+ "khoảng ": {
+  "en": "about ",
+  "ja": "約",
+  "ko": "약 ",
+  "zh": "约 "
+ },
+ "khoảng 1 giờ": {
+  "en": "about 1 hour",
+  "ja": "約1時間",
+  "ko": "약 1시간",
+  "zh": "约 1 小时"
+ },
+ "khoảng {value} giờ": {
+  "en": [
+   "about {value} hour",
+   "about {value} hours"
+  ],
+  "ja": "約{value}時間",
+  "ko": "약 {value}시간",
+  "zh": "约 {value} 小时"
+ },
+ "khoảng {value} tháng": {
+  "en": [
+   "about {value} month",
+   "about {value} months"
+  ],
+  "ja": "約{value}か月",
+  "ko": "약 {value}개월",
+  "zh": "约 {value} 个月"
+ },
+ "khoảng {whole} năm": {
+  "en": [
+   "about {whole} year",
+   "about {whole} years"
+  ],
+  "ja": "約{whole}年",
+  "ko": "약 {whole}년",
+  "zh": "约 {whole} 年"
+ },
+ "lượt lưu": {
+  "en": "saves",
+  "ja": "保存数",
+  "ko": "저장",
+  "zh": "收藏"
+ },
+ "lượt sao chép": {
+  "en": "copies",
+  "ja": "コピー数",
+  "ko": "복사",
+  "zh": "复制"
+ },
+ "người này": {
+  "en": "this person",
+  "ja": "この人",
+  "ko": "이 사람",
+  "zh": "此人"
+ },
+ "{_message} Hãy mở email mới nhất, liên kết cũ không còn dùng được.": {
+  "en": "{_message} Open the newest email; the old link no longer works.",
+  "ja": "{_message} 最新のメールを開いてください。古いリンクは使えません。",
+  "ko": "{_message} 가장 최근 이메일을 여세요. 이전 링크는 더 이상 쓸 수 없습니다.",
+  "zh": "{_message} 请打开最新的邮件，旧链接已失效。"
+ },
+ "{acceptedImagesLabel}, tối đa {maxCheckInPhotos} ảnh. Ảnh được tự nén trước khi tải lên.": {
+  "en": "{acceptedImagesLabel}, up to {maxCheckInPhotos} photos. Photos are compressed before upload.",
+  "ja": "{acceptedImagesLabel}、最大{maxCheckInPhotos}枚。写真はアップロード前に自動で圧縮されます。",
+  "ko": "{acceptedImagesLabel}, 최대 {maxCheckInPhotos}장. 사진은 업로드 전에 자동으로 압축됩니다.",
+  "zh": "{acceptedImagesLabel}，最多 {maxCheckInPhotos} 张。照片会在上传前自动压缩。"
+ },
+ "{amount}/người": {
+  "en": "{amount}/person",
+  "ja": "{amount}/人",
+  "ko": "{amount}/인",
+  "zh": "{amount}/人"
+ },
+ "{costMissing} điểm chưa có dữ liệu giá, chưa tính vào tổng.": {
+  "en": [
+   "{costMissing} stop has no price data and isn't counted.",
+   "{costMissing} stops have no price data and aren't counted."
+  ],
+  "ja": "{costMissing}か所は価格データがなく、合計に含まれていません。",
+  "ko": "경유지 {costMissing}곳은 가격 데이터가 없어 합계에 포함되지 않았어요.",
+  "zh": "{costMissing} 个站点暂无价格数据，未计入总额。"
+ },
+ "{date} · ước tính {amount}{value}": {
+  "en": "{date} · est. {amount}{value}",
+  "ja": "{date} · 概算 {amount}{value}",
+  "ko": "{date} · 예상 {amount}{value}",
+  "zh": "{date} · 估算 {amount}{value}"
+ },
+ "{date} • {n} ngày": {
+  "en": [
+   "{date} • {n} day",
+   "{date} • {n} days"
+  ],
+  "ja": "{date} • {n}日",
+  "ko": "{date} • {n}일",
+  "zh": "{date} • {n} 天"
+ },
+ "{days} ngày": {
+  "en": [
+   "{days} day",
+   "{days} days"
+  ],
+  "ja": "{days}日",
+  "ko": "{days}일",
+  "zh": "{days} 天"
+ },
+ "{displayName} đang phát: {title}": {
+  "en": "{displayName} is live: {title}",
+  "ja": "{displayName}さんがライブ配信中: {title}",
+  "ko": "{displayName}님 라이브 중: {title}",
+  "zh": "{displayName} 正在直播：{title}"
+ },
+ "{d} ngày": {
+  "en": [
+   "{d} day",
+   "{d} days"
+  ],
+  "ja": "{d}日",
+  "ko": "{d}일",
+  "zh": "{d} 天"
+ },
+ "{hours} giờ": {
+  "en": "{hours} h",
+  "ja": "{hours}時間",
+  "ko": "{hours}시간",
+  "zh": "{hours} 小时"
+ },
+ "{hours} giờ {rest} phút": {
+  "en": "{hours} h {rest} min",
+  "ja": "{hours}時間{rest}分",
+  "ko": "{hours}시간 {rest}분",
+  "zh": "{hours} 小时 {rest} 分钟"
+ },
+ "{h} giờ": {
+  "en": "{h} h",
+  "ja": "{h}時間",
+  "ko": "{h}시간",
+  "zh": "{h} 小时"
+ },
+ "{h} giờ {m} phút": {
+  "en": "{h} h {m} min",
+  "ja": "{h}時間{m}分",
+  "ko": "{h}시간 {m}분",
+  "zh": "{h} 小时 {m} 分钟"
+ },
+ "{label}, {badge} người đang phát": {
+  "en": [
+   "{label}, {badge} person live",
+   "{label}, {badge} people live"
+  ],
+  "ja": "{label}、{badge}人が配信中",
+  "ko": "{label}, {badge}명 라이브 중",
+  "zh": "{label}，{badge} 人正在直播"
+ },
+ "{length} · khởi hành {date}": {
+  "en": "{length} · departs {date}",
+  "ja": "{length} · {date}出発",
+  "ko": "{length} · {date} 출발",
+  "zh": "{length} · {date} 出发"
+ },
+ "{minutes} phút": {
+  "en": [
+   "{minutes} min",
+   "{minutes} min"
+  ],
+  "ja": "{minutes}分",
+  "ko": "{minutes}분",
+  "zh": "{minutes} 分钟"
+ },
+ "{m} phút": {
+  "en": [
+   "{m} min",
+   "{m} min"
+  ],
+  "ja": "{m}分",
+  "ko": "{m}분",
+  "zh": "{m} 分钟"
+ },
+ "{n} ngày · {places} địa điểm": {
+  "en": [
+   "{n} day · {places} places",
+   "{n} days · {places} places"
+  ],
+  "ja": "{n}日 · {places}か所",
+  "ko": "{n}일 · 장소 {places}곳",
+  "zh": "{n} 天 · {places} 个地点"
+ },
+ "{n} ngày · {value}{value2}": {
+  "en": [
+   "{n} day · {value}{value2}",
+   "{n} days · {value}{value2}"
+  ],
+  "ja": "{n}日 · {value}{value2}",
+  "ko": "{n}일 · {value}{value2}",
+  "zh": "{n} 天 · {value}{value2}"
+ },
+ "{n} người đang xem": {
+  "en": "{n} watching",
+  "ja": "{n}人が視聴中",
+  "ko": "{n}명 시청 중",
+  "zh": "{n} 人正在观看"
+ },
+ "{n} điểm dừng từ những hành trình trên ChillnGo, từ cao nguyên đá Hà Giang tới bãi cát Phú Quốc.": {
+  "en": "{n} stops from journeys on ChillnGo, from the Ha Giang stone plateau to the sands of Phu Quoc.",
+  "ja": "ハザンの石の高原からフーコックの砂浜まで、ChillnGoの旅の立ち寄り先{n}か所。",
+  "ko": "하장 돌 고원부터 푸꾸옥 모래사장까지, ChillnGo 여정의 장소 {n}곳.",
+  "zh": "来自 ChillnGo 行程的 {n} 个站点，从河江石头高原到富国岛的沙滩。"
+ },
+ "{pinnedStops}/{totalStops} điểm đã ghim": {
+  "en": "{pinnedStops}/{totalStops} stops pinned",
+  "ja": "{pinnedStops}/{totalStops}か所をピン留め済み",
+  "ko": "{pinnedStops}/{totalStops}곳 고정됨",
+  "zh": "已标记 {pinnedStops}/{totalStops} 个站点"
+ },
+ "{s} giây": {
+  "en": "{s} s",
+  "ja": "{s}秒",
+  "ko": "{s}초",
+  "zh": "{s} 秒"
+ },
+ "{text} nữa": {
+  "en": "in {text}",
+  "ja": "{text}後",
+  "ko": "{text} 후",
+  "zh": "{text}后"
+ },
+ "{text} trước": {
+  "en": "{text} ago",
+  "ja": "{text}前",
+  "ko": "{text} 전",
+  "zh": "{text}前"
+ },
+ "{time} · {n} người xem": {
+  "en": [
+   "{time} · {n} viewer",
+   "{time} · {n} viewers"
+  ],
+  "ja": "{time} · {n}人が視聴",
+  "ko": "{time} · {n}명 시청",
+  "zh": "{time} · {n} 人观看"
+ },
+ "{title} · {days} ngày": {
+  "en": [
+   "{title} · {days} day",
+   "{title} · {days} days"
+  ],
+  "ja": "{title} · {days}日",
+  "ko": "{title} · {days}일",
+  "zh": "{title} · {days} 天"
+ },
+ "{title}, của {value}": {
+  "en": "{title}, by {value}",
+  "ja": "{title}（{value}）",
+  "ko": "{title}, {value}",
+  "zh": "{title}，作者 {value}"
+ },
+ "{total} mục": {
+  "en": [
+   "{total} entry",
+   "{total} entries"
+  ],
+  "ja": "{total}件",
+  "ko": "{total}개 항목",
+  "zh": "{total} 条"
+ },
+ "{total} tài khoản": {
+  "en": [
+   "{total} account",
+   "{total} accounts"
+  ],
+  "ja": "{total}件のアカウント",
+  "ko": "계정 {total}개",
+  "zh": "{total} 个账户"
+ },
+ "{unread} thông báo mới": {
+  "en": [
+   "{unread} new notification",
+   "{unread} new notifications"
+  ],
+  "ja": "新しい通知 {unread}件",
+  "ko": "새 알림 {unread}개",
+  "zh": "{unread} 条新通知"
+ },
+ "{value} Livestream tiếp tục với âm thanh.": {
+  "en": "{value} The livestream continues with audio.",
+  "ja": "{value} ライブは音声のみで続きます。",
+  "ko": "{value} 라이브는 오디오로 계속됩니다.",
+  "zh": "{value} 直播将以纯音频继续。"
+ },
+ "{value} hành trình{value2}": {
+  "en": [
+   "{value} journey{value2}",
+   "{value} journeys{value2}"
+  ],
+  "ja": "{value}件の旅{value2}",
+  "ko": "여정 {value}개{value2}",
+  "zh": "{value} 个行程{value2}"
+ },
+ "{value} mời bạn đi cùng hành trình này.": {
+  "en": "{value} invited you along on this journey.",
+  "ja": "{value}さんがこの旅に同行するよう招待しました。",
+  "ko": "{value}님이 이 여정에 함께 가자고 초대했습니다.",
+  "zh": "{value} 邀请你同行这个行程。"
+ },
+ "{value} ngày": {
+  "en": [
+   "{value} day",
+   "{value} days"
+  ],
+  "ja": "{value}日",
+  "ko": "{value}일",
+  "zh": "{value} 天"
+ },
+ "{value} phút": {
+  "en": [
+   "{value} min",
+   "{value} min"
+  ],
+  "ja": "{value}分",
+  "ko": "{value}분",
+  "zh": "{value} 分钟"
+ },
+ "{value} tháng": {
+  "en": [
+   "{value} month",
+   "{value} months"
+  ],
+  "ja": "{value}か月",
+  "ko": "{value}개월",
+  "zh": "{value} 个月"
+ },
+ "{value} trên {value2}": {
+  "en": "{value} of {value2}",
+  "ja": "{value} / {value2}",
+  "ko": "{value} / {value2}",
+  "zh": "{value} / {value2}"
+ },
+ "{value} {days} ngày cho {groupSize} người": {
+  "en": [
+   "{value}, {days} days for {groupSize} person",
+   "{value}, {days} days for {groupSize} people"
+  ],
+  "ja": "{value} {days}日間・{groupSize}人",
+  "ko": "{value} {days}일 · {groupSize}명",
+  "zh": "{value} {days} 天 {groupSize} 人行程"
+ },
+ "{value} {value2}. Khởi hành {date}.": {
+  "en": "{value} {value2}. Departs {date}.",
+  "ja": "{value} {value2}。{date}出発。",
+  "ko": "{value} {value2}. {date} 출발.",
+  "zh": "{value} {value2}。{date} 出发。"
+ },
+ "{value} · từ {amount}": {
+  "en": "{value} · from {amount}",
+  "ja": "{value} · {amount}から",
+  "ko": "{value} · {amount}부터",
+  "zh": "{value} · {amount} 起"
+ },
+ "{value}: {value2} tài khoản": {
+  "en": [
+   "{value}: {value2} account",
+   "{value}: {value2} accounts"
+  ],
+  "ja": "{value}: {value2}アカウント",
+  "ko": "{value}: 계정 {value2}개",
+  "zh": "{value}：{value2} 个账户"
+ },
+ "ĐANG LIVE · {n}": {
+  "en": "LIVE · {n}",
+  "ja": "ライブ中 · {n}",
+  "ko": "라이브 · {n}",
+  "zh": "直播中 · {n}"
+ },
+ "Đang chuẩn bị…": {
+  "en": "Getting ready…",
+  "ja": "準備中…",
+  "ko": "준비 중…",
+  "zh": "正在准备…"
+ },
+ "Đang kiểm tra liên kết xác nhận…": {
+  "en": "Checking the confirmation link…",
+  "ja": "確認リンクを確認しています…",
+  "ko": "확인 링크를 확인하는 중…",
+  "zh": "正在检查确认链接…"
+ },
+ "Đang lưu{value}": {
+  "en": "Saving{value}",
+  "ja": "保存中{value}",
+  "ko": "저장 중{value}",
+  "zh": "正在保存{value}"
+ },
+ "Đang phát trực tiếp · chạm để xem": {
+  "en": "Live now · tap to watch",
+  "ja": "ライブ配信中 · タップして視聴",
+  "ko": "라이브 중 · 눌러서 보기",
+  "zh": "正在直播 · 点击观看"
+ },
+ "Đang tải {name} lên… 0%": {
+  "en": "Uploading {name}… 0%",
+  "ja": "{name}をアップロード中… 0%",
+  "ko": "{name} 업로드 중… 0%",
+  "zh": "正在上传 {name}… 0%"
+ },
+ "Đang tải {name} lên… {p}%": {
+  "en": "Uploading {name}… {p}%",
+  "ja": "{name}をアップロード中… {p}%",
+  "ko": "{name} 올리는 중… {p}%",
+  "zh": "正在上传{name}… {p}%"
+ },
+ "Đang tải ảnh{value}… {_progress}%": {
+  "en": "Uploading photo{value}… {_progress}%",
+  "ja": "写真をアップロード中{value}… {_progress}%",
+  "ko": "사진 업로드 중{value}… {_progress}%",
+  "zh": "正在上传照片{value}… {_progress}%"
+ },
+ "Đang tải ảnh… {_progress}%": {
+  "en": "Uploading photo… {_progress}%",
+  "ja": "画像をアップロード中… {_progress}%",
+  "ko": "사진 올리는 중… {_progress}%",
+  "zh": "正在上传图片… {_progress}%"
+ },
+ "Đi xong, đăng hành trình của bạn cho người đi sau.": {
+  "en": "Back from a trip? Post your journey for those who go next.",
+  "ja": "旅から戻ったら、次に行く人のために旅を投稿しましょう。",
+  "ko": "여행을 다녀왔나요? 다음 사람을 위해 여정을 올려 주세요.",
+  "zh": "旅行回来了？发布你的行程，给后来的人参考。"
+ },
+ "Đi đâu {seasonName} này?": {
+  "en": "Where to go this {seasonName}?",
+  "ja": "この{seasonName}はどこへ行く？",
+  "ko": "이번 {seasonName}엔 어디로 갈까요?",
+  "zh": "这个{seasonName}去哪儿？"
+ },
+ "Điểm dừng {number}": {
+  "en": "Stop {number}",
+  "ja": "立ち寄り先 {number}",
+  "ko": "장소 {number}",
+  "zh": "站点 {number}"
+ },
+ "Điểm dừng {value}": {
+  "en": "Stop {value}",
+  "ja": "立ち寄り先 {value}",
+  "ko": "장소 {value}",
+  "zh": "站点 {value}"
+ },
+ "Điểm này được giữ nguyên, không có gì để hoàn tác.": {
+  "en": "This stop is kept as is; there's nothing to undo.",
+  "ja": "この立ち寄り先は変更されていないため、元に戻すものはありません。",
+  "ko": "이 장소는 그대로 유지되어 되돌릴 것이 없습니다.",
+  "zh": "该站点保持不变，没有可撤销的内容。"
+ },
+ "Điểm đến": {
+  "en": "Destination",
+  "ja": "目的地",
+  "ko": "목적지",
+  "zh": "目的地"
+ },
+ "Đà Nẵng": {
+  "en": "Da Nang",
+  "ja": "ダナン",
+  "ko": "다낭",
+  "zh": "岘港"
+ },
+ "Đã bỏ lưu hành trình.": {
+  "en": "Removed from saved journeys.",
+  "ja": "旅の保存を取り消しました。",
+  "ko": "여정 저장을 취소했습니다.",
+  "zh": "已取消收藏该行程。"
+ },
+ "Đã chuyển check-in vào mục Đã xoá gần đây.": {
+  "en": "Moved the check-in to Recently deleted.",
+  "ja": "チェックインを「最近削除した項目」に移動しました。",
+  "ko": "체크인을 최근 삭제됨으로 옮겼습니다.",
+  "zh": "已将打卡移至“最近删除”。"
+ },
+ "Đã chọn {n} ngày · thêm khoảng ": {
+  "en": [
+   "{n} day selected · adds about ",
+   "{n} days selected · adds about "
+  ],
+  "ja": "{n}日を選択 · 追加は約",
+  "ko": "{n}일 선택 · 약 ",
+  "zh": "已选 {n} 天 · 约增加 "
+ },
+ "Đã có {value}/{n} mục, còn {callsLeft}/{dailyLimit} lượt AI hôm nay. Mục chưa trả lời sẽ dùng mặc định.": {
+  "en": "{value}/{n} answered, {callsLeft}/{dailyLimit} AI requests left today. Unanswered ones use the defaults.",
+  "ja": "{value}/{n}項目に回答済み、今日のAI残り {callsLeft}/{dailyLimit} 回。未回答の項目はデフォルトになります。",
+  "ko": "{value}/{n}개 답변 완료, 오늘 AI {callsLeft}/{dailyLimit}회 남음. 답하지 않은 항목은 기본값을 씁니다.",
+  "zh": "已回答 {value}/{n} 项，今天还剩 {callsLeft}/{dailyLimit} 次 AI。未回答的项将使用默认值。"
+ },
+ "Đã ghi: {value}.": {
+  "en": "Noted: {value}.",
+  "ja": "記録しました：{value}。",
+  "ko": "기록했어요: {value}.",
+  "zh": "已记下：{value}。"
+ },
+ "Đã ghim · {value}, {value2} · ": {
+  "en": "Pinned · {value}, {value2} · ",
+  "ja": "ピン留め済み · {value}, {value2} · ",
+  "ko": "고정됨 · {value}, {value2} · ",
+  "zh": "已标记 · {value}, {value2} · "
+ },
+ "Đã ghép {n} ngày vào lịch trình.": {
+  "en": [
+   "Merged {n} day into the itinerary.",
+   "Merged {n} days into the itinerary."
+  ],
+  "ja": "{n}日分を旅程に統合しました。",
+  "ko": "{n}일을 일정에 합쳤습니다.",
+  "zh": "已将 {n} 天合并到行程中。"
+ },
+ "Đã gỡ ảnh bìa.": {
+  "en": "Cover photo removed.",
+  "ja": "カバー写真を削除しました。",
+  "ko": "커버 사진을 삭제했습니다.",
+  "zh": "已移除封面照片。"
+ },
+ "Đã gửi lại email xác minh.": {
+  "en": "Verification email sent again.",
+  "ja": "確認メールを再送しました。",
+  "ko": "인증 이메일을 다시 보냈습니다.",
+  "zh": "已重新发送验证邮件。"
+ },
+ "Đã gửi lời mời.": {
+  "en": "Invite sent.",
+  "ja": "招待を送りました。",
+  "ko": "초대를 보냈습니다.",
+  "zh": "已发送邀请。"
+ },
+ "Đã gửi mật khẩu tạm qua email.": {
+  "en": "Temporary password sent by email.",
+  "ja": "仮パスワードをメールで送りました。",
+  "ko": "임시 비밀번호를 이메일로 보냈습니다.",
+  "zh": "已通过邮件发送临时密码。"
+ },
+ "Đã khôi phục.": {
+  "en": "Restored.",
+  "ja": "復元しました。",
+  "ko": "복원했습니다.",
+  "zh": "已恢复。"
+ },
+ "Đã lưu bản nháp.": {
+  "en": "Draft saved.",
+  "ja": "下書きを保存しました。",
+  "ko": "초안을 저장했습니다.",
+  "zh": "草稿已保存。"
+ },
+ "Đã lưu hành trình.": {
+  "en": "Journey saved.",
+  "ja": "旅を保存しました。",
+  "ko": "여정을 저장했습니다.",
+  "zh": "已收藏行程。"
+ },
+ "Đã lưu hồ sơ.": {
+  "en": "Profile saved.",
+  "ja": "プロフィールを保存しました。",
+  "ko": "프로필을 저장했습니다.",
+  "zh": "资料已保存。"
+ },
+ "Đã lưu thay đổi.": {
+  "en": "Changes saved.",
+  "ja": "変更を保存しました。",
+  "ko": "변경 사항을 저장했습니다.",
+  "zh": "更改已保存。"
+ },
+ "Đã lưu ảnh bìa.": {
+  "en": "Cover photo saved.",
+  "ja": "カバー写真を保存しました。",
+  "ko": "커버 사진을 저장했습니다.",
+  "zh": "封面照片已保存。"
+ },
+ "Đã lưu, mở lịch trình": {
+  "en": "Saved, open itinerary",
+  "ja": "保存済み、旅程を開く",
+  "ko": "저장됨, 일정 열기",
+  "zh": "已保存，打开行程"
+ },
+ "Đã phát {value}": {
+  "en": "Live for {value}",
+  "ja": "配信時間 {value}",
+  "ko": "방송 {value} 경과",
+  "zh": "已直播 {value}"
+ },
+ "Đã sao chép vào Hành trình của tôi.": {
+  "en": "Copied to My itineraries.",
+  "ja": "「マイ旅程」にコピーしました。",
+  "ko": "내 여정에 복사했습니다.",
+  "zh": "已复制到“我的行程”。"
+ },
+ "Đã sắp lại tuyến: quãng đường ước tính từ {value} còn {value2}. Bữa ăn giữ nguyên giờ.": {
+  "en": "Route reordered: estimated distance down from {value} to {value2}. Meal times stay the same.",
+  "ja": "ルートを並べ替えました：推定距離は {value} から {value2} に。食事の時間はそのままです。",
+  "ko": "경로를 재정렬했어요: 예상 거리가 {value}에서 {value2}(으)로 줄었어요. 식사 시간은 그대로예요.",
+  "zh": "已重新排列路线：预估距离从 {value} 缩短到 {value2}。用餐时间保持不变。"
+ },
+ "Đã tạo Admin {displayName} (@{username}). Hãy gửi email và mật khẩu cho họ qua kênh an toàn.": {
+  "en": "Created Admin {displayName} (@{username}). Send them the email and password through a secure channel.",
+  "ja": "管理者 {displayName}（@{username}）を作成しました。メールアドレスとパスワードは安全な方法で伝えてください。",
+  "ko": "관리자 {displayName}(@{username})을(를) 만들었어요. 이메일과 비밀번호는 안전한 경로로 전달하세요.",
+  "zh": "已创建管理员 {displayName}（@{username}）。请通过安全渠道将邮箱和密码发送给对方。"
+ },
+ "Đã tạo bản sao nháp.": {
+  "en": "Draft copy created.",
+  "ja": "下書きのコピーを作成しました。",
+  "ko": "초안 사본을 만들었습니다.",
+  "zh": "已创建草稿副本。"
+ },
+ "Đã từ chối lời mời.": {
+  "en": "Invite declined.",
+  "ja": "招待を辞退しました。",
+  "ko": "초대를 거절했습니다.",
+  "zh": "已拒绝邀请。"
+ },
+ "Đã xoá {time} · ": {
+  "en": "Deleted {time} · ",
+  "ja": "{time}に削除 · ",
+  "ko": "{time} 삭제 · ",
+  "zh": "删除于 {time} · "
+ },
+ "Đã xoá {value} tài khoản": {
+  "en": [
+   "Deleted {value} account",
+   "Deleted {value} accounts"
+  ],
+  "ja": "{value}件のアカウントを削除",
+  "ko": "계정 {value}개 삭제됨",
+  "zh": "已删除 {value} 个账户"
+ },
+ "Đã xác nhận xong? Đăng nhập": {
+  "en": "Already confirmed? Log in",
+  "ja": "確認済みですか？ログイン",
+  "ko": "확인을 마쳤나요? 로그인",
+  "zh": "已确认？登录"
+ },
+ "Đã đăng check-in.": {
+  "en": "Check-in posted.",
+  "ja": "チェックインを投稿しました。",
+  "ko": "체크인을 올렸습니다.",
+  "zh": "已发布打卡。"
+ },
+ "Đã đăng hành trình.": {
+  "en": "Journey posted.",
+  "ja": "旅を投稿しました。",
+  "ko": "여정을 올렸습니다.",
+  "zh": "已发布行程。"
+ },
+ "Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.": {
+  "en": "Password reset. Log in with your new password.",
+  "ja": "パスワードを再設定しました。新しいパスワードでログインしてください。",
+  "ko": "비밀번호를 재설정했습니다. 새 비밀번호로 로그인하세요.",
+  "zh": "密码已重置。请使用新密码登录。"
+ },
+ "Đã đổi máy chủ: {apiUrl}. Kéo xuống để tải lại dữ liệu.": {
+  "en": "Server changed: {apiUrl}. Pull down to reload.",
+  "ja": "サーバーを変更しました: {apiUrl}。下に引っ張って再読み込みしてください。",
+  "ko": "서버를 바꿨습니다: {apiUrl}. 아래로 당겨 새로 고치세요.",
+  "zh": "已更换服务器：{apiUrl}。下拉以重新加载。"
+ },
+ "Đã đủ tối đa {max} thẻ": {
+  "en": "Reached the limit of {max} tags",
+  "ja": "タグは最大{max}個までです",
+  "ko": "태그는 최대 {max}개까지예요",
+  "zh": "已达上限 {max} 个标签"
+ },
+ "Đóng bản đồ": {
+  "en": "Close map",
+  "ja": "地図を閉じる",
+  "ko": "지도 닫기",
+  "zh": "关闭地图"
+ },
+ "Đóng gợi ý": {
+  "en": "Close suggestions",
+  "ja": "候補を閉じる",
+  "ko": "추천 닫기",
+  "zh": "关闭建议"
+ },
+ "Đóng ảnh": {
+  "en": "Close photo",
+  "ja": "写真を閉じる",
+  "ko": "사진 닫기",
+  "zh": "关闭照片"
+ },
+ "Đăng ký với Google": {
+  "en": "Sign up with Google",
+  "ja": "Googleで登録",
+  "ko": "Google로 가입하기",
+  "zh": "使用 Google 注册"
+ },
+ "Đăng nhập Google chưa được cấu hình cho ứng dụng này (OAuth client Android và SHA-1). Xem README của ứng dụng.": {
+  "en": "Google sign-in isn't set up for this app (Android OAuth client and SHA-1). See the app's README.",
+  "ja": "このアプリではGoogleログインが設定されていません（Android OAuthクライアントとSHA-1）。アプリのREADMEを参照してください。",
+  "ko": "이 앱에는 Google 로그인이 설정되지 않았습니다(Android OAuth 클라이언트와 SHA-1). 앱의 README를 확인하세요.",
+  "zh": "此应用尚未配置 Google 登录（Android OAuth 客户端和 SHA-1）。请查看应用的 README。"
+ },
+ "Đăng nhập gần nhất: {time}": {
+  "en": "Last login: {time}",
+  "ja": "最終ログイン: {time}",
+  "ko": "최근 로그인: {time}",
+  "zh": "最近登录：{time}"
+ },
+ "Đăng nhập để có trang cá nhân": {
+  "en": "Log in to have a profile",
+  "ja": "ログインするとプロフィールが作れます",
+  "ko": "로그인하면 프로필을 만들 수 있습니다",
+  "zh": "登录后即可拥有个人主页"
+ },
+ "ĐƯỢC KỂ LẠI TỪ NHỮNG CHUYẾN ĐI THẬT": {
+  "en": "TOLD FROM REAL TRIPS",
+  "ja": "本当の旅から生まれた記録",
+  "ko": "진짜 여행에서 나온 이야기",
+  "zh": "来自真实旅行的讲述"
+ },
+ "Đưa ngày {value} lên": {
+  "en": "Move day {value} up",
+  "ja": "{value}日目を上へ",
+  "ko": "{value}일차를 위로",
+  "zh": "将第 {value} 天上移"
+ },
+ "Đưa ngày {value} xuống": {
+  "en": "Move day {value} down",
+  "ja": "{value}日目を下へ",
+  "ko": "{value}일차를 아래로",
+  "zh": "将第 {value} 天下移"
+ },
+ "Được lưu nhiều nhất trên ChillnGo, do chính cộng đồng bình chọn bằng từng lượt lưu.": {
+  "en": "The most saved on ChillnGo, chosen by the community one save at a time.",
+  "ja": "ChillnGoで最も保存された旅。コミュニティの保存ひとつひとつで選ばれました。",
+  "ko": "ChillnGo에서 가장 많이 저장된 여정으로, 커뮤니티의 저장 하나하나로 뽑혔습니다.",
+  "zh": "ChillnGo 上收藏最多的行程，由社区一次次收藏选出。"
+ },
+ "Đặt {displayName} làm Admin": {
+  "en": "Make {displayName} an Admin",
+  "ja": "{displayName} を管理者にする",
+  "ko": "{displayName}님을 관리자로 지정",
+  "zh": "将 {displayName} 设为管理员"
+ },
+ "Đặt ảnh {value} làm ảnh bìa": {
+  "en": "Make photo {value} the cover",
+  "ja": "写真 {value} をカバーにする",
+  "ko": "사진 {value}을(를) 커버로 지정",
+  "zh": "将照片 {value} 设为封面"
+ },
+ "Đến vị trí của tôi": {
+  "en": "Go to my location",
+  "ja": "現在地へ移動",
+  "ko": "내 위치로 이동",
+  "zh": "前往我的位置"
+ },
+ "Để 0 nếu miễn phí": {
+  "en": "Leave 0 if free",
+  "ja": "無料なら0のまま",
+  "ko": "무료면 0으로 두세요",
+  "zh": "免费请填 0"
+ },
+ "Để phát thử": {
+  "en": "For a test stream",
+  "ja": "テスト配信用",
+  "ko": "테스트 방송용",
+  "zh": "用于试播"
+ },
+ "Địa chỉ máy chủ API": {
+  "en": "API server address",
+  "ja": "APIサーバーのアドレス",
+  "ko": "API 서버 주소",
+  "zh": "API 服务器地址"
+ },
+ "Định vị trên điện thoại đang tắt. Hãy bật Vị trí rồi thử lại, hoặc tìm địa điểm bằng tên.": {
+  "en": "Location is off on your phone. Turn on Location and try again, or search for the place by name.",
+  "ja": "端末の位置情報がオフです。位置情報をオンにして再試行するか、名前で場所を検索してください。",
+  "ko": "휴대폰 위치가 꺼져 있습니다. 위치를 켜고 다시 시도하거나 이름으로 장소를 검색하세요.",
+  "zh": "手机定位已关闭。请开启定位后重试，或按名称搜索地点。"
+ },
+ "Đối tượng: {value}": {
+  "en": "Audience: {value}",
+  "ja": "公開範囲: {value}",
+  "ko": "공개 대상: {value}",
+  "zh": "观众：{value}"
+ },
+ "Đổi nơi sống": {
+  "en": "Change where you live",
+  "ja": "居住地を変更",
+  "ko": "사는 곳 변경",
+  "zh": "修改所在地"
+ },
+ "Đổi phần giới thiệu": {
+  "en": "Change your bio",
+  "ja": "自己紹介を変更",
+  "ko": "소개 변경",
+  "zh": "修改简介"
+ },
+ "Đổi thứ tự ngày, ngày tháng tự cập nhật theo.": {
+  "en": "Reorder days; dates update to match.",
+  "ja": "日の順番を変えると、日付も自動で更新されます。",
+  "ko": "날 순서를 바꾸면 날짜도 자동으로 바뀝니다.",
+  "zh": "调整日期顺序，日期会自动更新。"
+ },
+ "Đổi tên hiển thị": {
+  "en": "Change display name",
+  "ja": "表示名を変更",
+  "ko": "표시 이름 변경",
+  "zh": "修改显示名称"
+ },
+ "Đổi tên người dùng": {
+  "en": "Change username",
+  "ja": "ユーザー名を変更",
+  "ko": "사용자 이름 변경",
+  "zh": "修改用户名"
+ },
+ "Đổi địa chỉ khi chạy trên điện thoại thật": {
+  "en": "Change the address when running on a real phone",
+  "ja": "実機で動かすときにアドレスを変更",
+  "ko": "실제 휴대폰에서 실행할 때 주소 변경",
+  "zh": "在真机上运行时修改地址"
+ },
+ "Đổi ảnh đại diện": {
+  "en": "Change profile photo",
+  "ja": "プロフィール写真を変更",
+  "ko": "프로필 사진 변경",
+  "zh": "更换头像"
+ },
+ "Đợi ảnh tải lên xong rồi lưu nhé.": {
+  "en": "Wait for the photos to finish uploading, then save.",
+  "ja": "写真のアップロードが終わってから保存してください。",
+  "ko": "사진 업로드가 끝난 뒤 저장하세요.",
+  "zh": "请等待照片上传完成后再保存。"
+ },
+ "điểm dừng": {
+  "en": "stops",
+  "ja": "立ち寄り先",
+  "ko": "장소",
+  "zh": "站点"
+ },
+ "điểm dừng {value}": {
+  "en": "stop {value}",
+  "ja": "スポット {value}",
+  "ko": "경유지 {value}",
+  "zh": "站点 {value}"
+ },
+ "đạt": {
+  "en": "met",
+  "ja": "達成",
+  "ko": "충족",
+  "zh": "已达到"
+ },
+ "Ảnh JPG, PNG, WebP hoặc HEIC": {
+  "en": "JPG, PNG, WebP or HEIC images",
+  "ja": "JPG、PNG、WebP、HEIC画像",
+  "ko": "JPG, PNG, WebP, HEIC 이미지",
+  "zh": "JPG、PNG、WebP 或 HEIC 图片"
+ },
+ "Ảnh bị trùng": {
+  "en": "Duplicate photo",
+  "ja": "写真が重複しています",
+  "ko": "중복된 사진입니다",
+  "zh": "照片重复"
+ },
+ "Ảnh không hợp lệ": {
+  "en": "Invalid image",
+  "ja": "画像が無効です",
+  "ko": "잘못된 이미지입니다",
+  "zh": "图片无效"
+ },
+ "Ảnh ngang, tỉ lệ khoảng 3:1. {acceptedImagesLabel}. Ảnh được tự nén trước khi tải lên.": {
+  "en": "A landscape image, about 3:1. {acceptedImagesLabel}. Images are compressed before upload.",
+  "ja": "横長の画像（約3:1）。{acceptedImagesLabel}。画像はアップロード前に自動で圧縮されます。",
+  "ko": "가로 이미지, 약 3:1 비율. {acceptedImagesLabel}. 이미지는 업로드 전에 자동으로 압축됩니다.",
+  "zh": "横向图片，比例约 3:1。{acceptedImagesLabel}。图片会在上传前自动压缩。"
+ },
+ "Ảnh phải là địa chỉ https": {
+  "en": "Images must be https addresses",
+  "ja": "画像はhttpsのアドレスである必要があります",
+  "ko": "이미지는 https 주소여야 합니다",
+  "zh": "图片必须是 https 地址"
+ },
+ "Ảnh quá lớn. Vui lòng chọn ảnh dưới 30 MB.": {
+  "en": "The image is too large. Please choose one under 30 MB.",
+  "ja": "画像が大きすぎます。30MB未満の画像を選んでください。",
+  "ko": "이미지가 너무 큽니다. 30MB 미만 이미지를 고르세요.",
+  "zh": "图片太大。请选择 30 MB 以下的图片。"
+ },
+ "Ảnh vuông sẽ đẹp nhất. {acceptedImagesLabel}.": {
+  "en": "A square image looks best. {acceptedImagesLabel}.",
+  "ja": "正方形の画像がおすすめです。{acceptedImagesLabel}。",
+  "ko": "정사각형 이미지가 가장 좋습니다. {acceptedImagesLabel}.",
+  "zh": "方形图片效果最好。{acceptedImagesLabel}。"
+ },
+ "Ảnh và nội dung bạn vừa nhập sẽ không được lưu.": {
+  "en": "The photos and text you just entered won't be saved.",
+  "ja": "入力した写真と内容は保存されません。",
+  "ko": "방금 입력한 사진과 내용은 저장되지 않습니다.",
+  "zh": "你刚输入的照片和内容将不会保存。"
+ },
+ "Ảnh {value} của ngày {dayNumber}": {
+  "en": "Photo {value} of day {dayNumber}",
+  "ja": "{dayNumber}日目の写真 {value}",
+  "ko": "{dayNumber}일차 사진 {value}",
+  "zh": "第 {dayNumber} 天的照片 {value}"
+ },
+ "Ảnh {value} trên {n}": {
+  "en": "Photo {value} of {n}",
+  "ja": "写真 {value}/{n}",
+  "ko": "사진 {value}/{n}",
+  "zh": "第 {value} 张，共 {n} 张"
+ },
+ "Ảnh, cảm xúc và nơi bạn đang đến.": {
+  "en": "Photos, feelings and where you're headed.",
+  "ja": "写真、気持ち、そして向かっている場所。",
+  "ko": "사진, 기분, 그리고 가고 있는 곳.",
+  "zh": "照片、心情和你正在前往的地方。"
+ },
+ "Ẩn bảng": {
+  "en": "Hide panel",
+  "ja": "パネルを隠す",
+  "ko": "패널 숨기기",
+  "zh": "隐藏面板"
+ },
+ "Ở lại": {
+  "en": "Stay",
+  "ja": "このまま",
+  "ko": "머무르기",
+  "zh": "留下"
+ },
+ "“{value}” sẽ bị bỏ khỏi lịch trình. Các ngày sau sẽ được đánh số lại.": {
+  "en": "“{value}” will be removed from the itinerary. Later days will be renumbered.",
+  "ja": "「{value}」は旅程から外されます。以降の日は番号が振り直されます。",
+  "ko": "“{value}”이(가) 일정에서 빠집니다. 이후 날은 번호가 다시 매겨집니다.",
+  "zh": "“{value}”将从行程中移除。之后的日期会重新编号。"
+ }
+}

@@ -15,6 +15,7 @@ import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import 'live_format.dart';
+import '../../core/i18n.dart';
 
 const _commentMax = 300;
 
@@ -115,11 +116,11 @@ class _LiveCommentsState extends State<LiveComments> {
     final isHost = widget.meId != null && widget.meId == widget.hostId;
     final choice = await showActionSheet<String>(
       context,
-      title: 'Bình luận của ${comment.author.displayName}',
+      title: t('Bình luận của {displayName}', {'displayName': comment.author.displayName}),
       actions: [
-        const MenuAction('delete', 'Xoá bình luận', icon: LucideIcons.trash),
+        MenuAction('delete', t('Xoá bình luận'), icon: LucideIcons.trash),
         if (isHost && widget.onBlock != null && comment.author.id != widget.hostId)
-          MenuAction('block', 'Chặn ${comment.author.displayName}', icon: LucideIcons.ban, destructive: true),
+          MenuAction('block', t('Chặn {displayName}', {'displayName': comment.author.displayName}), icon: LucideIcons.ban, destructive: true),
       ],
     );
     if (choice == 'delete') widget.onDelete?.call(comment);
@@ -145,11 +146,11 @@ class _LiveCommentsState extends State<LiveComments> {
             decoration: const BoxDecoration(
               border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
-            child: Text('Bình luận', style: AppText.label),
+            child: Text(t('Bình luận'), style: AppText.label),
           ),
           Expanded(
             child: widget.comments.isEmpty
-                ? Center(child: Text('Chưa có bình luận nào. Hãy là người đầu tiên!', style: AppText.meta.copyWith(fontSize: 12)))
+                ? Center(child: Text(t('Chưa có bình luận nào. Hãy là người đầu tiên!'), style: AppText.meta.copyWith(fontSize: 12)))
                 : ListView.separated(
                     controller: _scroll,
                     padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -180,7 +181,7 @@ class _LiveCommentsState extends State<LiveComments> {
                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                         decoration: BoxDecoration(color: const Color(0x330099FF), borderRadius: BorderRadius.circular(AppRadius.pill)),
                                         child: Text(
-                                          'Người phát',
+                                          t('Người phát'),
                                           style: AppText.meta.copyWith(fontSize: 10, color: AppColors.cream, fontWeight: FontWeight.w600),
                                         ),
                                       ),
@@ -194,7 +195,7 @@ class _LiveCommentsState extends State<LiveComments> {
                           if (canMenu)
                             AppIconButton(
                               icon: LucideIcons.ellipsis,
-                              label: 'Tuỳ chọn bình luận của ${c.author.displayName}',
+                              label: t('Tuỳ chọn bình luận của {displayName}', {'displayName': c.author.displayName}),
                               size: 30,
                               onPressed: () => _menu(c),
                             ),
@@ -221,7 +222,7 @@ class _LiveCommentsState extends State<LiveComments> {
                           Expanded(
                             child: AppTextField(
                               controller: _text,
-                              hint: 'Viết bình luận…',
+                              hint: t('Viết bình luận…'),
                               maxLength: _commentMax,
                               dense: true,
                               textInputAction: TextInputAction.send,
@@ -232,7 +233,7 @@ class _LiveCommentsState extends State<LiveComments> {
                           const SizedBox(width: 8),
                           AppIconButton(
                             icon: LucideIcons.send,
-                            label: 'Gửi bình luận',
+                            label: t('Gửi bình luận'),
                             tone: IconTone.primary,
                             loading: _sending,
                             onPressed: _text.text.trim().isEmpty ? null : _submit,
@@ -364,7 +365,7 @@ class _ReactionBarState extends State<ReactionBar> {
       LivestreamService.sendReaction(widget.streamId, kind, count).catchError((Object error) {
         final tooFast = error is ApiError && error.code == 'REACTION_RATE_LIMIT';
         if (!mounted) return;
-        setState(() => _note = tooFast ? 'Bạn thả nhanh quá, nghỉ tay một chút nhé.' : errorMessage(error));
+        setState(() => _note = tooFast ? t('Bạn thả nhanh quá, nghỉ tay một chút nhé.') : errorMessage(error));
         _noteTimer?.cancel();
         _noteTimer = Timer(const Duration(seconds: 3), () {
           if (mounted) setState(() => _note = null);
@@ -399,7 +400,7 @@ class _ReactionBarState extends State<ReactionBar> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Semantics(
-          label: 'Thả cảm xúc',
+          label: t('Thả cảm xúc'),
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
@@ -489,7 +490,7 @@ class _DvrBarState extends State<DvrBar> {
           children: [
             AppIconButton(
               icon: LucideIcons.rotateCcw,
-              label: 'Tua lại 10 giây',
+              label: t('Tua lại 10 giây'),
               tone: IconTone.overlay,
               size: 36,
               onPressed: () => widget.onRewind((widget.rewinding ? widget.position : total - liveMarginSec) - 10),
@@ -498,7 +499,7 @@ class _DvrBarState extends State<DvrBar> {
               const SizedBox(width: 6),
               AppIconButton(
                 icon: widget.paused ? LucideIcons.play : LucideIcons.pause,
-                label: widget.paused ? 'Phát' : 'Tạm dừng',
+                label: widget.paused ? t('Phát') : t('Tạm dừng'),
                 tone: IconTone.overlay,
                 size: 36,
                 onPressed: widget.onTogglePause,
@@ -518,7 +519,7 @@ class _DvrBarState extends State<DvrBar> {
                   value: shown.clamp(0, total),
                   max: total,
                   semanticFormatterCallback: (_) =>
-                      !widget.rewinding && _scrub == null ? 'Trực tiếp, đã phát ${liveClock(total)}' : '${liveClock(shown)} trên ${liveClock(total)}',
+                      !widget.rewinding && _scrub == null ? t('Trực tiếp, đã phát {value}', {'value': liveClock(total)}) : t('{value} trên {value2}', {'value': liveClock(shown), 'value2': liveClock(total)}),
                   onChanged: (v) => setState(() => _scrub = v),
                   onChangeEnd: (v) {
                     setState(() => _scrub = null);
@@ -535,7 +536,7 @@ class _DvrBarState extends State<DvrBar> {
             const SizedBox(width: 8),
             Semantics(
               button: true,
-              label: widget.rewinding ? 'Về trực tiếp' : 'Đang xem trực tiếp',
+              label: widget.rewinding ? t('Về trực tiếp') : t('Đang xem trực tiếp'),
               child: GestureDetector(
                 onTap: widget.rewinding ? widget.onGoLive : null,
                 child: Container(
@@ -562,7 +563,7 @@ class _DvrBarState extends State<DvrBar> {
                         ),
                       const SizedBox(width: 6),
                       Text(
-                        'TRỰC TIẾP',
+                        t('TRỰC TIẾP'),
                         style: TextStyle(
                           fontFamily: AppFonts.body,
                           fontWeight: FontWeight.w700,

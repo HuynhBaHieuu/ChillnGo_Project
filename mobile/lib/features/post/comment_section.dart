@@ -13,6 +13,7 @@ import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// Comments under a journey, one level of replies (web: CommentSection).
 class CommentSection extends ConsumerStatefulWidget {
@@ -74,7 +75,7 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
           TextSpan(
             style: AppText.h2,
             children: [
-              const TextSpan(text: 'Bình luận '),
+              TextSpan(text: t('Bình luận ')),
               TextSpan(
                 text: formatCount(count),
                 style: AppText.h2.copyWith(color: AppColors.meta),
@@ -99,7 +100,7 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
                         children: [
                           AppTextField(
                             controller: _draft,
-                            hint: 'Viết bình luận…',
+                            hint: t('Viết bình luận…'),
                             maxLines: 5,
                             minLines: 1,
                             maxLength: 2000,
@@ -108,7 +109,7 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
                           ),
                           const SizedBox(height: 8),
                           AppButton(
-                            label: 'Gửi bình luận',
+                            label: t('Gửi bình luận'),
                             icon: LucideIcons.send,
                             size: ButtonSize.sm,
                             loading: _sending && _replyTo == null,
@@ -122,8 +123,8 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
               else
                 Row(
                   children: [
-                    TextLink(label: 'Đăng nhập', onPressed: () => context.push('/login?next=${Uri.encodeComponent('/posts/${widget.postId}')}')),
-                    Text(' để tham gia bình luận.', style: AppText.meta),
+                    TextLink(label: t('Đăng nhập'), onPressed: () => context.push('/login?next=${Uri.encodeComponent('/posts/${widget.postId}')}')),
+                    Text(t(' để tham gia bình luận.'), style: AppText.meta),
                   ],
                 ),
               if (_error != null) ...[const SizedBox(height: 8), ErrorText(_error)],
@@ -149,13 +150,13 @@ class _CommentSectionState extends ConsumerState<CommentSection> {
               ),
             ),
         if (threads.hasError && !threads.hasValue)
-          ErrorPanel(error: threads.error, onRetry: () => ref.invalidate(commentsProvider(widget.postId)), title: 'Không tải được bình luận'),
+          ErrorPanel(error: threads.error, onRetry: () => ref.invalidate(commentsProvider(widget.postId)), title: t('Không tải được bình luận')),
         if (threads.value?.isEmpty ?? false)
           Row(
             children: [
               const Icon(LucideIcons.messageCircle, size: 16, color: AppColors.meta),
               const SizedBox(width: 8),
-              Expanded(child: Text('Chưa có bình luận nào. Hãy là người đầu tiên.', style: AppText.meta)),
+              Expanded(child: Text(t('Chưa có bình luận nào. Hãy là người đầu tiên.'), style: AppText.meta)),
             ],
           ),
         for (final thread in threads.value ?? const <CommentThread>[])
@@ -242,14 +243,14 @@ class _CommentItem extends StatelessWidget {
                         onTap: onToggleReply,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 6),
-                          child: Text(replying ? 'Huỷ' : 'Trả lời', style: AppText.meta.copyWith(fontWeight: FontWeight.w600)),
+                          child: Text(replying ? t('Huỷ') : t('Trả lời'), style: AppText.meta.copyWith(fontWeight: FontWeight.w600)),
                         ),
                       ),
                     if (replying && replyDraft != null) ...[
                       const SizedBox(height: 8),
                       AppTextField(
                         controller: replyDraft,
-                        hint: 'Trả lời ${author.displayName}…',
+                        hint: t('Trả lời {displayName}…', {'displayName': author.displayName}),
                         maxLines: 4,
                         minLines: 1,
                         maxLength: 2000,
@@ -260,7 +261,7 @@ class _CommentItem extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerRight,
                         child: AppButton(
-                          label: 'Gửi trả lời',
+                          label: t('Gửi trả lời'),
                           size: ButtonSize.sm,
                           icon: LucideIcons.send,
                           loading: sending,

@@ -10,6 +10,7 @@ import '../../state/providers.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// Photos a journey can carry in its header; the server enforces the same limit.
 const maxCoverImages = 10;
@@ -44,7 +45,7 @@ class _CoverPickerState extends State<CoverPicker> {
 
   Future<void> _pick() async {
     if (_remaining <= 0) {
-      setState(() => _error = 'Tối đa $maxCoverImages ảnh.');
+      setState(() => _error = t('Tối đa {maxCoverImages} ảnh.', {'maxCoverImages': maxCoverImages}));
       return;
     }
     setState(() => _error = null);
@@ -90,14 +91,14 @@ class _CoverPickerState extends State<CoverPicker> {
   Widget build(BuildContext context) {
     final hasOwn = widget.value.isNotEmpty;
     final processing = _processing;
-    final status = processing == null ? null : 'Đang tải ảnh${processing.total > 1 ? ' ${processing.index}/${processing.total}' : ''}… $_progress%';
+    final status = processing == null ? null : t('Đang tải ảnh{value}… {_progress}%', {'value': processing.total > 1 ? ' ${processing.index}/${processing.total}' : '', '_progress': _progress});
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           button: !hasOwn,
-          label: hasOwn ? 'Ảnh bìa' : 'Chọn tối đa $maxCoverImages ảnh',
+          label: hasOwn ? t('Ảnh bìa') : t('Chọn tối đa {maxCoverImages} ảnh', {'maxCoverImages': maxCoverImages}),
           child: GestureDetector(
             onTap: hasOwn || _busy ? null : _pick,
             child: ClipRRect(
@@ -111,7 +112,7 @@ class _CoverPickerState extends State<CoverPicker> {
                       opacity: hasOwn ? 1 : 0.45,
                       child: NetImage(hasOwn ? widget.value.first : widget.fallbackUrl, placeholderColor: AppColors.canopy),
                     ),
-                    if (hasOwn) const Positioned(left: 10, top: 10, child: AppBadge('Ảnh bìa', tone: BadgeTone.overlay)),
+                    if (hasOwn) Positioned(left: 10, top: 10, child: AppBadge(t('Ảnh bìa'), tone: BadgeTone.overlay)),
                     if (!hasOwn || processing != null)
                       Container(
                         color: hasOwn ? const Color(0xB3000000) : Colors.transparent,
@@ -131,10 +132,10 @@ class _CoverPickerState extends State<CoverPicker> {
                                   : const Icon(LucideIcons.imageUp, size: 22, color: AppColors.cream),
                             ),
                             const SizedBox(height: 10),
-                            Text(status ?? 'Chạm để chọn tối đa $maxCoverImages ảnh', style: AppText.label, textAlign: TextAlign.center),
+                            Text(status ?? t('Chạm để chọn tối đa {maxCoverImages} ảnh', {'maxCoverImages': maxCoverImages}), style: AppText.label, textAlign: TextAlign.center),
                             if (!hasOwn) ...[
                               const SizedBox(height: 4),
-                              Text('Chưa chọn ảnh, bài viết sẽ dùng ảnh tự động này', style: AppText.meta, textAlign: TextAlign.center),
+                              Text(t('Chưa chọn ảnh, bài viết sẽ dùng ảnh tự động này'), style: AppText.meta, textAlign: TextAlign.center),
                             ],
                           ],
                         ),
@@ -169,7 +170,7 @@ class _CoverPickerState extends State<CoverPicker> {
                 if (_remaining > 0)
                   Semantics(
                     button: true,
-                    label: 'Thêm ảnh',
+                    label: t('Thêm ảnh'),
                     child: InkWell(
                       onTap: _busy ? null : _pick,
                       borderRadius: BorderRadius.circular(10),
@@ -198,7 +199,7 @@ class _CoverPickerState extends State<CoverPicker> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             AppButton(
-              label: hasOwn ? 'Thêm ảnh (${widget.value.length}/$maxCoverImages)' : 'Chọn ảnh',
+              label: hasOwn ? t('Thêm ảnh ({n}/{maxCoverImages})', {'n': widget.value.length, 'maxCoverImages': maxCoverImages}) : t('Chọn ảnh'),
               icon: LucideIcons.imageUp,
               variant: ButtonVariant.outline,
               size: ButtonSize.sm,
@@ -206,7 +207,7 @@ class _CoverPickerState extends State<CoverPicker> {
             ),
             if (hasOwn)
               AppButton(
-                label: 'Dùng ảnh tự động',
+                label: t('Dùng ảnh tự động'),
                 icon: LucideIcons.rotateCcw,
                 variant: ButtonVariant.ghost,
                 size: ButtonSize.sm,
@@ -221,7 +222,7 @@ class _CoverPickerState extends State<CoverPicker> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Tối đa $maxCoverImages ảnh, ảnh đầu tiên là ảnh bìa. $acceptedImagesLabel. Ảnh được tự nén trước khi tải lên.',
+          t('Tối đa {maxCoverImages} ảnh, ảnh đầu tiên là ảnh bìa. {acceptedImagesLabel}. Ảnh được tự nén trước khi tải lên.', {'maxCoverImages': maxCoverImages, 'acceptedImagesLabel': acceptedImagesLabel}),
           style: AppText.meta.copyWith(fontSize: 12),
         ),
         if (_error != null) ...[const SizedBox(height: 6), ErrorText(_error)],
@@ -276,8 +277,8 @@ class _Thumb extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  isCover ? action(LucideIcons.star, 'Ảnh bìa', null, filled: true) : action(LucideIcons.star, 'Đặt ảnh ${index + 1} làm ảnh bìa', onMakeCover),
-                  action(LucideIcons.x, 'Xoá ảnh ${index + 1}', onRemove),
+                  isCover ? action(LucideIcons.star, t('Ảnh bìa'), null, filled: true) : action(LucideIcons.star, t('Đặt ảnh {value} làm ảnh bìa', {'value': index + 1}), onMakeCover),
+                  action(LucideIcons.x, t('Xoá ảnh {value}', {'value': index + 1}), onRemove),
                 ],
               ),
             ),
@@ -331,7 +332,7 @@ class _TagPickerState extends ConsumerState<TagPicker> {
             runSpacing: 6,
             children: [
               for (final tag in widget.value)
-                AppChip(label: tag, selected: true, onRemove: () => widget.onChanged(widget.value.where((t) => t != tag).toList())),
+                AppChip(label: tx(tag), selected: true, onRemove: () => widget.onChanged(widget.value.where((t) => t != tag).toList())),
             ],
           ),
           const SizedBox(height: 10),
@@ -339,7 +340,7 @@ class _TagPickerState extends ConsumerState<TagPicker> {
         AppTextField(
           controller: _draft,
           enabled: !full,
-          hint: full ? 'Đã đủ tối đa ${widget.max} thẻ' : 'Thêm thẻ, nhấn Enter hoặc dấu phẩy',
+          hint: full ? t('Đã đủ tối đa {max} thẻ', {'max': widget.max}) : t('Thêm thẻ, nhấn Enter hoặc dấu phẩy'),
           textInputAction: TextInputAction.done,
           autocorrect: false,
           onChanged: (text) {
@@ -349,12 +350,12 @@ class _TagPickerState extends ConsumerState<TagPicker> {
         ),
         if (unused.isNotEmpty && !full) ...[
           const SizedBox(height: 10),
-          Text('Gợi ý', style: AppText.meta),
+          Text(t('Gợi ý'), style: AppText.meta),
           const SizedBox(height: 6),
           Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: [for (final s in unused) AppChip(label: '#${s.tag}', onTap: () => _add(s.tag))],
+            children: [for (final s in unused) AppChip(label: '#${tx(s.tag)}', onTap: () => _add(s.tag))],
           ),
         ],
       ],

@@ -16,6 +16,7 @@ import '../../ui/surfaces.dart';
 import 'live_badges.dart';
 import 'live_format.dart';
 import 'live_preview.dart';
+import '../../core/i18n.dart';
 
 /// A blurred photo behind a poster.
 class _BlurredBackdrop extends StatelessWidget {
@@ -79,7 +80,7 @@ class LivestreamCard extends StatelessWidget {
                             recognizer: TapGestureRecognizer()..onTap = openHost,
                           ),
                           TextSpan(
-                            text: ' đang phát trực tiếp',
+                            text: t(' đang phát trực tiếp'),
                             style: AppText.bodySmall.copyWith(color: AppColors.meta),
                           ),
                         ],
@@ -92,7 +93,7 @@ class LivestreamCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         const LiveBadge(social: true),
-                        Text('Bắt đầu ${relativeTime(stream.startedAt)}', style: AppText.meta),
+                        Text(t('Bắt đầu {time}', {'time': relativeTime(stream.startedAt)}), style: AppText.meta),
                       ],
                     ),
                   ],
@@ -131,7 +132,7 @@ class LivestreamCard extends StatelessWidget {
                             child: const Icon(LucideIcons.radio, size: 28, color: AppColors.onPrimary),
                           ),
                           const SizedBox(height: 10),
-                          Text('Đang phát trực tiếp · chạm để xem', style: AppText.label.copyWith(shadows: const [Shadow(blurRadius: 6)])),
+                          Text(t('Đang phát trực tiếp · chạm để xem'), style: AppText.label.copyWith(shadows: const [Shadow(blurRadius: 6)])),
                         ],
                       ),
                       Positioned(
@@ -154,8 +155,8 @@ class LivestreamCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              AppIconButton(icon: LucideIcons.messageCircle, label: 'Bình luận trong livestream', onPressed: open),
-              AppIconButton(icon: LucideIcons.share2, label: 'Chia sẻ livestream', onPressed: () => sharePath('/live/${stream.id}', stream.title)),
+              AppIconButton(icon: LucideIcons.messageCircle, label: t('Bình luận trong livestream'), onPressed: open),
+              AppIconButton(icon: LucideIcons.share2, label: t('Chia sẻ livestream'), onPressed: () => sharePath('/live/${stream.id}', stream.title)),
               const Spacer(),
               AppButton(label: 'Xem livestream', size: ButtonSize.sm, onPressed: open),
             ],
@@ -166,7 +167,7 @@ class LivestreamCard extends StatelessWidget {
   }
 }
 
-const _audienceLabel = {'public': null, 'followers': 'Người theo dõi', 'private': 'Chỉ mình tôi'};
+Map<String, String?> get _audienceLabel => {'public': null, 'followers': t('Người theo dõi'), 'private': t('Chỉ mình tôi')};
 
 /// A stream that is over: when it ran, its numbers, and a way into the replay
 /// (or the summary, when it was not recorded). [showHost] for mixed lists.
@@ -185,7 +186,7 @@ class ReplayCard extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: '${replay ? 'Xem lại' : 'Xem tổng kết'}: ${stream.title}',
+      label: '${replay ? t('Xem lại') : t('Xem tổng kết')}: ${stream.title}',
       child: AppCard(
         surface: Surface.featured,
         onTap: () => context.push('/live/${stream.id}'),
@@ -212,7 +213,7 @@ class ReplayCard extends StatelessWidget {
                                 style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.cream),
                               ),
                               TextSpan(
-                                text: ' đã phát trực tiếp',
+                                text: t(' đã phát trực tiếp'),
                                 style: AppText.bodySmall.copyWith(color: AppColors.meta),
                               ),
                             ],
@@ -260,10 +261,10 @@ class ReplayCard extends StatelessWidget {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (replay) const AppBadge('Xem lại', tone: BadgeTone.social, icon: LucideIcons.play, uppercase: true),
+                if (replay) AppBadge(t('Xem lại'), tone: BadgeTone.social, icon: LucideIcons.play, uppercase: true),
                 Text(formatStart(stream.startedAt), style: AppText.meta),
                 if (audience != null) AppBadge(audience),
-                if (processing) const AppBadge('Bản ghi đang xử lý'),
+                if (processing) AppBadge(t('Bản ghi đang xử lý')),
               ],
             ),
             const SizedBox(height: 8),
@@ -298,9 +299,9 @@ class LiveNowStrip extends ConsumerWidget {
                 decoration: const BoxDecoration(color: AppColors.social, shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
-              Text('ĐANG LIVE · ${streams.length}', style: AppText.caps.copyWith(color: AppColors.cream, fontSize: 12)),
+              Text(t('ĐANG LIVE · {n}', {'n': streams.length}), style: AppText.caps.copyWith(color: AppColors.cream, fontSize: 12)),
               const Spacer(),
-              TextLink(label: 'Xem tất cả', color: AppColors.meta, onPressed: () => context.go('/live')),
+              TextLink(label: t('Xem tất cả'), color: AppColors.meta, onPressed: () => context.go('/live')),
             ],
           ),
           const SizedBox(height: 12),
@@ -314,7 +315,7 @@ class LiveNowStrip extends ConsumerWidget {
                 final stream = streams[index];
                 return Semantics(
                   button: true,
-                  label: '${stream.host.displayName} đang phát: ${stream.title}',
+                  label: t('{displayName} đang phát: {title}', {'displayName': stream.host.displayName, 'title': stream.title}),
                   child: GestureDetector(
                     onTap: () => context.push('/live/${stream.id}'),
                     child: SizedBox(

@@ -5,10 +5,12 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/theme.dart';
 import '../../state/session.dart';
+import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../auth/auth_widgets.dart';
 import 'server_settings.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// The account menu behind the header avatar (web: AccountMenu + the navbar's mobile sheet).
 class MenuScreen extends ConsumerWidget {
@@ -34,20 +36,20 @@ class MenuScreen extends ConsumerWidget {
     }
 
     final items = user == null
-        ? [(label: 'Đăng nhập', hint: null, icon: LucideIcons.user, path: '/login'), (label: 'Về ChillnGo', hint: null, icon: LucideIcons.info, path: '/about')]
+        ? [(label: t('Đăng nhập'), hint: null, icon: LucideIcons.user, path: '/login'), (label: t('Về ChillnGo'), hint: null, icon: LucideIcons.info, path: '/about')]
         : [
-            (label: 'Trang cá nhân', hint: null, icon: LucideIcons.user, path: '/users/${user.id}'),
-            (label: 'Chỉnh sửa hồ sơ', hint: null, icon: LucideIcons.userPen, path: '/profile/edit'),
-            (label: 'Đăng bài mới', hint: null, icon: LucideIcons.squarePen, path: '/posts/new'),
-            (label: 'Hoạt động của bạn', hint: 'Lượt thích, bình luận, bản nháp, đã xoá…', icon: LucideIcons.activity, path: '/activity'),
-            (label: 'Hành trình của tôi', hint: 'Bài bạn đăng và lịch trình đã sao chép', icon: LucideIcons.map, path: '/itineraries'),
-            (label: 'Đã lưu', hint: null, icon: LucideIcons.bookmark, path: '/activity/saved'),
-            (label: 'Phát trực tiếp', hint: null, icon: LucideIcons.radio, path: '/live/new'),
-            (label: 'Về ChillnGo', hint: null, icon: LucideIcons.info, path: '/about'),
+            (label: t('Trang cá nhân'), hint: null, icon: LucideIcons.user, path: '/users/${user.id}'),
+            (label: t('Chỉnh sửa hồ sơ'), hint: null, icon: LucideIcons.userPen, path: '/profile/edit'),
+            (label: t('Đăng bài mới'), hint: null, icon: LucideIcons.squarePen, path: '/posts/new'),
+            (label: t('Hoạt động của bạn'), hint: t('Lượt thích, bình luận, bản nháp, đã xoá…'), icon: LucideIcons.activity, path: '/activity'),
+            (label: t('Hành trình của tôi'), hint: t('Bài bạn đăng và lịch trình đã sao chép'), icon: LucideIcons.map, path: '/itineraries'),
+            (label: t('Đã lưu'), hint: null, icon: LucideIcons.bookmark, path: '/activity/saved'),
+            (label: t('Phát trực tiếp'), hint: null, icon: LucideIcons.radio, path: '/live/new'),
+            (label: t('Về ChillnGo'), hint: null, icon: LucideIcons.info, path: '/about'),
           ];
 
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Tài khoản')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Tài khoản'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 40),
         children: [
@@ -71,12 +73,13 @@ class MenuScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
           ] else ...[
-            Text('Bạn chưa đăng nhập', style: AppText.h2),
+            Text(t('Bạn chưa đăng nhập'), style: AppText.h2),
             const SizedBox(height: 12),
           ],
           for (final item in items) _MenuRow(icon: item.icon, label: item.label, hint: item.hint, onTap: () => open(item.path)),
-          _MenuRow(icon: LucideIcons.server, label: 'Máy chủ API', hint: 'Đổi địa chỉ khi chạy trên điện thoại thật', onTap: () => showServerSettings(context)),
-          if (user != null) _MenuRow(icon: LucideIcons.logOut, label: 'Đăng xuất', danger: true, showChevron: false, onTap: signOut),
+          _MenuRow(icon: LucideIcons.languages, label: t('Ngôn ngữ'), hint: locales[locale.value], onTap: () => pickLanguage(context)),
+          _MenuRow(icon: LucideIcons.server, label: t('Máy chủ API'), hint: t('Đổi địa chỉ khi chạy trên điện thoại thật'), onTap: () => showServerSettings(context)),
+          if (user != null) _MenuRow(icon: LucideIcons.logOut, label: t('Đăng xuất'), danger: true, showChevron: false, onTap: signOut),
         ],
       ),
     );

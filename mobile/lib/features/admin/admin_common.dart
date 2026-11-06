@@ -7,6 +7,7 @@ import '../../core/theme.dart';
 import '../../data/models.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
+import '../../core/i18n.dart';
 
 /// A result line shown above a panel after an action.
 class Notice {
@@ -76,7 +77,7 @@ class StatusBadge extends StatelessWidget {
           Icon(locked ? LucideIcons.circleAlert : LucideIcons.circleCheck, size: 12, color: locked ? AppColors.destructive : AppColors.cream),
           const SizedBox(width: 4),
           Text(
-            locked ? 'Đã khoá' : 'Hoạt động',
+            locked ? t('Đã khoá') : t('Hoạt động'),
             style: TextStyle(fontFamily: AppFonts.body, fontWeight: FontWeight.w600, fontSize: 11.5, color: locked ? AppColors.destructive : AppColors.cream),
           ),
         ],
@@ -105,7 +106,7 @@ class NoticeBar extends ConsumerWidget {
           Expanded(
             child: Text(notice.text, style: AppText.bodySmall.copyWith(color: notice.error ? AppColors.destructive : AppColors.cream)),
           ),
-          TextButton(onPressed: () => ref.read(adminNoticeProvider.notifier).show(null), child: const Text('Đóng')),
+          TextButton(onPressed: () => ref.read(adminNoticeProvider.notifier).show(null), child: Text(t('Đóng'))),
         ],
       ),
     );
@@ -126,7 +127,7 @@ class Pagination extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         AppButton(
-          label: 'Trước',
+          label: t('Trước'),
           icon: LucideIcons.chevronLeft,
           variant: ButtonVariant.outline,
           size: ButtonSize.sm,
@@ -161,7 +162,7 @@ class PermissionChecklist extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Được phép dùng', style: AppText.label),
+        Text(t('Được phép dùng'), style: AppText.label),
         const SizedBox(height: 8),
         for (final module in adminModules) ...[
           CheckboxRow(
@@ -173,7 +174,7 @@ class PermissionChecklist extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         Text(
-          'Admin không bao giờ tạo được Admin khác, đổi cấu hình hệ thống hay thao tác trên Super Admin, dù được cấp quyền nào.',
+          t('Admin không bao giờ tạo được Admin khác, đổi cấu hình hệ thống hay thao tác trên Super Admin, dù được cấp quyền nào.'),
           style: AppText.meta.copyWith(fontSize: 12),
         ),
       ],

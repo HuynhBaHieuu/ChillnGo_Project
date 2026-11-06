@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../core/theme.dart';
 import 'buttons.dart';
 import 'fields.dart';
+import '../core/i18n.dart';
 
 /// Yours in a bubble on the right; the AI's as plain text on the left.
 class ChatBubble extends StatelessWidget {
@@ -92,10 +93,10 @@ class ChatComposer extends StatelessWidget {
         ListenableBuilder(
           listenable: controller,
           builder: (_, _) => onStop != null
-              ? AppIconButton(icon: LucideIcons.square, label: 'Dừng trả lời', tone: IconTone.primary, size: 44, onPressed: onStop)
+              ? AppIconButton(icon: LucideIcons.square, label: t('Dừng trả lời'), tone: IconTone.primary, size: 44, onPressed: onStop)
               : AppIconButton(
                   icon: LucideIcons.arrowUp,
-                  label: 'Gửi',
+                  label: t('Gửi'),
                   tone: IconTone.primary,
                   size: 44,
                   onPressed: enabled && controller.text.trim().isNotEmpty ? onSend : null,

@@ -19,11 +19,12 @@ import '../discover/discover_cards.dart';
 import '../livestream/live_cards.dart';
 import '../post/trip_card.dart';
 import 'follow_button.dart';
+import '../../core/i18n.dart';
 
-const List<({String value, String label, int? count})> _tabs = [
-  (value: 'posts', label: 'Bài viết', count: null),
-  (value: 'saved', label: 'Đã lưu', count: null),
-  (value: 'cloned', label: 'Lịch trình đã sao chép', count: null),
+List<({String value, String label, int? count})> get _tabs => [
+  (value: 'posts', label: t('Bài viết'), count: null),
+  (value: 'saved', label: t('Đã lưu'), count: null),
+  (value: 'cloned', label: t('Lịch trình đã sao chép'), count: null),
   (value: 'live', label: 'Livestream', count: null),
 ];
 
@@ -89,9 +90,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         padding: const EdgeInsets.all(kGutter),
         child: Center(
           child: EmptyState(
-            title: 'Không tìm thấy người dùng',
+            title: t('Không tìm thấy người dùng'),
             description: user.error.toString(),
-            action: AppButton(label: 'Về Khám phá', onPressed: () => context.go('/discover')),
+            action: AppButton(label: t('Về Khám phá'), onPressed: () => context.go('/discover')),
           ),
         ),
       );
@@ -155,14 +156,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     children: [
                       if (isOwn) ...[
                         AppButton(
-                          label: 'Chỉnh sửa hồ sơ',
+                          label: t('Chỉnh sửa hồ sơ'),
                           icon: LucideIcons.settings2,
                           variant: ButtonVariant.secondary,
                           size: ButtonSize.sm,
                           onPressed: () => context.push('/profile/edit'),
                         ),
                         AppButton(
-                          label: 'Đăng bài mới',
+                          label: t('Đăng bài mới'),
                           icon: LucideIcons.squarePen,
                           variant: ButtonVariant.outline,
                           size: ButtonSize.sm,
@@ -172,7 +173,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         FollowButton(userId: profile.id, size: ButtonSize.sm),
                       AppIconButton(
                         icon: LucideIcons.share2,
-                        label: 'Chia sẻ trang cá nhân',
+                        label: t('Chia sẻ trang cá nhân'),
                         tone: IconTone.well,
                         size: 36,
                         onPressed: () => sharePath('/users/${profile.id}', profile.displayName),
@@ -201,9 +202,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _Stat(label: 'Bài viết', value: profile.postCount),
-                      _Stat(label: 'Người theo dõi', value: followerCount),
-                      _Stat(label: 'Đang theo dõi', value: profile.followingCount),
+                      _Stat(label: t('Bài viết'), value: profile.postCount),
+                      _Stat(label: t('Người theo dõi'), value: followerCount),
+                      _Stat(label: t('Đang theo dõi'), value: profile.followingCount),
                     ],
                   ),
                 ),
@@ -214,16 +215,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   'saved' => _PostGrid(
                     provider: bookmarksProvider(profile.id),
                     emptyIcon: LucideIcons.bookmark,
-                    emptyTitle: 'Chưa lưu hành trình nào',
-                    emptyText: 'Bấm biểu tượng dấu trang trên một bài viết để lưu lại đọc sau.',
+                    emptyTitle: t('Chưa lưu hành trình nào'),
+                    emptyText: t('Bấm biểu tượng dấu trang trên một bài viết để lưu lại đọc sau.'),
                   ),
                   'cloned' => _Cloned(isOwn: isOwn),
                   'live' => _LiveHistory(listKey: _liveKey, userId: profile.id, isOwn: isOwn),
                   _ => _PostGrid(
                     provider: postsByAuthorProvider(profile.id),
                     emptyIcon: LucideIcons.fileText,
-                    emptyTitle: 'Chưa có bài viết nào',
-                    emptyText: isOwn ? 'Hành trình đầu tiên của bạn sẽ xuất hiện ở đây.' : 'Người dùng này chưa chia sẻ hành trình nào.',
+                    emptyTitle: t('Chưa có bài viết nào'),
+                    emptyText: isOwn ? t('Hành trình đầu tiên của bạn sẽ xuất hiện ở đây.') : t('Người dùng này chưa chia sẻ hành trình nào.'),
                   ),
                 },
               ],
@@ -280,14 +281,14 @@ class _Cloned extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isOwn) {
-      return const EmptyState(icon: LucideIcons.copy, title: 'Lịch trình riêng tư', description: 'Chỉ chủ tài khoản mới xem được những lịch trình đã sao chép.');
+      return EmptyState(icon: LucideIcons.copy, title: t('Lịch trình riêng tư'), description: t('Chỉ chủ tài khoản mới xem được những lịch trình đã sao chép.'));
     }
     final itineraries = ref.watch(myItinerariesProvider);
     if (itineraries.isLoading && !itineraries.hasValue) return const Skeleton(height: 140, radius: AppRadius.lg);
     if (itineraries.hasError && !itineraries.hasValue) return ErrorPanel(error: itineraries.error);
     final list = itineraries.value ?? const <ClonedItinerary>[];
     if (list.isEmpty) {
-      return const EmptyState(icon: LucideIcons.copy, title: 'Chưa sao chép lịch trình nào', description: 'Khi bạn sao chép một hành trình, nó sẽ xuất hiện ở đây.');
+      return EmptyState(icon: LucideIcons.copy, title: t('Chưa sao chép lịch trình nào'), description: t('Khi bạn sao chép một hành trình, nó sẽ xuất hiện ở đây.'));
     }
     return Column(
       children: [
@@ -344,11 +345,11 @@ class _LiveHistory extends ConsumerWidget {
               ? null
               : EmptyState(
                   icon: LucideIcons.radio,
-                  title: 'Chưa có buổi phát nào',
+                  title: t('Chưa có buổi phát nào'),
                   description: isOwn
-                      ? 'Bấm nút “+” rồi chọn Phát trực tiếp để livestream lần đầu. Các buổi phát sẽ được lưu ở đây.'
-                      : 'Người dùng này chưa phát trực tiếp lần nào.',
-                  action: isOwn ? AppButton(label: 'Phát trực tiếp', onPressed: () => context.push('/live/new')) : null,
+                      ? t('Bấm nút “+” rồi chọn Phát trực tiếp để livestream lần đầu. Các buổi phát sẽ được lưu ở đây.')
+                      : t('Người dùng này chưa phát trực tiếp lần nào.'),
+                  action: isOwn ? AppButton(label: t('Phát trực tiếp'), onPressed: () => context.push('/live/new')) : null,
                 ),
         ),
       ],

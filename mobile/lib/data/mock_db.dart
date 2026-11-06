@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'api.dart';
 import 'json.dart';
 import 'models.dart';
+import '../core/i18n.dart';
 
 class LikeRecord {
   LikeRecord(this.userId, this.postId);
@@ -96,7 +97,7 @@ T assertFound<T>(T? value, String message) {
 
 /// Shown for content whose author account no longer exists.
 User deletedUser(String id) =>
-    User(id: id, username: 'deleted', displayName: 'Tài khoản đã xoá', createdAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toIso8601String());
+    User(id: id, username: 'deleted', displayName: t('Tài khoản đã xoá'), createdAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toIso8601String());
 
 /// Newest first by an ISO timestamp.
 int byNewest(String a, String b) => _ms(b).compareTo(_ms(a));

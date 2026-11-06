@@ -16,6 +16,7 @@ import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import 'map_picker.dart';
 import 'place_search.dart';
+import '../../core/i18n.dart';
 
 /// A stop's name, with place suggestions as the author types. Picking one also
 /// fills the address and pins the stop (web: PlaceField).
@@ -88,8 +89,8 @@ class _PlaceFieldState extends State<PlaceField> {
         AppTextField(
           controller: _text,
           focusNode: _focus,
-          label: 'Tên địa điểm',
-          hint: canSearchPlaces ? 'Gõ tên địa điểm, rồi chọn một gợi ý' : 'Tên địa điểm',
+          label: t('Tên địa điểm'),
+          hint: canSearchPlaces ? t('Gõ tên địa điểm, rồi chọn một gợi ý') : t('Tên địa điểm'),
           maxLength: 200,
           suffix: _search.searching
               ? const Padding(
@@ -224,7 +225,7 @@ class _AddressFieldState extends State<AddressField> {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text?.trim() ?? '';
     if (text.isEmpty) {
-      setState(() => _error = 'Bộ nhớ tạm đang trống. Hãy sao chép link Google Maps trước.');
+      setState(() => _error = t('Bộ nhớ tạm đang trống. Hãy sao chép link Google Maps trước.'));
       return;
     }
     _text.text = text;
@@ -255,9 +256,9 @@ class _AddressFieldState extends State<AddressField> {
         AppTextField(
           controller: _text,
           focusNode: _focus,
-          label: 'Địa chỉ',
+          label: t('Địa chỉ'),
           icon: LucideIcons.mapPin,
-          hint: 'Gõ địa chỉ, hoặc dán link Google Maps / toạ độ',
+          hint: t('Gõ địa chỉ, hoặc dán link Google Maps / toạ độ'),
           maxLength: 300,
           autocorrect: false,
           textInputAction: TextInputAction.search,
@@ -282,8 +283,8 @@ class _AddressFieldState extends State<AddressField> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            AppButton(label: 'Chọn trên bản đồ', icon: LucideIcons.map, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _pickOnMap),
-            AppButton(label: 'Dán link', icon: LucideIcons.clipboardPaste, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _paste),
+            AppButton(label: t('Chọn trên bản đồ'), icon: LucideIcons.map, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _pickOnMap),
+            AppButton(label: t('Dán link'), icon: LucideIcons.clipboardPaste, variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _paste),
             AppButton(
               label: 'Google Maps',
               icon: LucideIcons.externalLink,
@@ -299,9 +300,9 @@ class _AddressFieldState extends State<AddressField> {
             TextSpan(
               style: AppText.meta.copyWith(color: AppColors.sage),
               children: [
-                TextSpan(text: 'Đã ghim · ${loc.lat.toStringAsFixed(5)}, ${loc.lng.toStringAsFixed(5)} · '),
+                TextSpan(text: t('Đã ghim · {value}, {value2} · ', {'value': loc.lat.toStringAsFixed(5), 'value2': loc.lng.toStringAsFixed(5)})),
                 TextSpan(
-                  text: 'Xem trên Google Maps',
+                  text: t('Xem trên Google Maps'),
                   style: const TextStyle(decoration: TextDecoration.underline),
                   recognizer: TapGestureRecognizer()..onTap = () => openExternal(googleMapsUrl(loc.lat, loc.lng)),
                 ),
@@ -320,8 +321,8 @@ class _AddressFieldState extends State<AddressField> {
               Expanded(
                 child: Text(
                   address.trim().isNotEmpty
-                      ? 'Chưa ghim. Chọn một gợi ý, dán link Google Maps, hoặc chọn trên bản đồ. Nếu không, khi lưu ChillnGo sẽ tự tìm theo địa chỉ.'
-                      : 'Trên Google Maps: mở địa điểm, bấm Chia sẻ, Sao chép đường liên kết, rồi bấm "Dán link".',
+                      ? t('Chưa ghim. Chọn một gợi ý, dán link Google Maps, hoặc chọn trên bản đồ. Nếu không, khi lưu ChillnGo sẽ tự tìm theo địa chỉ.')
+                      : t('Trên Google Maps: mở địa điểm, bấm Chia sẻ, Sao chép đường liên kết, rồi bấm "Dán link".'),
                   style: AppText.meta.copyWith(fontSize: 12, color: address.trim().isNotEmpty ? AppColors.ochre : AppColors.meta),
                 ),
               ),

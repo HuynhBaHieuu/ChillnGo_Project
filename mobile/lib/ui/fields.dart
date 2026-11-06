@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../core/format.dart';
 import '../core/theme.dart';
 import 'sheets.dart';
+import '../core/i18n.dart';
 
 InputDecoration appInputDecoration({String? hint, IconData? icon, Widget? suffix, String? error, bool dense = false}) {
   OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
@@ -160,7 +161,7 @@ class _PasswordFieldState extends State<PasswordField> {
   Widget build(BuildContext context) {
     return AppTextField(
       controller: widget.controller,
-      label: widget.label,
+      label: tx(widget.label),
       error: widget.error,
       icon: LucideIcons.lock,
       obscureText: !_shown,
@@ -170,7 +171,7 @@ class _PasswordFieldState extends State<PasswordField> {
       textInputAction: widget.textInputAction,
       keyboardType: TextInputType.visiblePassword,
       suffix: IconButton(
-        tooltip: _shown ? 'Ẩn mật khẩu' : 'Hiện mật khẩu',
+        tooltip: _shown ? t('Ẩn mật khẩu') : t('Hiện mật khẩu'),
         icon: Icon(_shown ? LucideIcons.eyeOff : LucideIcons.eye, size: 18, color: AppColors.meta),
         onPressed: () => setState(() => _shown = !_shown),
       ),
@@ -215,7 +216,7 @@ class SelectField<T> extends StatelessWidget {
       onTap: !enabled
           ? null
           : () async {
-              final picked = await showOptionsSheet<T>(context, title: label ?? placeholder, options: options, selected: value);
+              final picked = await showOptionsSheet<T>(context, title: label ?? tx(placeholder), options: options, selected: value);
               if (picked != null) onChanged(picked.value);
             },
       child: InputDecorator(
@@ -225,7 +226,7 @@ class SelectField<T> extends StatelessWidget {
         ),
         isEmpty: selected == null,
         child: Text(
-          selected?.label ?? placeholder,
+          selected?.label ?? tx(placeholder),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppText.body.copyWith(color: selected == null ? AppColors.meta : AppColors.cream),
@@ -269,15 +270,15 @@ class DateField extends StatelessWidget {
                 initialDate: current,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2100),
-                helpText: label ?? 'Chọn ngày',
-                cancelText: 'Huỷ',
-                confirmText: 'Chọn',
+                helpText: label ?? t('Chọn ngày'),
+                cancelText: t('Huỷ'),
+                confirmText: t('Chọn'),
               );
               if (picked != null) onChanged(toDateOnly(picked));
             },
       child: InputDecorator(
         decoration: appInputDecoration(icon: LucideIcons.calendar),
-        child: Text(value.isEmpty ? 'Chọn ngày' : formatLongDate(value), style: AppText.body.copyWith(color: value.isEmpty ? AppColors.meta : AppColors.cream)),
+        child: Text(value.isEmpty ? t('Chọn ngày') : formatLongDate(value), style: AppText.body.copyWith(color: value.isEmpty ? AppColors.meta : AppColors.cream)),
       ),
     );
     return Column(

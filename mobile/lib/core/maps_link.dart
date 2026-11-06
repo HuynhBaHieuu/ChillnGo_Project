@@ -6,6 +6,7 @@ library;
 import '../data/api.dart';
 import '../data/json.dart';
 import 'geo.dart';
+import '../core/i18n.dart';
 
 class ResolvedPlace {
   const ResolvedPlace({required this.lat, required this.lng, required this.address, this.name, this.types});
@@ -95,7 +96,7 @@ Future<String> _addressAt(double lat, double lng) async {
 Future<ResolvedPlace> _lookUp(String text, String? name) async {
   final places = await searchPlaces(text);
   if (places.isEmpty) {
-    throw Exception('Không tìm thấy địa chỉ này. Hãy thử dán link Google Maps hoặc chọn trên bản đồ.');
+    throw Exception(t('Không tìm thấy địa chỉ này. Hãy thử dán link Google Maps hoặc chọn trên bản đồ.'));
   }
   final place = places.first;
   return ResolvedPlace(
@@ -114,7 +115,7 @@ Future<ResolvedPlace> resolveLinkOrCoordinates(String input) async {
   final coords = parseCoordinates(text);
   if (coords != null) return ResolvedPlace(lat: coords.lat, lng: coords.lng, address: await _addressAt(coords.lat, coords.lng));
 
-  if (!isGoogleMapsUrl(text)) throw Exception('Không nhận ra link hay toạ độ này.');
+  if (!isGoogleMapsUrl(text)) throw Exception(t('Không nhận ra link hay toạ độ này.'));
 
   var full = text;
   if (_isShortLink(text)) {
@@ -128,7 +129,7 @@ Future<ResolvedPlace> resolveLinkOrCoordinates(String input) async {
     return ResolvedPlace(lat: info.lat!, lng: info.lng!, address: address, name: info.name);
   }
   if (info.query != null && info.query!.isNotEmpty) return _lookUp(info.query!, info.name);
-  throw Exception('Link Google Maps này không có vị trí. Hãy mở địa điểm trên Google Maps rồi bấm Chia sẻ, Sao chép đường liên kết.');
+  throw Exception(t('Link Google Maps này không có vị trí. Hãy mở địa điểm trên Google Maps rồi bấm Chia sẻ, Sao chép đường liên kết.'));
 }
 
 bool looksLikeLinkOrCoordinates(String text) => parseCoordinates(text) != null || isGoogleMapsUrl(text);

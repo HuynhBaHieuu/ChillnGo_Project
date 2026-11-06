@@ -9,6 +9,7 @@ import '../../ui/buttons.dart';
 import '../../ui/surfaces.dart';
 import '../shell/tab_header.dart';
 import 'profile_view.dart';
+import '../../core/i18n.dart';
 
 /// The "Cá nhân" tab: your own profile, with shortcuts to your activity and journeys.
 class MeScreen extends ConsumerWidget {
@@ -21,7 +22,7 @@ class MeScreen extends ConsumerWidget {
       return Scaffold(
         body: Column(
           children: [
-            const TabHeader(title: 'Cá nhân'),
+            TabHeader(title: t('Cá nhân')),
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -30,20 +31,20 @@ class MeScreen extends ConsumerWidget {
                     children: [
                       EmptyState(
                         icon: LucideIcons.logIn,
-                        title: 'Đăng nhập để có trang cá nhân',
-                        description: 'Lưu hành trình bạn thích, sao chép lịch trình về làm của mình, check-in và phát trực tiếp chuyến đi.',
+                        title: t('Đăng nhập để có trang cá nhân'),
+                        description: t('Lưu hành trình bạn thích, sao chép lịch trình về làm của mình, check-in và phát trực tiếp chuyến đi.'),
                         action: Wrap(
                           spacing: 10,
                           runSpacing: 10,
                           alignment: WrapAlignment.center,
                           children: [
-                            AppButton(label: 'Đăng nhập', onPressed: () => context.push('/login')),
-                            AppButton(label: 'Tạo tài khoản', variant: ButtonVariant.outline, onPressed: () => context.push('/register')),
+                            AppButton(label: t('Đăng nhập'), onPressed: () => context.push('/login')),
+                            AppButton(label: t('Tạo tài khoản'), variant: ButtonVariant.outline, onPressed: () => context.push('/register')),
                           ],
                         ),
                       ),
                       const SizedBox(height: 12),
-                      AppButton(label: 'Về ChillnGo', variant: ButtonVariant.ghost, onPressed: () => context.push('/about')),
+                      AppButton(label: t('Về ChillnGo'), variant: ButtonVariant.ghost, onPressed: () => context.push('/about')),
                     ],
                   ),
                 ),
@@ -57,10 +58,10 @@ class MeScreen extends ConsumerWidget {
       body: Column(
         children: [
           TabHeader(
-            title: 'Cá nhân',
+            title: t('Cá nhân'),
             actions: [
-              AppIconButton(icon: LucideIcons.map, label: 'Hành trình của tôi', tone: IconTone.well, size: 38, onPressed: () => context.push('/itineraries')),
-              AppIconButton(icon: LucideIcons.activity, label: 'Hoạt động của bạn', tone: IconTone.well, size: 38, onPressed: () => context.push('/activity')),
+              AppIconButton(icon: LucideIcons.map, label: t('Hành trình của tôi'), tone: IconTone.well, size: 38, onPressed: () => context.push('/itineraries')),
+              AppIconButton(icon: LucideIcons.activity, label: t('Hoạt động của bạn'), tone: IconTone.well, size: 38, onPressed: () => context.push('/activity')),
             ],
           ),
           Expanded(

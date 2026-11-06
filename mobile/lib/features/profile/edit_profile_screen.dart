@@ -19,6 +19,7 @@ import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 const _bioMax = 300;
 const _locationMax = 80;
@@ -42,7 +43,7 @@ class EditProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(sessionProvider.select((s) => s.user));
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Chỉnh sửa hồ sơ')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Chỉnh sửa hồ sơ'))),
       body: user == null ? const SizedBox.shrink() : _EditProfileForm(key: ValueKey(user.id), user: user),
     );
   }
@@ -85,7 +86,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
 
   Future<void> _save() async {
     if (_displayName.text.trim().isEmpty) {
-      setState(() => _error = 'Vui lòng nhập tên hiển thị.');
+      setState(() => _error = t('Vui lòng nhập tên hiển thị.'));
       return;
     }
     if (_usernameChanged) {
@@ -101,19 +102,19 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
       _saving = true;
     });
     try {
-      for (final (kind, draft, name) in [('avatar', _avatar, 'ảnh đại diện'), ('cover', _cover, 'ảnh bìa')]) {
+      for (final (kind, draft, name) in [('avatar', _avatar, t('ảnh đại diện')), ('cover', _cover, t('ảnh bìa'))]) {
         final image = draft.image;
         if (image == null) continue;
-        setState(() => _progress = 'Đang tải $name lên… 0%');
+        setState(() => _progress = t('Đang tải {name} lên… 0%', {'name': name}));
         await ProfileService.uploadImage(
           kind,
           image,
           onProgress: (p) {
-            if (mounted) setState(() => _progress = 'Đang tải $name lên… $p%');
+            if (mounted) setState(() => _progress = t('Đang tải {name} lên… {p}%', {'name': name, 'p': p}));
           },
         );
       }
-      setState(() => _progress = 'Đang lưu hồ sơ…');
+      setState(() => _progress = t('Đang lưu hồ sơ…'));
       final fresh = adoptUser(
         await ProfileService.updateProfile(
           displayName: _nameChanged ? _displayName.text.trim() : null,
@@ -128,7 +129,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
       ref.invalidate(userProvider(fresh.id));
       invalidateJourneys(ref);
       if (!mounted) return;
-      toast(context, 'Đã lưu hồ sơ.');
+      toast(context, t('Đã lưu hồ sơ.'));
       leavePage(context);
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
@@ -148,18 +149,18 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 40),
       children: [
-        Text('Thông tin này hiện trên trang cá nhân của bạn.', style: AppText.meta),
+        Text(t('Thông tin này hiện trên trang cá nhân của bạn.'), style: AppText.meta),
         const SizedBox(height: 16),
         AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Ảnh', style: AppText.h3),
+              Text(t('Ảnh'), style: AppText.h3),
               const SizedBox(height: 14),
               _ImagePicker(
                 cover: true,
-                label: 'Ảnh bìa',
-                hint: 'Ảnh ngang, tỉ lệ khoảng 3:1. $acceptedImagesLabel. Ảnh được tự nén trước khi tải lên.',
+                label: t('Ảnh bìa'),
+                hint: t('Ảnh ngang, tỉ lệ khoảng 3:1. {acceptedImagesLabel}. Ảnh được tự nén trước khi tải lên.', {'acceptedImagesLabel': acceptedImagesLabel}),
                 currentUrl: user.coverUrl,
                 defaultUrl: travelBanner(user.username),
                 draft: _cover,
@@ -169,8 +170,8 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
               const SizedBox(height: 18),
               _ImagePicker(
                 cover: false,
-                label: 'Ảnh đại diện',
-                hint: 'Ảnh vuông sẽ đẹp nhất. $acceptedImagesLabel.',
+                label: t('Ảnh đại diện'),
+                hint: t('Ảnh vuông sẽ đẹp nhất. {acceptedImagesLabel}.', {'acceptedImagesLabel': acceptedImagesLabel}),
                 currentUrl: user.avatarUrl,
                 defaultUrl: travelAvatar(user.username),
                 draft: _avatar,
@@ -185,11 +186,11 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Thông tin', style: AppText.h3),
+              Text(t('Thông tin'), style: AppText.h3),
               const SizedBox(height: 14),
               AppTextField(
                 controller: _displayName,
-                label: 'Tên hiển thị',
+                label: t('Tên hiển thị'),
                 maxLength: 60,
                 autofillHints: const [AutofillHints.name],
                 textCapitalization: TextCapitalization.words,
@@ -198,17 +199,17 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
               const SizedBox(height: 14),
               AppTextField(
                 controller: _username,
-                label: 'Tên người dùng',
+                label: t('Tên người dùng'),
                 maxLength: 30,
                 autocorrect: false,
                 helper:
-                    '3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @${_username.text.trim().toLowerCase().isEmpty ? '…' : _username.text.trim().toLowerCase()}',
+                    t('3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Hiện là @{value}', {'value': _username.text.trim().toLowerCase().isEmpty ? '…' : _username.text.trim().toLowerCase()}),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 14),
               AppTextField(
                 controller: _bio,
-                label: 'Giới thiệu',
+                label: t('Giới thiệu'),
                 maxLines: 5,
                 minLines: 3,
                 maxLength: _bioMax,
@@ -217,7 +218,7 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 14),
-              AppTextField(controller: _location, label: 'Nơi sống', maxLength: _locationMax, onChanged: (_) => setState(() {})),
+              AppTextField(controller: _location, label: t('Nơi sống'), maxLength: _locationMax, onChanged: (_) => setState(() {})),
             ],
           ),
         ),
@@ -237,11 +238,11 @@ class _EditProfileFormState extends ConsumerState<_EditProfileForm> {
         Row(
           children: [
             Expanded(
-              child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _saving ? null : () => leavePage(context)),
+              child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _saving ? null : () => leavePage(context)),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: AppButton(label: 'Lưu thay đổi', loading: _saving, onPressed: _dirty ? _save : null),
+              child: AppButton(label: t('Lưu thay đổi'), loading: _saving, onPressed: _dirty ? _save : null),
             ),
           ],
         ),
@@ -309,7 +310,7 @@ class _ImagePickerState extends State<_ImagePicker> {
       runSpacing: 8,
       children: [
         AppButton(
-          label: 'Chọn ảnh mới',
+          label: t('Chọn ảnh mới'),
           icon: widget.cover ? LucideIcons.imageUp : LucideIcons.camera,
           variant: ButtonVariant.outline,
           size: ButtonSize.sm,
@@ -317,7 +318,7 @@ class _ImagePickerState extends State<_ImagePicker> {
         ),
         if (draft.changed)
           AppButton(
-            label: 'Hoàn tác',
+            label: t('Hoàn tác'),
             icon: LucideIcons.rotateCcw,
             variant: ButtonVariant.ghost,
             size: ButtonSize.sm,
@@ -330,7 +331,7 @@ class _ImagePickerState extends State<_ImagePicker> {
           )
         else if (hasOwnImage)
           AppButton(
-            label: 'Dùng ảnh mặc định',
+            label: t('Dùng ảnh mặc định'),
             icon: LucideIcons.trash,
             variant: ButtonVariant.ghost,
             size: ButtonSize.sm,
@@ -348,7 +349,7 @@ class _ImagePickerState extends State<_ImagePicker> {
           Stack(
             children: [
               frame,
-              if (draft.changed) const Positioned(left: 6, top: 6, child: AppBadge('Chưa lưu', tone: BadgeTone.primary)),
+              if (draft.changed) Positioned(left: 6, top: 6, child: AppBadge(t('Chưa lưu'), tone: BadgeTone.primary)),
             ],
           ),
           const SizedBox(height: 10),
@@ -359,7 +360,7 @@ class _ImagePickerState extends State<_ImagePicker> {
               Stack(
                 children: [
                   frame,
-                  if (draft.changed) const Positioned(left: 0, top: 0, child: AppBadge('Chưa lưu', tone: BadgeTone.primary)),
+                  if (draft.changed) Positioned(left: 0, top: 0, child: AppBadge(t('Chưa lưu'), tone: BadgeTone.primary)),
                 ],
               ),
               const SizedBox(width: 14),

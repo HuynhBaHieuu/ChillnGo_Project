@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../data/models.dart';
 import 'live_format.dart';
+import '../../core/i18n.dart';
 
 /// The red "● LIVE" pill; the dot pulses. [social] uses the coral tone.
 class LiveBadge extends StatefulWidget {
@@ -70,7 +71,7 @@ class LiveClock extends StatelessWidget {
       builder: (_) {
         final elapsed = elapsedSince(baseSec, baseAt);
         return Semantics(
-          label: 'Đã phát ${liveClock(elapsed)}',
+          label: t('Đã phát {value}', {'value': liveClock(elapsed)}),
           child: LiveBadge(
             social: social,
             trailing: Text(
@@ -108,7 +109,7 @@ class ViewerCount extends StatelessWidget {
           const Icon(LucideIcons.eye, size: 13, color: AppColors.white),
           const SizedBox(width: 5),
           Text(
-            '${formatNumber(count)} người đang xem',
+            t('{n} người đang xem', {'n': formatNumber(count)}),
             style: const TextStyle(fontFamily: AppFonts.body, fontWeight: FontWeight.w600, fontSize: 11, color: AppColors.white, height: 1.2),
           ),
         ],
@@ -129,11 +130,11 @@ class LiveStats extends StatelessWidget {
   Widget build(BuildContext context) {
     final reactions = totalReactions(stream.reactions);
     final stats = [
-      (icon: LucideIcons.clock, label: 'Thời lượng', value: liveDuration(stream.durationSec)),
-      (icon: LucideIcons.users, label: 'Người xem', value: compact(stream.uniqueViewers)),
-      (icon: LucideIcons.eye, label: 'Cao nhất cùng lúc', value: compact(stream.peakViewers)),
-      (icon: LucideIcons.messageCircle, label: 'Bình luận', value: compact(stream.commentCount)),
-      (icon: LucideIcons.sparkles, label: 'Cảm xúc', value: compact(reactions)),
+      (icon: LucideIcons.clock, label: t('Thời lượng'), value: liveDuration(stream.durationSec)),
+      (icon: LucideIcons.users, label: t('Người xem'), value: compact(stream.uniqueViewers)),
+      (icon: LucideIcons.eye, label: t('Cao nhất cùng lúc'), value: compact(stream.peakViewers)),
+      (icon: LucideIcons.messageCircle, label: t('Bình luận'), value: compact(stream.commentCount)),
+      (icon: LucideIcons.sparkles, label: t('Cảm xúc'), value: compact(reactions)),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

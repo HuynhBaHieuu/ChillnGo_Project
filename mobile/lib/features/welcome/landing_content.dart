@@ -13,21 +13,23 @@ import '../../data/services/discovery_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
+import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
-const _statement = [
-  'ChillnGo là mạng xã hội của những chuyến đi có thật.',
-  'Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.',
-  'Thấy hợp ý? Sao chép về làm của bạn chỉ với một chạm.',
+List<String> get _statement => [
+  t('ChillnGo là mạng xã hội của những chuyến đi có thật.'),
+  t('Mỗi hành trình được kể lại từng ngày, từng điểm dừng, từng khoản chi.'),
+  t('Thấy hợp ý? Sao chép về làm của bạn chỉ với một chạm.'),
 ];
 
-const _features = [
-  (title: 'Khám phá hành trình', desc: 'Lịch trình thật, lọc theo vùng, mùa và ngân sách.', icon: LucideIcons.compass),
-  (title: 'Xem từng ngày', desc: 'Mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.', icon: LucideIcons.calendarRange),
-  (title: 'Sao chép một chạm', desc: 'Biến chuyến đi của người khác thành bản nháp của bạn.', icon: LucideIcons.copy),
-  (title: 'Sắp xếp lại ngày', desc: 'Đổi thứ tự ngày, ngày tháng tự cập nhật theo.', icon: LucideIcons.arrowUpDown),
-  (title: 'Ghép nhiều chuyến', desc: 'Lấy những ngày hay nhất từ nhiều bài, gộp vào một lịch trình.', icon: LucideIcons.gitMerge),
-  (title: 'Chia sẻ lại', desc: 'Đi xong, đăng hành trình của bạn cho người đi sau.', icon: LucideIcons.share2),
+List<({String title, String desc, IconData icon})> get _features => [
+  (title: t('Khám phá hành trình'), desc: t('Lịch trình thật, lọc theo vùng, mùa và ngân sách.'), icon: LucideIcons.compass),
+  (title: t('Xem từng ngày'), desc: t('Mỗi điểm dừng có ghi chú, ảnh và chi phí ước tính.'), icon: LucideIcons.calendarRange),
+  (title: t('Sao chép một chạm'), desc: t('Biến chuyến đi của người khác thành bản nháp của bạn.'), icon: LucideIcons.copy),
+  (title: t('Sắp xếp lại ngày'), desc: t('Đổi thứ tự ngày, ngày tháng tự cập nhật theo.'), icon: LucideIcons.arrowUpDown),
+  (title: t('Ghép nhiều chuyến'), desc: t('Lấy những ngày hay nhất từ nhiều bài, gộp vào một lịch trình.'), icon: LucideIcons.gitMerge),
+  (title: t('Chia sẻ lại'), desc: t('Đi xong, đăng hành trình của bạn cho người đi sau.'), icon: LucideIcons.share2),
 ];
 
 /// The web home page (web/src/app/landing/home) for a phone: the hero, the
@@ -76,9 +78,16 @@ class LandingContent extends ConsumerWidget {
                   left: kGutter,
                   right: kGutter,
                   top: top + 14,
-                  child: const Text(
-                    'ChillnGo',
-                    style: TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w900, fontSize: 22, color: AppColors.cream),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'ChillnGo',
+                          style: TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w900, fontSize: 22, color: AppColors.cream),
+                        ),
+                      ),
+                      AppChip(label: locales[locale.value]!, icon: LucideIcons.languages, onTap: () => pickLanguage(context)),
+                    ],
                   ),
                 ),
               Positioned(
@@ -113,12 +122,12 @@ class LandingContent extends ConsumerWidget {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép nó về làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn phải dựng lịch trình từ con số không.',
+                      t('ChillnGo là nơi những chuyến đi có thật được kể lại đầy đủ: từng ngày, từng điểm dừng, từng khoản chi. Thấy một hành trình hợp ý? Sao chép nó về làm của mình chỉ với một chạm, rồi sửa theo cách bạn muốn đi. Không còn phải dựng lịch trình từ con số không.'),
                       style: AppText.body.copyWith(color: AppColors.cream),
                     ),
                     const SizedBox(height: 22),
                     AppButton(
-                      label: 'Khám phá ngay',
+                      label: t('Khám phá ngay'),
                       size: ButtonSize.lg,
                       icon: LucideIcons.arrowRight,
                       iconRight: true,
@@ -130,11 +139,11 @@ class LandingContent extends ConsumerWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: AppButton(label: 'Đăng nhập', variant: ButtonVariant.secondary, onPressed: () => context.push('/login')),
+                            child: AppButton(label: t('Đăng nhập'), variant: ButtonVariant.secondary, onPressed: () => context.push('/login')),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: AppButton(label: 'Tạo tài khoản', variant: ButtonVariant.outline, onPressed: () => context.push('/register')),
+                            child: AppButton(label: t('Tạo tài khoản'), variant: ButtonVariant.outline, onPressed: () => context.push('/register')),
                           ),
                         ],
                       ),
@@ -164,7 +173,7 @@ class LandingContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('ĐƯỢC KỂ LẠI TỪ NHỮNG CHUYẾN ĐI THẬT', style: AppText.caps.copyWith(letterSpacing: 3), textAlign: TextAlign.center),
+                Text(t('ĐƯỢC KỂ LẠI TỪ NHỮNG CHUYẾN ĐI THẬT'), style: AppText.caps.copyWith(letterSpacing: 3), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -175,10 +184,10 @@ class LandingContent extends ConsumerWidget {
                       runSpacing: 16,
                       children: [
                         for (final item in [
-                          (stats.tripCount, 'hành trình'),
-                          (stats.cloneCount, 'lượt sao chép'),
-                          (stats.bookmarkCount, 'lượt lưu'),
-                          (stats.stopCount, 'điểm dừng'),
+                          (stats.tripCount, t('hành trình')),
+                          (stats.cloneCount, t('lượt sao chép')),
+                          (stats.bookmarkCount, t('lượt lưu')),
+                          (stats.stopCount, t('điểm dừng')),
                         ])
                           Container(
                             width: circle,
@@ -211,7 +220,7 @@ class LandingContent extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('CÁCH CHILLNGO HOẠT ĐỘNG', style: AppText.caps.copyWith(letterSpacing: 3)),
+              Text(t('CÁCH CHILLNGO HOẠT ĐỘNG'), style: AppText.caps.copyWith(letterSpacing: 3)),
               const SizedBox(height: 14),
               for (var i = 0; i < _features.length; i++)
                 Container(
@@ -254,11 +263,11 @@ class LandingContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Hành trình nổi bật', style: AppText.meta, textAlign: TextAlign.center),
+                Text(t('Hành trình nổi bật'), style: AppText.meta, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                Text('Được lưu nhiều nhất', style: AppText.h1, textAlign: TextAlign.center),
+                Text(t('Được lưu nhiều nhất'), style: AppText.h1, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                Text('Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi sao chép về làm của bạn.', style: AppText.meta, textAlign: TextAlign.center),
+                Text(t('Những lịch trình cộng đồng tin dùng. Mở ra xem từng ngày, rồi sao chép về làm của bạn.'), style: AppText.meta, textAlign: TextAlign.center),
                 const SizedBox(height: 18),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -295,7 +304,7 @@ class LandingContent extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: AppButton(label: 'Xem tất cả', variant: ButtonVariant.outline, icon: LucideIcons.arrowRight, iconRight: true, onPressed: onExplore),
+                  child: AppButton(label: t('Xem tất cả'), variant: ButtonVariant.outline, icon: LucideIcons.arrowRight, iconRight: true, onPressed: onExplore),
                 ),
               ],
             ),
@@ -308,12 +317,12 @@ class LandingContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Điểm đến', style: AppText.meta, textAlign: TextAlign.center),
+                Text(t('Điểm đến'), style: AppText.meta, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                Text('Mỗi toạ độ là một chuyến đi có thật.', style: AppText.h1, textAlign: TextAlign.center),
+                Text(t('Mỗi toạ độ là một chuyến đi có thật.'), style: AppText.h1, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
-                  '${rows.length} điểm dừng từ những hành trình trên ChillnGo, từ cao nguyên đá Hà Giang tới bãi cát Phú Quốc.',
+                  t('{n} điểm dừng từ những hành trình trên ChillnGo, từ cao nguyên đá Hà Giang tới bãi cát Phú Quốc.', {'n': rows.length}),
                   style: AppText.meta,
                   textAlign: TextAlign.center,
                 ),
@@ -377,20 +386,20 @@ class LandingContent extends ConsumerWidget {
                 spacing: 18,
                 runSpacing: 6,
                 children: [
-                  TextLink(label: 'Khám phá', color: AppColors.meta, onPressed: () => context.go('/discover')),
+                  TextLink(label: t('Khám phá'), color: AppColors.meta, onPressed: () => context.go('/discover')),
                   TextLink(label: 'Newsfeed', color: AppColors.meta, onPressed: () => context.go('/feed')),
-                  TextLink(label: 'Hành trình của tôi', color: AppColors.meta, onPressed: () => context.push('/itineraries')),
-                  TextLink(label: 'Đăng bài mới', color: AppColors.meta, onPressed: () => context.push('/posts/new')),
+                  TextLink(label: t('Hành trình của tôi'), color: AppColors.meta, onPressed: () => context.push('/itineraries')),
+                  TextLink(label: t('Đăng bài mới'), color: AppColors.meta, onPressed: () => context.push('/posts/new')),
                 ],
               ),
               const SizedBox(height: 20),
               AppButton(
-                label: signedIn ? 'Đăng hành trình' : 'Bắt đầu ngay',
+                label: signedIn ? t('Đăng hành trình') : t('Bắt đầu ngay'),
                 size: ButtonSize.lg,
                 onPressed: () => context.push(signedIn ? '/posts/new' : '/register'),
               ),
               const SizedBox(height: 16),
-              Text('Chia sẻ hành trình thật. Sao chép lịch trình chỉ với một chạm.', style: AppText.meta, textAlign: TextAlign.center),
+              Text(t('Chia sẻ hành trình thật. Sao chép lịch trình chỉ với một chạm.'), style: AppText.meta, textAlign: TextAlign.center),
               const SizedBox(height: 10),
               Text('© 2026 ChillnGo', style: AppText.meta.copyWith(fontSize: 12)),
             ],

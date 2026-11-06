@@ -1,11 +1,19 @@
 /// Labels for the journey vocabulary (web/src/lib/format.ts).
 library;
 
-const budgetLabels = {'low': 'Tiết kiệm', 'medium': 'Vừa phải', 'high': 'Cao cấp'};
+import '../core/i18n.dart';
 
-const regionLabels = {'north': 'Miền Bắc', 'central': 'Miền Trung', 'south': 'Miền Nam', 'islands': 'Hải đảo', 'overseas': 'Nước ngoài'};
+Map<String, String> get budgetLabels => {'low': t('Tiết kiệm'), 'medium': t('Vừa phải'), 'high': t('Cao cấp')};
 
-const seasonLabels = {'spring': 'Mùa xuân', 'summer': 'Mùa hè', 'autumn': 'Mùa thu', 'winter': 'Mùa đông'};
+Map<String, String> get regionLabels => {
+  'north': t('Miền Bắc'),
+  'central': t('Miền Trung'),
+  'south': t('Miền Nam'),
+  'islands': t('Hải đảo'),
+  'overseas': t('Nước ngoài'),
+};
+
+Map<String, String> get seasonLabels => {'spring': t('Mùa xuân'), 'summer': t('Mùa hè'), 'autumn': t('Mùa thu'), 'winter': t('Mùa đông')};
 
 const budgetLevels = ['low', 'medium', 'high'];
 const regions = ['north', 'central', 'south', 'islands', 'overseas'];

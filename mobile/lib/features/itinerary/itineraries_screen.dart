@@ -12,8 +12,9 @@ import '../../state/providers.dart';
 import '../../ui/buttons.dart';
 import '../../ui/surfaces.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
-const itineraryStatusLabels = {'planning': 'Đang lên kế hoạch', 'confirmed': 'Đã chốt', 'completed': 'Đã đi'};
+Map<String, String> get itineraryStatusLabels => {'planning': t('Đang lên kế hoạch'), 'confirmed': t('Đã chốt'), 'completed': t('Đã đi')};
 
 /// Hành trình của tôi (web: ItinerariesPage).
 class ItinerariesScreen extends ConsumerStatefulWidget {
@@ -34,7 +35,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
     final itineraries = ref.watch(myItinerariesProvider);
 
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Hành trình của tôi')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Hành trình của tôi'))),
       body: RefreshIndicator(
         onRefresh: () async {
           invalidateServerPosts();
@@ -48,7 +49,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
           padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 40),
           children: [
             Text(
-              'Hành trình bạn tự đăng và những lịch trình bạn đã sao chép. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.',
+              t('Hành trình bạn tự đăng và những lịch trình bạn đã sao chép. Sửa thứ tự ngày, ghép thêm ngày từ bài viết khác, và theo dõi tổng chi phí theo thời gian thực.'),
               style: AppText.meta,
             ),
             const SizedBox(height: 14),
@@ -56,9 +57,9 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                AppButton(label: 'Đăng hành trình', icon: LucideIcons.plus, size: ButtonSize.sm, onPressed: () => context.push('/posts/new')),
+                AppButton(label: t('Đăng hành trình'), icon: LucideIcons.plus, size: ButtonSize.sm, onPressed: () => context.push('/posts/new')),
                 AppButton(
-                  label: 'Tìm hành trình mới',
+                  label: t('Tìm hành trình mới'),
                   icon: LucideIcons.compass,
                   variant: ButtonVariant.outline,
                   size: ButtonSize.sm,
@@ -68,7 +69,7 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
             ),
             const SizedBox(height: 16),
             SegmentTabs<String>(
-              items: const [(value: 'mine', label: 'Tôi đăng', count: null), (value: 'cloned', label: 'Đã sao chép', count: null)],
+              items: [(value: 'mine', label: t('Tôi đăng'), count: null), (value: 'cloned', label: t('Đã sao chép'), count: null)],
               value: _tab,
               onChanged: (t) => setState(() => _tab = t),
             ),
@@ -78,9 +79,9 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
                 AsyncValue(:final value?) when value.isEmpty => [
                   EmptyState(
                     icon: LucideIcons.squarePen,
-                    title: 'Bạn chưa đăng hành trình nào',
-                    description: 'Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể sao chép về làm lịch trình của họ.',
-                    action: AppButton(label: 'Đăng hành trình đầu tiên', icon: LucideIcons.plus, onPressed: () => context.push('/posts/new')),
+                    title: t('Bạn chưa đăng hành trình nào'),
+                    description: t('Kể lại chuyến đi của bạn theo từng ngày, từng điểm dừng và chi phí thật. Người khác có thể sao chép về làm lịch trình của họ.'),
+                    action: AppButton(label: t('Đăng hành trình đầu tiên'), icon: LucideIcons.plus, onPressed: () => context.push('/posts/new')),
                   ),
                 ],
                 AsyncValue(:final value?) => [
@@ -94,9 +95,9 @@ class _ItinerariesScreenState extends ConsumerState<ItinerariesScreen> {
                 AsyncValue(:final value?) when value.isEmpty => [
                   EmptyState(
                     icon: LucideIcons.map,
-                    title: 'Chưa có lịch trình nào',
-                    description: 'Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.',
-                    action: AppButton(label: 'Khám phá hành trình', onPressed: () => context.go('/discover')),
+                    title: t('Chưa có lịch trình nào'),
+                    description: t('Khi bạn thấy một hành trình hợp ý, bấm “Dùng làm lịch trình” để sao chép nó về đây rồi sửa theo cách bạn muốn đi.'),
+                    action: AppButton(label: t('Khám phá hành trình'), onPressed: () => context.go('/discover')),
                   ),
                 ],
                 AsyncValue(:final value?) => [
@@ -156,9 +157,9 @@ class _ItineraryCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(itinerary.note, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.meta),
                 ],
-                row('Khởi hành', Text(formatShortDate(itinerary.startDate), style: AppText.bodySmall)),
+                row(t('Khởi hành'), Text(formatShortDate(itinerary.startDate), style: AppText.bodySmall)),
                 row(
-                  'Tổng chi phí',
+                  t('Tổng chi phí'),
                   Text(
                     formatVnd(itinerary.totalEstCost),
                     style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.cream),
@@ -166,7 +167,7 @@ class _ItineraryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Cập nhật ${relativeTime(itinerary.updatedAt)}${itinerary.sourcePostIds.length > 1 ? ' · ghép từ ${itinerary.sourcePostIds.length} bài' : ''}',
+                  t('Cập nhật {time}{value}', {'time': relativeTime(itinerary.updatedAt), 'value': itinerary.sourcePostIds.length > 1 ? t(' · ghép từ {n} bài', {'n': itinerary.sourcePostIds.length}) : ''}),
                   style: AppText.meta,
                 ),
               ],
@@ -186,7 +187,7 @@ class _MyJourneyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final draft = journey.status == 'draft';
-    final title = journey.title.trim().isEmpty ? 'Hành trình chưa đặt tên' : journey.title.trim();
+    final title = journey.title.trim().isEmpty ? t('Hành trình chưa đặt tên') : journey.title.trim();
     final cover = journey.coverUrl.isNotEmpty ? journey.coverUrl : autoCover(journey.title);
     return AppCard(
       padding: EdgeInsets.zero,
@@ -203,7 +204,7 @@ class _MyJourneyCard extends StatelessWidget {
                 Positioned(
                   left: 10,
                   top: 10,
-                  child: AppBadge(draft ? 'Nháp' : 'Đã đăng', tone: draft ? BadgeTone.overlay : BadgeTone.primary, uppercase: true),
+                  child: AppBadge(draft ? t('Nháp') : t('Đã đăng'), tone: draft ? BadgeTone.overlay : BadgeTone.primary, uppercase: true),
                 ),
               ],
             ),
@@ -229,9 +230,9 @@ class _MyJourneyCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('${draft ? 'Sửa lần cuối' : 'Cập nhật'} ${relativeTime(journey.updatedAt)}', style: AppText.meta)),
+                    Expanded(child: Text('${draft ? t('Sửa lần cuối') : t('Cập nhật')} ${relativeTime(journey.updatedAt)}', style: AppText.meta)),
                     Text(
-                      draft ? 'Viết tiếp' : 'Xem bài',
+                      draft ? t('Viết tiếp') : t('Xem bài'),
                       style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.cream),
                     ),
                   ],

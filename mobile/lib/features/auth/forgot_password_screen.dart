@@ -13,6 +13,7 @@ import '../../ui/fields.dart';
 import '../../ui/navigation.dart';
 import '../../ui/surfaces.dart';
 import 'auth_widgets.dart';
+import '../../core/i18n.dart';
 
 /// Matches RESET_COOLDOWN_MS on the server.
 const _cooldownSeconds = 60;
@@ -47,7 +48,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _send() async {
     if (_pending || _secondsLeft > 0) return;
     if (!looksLikeEmail(_email.text)) {
-      setState(() => _error = 'Email không hợp lệ.');
+      setState(() => _error = t('Email không hợp lệ.'));
       return;
     }
     FocusScope.of(context).unfocus();
@@ -88,9 +89,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   List<Widget> _formView(BuildContext context) {
     return [
-      Text('Quên mật khẩu', style: AppText.h1),
+      Text(t('Quên mật khẩu'), style: AppText.h1),
       const SizedBox(height: 8),
-      Text('Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để bạn đặt mật khẩu mới.', style: AppText.meta),
+      Text(t('Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để bạn đặt mật khẩu mới.'), style: AppText.meta),
       const SizedBox(height: 20),
       AppCard(
         child: Column(
@@ -109,7 +110,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
             const SizedBox(height: 16),
             AppButton(
-              label: 'Gửi liên kết đặt lại',
+              label: t('Gửi liên kết đặt lại'),
               size: ButtonSize.lg,
               fullWidth: true,
               loading: _pending,
@@ -119,14 +120,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
       const SizedBox(height: 20),
-      AuthSwitchLink(question: 'Đã nhớ ra mật khẩu?', action: 'Đăng nhập', onTap: () => context.canPop() ? context.pop() : context.go('/login')),
+      AuthSwitchLink(question: t('Đã nhớ ra mật khẩu?'), action: t('Đăng nhập'), onTap: () => context.canPop() ? context.pop() : context.go('/login')),
     ];
   }
 
   List<Widget> _sentView(BuildContext context) {
     final waiting = _secondsLeft > 0;
     return [
-      Text('Kiểm tra email', style: AppText.h1),
+      Text(t('Kiểm tra email'), style: AppText.h1),
       const SizedBox(height: 20),
       AppCard(
         child: Row(
@@ -138,7 +139,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nếu địa chỉ này có tài khoản ChillnGo, chúng tôi đã gửi liên kết đặt lại mật khẩu tới', style: AppText.bodySmall),
+                  Text(t('Nếu địa chỉ này có tài khoản ChillnGo, chúng tôi đã gửi liên kết đặt lại mật khẩu tới'), style: AppText.bodySmall),
                   Text(_email.text.trim(), style: AppText.label),
                 ],
               ),
@@ -147,21 +148,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
       const SizedBox(height: 14),
-      Text('1. Mở email có tiêu đề “Đặt lại mật khẩu tài khoản ChillnGo”.', style: AppText.bodySmall),
+      Text(t('1. Mở email có tiêu đề “Đặt lại mật khẩu tài khoản ChillnGo”.'), style: AppText.bodySmall),
       const SizedBox(height: 6),
-      Text('2. Bấm nút Đặt lại mật khẩu để đổi ngay trên trình duyệt, hoặc giữ lâu nút đó để sao chép liên kết rồi dán vào ứng dụng.', style: AppText.bodySmall),
+      Text(t('2. Bấm nút Đặt lại mật khẩu để đổi ngay trên trình duyệt, hoặc giữ lâu nút đó để sao chép liên kết rồi dán vào ứng dụng.'), style: AppText.bodySmall),
       const SizedBox(height: 8),
-      Text('Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 60 phút và chỉ dùng được một lần.', style: AppText.meta),
+      Text(t('Không thấy email? Hãy xem thư mục Spam hoặc Quảng cáo. Liên kết có hiệu lực trong 60 phút và chỉ dùng được một lần.'), style: AppText.meta),
       if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
       const SizedBox(height: 14),
       AppButton(
-        label: 'Dán liên kết đặt lại',
+        label: t('Dán liên kết đặt lại'),
         fullWidth: true,
         onPressed: () => context.push('/reset-password'),
       ),
       const SizedBox(height: 10),
       AppButton(
-        label: waiting ? 'Gửi lại email sau $_secondsLeft giây' : 'Gửi lại email',
+        label: waiting ? t('Gửi lại email sau {_secondsLeft} giây', {'_secondsLeft': _secondsLeft}) : t('Gửi lại email'),
         icon: LucideIcons.mail,
         variant: ButtonVariant.secondary,
         fullWidth: true,

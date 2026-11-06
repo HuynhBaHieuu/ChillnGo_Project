@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/format.dart';
+import '../../core/i18n.dart';
 
 const reactionEmoji = {'heart': '❤️', 'fire': '🔥', 'clap': '👏', 'wow': '😮', 'haha': '😂'};
-const reactionLabel = {'heart': 'Thả tim', 'fire': 'Cháy quá', 'clap': 'Vỗ tay', 'wow': 'Wow', 'haha': 'Haha'};
+Map<String, String> get reactionLabel => {'heart': t('Thả tim'), 'fire': t('Cháy quá'), 'clap': t('Vỗ tay'), 'wow': 'Wow', 'haha': 'Haha'};
 
 /// 1234 → "1,2 N", 2_500_000 → "2,5 Tr" (Vietnamese compact notation).
 String compact(num n) {
@@ -27,9 +28,9 @@ String liveDuration(num totalSec) {
   final h = sec ~/ 3600;
   final m = (sec % 3600) ~/ 60;
   final s = sec % 60;
-  if (h > 0) return m > 0 ? '$h giờ $m phút' : '$h giờ';
-  if (m > 0) return s > 0 ? '$m phút $s giây' : '$m phút';
-  return '$s giây';
+  if (h > 0) return m > 0 ? t('{h} giờ {m} phút', {'h': h, 'm': m}) : t('{h} giờ', {'h': h});
+  if (m > 0) return s > 0 ? t('{m} phút {s} giây', {'m': m, 's': s}) : t('{m} phút', {'m': m});
+  return t('{s} giây', {'s': s});
 }
 
 /// A running time: 754 → "12:34", 3725 → "1:02:05".

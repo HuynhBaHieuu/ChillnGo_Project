@@ -9,6 +9,7 @@ import '../../data/server_posts.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
+import '../../core/i18n.dart';
 
 /// A small link to the API address setting (on the sign-in screen and the menu).
 class ServerAddressLink extends StatelessWidget {
@@ -17,7 +18,7 @@ class ServerAddressLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: TextLink(label: 'Máy chủ: ${Env.apiUrl}', icon: LucideIcons.server, color: AppColors.meta, onPressed: () => showServerSettings(context)),
+      child: TextLink(label: t('Máy chủ: {apiUrl}', {'apiUrl': Env.apiUrl}), icon: LucideIcons.server, color: AppColors.meta, onPressed: () => showServerSettings(context)),
     );
   }
 }
@@ -27,8 +28,8 @@ class ServerAddressLink extends StatelessWidget {
 Future<void> showServerSettings(BuildContext context) {
   return showAppSheet<void>(
     context,
-    title: 'Địa chỉ máy chủ API',
-    description: 'Dùng khi chạy trên điện thoại thật: nhập địa chỉ IP của máy tính đang chạy server (cùng mạng Wi-Fi), ví dụ http://192.168.1.10:4000.',
+    title: t('Địa chỉ máy chủ API'),
+    description: t('Dùng khi chạy trên điện thoại thật: nhập địa chỉ IP của máy tính đang chạy server (cùng mạng Wi-Fi), ví dụ http://192.168.1.10:4000.'),
     builder: (_) => const _ServerForm(),
   );
 }
@@ -64,10 +65,10 @@ class _ServerFormState extends ConsumerState<_ServerForm> {
         BaseOptions(connectTimeout: const Duration(seconds: 6), receiveTimeout: const Duration(seconds: 6), validateStatus: (_) => true),
       ).get<dynamic>('$base/api/health');
       _ok = (response.statusCode ?? 0) < 500;
-      _result = _ok ? 'Kết nối được tới máy chủ.' : 'Máy chủ trả về lỗi ${response.statusCode}.';
+      _result = _ok ? t('Kết nối được tới máy chủ.') : t('Máy chủ trả về lỗi {statusCode}.', {'statusCode': response.statusCode});
     } catch (_) {
       _ok = false;
-      _result = 'Không kết nối được. Kiểm tra địa chỉ, cổng 4000 và tường lửa của máy tính.';
+      _result = t('Không kết nối được. Kiểm tra địa chỉ, cổng 4000 và tường lửa của máy tính.');
     }
     if (mounted) setState(() => _checking = false);
   }
@@ -77,7 +78,7 @@ class _ServerFormState extends ConsumerState<_ServerForm> {
     invalidateServerPosts();
     if (!mounted) return;
     Navigator.of(context).pop();
-    toast(context, 'Đã đổi máy chủ: ${Env.apiUrl}. Kéo xuống để tải lại dữ liệu.');
+    toast(context, t('Đã đổi máy chủ: {apiUrl}. Kéo xuống để tải lại dữ liệu.', {'apiUrl': Env.apiUrl}));
   }
 
   @override
@@ -85,9 +86,9 @@ class _ServerFormState extends ConsumerState<_ServerForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppTextField(controller: _url, label: 'Địa chỉ', keyboardType: TextInputType.url, autocorrect: false, hint: 'http://192.168.1.10:4000'),
+        AppTextField(controller: _url, label: t('Địa chỉ'), keyboardType: TextInputType.url, autocorrect: false, hint: 'http://192.168.1.10:4000'),
         const SizedBox(height: 8),
-        Text('Mặc định: ${Env.defaultApiUrl}', style: AppText.meta),
+        Text(t('Mặc định: {defaultApiUrl}', {'defaultApiUrl': Env.defaultApiUrl}), style: AppText.meta),
         if (_result != null) ...[
           const SizedBox(height: 8),
           Text(_result!, style: AppText.bodySmall.copyWith(color: _ok ? AppColors.teal : AppColors.destructive)),
@@ -97,9 +98,9 @@ class _ServerFormState extends ConsumerState<_ServerForm> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            AppButton(label: 'Kiểm tra', variant: ButtonVariant.outline, size: ButtonSize.sm, loading: _checking, onPressed: _check),
-            AppButton(label: 'Dùng mặc định', variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: () => _save(null)),
-            AppButton(label: 'Lưu', size: ButtonSize.sm, onPressed: () => _save(_url.text)),
+            AppButton(label: t('Kiểm tra'), variant: ButtonVariant.outline, size: ButtonSize.sm, loading: _checking, onPressed: _check),
+            AppButton(label: t('Dùng mặc định'), variant: ButtonVariant.ghost, size: ButtonSize.sm, onPressed: () => _save(null)),
+            AppButton(label: t('Lưu'), size: ButtonSize.sm, onPressed: () => _save(_url.text)),
           ],
         ),
       ],

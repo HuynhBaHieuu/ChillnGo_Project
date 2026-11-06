@@ -12,6 +12,7 @@ import '../data/api.dart';
 import '../data/json.dart';
 import '../data/models.dart';
 import 'env.dart';
+import '../core/i18n.dart';
 
 bool get canSearchPlaces => Env.mapboxToken != null;
 
@@ -43,13 +44,13 @@ Future<List<Place>> searchPlaces(String text, {CancelToken? cancel, ({double lat
   final params = queryString({
     'q': text.trim(),
     'access_token': token,
-    'language': 'vi',
+    'language': mapLanguage,
     'limit': '8',
     'proximity': near == null ? 'ip' : '${near.lng},${near.lat}',
   });
   final data = await Api.getExternal('$_search/forward$params', cancel: cancel);
   if (cancel?.isCancelled ?? false) return [];
-  if (data == null) throw Exception('Không tìm được địa điểm lúc này. Vui lòng thử lại.');
+  if (data == null) throw Exception(t('Không tìm được địa điểm lúc này. Vui lòng thử lại.'));
   return _distinct(listOf(data['features'], (f) => _toPlace(mapOf(f)))).take(6).toList();
 }
 
@@ -57,7 +58,7 @@ Future<List<Place>> searchPlaces(String text, {CancelToken? cancel, ({double lat
 Future<Place?> placeAt(double lat, double lng) async {
   final token = Env.mapboxToken;
   if (token == null) return null;
-  final params = queryString({'longitude': '$lng', 'latitude': '$lat', 'access_token': token, 'language': 'vi', 'limit': '1'});
+  final params = queryString({'longitude': '$lng', 'latitude': '$lat', 'access_token': token, 'language': mapLanguage, 'limit': '1'});
   final data = await Api.getExternal('$_search/reverse$params');
   final features = listOf(data?['features'], mapOf);
   if (features.isEmpty) return null;
@@ -68,12 +69,12 @@ Future<Place?> placeAt(double lat, double lng) async {
 Future<({double lat, double lng})> getDevicePosition() async {
   final enabled = await Geolocator.isLocationServiceEnabled().catchError((_) => true);
   if (!enabled) {
-    throw Exception('Định vị trên điện thoại đang tắt. Hãy bật Vị trí rồi thử lại, hoặc tìm địa điểm bằng tên.');
+    throw Exception(t('Định vị trên điện thoại đang tắt. Hãy bật Vị trí rồi thử lại, hoặc tìm địa điểm bằng tên.'));
   }
   var permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
   if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-    throw Exception('Bạn chưa cho ChillnGo dùng vị trí. Hãy bật quyền Vị trí trong Cài đặt, hoặc tìm địa điểm bằng tên.');
+    throw Exception(t('Bạn chưa cho ChillnGo dùng vị trí. Hãy bật quyền Vị trí trong Cài đặt, hoặc tìm địa điểm bằng tên.'));
   }
   try {
     final position = await Geolocator.getCurrentPosition(
@@ -85,7 +86,7 @@ Future<({double lat, double lng})> getDevicePosition() async {
     final last = await Geolocator.getLastKnownPosition().catchError((_) => null);
     if (last != null) return (lat: last.latitude, lng: last.longitude);
     throw Exception(
-      error is TimeoutException ? 'Lấy vị trí quá lâu. Vui lòng thử lại.' : 'Không xác định được vị trí của điện thoại. Hãy tìm địa điểm bằng tên.',
+      error is TimeoutException ? t('Lấy vị trí quá lâu. Vui lòng thử lại.') : t('Không xác định được vị trí của điện thoại. Hãy tìm địa điểm bằng tên.'),
     );
   }
 }
@@ -103,6 +104,6 @@ String? staticMapUrl(double lat, double lng, int width, int height) {
 String googleMapsUrl(double lat, double lng) => 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
 
 String googleMapsSearchUrl(String text) =>
-    'https://www.google.com/maps/search/?api=1&query=${Uri.encodeQueryComponent(text.trim().isEmpty ? 'Việt Nam' : text.trim())}';
+    'https://www.google.com/maps/search/?api=1&query=${Uri.encodeQueryComponent(text.trim().isEmpty ? t('Việt Nam') : text.trim())}';
 
 String googleDirectionsUrl(double lat, double lng) => 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng';

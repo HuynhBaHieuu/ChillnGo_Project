@@ -7,13 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../data/models.dart';
+import '../core/i18n.dart';
 
-const modeLabels = {
-  TravelMode.driving: 'Ô tô, xe máy',
-  TravelMode.walking: 'Đi bộ',
-  TravelMode.transit: 'Xe buýt, xe khách',
-  TravelMode.flight: 'Máy bay',
-  TravelMode.ferry: 'Tàu, phà, ca nô',
+Map<TravelMode, String> get modeLabels => {
+  TravelMode.driving: t('Ô tô, xe máy'),
+  TravelMode.walking: t('Đi bộ'),
+  TravelMode.transit: t('Xe buýt, xe khách'),
+  TravelMode.flight: t('Máy bay'),
+  TravelMode.ferry: t('Tàu, phà, ca nô'),
 };
 
 /// The icon for each travel mode, shared by the editor's picker and the map.
@@ -84,10 +85,10 @@ String formatTravelDuration(double seconds, {bool estimate = false}) {
   final step = estimate ? 5 : 1;
   final rounded = ((seconds / 60 / step).round() * step);
   final minutes = rounded < step ? step : rounded;
-  if (minutes < 60) return '$minutes phút';
+  if (minutes < 60) return t('{minutes} phút', {'minutes': minutes});
   final hours = minutes ~/ 60;
   final rest = minutes % 60;
-  return rest > 0 ? '$hours giờ $rest phút' : '$hours giờ';
+  return rest > 0 ? t('{hours} giờ {rest} phút', {'hours': hours, 'rest': rest}) : t('{hours} giờ', {'hours': hours});
 }
 
 String formatDistance(double metres) => metres < 1000 ? '${metres.round()} m' : '${(metres / 1000).toStringAsFixed(metres < 10000 ? 1 : 0)} km';

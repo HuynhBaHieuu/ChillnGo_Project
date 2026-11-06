@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../core/theme.dart';
 import 'buttons.dart';
 import 'surfaces.dart';
+import '../core/i18n.dart';
 
 /// Opens photos full screen, swipe between them, pinch to zoom.
 Future<void> showPhotoViewer(BuildContext context, List<String> photos, int index) {
@@ -68,7 +69,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                       child: Text('${_index + 1}/${widget.photos.length}', style: AppText.label.copyWith(color: AppColors.white)),
                     ),
                   const Spacer(),
-                  AppIconButton(icon: LucideIcons.x, label: 'Đóng ảnh', tone: IconTone.overlay, onPressed: () => Navigator.of(context).pop()),
+                  AppIconButton(icon: LucideIcons.x, label: t('Đóng ảnh'), tone: IconTone.overlay, onPressed: () => Navigator.of(context).pop()),
                 ],
               ),
             ),

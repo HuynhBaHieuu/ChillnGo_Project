@@ -11,6 +11,7 @@ import '../../data/models.dart';
 import '../../ui/buttons.dart';
 import 'legs.dart';
 import 'map_tiles.dart';
+import '../../core/i18n.dart';
 
 /// A trip's route on a map (web: MapboxMap with `days`): every stop numbered in
 /// its day's colour; picking a day (its chip, or one of its stops) draws that
@@ -35,11 +36,11 @@ class RouteMap extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: const Color(0x29FFFFFF)),
         ),
-        child: Text('Chưa có điểm dừng nào được ghim trên bản đồ.', style: AppText.meta, textAlign: TextAlign.center),
+        child: Text(t('Chưa có điểm dừng nào được ghim trên bản đồ.'), style: AppText.meta, textAlign: TextAlign.center),
       );
     }
     return Semantics(
-      label: label,
+      label: tx(label),
       child: SizedBox(
         height: height,
         child: Stack(
@@ -55,7 +56,7 @@ class RouteMap extends StatelessWidget {
               bottom: 22,
               child: AppIconButton(
                 icon: LucideIcons.maximize2,
-                label: 'Mở bản đồ toàn màn hình',
+                label: t('Mở bản đồ toàn màn hình'),
                 tone: IconTone.overlay,
                 size: 38,
                 onPressed: () => Navigator.of(
@@ -89,7 +90,7 @@ class _FullScreenMap extends StatelessWidget {
           Positioned(
             top: top + 8,
             right: 12,
-            child: AppIconButton(icon: LucideIcons.x, label: 'Đóng bản đồ', tone: IconTone.overlay, size: 42, onPressed: () => Navigator.of(context).pop()),
+            child: AppIconButton(icon: LucideIcons.x, label: t('Đóng bản đồ'), tone: IconTone.overlay, size: 42, onPressed: () => Navigator.of(context).pop()),
           ),
         ],
       ),
@@ -255,11 +256,11 @@ class _RouteMapViewState extends State<RouteMapView> {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
                 children: [
-                  _DayChip(label: 'Tất cả', selected: activeDay == null, onTap: () => _selectDay(null)),
+                  _DayChip(label: t('Tất cả'), selected: activeDay == null, onTap: () => _selectDay(null)),
                   for (final day in _stopDays)
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
-                      child: _DayChip(label: 'Ngày $day', color: dayColor(day), selected: activeDay == day, onTap: () => _selectDay(day)),
+                      child: _DayChip(label: t('Ngày {day}', {'day': day}), color: dayColor(day), selected: activeDay == day, onTap: () => _selectDay(day)),
                     ),
                 ],
               ),
@@ -277,7 +278,7 @@ class _RouteMapViewState extends State<RouteMapView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(color: const Color(0xEBFFFFFF), borderRadius: BorderRadius.circular(AppRadius.pill)),
-                  child: Text('Chọn một ngày hoặc một điểm để xem đường đi', style: AppText.label.copyWith(fontSize: 11, color: AppColors.ground)),
+                  child: Text(t('Chọn một ngày hoặc một điểm để xem đường đi'), style: AppText.label.copyWith(fontSize: 11, color: AppColors.ground)),
                 ),
               ),
             ),
@@ -296,7 +297,7 @@ class _RouteMapViewState extends State<RouteMapView> {
       height: size,
       child: Semantics(
         button: true,
-        label: 'Ngày ${stop.day} · ${stop.order}. ${stop.name.isEmpty ? 'Điểm dừng' : stop.name}',
+        label: t('Ngày {day} · {order}. {value}', {'day': stop.day, 'order': stop.order, 'value': stop.name.isEmpty ? t('Điểm dừng') : stop.name}),
         child: GestureDetector(
           onTap: () => _selectDay(stop.day),
           child: Opacity(
@@ -399,7 +400,7 @@ class _SegmentLabel extends StatelessWidget {
     final duration = segment.duration;
     final time = duration == null
         ? null
-        : '${segment.estimated ? 'khoảng ' : ''}${formatTravelDuration(duration, estimate: segment.estimated)}${segment.estimated ? ' (ước tính)' : ''}';
+        : '${segment.estimated ? t('khoảng ') : ''}${formatTravelDuration(duration, estimate: segment.estimated)}${segment.estimated ? t(' (ước tính)') : ''}';
     const line = TextStyle(fontFamily: AppFonts.body, fontSize: 12, color: Color(0xFF333333));
     return Container(
       constraints: const BoxConstraints(maxWidth: 260),
@@ -418,7 +419,7 @@ class _SegmentLabel extends StatelessWidget {
                 Text(modeLabels[segment.mode]!, style: AppText.label.copyWith(fontSize: 13, color: AppColors.ground)),
                 if (time != null) Text(time, style: line),
                 if (segment.distance != null) Text(formatDistance(segment.distance!), style: line),
-                if (duration == null) const Text('Chưa có dữ liệu thời gian', style: line),
+                if (duration == null) Text(t('Chưa có dữ liệu thời gian'), style: line),
               ],
             ),
           ),

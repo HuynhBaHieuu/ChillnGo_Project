@@ -17,36 +17,37 @@ import '../../ui/buttons.dart';
 import '../../ui/chat.dart';
 import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
-const paceLabels = {'relaxed': 'Thong thả', 'moderate': 'Vừa phải', 'packed': 'Dày đặc'};
+Map<String, String> get paceLabels => {'relaxed': t('Thong thả'), 'moderate': t('Vừa phải'), 'packed': t('Dày đặc')};
 
-const _questions = {
-  Slot.date: 'Bạn định khởi hành ngày nào?',
-  Slot.days: 'Chuyến đi mấy ngày? Hành trình gốc là {n} ngày.',
-  Slot.group: 'Đi mấy người? Có trẻ em hay người lớn tuổi không?',
-  Slot.budget: 'Tổng ngân sách cho cả nhóm khoảng bao nhiêu?',
-  Slot.departure: 'Bạn xuất phát từ đâu?',
-  Slot.interests: 'Bạn thích kiểu điểm nào? Chọn một hoặc vài mục rồi bấm Xong.',
-  Slot.pace: 'Bạn muốn đi với nhịp độ nào?',
-  Slot.merge: 'Có hành trình khác cùng điểm đến. Bạn muốn AI gộp thêm (tối đa 2) không?',
+Map<Slot, String> get _questions => {
+  Slot.date: t('Bạn định khởi hành ngày nào?'),
+  Slot.days: t('Chuyến đi mấy ngày? Hành trình gốc là {n} ngày.'),
+  Slot.group: t('Đi mấy người? Có trẻ em hay người lớn tuổi không?'),
+  Slot.budget: t('Tổng ngân sách cho cả nhóm khoảng bao nhiêu?'),
+  Slot.departure: t('Bạn xuất phát từ đâu?'),
+  Slot.interests: t('Bạn thích kiểu điểm nào? Chọn một hoặc vài mục rồi bấm Xong.'),
+  Slot.pace: t('Bạn muốn đi với nhịp độ nào?'),
+  Slot.merge: t('Có hành trình khác cùng điểm đến. Bạn muốn AI gộp thêm (tối đa 2) không?'),
 };
 
 /// What to type when a reply was not understood.
-const _examples = {Slot.date: '20/11', Slot.days: '3 ngày (1 đến 14)', Slot.group: '4 người, có trẻ em', Slot.budget: '5 triệu', Slot.departure: 'TP.HCM', Slot.pace: 'thong thả'};
+Map<Slot, String> get _examples => {Slot.date: '20/11', Slot.days: t('3 ngày (1 đến 14)'), Slot.group: t('4 người, có trẻ em'), Slot.budget: t('5 triệu'), Slot.departure: 'TP.HCM', Slot.pace: t('thong thả')};
 
-const _labels = {
-  Slot.date: 'Ngày khởi hành',
-  Slot.days: 'Số ngày',
-  Slot.group: 'Số người',
-  Slot.budget: 'Ngân sách',
-  Slot.departure: 'Điểm xuất phát',
-  Slot.interests: 'Sở thích',
-  Slot.pace: 'Nhịp độ',
-  Slot.merge: 'Gộp hành trình',
+Map<Slot, String> get _labels => {
+  Slot.date: t('Ngày khởi hành'),
+  Slot.days: t('Số ngày'),
+  Slot.group: t('Số người'),
+  Slot.budget: t('Ngân sách'),
+  Slot.departure: t('Điểm xuất phát'),
+  Slot.interests: t('Sở thích'),
+  Slot.pace: t('Nhịp độ'),
+  Slot.merge: t('Gộp hành trình'),
 };
 
 /// Shown in turn while the AI works, so a minute of waiting says what is happening.
-const _steps = ['Đang đọc hành trình gốc…', 'Đang chọn địa điểm từ dữ liệu ChillnGo…', 'Đang xếp giờ cho từng ngày…', 'Đang kiểm tra chi phí và giờ giấc…'];
+List<String> get _steps => [t('Đang đọc hành trình gốc…'), t('Đang chọn địa điểm từ dữ liệu ChillnGo…'), t('Đang xếp giờ cho từng ngày…'), t('Đang kiểm tra chi phí và giờ giấc…')];
 
 typedef _Chip = ({String label, Map<String, Object?>? answers, String? says, bool? pressed, VoidCallback? onToggle});
 
@@ -96,18 +97,18 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
       AiCloneForm.from(answers ?? _answers, startDate: nextWeek(DateTime.now()), days: post.days.length);
 
   String _question(Slot? slot, TripPost post) =>
-      slot == null ? 'Đủ thông tin rồi! Bấm “Tạo bản nháp” để AI bắt đầu, hoặc nhắn thêm nếu muốn đổi gì.' : _questions[slot]!.replaceAll('{n}', '${post.days.length}');
+      slot == null ? t('Đủ thông tin rồi! Bấm “Tạo bản nháp” để AI bắt đầu, hoặc nhắn thêm nếu muốn đổi gì.') : _questions[slot]!.replaceAll('{n}', '${post.days.length}');
 
   /// A slot's answer as the chat shows it.
   String _valueOf(Slot slot, AiCloneForm f, AiCloneOptions o) => switch (slot) {
     Slot.date => formatShortDate(f.startDate),
-    Slot.days => '${f.days} ngày',
-    Slot.group => ['${f.groupSize}', if (f.withChildren) 'Có trẻ em', if (f.withElderly) 'Có người lớn tuổi'].join(', '),
-    Slot.budget => f.budget == null ? 'Không giới hạn' : formatVnd(f.budget!),
-    Slot.departure => f.departure.isEmpty ? 'Bỏ qua' : f.departure,
-    Slot.interests => f.interests.isEmpty ? 'Tất cả' : f.interests.map((v) => o.interests.where((i) => i.value == v).firstOrNull?.label ?? v).join(', '),
+    Slot.days => t('{days} ngày', {'days': f.days}),
+    Slot.group => ['${f.groupSize}', if (f.withChildren) t('Có trẻ em'), if (f.withElderly) t('Có người lớn tuổi')].join(', '),
+    Slot.budget => f.budget == null ? t('Không giới hạn') : formatVnd(f.budget!),
+    Slot.departure => f.departure.isEmpty ? t('Bỏ qua') : f.departure,
+    Slot.interests => f.interests.isEmpty ? t('Tất cả') : f.interests.map((v) => tx(o.interests.where((i) => i.value == v).firstOrNull?.label ?? v)).join(', '),
     Slot.pace => paceLabels[f.pace] ?? '',
-    Slot.merge => _mergeWith.isEmpty ? 'Không gộp' : _mergeWith.map((id) => o.mergeable.where((j) => j.postId == id).firstOrNull?.title ?? '').join(', '),
+    Slot.merge => _mergeWith.isEmpty ? t('Không gộp') : _mergeWith.map((id) => o.mergeable.where((j) => j.postId == id).firstOrNull?.title ?? '').join(', '),
   };
 
   /// What ChillnGo's season data says about these dates; nothing without data.
@@ -115,10 +116,10 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
     final start = fromDateOnly(f.startDate);
     final months = {for (var i = 0; i < f.days.clamp(1, 14); i++) start.add(Duration(days: i)).month};
     return [
-      if (months.any(o.rainyMonths.contains)) 'Theo dữ liệu ChillnGo, ${o.destination ?? 'điểm đến'} đang vào mùa mưa: AI sẽ ưu tiên điểm trong nhà.',
-      if (months.any(o.peakMonths.contains)) 'Đang mùa cao điểm: nên đặt phòng và vé sớm.',
+      if (months.any(o.rainyMonths.contains)) t('Theo dữ liệu ChillnGo, {value} đang vào mùa mưa: AI sẽ ưu tiên điểm trong nhà.', {'value': o.destination ?? t('điểm đến')}),
+      if (months.any(o.peakMonths.contains)) t('Đang mùa cao điểm: nên đặt phòng và vé sớm.'),
       for (final fest in o.festivals)
-        if (months.contains(fest.month)) 'Có ${fest.name} (tháng ${fest.month}).',
+        if (months.contains(fest.month)) t('Có {name} (tháng {month}).', {'name': fest.name, 'month': fest.month}),
     ];
   }
 
@@ -128,7 +129,9 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
     if (said.isEmpty || _creating) return;
     final slots = _slots(o);
     final asking = slots.where((s) => !_settled.contains(s)).firstOrNull;
-    final parsed = given ?? parseTripReply(said, asking, o.interests, DateTime.now());
+    // Interests are named in Vietnamese by the API, and in the reader's language on screen: either reads.
+    final interests = [...o.interests, for (final i in o.interests) (value: i.value, label: tx(i.label))];
+    final parsed = given ?? parseTripReply(said, asking, interests, DateTime.now());
     final skipped = given == null && asking != null && skipReply.hasMatch(said.toLowerCase());
     final next = {..._answers, ...parsed};
     final form = _form(post, next);
@@ -136,11 +139,11 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
     final bot = <String>[];
     if (given == null && !skipped && parsed.isEmpty) {
       final example = _examples[asking];
-      bot.add(example == null ? 'Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới.' : 'Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới, hoặc nhắn kiểu: “$example”.');
+      bot.add(example == null ? t('Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới.') : t('Mình chưa hiểu ý bạn. Hãy chọn một gợi ý bên dưới, hoặc nhắn kiểu: “{example}”.', {'example': example}));
     } else {
       if (given == null && parsed.isNotEmpty) {
         final touched = {for (final k in parsed.keys) slotOf[k]!};
-        bot.add('Đã ghi: ${touched.map((s) => '${_labels[s]} ${_valueOf(s, form, o)}').join('; ')}.');
+        bot.add(t('Đã ghi: {value}.', {'value': touched.map((s) => '${_labels[s]} ${_valueOf(s, form, o)}').join('; ')}));
       }
       if (parsed.containsKey('startDate') || parsed.containsKey('days')) {
         bot.addAll(_seasonNotes(form, o).where((note) => !_messages.any((m) => m.text == note)));
@@ -172,27 +175,27 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
     switch (slot) {
       case Slot.date:
         final week = nextWeek(today), weekend = thisWeekend(today);
-        return [chip('Tuần sau (${formatShortDate(week)})', {'startDate': week}), chip('Cuối tuần này (${formatShortDate(weekend)})', {'startDate': weekend})];
+        return [chip(t('Tuần sau ({date})', {'date': formatShortDate(week)}), {'startDate': week}), chip(t('Cuối tuần này ({date})', {'date': formatShortDate(weekend)}), {'startDate': weekend})];
       case Slot.days:
         final n = post.days.length;
-        return [for (final d in [n - 1, n, n + 1]) if (d >= 1 && d <= 14) chip('$d ngày', {'days': d})];
+        return [for (final d in [n - 1, n, n + 1]) if (d >= 1 && d <= 14) chip(t('{d} ngày', {'d': d}), {'days': d})];
       case Slot.group:
         return [
-          chip('Một mình', {'groupSize': 1, 'withChildren': false, 'withElderly': false}),
-          chip('Cặp đôi', {'groupSize': 2, 'withChildren': false, 'withElderly': false}),
-          chip('Gia đình 4 người, có trẻ em', {'groupSize': 4, 'withChildren': true}),
-          chip('Nhóm bạn 4 người', {'groupSize': 4, 'withChildren': false, 'withElderly': false}),
+          chip(t('Một mình'), {'groupSize': 1, 'withChildren': false, 'withElderly': false}),
+          chip(t('Cặp đôi'), {'groupSize': 2, 'withChildren': false, 'withElderly': false}),
+          chip(t('Gia đình 4 người, có trẻ em'), {'groupSize': 4, 'withChildren': true}),
+          chip(t('Nhóm bạn 4 người'), {'groupSize': 4, 'withChildren': false, 'withElderly': false}),
         ];
       case Slot.budget:
-        return [chip('Không giới hạn', {'budget': null}), for (final b in [3000000, 5000000, 10000000]) chip(formatVnd(b), {'budget': b})];
+        return [chip(t('Không giới hạn'), {'budget': null}), for (final b in [3000000, 5000000, 10000000]) chip(formatVnd(b), {'budget': b})];
       case Slot.departure:
-        return [for (final c in ['TP.HCM', 'Hà Nội', 'Đà Nẵng']) chip(c, {'departure': c}), chip('Bỏ qua', {})];
+        return [for (final c in ['TP.HCM', t('Hà Nội'), t('Đà Nẵng')]) chip(c, {'departure': c}), chip(t('Bỏ qua'), {})];
       case Slot.interests:
         final picked = (_answers['interests'] as List<String>?) ?? const <String>[];
         return [
           for (final i in o.interests)
             (
-              label: i.label,
+              label: tx(i.label),
               answers: null,
               says: null,
               pressed: picked.contains(i.value),
@@ -200,7 +203,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                 () => _answers = {..._answers, 'interests': picked.contains(i.value) ? [...picked.where((v) => v != i.value)] : [...picked, i.value]},
               ),
             ),
-          (label: picked.isEmpty ? 'Tất cả' : 'Xong', answers: {'interests': picked}, says: _valueOf(Slot.interests, _form(post), o), pressed: null, onToggle: null),
+          (label: picked.isEmpty ? t('Tất cả') : 'Xong', answers: {'interests': picked}, says: _valueOf(Slot.interests, _form(post), o), pressed: null, onToggle: null),
         ];
       case Slot.pace:
         return [for (final p in paceLabels.entries) chip(p.value, {'pace': p.key})];
@@ -208,7 +211,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
         return [
           for (final j in o.mergeable)
             (
-              label: '${j.title} · ${j.days} ngày',
+              label: t('{title} · {days} ngày', {'title': j.title, 'days': j.days}),
               answers: null,
               says: null,
               pressed: _mergeWith.contains(j.postId),
@@ -216,7 +219,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                 if (!_mergeWith.remove(j.postId) && _mergeWith.length < 2) _mergeWith.add(j.postId);
               }),
             ),
-          (label: _mergeWith.isEmpty ? 'Không gộp' : 'Xong', answers: <String, Object?>{}, says: _valueOf(Slot.merge, _form(post), o), pressed: null, onToggle: null),
+          (label: _mergeWith.isEmpty ? t('Không gộp') : 'Xong', answers: <String, Object?>{}, says: _valueOf(Slot.merge, _form(post), o), pressed: null, onToggle: null),
         ];
       case null:
         return [];
@@ -256,8 +259,8 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
       canPop: !_creating,
       child: Scaffold(
         appBar: AppBar(
-          leading: AppIconButton(icon: LucideIcons.x, label: 'Đóng', onPressed: _creating ? null : () => context.pop()),
-          title: const Text('Sao chép bằng AI'),
+          leading: AppIconButton(icon: LucideIcons.x, label: t('Đóng'), onPressed: _creating ? null : () => context.pop()),
+          title: Text(t('Sao chép bằng AI')),
         ),
         body: FutureBuilder(
           future: _options,
@@ -266,7 +269,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
               return Padding(padding: const EdgeInsets.all(kGutter), child: Center(child: ErrorPanel(error: options.error ?? post.error)));
             }
             final o = options.data, p = post.value;
-            if (o == null || p == null) return const LoadingView(message: 'Đang chuẩn bị…');
+            if (o == null || p == null) return LoadingView(message: t('Đang chuẩn bị…'));
             return _chat(p, o);
           },
         ),
@@ -286,11 +289,11 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
             controller: _scroll,
             padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 16),
             children: [
-              Text('AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ nào thiếu sẽ ghi “chưa có dữ liệu”.', style: AppText.meta, textAlign: TextAlign.center),
+              Text(t('AI chỉ dùng địa điểm, giá và giờ mở cửa có trong dữ liệu ChillnGo; chỗ nào thiếu sẽ ghi “chưa có dữ liệu”.'), style: AppText.meta, textAlign: TextAlign.center),
               const SizedBox(height: 18),
-              ChatBubble(mine: false, text: 'Chào bạn! Mình sẽ điều chỉnh “${post.title}” cho chuyến đi của bạn. Cứ nhắn tự nhiên, hoặc chọn gợi ý bên dưới nhé.'),
+              ChatBubble(mine: false, text: t('Chào bạn! Mình sẽ điều chỉnh “{title}” cho chuyến đi của bạn. Cứ nhắn tự nhiên, hoặc chọn gợi ý bên dưới nhé.', {'title': post.title})),
               if (o.destination == null)
-                const ChatBubble(mine: false, text: 'ChillnGo chưa có dữ liệu địa điểm cho nơi này, nên AI chỉ sắp xếp lại các điểm có sẵn trong hành trình gốc.'),
+                ChatBubble(mine: false, text: t('ChillnGo chưa có dữ liệu địa điểm cho nơi này, nên AI chỉ sắp xếp lại các điểm có sẵn trong hành trình gốc.')),
               for (final m in _messages) ChatBubble(mine: m.mine, text: m.text),
               if (_creating)
                 AppCard(
@@ -304,7 +307,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                         child: LinearProgressIndicator(value: _progress, minHeight: 6, color: AppColors.teal, backgroundColor: AppColors.well),
                       ),
                       const SizedBox(height: 10),
-                      Text('Thường mất từ 20 giây đến một phút. Đừng rời màn hình này nhé.', style: AppText.meta),
+                      Text(t('Thường mất từ 20 giây đến một phút. Đừng rời màn hình này nhé.'), style: AppText.meta),
                     ],
                   ),
                 )
@@ -324,11 +327,11 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                       ),
                     if (asking == Slot.date)
                       AppChip(
-                        label: 'Chọn ngày khác',
+                        label: t('Chọn ngày khác'),
                         icon: LucideIcons.calendar,
                         onTap: () async {
                           final today = DateTime.now();
-                          final picked = await showDatePicker(context: context, firstDate: today, lastDate: DateTime(today.year + 2), cancelText: 'Huỷ', confirmText: 'Chọn');
+                          final picked = await showDatePicker(context: context, firstDate: today, lastDate: DateTime(today.year + 2), cancelText: t('Huỷ'), confirmText: t('Chọn'));
                           if (picked != null) _reply(formatShortDate(toDateOnly(picked)), post, o, {'startDate': toDateOnly(picked)});
                         },
                       ),
@@ -336,7 +339,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                 ),
               ],
               if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
-              if (o.callsLeft == 0) ...[const SizedBox(height: 12), const ErrorText('Bạn đã dùng hết lượt AI hôm nay. Hãy quay lại vào ngày mai nhé.')],
+              if (o.callsLeft == 0) ...[const SizedBox(height: 12), ErrorText(t('Bạn đã dùng hết lượt AI hôm nay. Hãy quay lại vào ngày mai nhé.'))],
             ],
           ),
         ),
@@ -351,14 +354,14 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                 children: [
                   ChatComposer(
                     controller: _text,
-                    hint: 'Ví dụ: 3 ngày, 4 người có trẻ em, 5 triệu',
+                    hint: t('Ví dụ: 3 ngày, 4 người có trẻ em, 5 triệu'),
                     maxLength: 300,
                     enabled: !_creating,
                     onSend: () => _reply(_text.text, post, o),
                   ),
                   const SizedBox(height: 8),
                   AppButton(
-                    label: _creating ? 'AI đang tạo bản nháp…' : _mergeWith.isEmpty ? 'Tạo bản nháp' : 'Gộp và tạo bản nháp',
+                    label: _creating ? t('AI đang tạo bản nháp…') : _mergeWith.isEmpty ? t('Tạo bản nháp') : t('Gộp và tạo bản nháp'),
                     icon: LucideIcons.sparkles,
                     loading: _creating,
                     fullWidth: true,
@@ -366,7 +369,7 @@ class _AiCloneScreenState extends ConsumerState<AiCloneScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Đã có ${slots.where(_settled.contains).length}/${slots.length} mục, còn ${o.callsLeft}/${o.dailyLimit} lượt AI hôm nay. Mục chưa trả lời sẽ dùng mặc định.',
+                    t('Đã có {value}/{n} mục, còn {callsLeft}/{dailyLimit} lượt AI hôm nay. Mục chưa trả lời sẽ dùng mặc định.', {'value': slots.where(_settled.contains).length, 'n': slots.length, 'callsLeft': o.callsLeft, 'dailyLimit': o.dailyLimit}),
                     style: AppText.meta.copyWith(fontSize: 12),
                     textAlign: TextAlign.center,
                   ),

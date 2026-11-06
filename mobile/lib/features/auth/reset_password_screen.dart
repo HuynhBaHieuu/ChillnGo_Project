@@ -14,6 +14,7 @@ import '../../ui/navigation.dart';
 import '../../ui/surfaces.dart';
 import 'auth_widgets.dart';
 import 'verify_email_screen.dart' show tokenFrom;
+import '../../core/i18n.dart';
 
 /// Đặt mật khẩu mới (web: ResetPasswordPage). Opened from a link
 /// (chillngo://app/reset-password?token=…) or by pasting the email's link here.
@@ -50,11 +51,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final token = _hasToken ? widget.token : tokenFrom(_link.text);
     final String? problem;
     if (token == null) {
-      problem = 'Không tìm thấy mã đặt lại trong liên kết này.';
+      problem = t('Không tìm thấy mã đặt lại trong liên kết này.');
     } else if (!passwordMeetsRules(_password.text)) {
-      problem = 'Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.';
+      problem = t('Mật khẩu chưa đạt đủ các yêu cầu bên dưới ô mật khẩu.');
     } else if (_password.text != _confirm.text) {
-      problem = 'Mật khẩu xác nhận không khớp.';
+      problem = t('Mật khẩu xác nhận không khớp.');
     } else {
       problem = null;
     }
@@ -108,7 +109,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   List<Widget> _doneView(BuildContext context) {
     return [
-      Text('Đã đổi mật khẩu', style: AppText.h1),
+      Text(t('Đã đổi mật khẩu'), style: AppText.h1),
       const SizedBox(height: 20),
       AppCard(
         child: Column(
@@ -119,11 +120,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               children: [
                 const Icon(LucideIcons.circleCheck, size: 26, color: AppColors.teal),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Mật khẩu mới đã có hiệu lực. Mọi thiết bị đang đăng nhập đã được đăng xuất.', style: AppText.bodySmall)),
+                Expanded(child: Text(t('Mật khẩu mới đã có hiệu lực. Mọi thiết bị đang đăng nhập đã được đăng xuất.'), style: AppText.bodySmall)),
               ],
             ),
             const SizedBox(height: 14),
-            AppButton(label: 'Đăng nhập', fullWidth: true, onPressed: () => context.go('/login')),
+            AppButton(label: t('Đăng nhập'), fullWidth: true, onPressed: () => context.go('/login')),
           ],
         ),
       ),
@@ -132,7 +133,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   List<Widget> _failedView(BuildContext context) {
     return [
-      Text('Liên kết không dùng được', style: AppText.h1),
+      Text(t('Liên kết không dùng được'), style: AppText.h1),
       const SizedBox(height: 20),
       AppCard(
         child: Column(
@@ -147,7 +148,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            AppButton(label: 'Nhận liên kết mới', fullWidth: true, onPressed: () => context.pushReplacement('/forgot-password')),
+            AppButton(label: t('Nhận liên kết mới'), fullWidth: true, onPressed: () => context.pushReplacement('/forgot-password')),
           ],
         ),
       ),
@@ -158,9 +159,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final mismatch = _confirm.text.isNotEmpty && _confirm.text != _password.text;
     final canSubmit = _password.text.isNotEmpty && _confirm.text.isNotEmpty && (_hasToken || _link.text.trim().isNotEmpty);
     return [
-      Text('Đặt mật khẩu mới', style: AppText.h1),
+      Text(t('Đặt mật khẩu mới'), style: AppText.h1),
       const SizedBox(height: 8),
-      Text('Chọn mật khẩu mới cho tài khoản ChillnGo của bạn.', style: AppText.meta),
+      Text(t('Chọn mật khẩu mới cho tài khoản ChillnGo của bạn.'), style: AppText.meta),
       const SizedBox(height: 20),
       AppCard(
         child: Column(
@@ -169,7 +170,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             if (!_hasToken) ...[
               AppTextField(
                 controller: _link,
-                label: 'Liên kết trong email',
+                label: t('Liên kết trong email'),
                 hint: 'https://…/reset-password?token=…',
                 autocorrect: false,
                 keyboardType: TextInputType.url,
@@ -180,7 +181,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ],
             PasswordField(
               controller: _password,
-              label: 'Mật khẩu mới',
+              label: t('Mật khẩu mới'),
               autofillHints: const [AutofillHints.newPassword],
               textInputAction: TextInputAction.next,
               onChanged: (_) => setState(() => _error = null),
@@ -190,17 +191,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             const SizedBox(height: 12),
             PasswordField(
               controller: _confirm,
-              label: 'Xác nhận mật khẩu',
+              label: t('Xác nhận mật khẩu'),
               autofillHints: const [AutofillHints.newPassword],
               textInputAction: TextInputAction.go,
-              error: mismatch ? 'Mật khẩu xác nhận không khớp.' : null,
+              error: mismatch ? t('Mật khẩu xác nhận không khớp.') : null,
               onChanged: (_) => setState(() => _error = null),
               onSubmitted: (_) => _submit(),
             ),
             if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
             const SizedBox(height: 16),
             AppButton(
-              label: 'Đặt mật khẩu mới',
+              label: t('Đặt mật khẩu mới'),
               size: ButtonSize.lg,
               fullWidth: true,
               loading: _pending,

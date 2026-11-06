@@ -14,6 +14,7 @@ import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
 import 'location_fields.dart';
+import '../../core/i18n.dart';
 
 const _stopPhotoMaxSide = 1600;
 
@@ -78,16 +79,16 @@ class _DayBuilderState extends State<DayBuilder> {
                 decoration: BoxDecoration(color: dayColor(number), shape: BoxShape.circle),
               ),
               const SizedBox(width: 10),
-              Expanded(child: Text('Ngày $number', style: AppText.h3)),
+              Expanded(child: Text(t('Ngày {number}', {'number': number}), style: AppText.h3)),
               if (widget.canRemove)
-                AppIconButton(icon: LucideIcons.trash, label: 'Xoá ngày $number', tone: IconTone.danger, size: 36, onPressed: widget.onRemove),
+                AppIconButton(icon: LucideIcons.trash, label: t('Xoá ngày {number}', {'number': number}), tone: IconTone.danger, size: 36, onPressed: widget.onRemove),
             ],
           ),
           const SizedBox(height: 14),
           AppTextField(
             controller: _title,
-            label: 'Tiêu đề ngày $number',
-            hint: 'Ví dụ: Hà Nội → Hà Giang',
+            label: t('Tiêu đề ngày {number}', {'number': number}),
+            hint: t('Ví dụ: Hà Nội → Hà Giang'),
             maxLength: 200,
             onChanged: (text) {
               day.title = text;
@@ -96,7 +97,7 @@ class _DayBuilderState extends State<DayBuilder> {
           ),
           const SizedBox(height: 14),
           DateField(
-            label: 'Ngày',
+            label: t('Ngày'),
             value: day.date,
             onChanged: (date) {
               day.date = date;
@@ -139,7 +140,7 @@ class _DayBuilderState extends State<DayBuilder> {
             runSpacing: 10,
             children: [
               AppButton(
-                label: 'Thêm điểm dừng',
+                label: t('Thêm điểm dừng'),
                 icon: LucideIcons.plus,
                 variant: ButtonVariant.outline,
                 size: ButtonSize.sm,
@@ -152,7 +153,7 @@ class _DayBuilderState extends State<DayBuilder> {
                 TextSpan(
                   style: AppText.meta,
                   children: [
-                    const TextSpan(text: 'Ngày này: '),
+                    TextSpan(text: t('Ngày này: ')),
                     TextSpan(
                       text: formatVnd(dayCostOf(day)),
                       style: const TextStyle(color: AppColors.cream),
@@ -242,8 +243,8 @@ class _LocationRowState extends State<_LocationRow> {
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(child: Text('Điểm dừng $number', style: AppText.label)),
-              if (widget.canRemove) AppIconButton(icon: LucideIcons.trash, label: 'Xoá địa điểm $number', size: 34, onPressed: widget.onRemove),
+              Expanded(child: Text(t('Điểm dừng {number}', {'number': number}), style: AppText.label)),
+              if (widget.canRemove) AppIconButton(icon: LucideIcons.trash, label: t('Xoá địa điểm {number}', {'number': number}), size: 34, onPressed: widget.onRemove),
             ],
           ),
           const SizedBox(height: 12),
@@ -251,9 +252,9 @@ class _LocationRowState extends State<_LocationRow> {
           const SizedBox(height: 12),
           AppTextField(
             controller: _cost,
-            label: 'Chi phí (₫)',
+            label: t('Chi phí (₫)'),
             hint: '0',
-            helper: loc.estCost > 0 ? formatVnd(loc.estCost) : 'Để 0 nếu miễn phí',
+            helper: loc.estCost > 0 ? formatVnd(loc.estCost) : t('Để 0 nếu miễn phí'),
             keyboardType: TextInputType.number,
             maxLength: 13,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -268,8 +269,8 @@ class _LocationRowState extends State<_LocationRow> {
           const SizedBox(height: 12),
           AppTextField(
             controller: _note,
-            label: 'Ghi chú',
-            hint: 'Mẹo, giờ mở cửa, món nên thử…',
+            label: t('Ghi chú'),
+            hint: t('Mẹo, giờ mở cửa, món nên thử…'),
             maxLines: 5,
             minLines: 2,
             maxLength: 2000,
@@ -305,7 +306,7 @@ class _LocationRowState extends State<_LocationRow> {
                   ),
                 ),
               AppButton(
-                label: _uploading != null ? 'Đang tải ảnh…' : (loc.photoUrl != null ? 'Đổi ảnh' : 'Thêm ảnh'),
+                label: _uploading != null ? t('Đang tải ảnh…') : (loc.photoUrl != null ? t('Đổi ảnh') : t('Thêm ảnh')),
                 icon: LucideIcons.imagePlus,
                 variant: ButtonVariant.outline,
                 size: ButtonSize.sm,
@@ -313,7 +314,7 @@ class _LocationRowState extends State<_LocationRow> {
               ),
               if (loc.photoUrl != null)
                 AppButton(
-                  label: 'Bỏ ảnh',
+                  label: t('Bỏ ảnh'),
                   variant: ButtonVariant.ghost,
                   size: ButtonSize.sm,
                   onPressed: _uploading != null
@@ -345,7 +346,7 @@ class _LegPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Phương tiện từ điểm $from đến điểm $to',
+      label: t('Phương tiện từ điểm {from} đến điểm {to}', {'from': from, 'to': to}),
       child: Padding(
         padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
         child: Row(

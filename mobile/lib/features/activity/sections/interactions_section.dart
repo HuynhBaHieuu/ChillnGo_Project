@@ -11,6 +11,7 @@ import '../../../ui/buttons.dart';
 import '../../../ui/surfaces.dart';
 import '../../post/post_actions.dart';
 import '../activity_common.dart';
+import '../../../core/i18n.dart';
 
 class InteractionsSection extends StatefulWidget {
   const InteractionsSection({super.key, this.initialTab});
@@ -22,12 +23,12 @@ class InteractionsSection extends StatefulWidget {
 }
 
 class _InteractionsSectionState extends State<InteractionsSection> {
-  static const _tabs = <({String value, String label, int? count})>[
-    (value: 'likes', label: 'Lượt thích', count: null),
-    (value: 'comments', label: 'Bình luận', count: null),
-    (value: 'reposts', label: 'Chia sẻ lại', count: null),
-    (value: 'story-replies', label: 'Phản hồi tin', count: null),
-    (value: 'reviews', label: 'Đánh giá', count: null),
+  static List<({String value, String label, int? count})> get _tabs => <({String value, String label, int? count})>[
+    (value: 'likes', label: t('Lượt thích'), count: null),
+    (value: 'comments', label: t('Bình luận'), count: null),
+    (value: 'reposts', label: t('Chia sẻ lại'), count: null),
+    (value: 'story-replies', label: t('Phản hồi tin'), count: null),
+    (value: 'reviews', label: t('Đánh giá'), count: null),
   ];
 
   late String _tab = _tabs.any((t) => t.value == widget.initialTab) ? widget.initialTab! : 'likes';
@@ -37,26 +38,26 @@ class _InteractionsSectionState extends State<InteractionsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionIntro(title: 'Lượt tương tác', description: 'Xem lại những hành trình bạn đã thích và các bình luận bạn đã để lại trên ChillnGo.'),
+        SectionIntro(title: t('Lượt tương tác'), description: t('Xem lại những hành trình bạn đã thích và các bình luận bạn đã để lại trên ChillnGo.')),
         const SizedBox(height: 16),
         SegmentTabs<String>(items: _tabs, value: _tab, onChanged: (t) => setState(() => _tab = t)),
         const SizedBox(height: 16),
         switch (_tab) {
           'comments' => const _Comments(),
-          'reposts' => const NotAvailable(
+          'reposts' => NotAvailable(
             icon: LucideIcons.repeat2,
-            feature: 'tính năng chia sẻ lại',
-            description: 'Khi có tính năng này, những hành trình bạn chia sẻ lại cho người theo dõi sẽ hiện ở đây.',
+            feature: t('tính năng chia sẻ lại'),
+            description: t('Khi có tính năng này, những hành trình bạn chia sẻ lại cho người theo dõi sẽ hiện ở đây.'),
           ),
-          'story-replies' => const NotAvailable(
+          'story-replies' => NotAvailable(
             icon: LucideIcons.messageSquareQuote,
-            feature: 'tính năng tin (story)',
-            description: 'Khi có tính năng tin, các phản hồi và cảm xúc bạn gửi cho tin của người khác sẽ hiện ở đây.',
+            feature: t('tính năng tin (story)'),
+            description: t('Khi có tính năng tin, các phản hồi và cảm xúc bạn gửi cho tin của người khác sẽ hiện ở đây.'),
           ),
-          'reviews' => const NotAvailable(
+          'reviews' => NotAvailable(
             icon: LucideIcons.star,
-            feature: 'tính năng đánh giá',
-            description: 'Khi có tính năng đánh giá, những đánh giá bạn viết cho địa điểm và hành trình sẽ được gom lại ở đây.',
+            feature: t('tính năng đánh giá'),
+            description: t('Khi có tính năng đánh giá, những đánh giá bạn viết cho địa điểm và hành trình sẽ được gom lại ở đây.'),
           ),
           _ => const _Likes(),
         },
@@ -77,9 +78,9 @@ class _Likes extends ConsumerWidget {
     if (list.isEmpty) {
       return EmptyState(
         icon: LucideIcons.heart,
-        title: 'Chưa có lượt thích nào',
-        description: 'Bấm vào trái tim ở hành trình bạn thích, hành trình đó sẽ hiện ở đây.',
-        action: AppButton(label: 'Khám phá hành trình', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
+        title: t('Chưa có lượt thích nào'),
+        description: t('Bấm vào trái tim ở hành trình bạn thích, hành trình đó sẽ hiện ở đây.'),
+        action: AppButton(label: t('Khám phá hành trình'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/discover')),
       );
     }
     return Column(
@@ -96,7 +97,7 @@ class _Likes extends ConsumerWidget {
                   children: [
                     Text(post.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.h3),
                     Text(
-                      'của ${post.author?.displayName ?? ''} · ${journeyStats(post.days)}',
+                      t('của {value} · {value2}', {'value': post.author?.displayName ?? '', 'value2': journeyStats(post.days)}),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.meta,
@@ -106,7 +107,7 @@ class _Likes extends ConsumerWidget {
               ),
               AppIconButton(
                 icon: Icons.favorite,
-                label: 'Bỏ thích ${post.title}',
+                label: t('Bỏ thích {title}', {'title': post.title}),
                 color: AppColors.social,
                 onPressed: () async {
                   await toggleLike(context, ref, post);
@@ -138,7 +139,7 @@ class _Comments extends ConsumerWidget {
           text: c.comment.content,
           at: c.comment.createdAt,
           href: c.postId == null ? null : '/posts/${c.postId}',
-          where: c.postTitle ?? 'một hành trình đã bị xoá',
+          where: c.postTitle ?? t('một hành trình đã bị xoá'),
           thumb: c.postCover,
           live: false,
         ),
@@ -148,18 +149,18 @@ class _Comments extends ConsumerWidget {
           at: c.createdAt,
           href: c.livestreamId == null ? null : '/live/${c.livestreamId}',
           where: c.livestreamId == null
-              ? 'một buổi live không còn tồn tại'
-              : '${c.livestreamTitle ?? ''}${c.host != null ? ' · live của ${c.host!.displayName}' : ''}',
+              ? t('một buổi live không còn tồn tại')
+              : '${c.livestreamTitle ?? ''}${c.host != null ? t(' · live của {displayName}', {'displayName': c.host!.displayName}) : ''}',
           thumb: c.host?.avatarUrl,
           live: true,
         ),
     ]..sort((a, b) => b.at.compareTo(a.at));
 
     if (items.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: LucideIcons.messageCircle,
-        title: 'Chưa có bình luận nào',
-        description: 'Bình luận bạn viết trên hành trình và trong các buổi livestream sẽ được liệt kê ở đây.',
+        title: t('Chưa có bình luận nào'),
+        description: t('Bình luận bạn viết trên hành trình và trong các buổi livestream sẽ được liệt kê ở đây.'),
       );
     }
     return Column(
@@ -203,7 +204,7 @@ class _Comments extends ConsumerWidget {
                       children: [
                         if (item.live) ...[const Icon(LucideIcons.radio, size: 13, color: AppColors.social), const SizedBox(width: 6)],
                         Expanded(
-                          child: Text('Tại ${item.where} · ${timeAgo(item.at)}', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta),
+                          child: Text(t('Tại {where} · {time}', {'where': item.where, 'time': timeAgo(item.at)}), maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta),
                         ),
                       ],
                     ),

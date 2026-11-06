@@ -21,6 +21,7 @@ import 'day_itinerary.dart';
 import 'post_actions.dart';
 import 'trip_card.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// /posts/:id: a journey (web: PostDetailPage).
 class PostDetailScreen extends ConsumerStatefulWidget {
@@ -53,13 +54,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           padding: const EdgeInsets.all(kGutter),
           child: Center(
             child: EmptyState(
-              title: 'Không tìm thấy hành trình',
+              title: t('Không tìm thấy hành trình'),
               description: async.error.toString(),
               action: Wrap(
                 spacing: 8,
                 children: [
-                  AppButton(label: 'Thử lại', variant: ButtonVariant.outline, onPressed: () => ref.invalidate(postProvider(widget.id))),
-                  AppButton(label: 'Về Khám phá', onPressed: () => context.go('/discover')),
+                  AppButton(label: t('Thử lại'), variant: ButtonVariant.outline, onPressed: () => ref.invalidate(postProvider(widget.id))),
+                  AppButton(label: t('Về Khám phá'), onPressed: () => context.go('/discover')),
                 ],
               ),
             ),
@@ -77,8 +78,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       appBar: AppBar(
         leading: const BackOrHome(),
         actions: [
-          if (isAuthor) AppIconButton(icon: LucideIcons.pencil, label: 'Chỉnh sửa hành trình', onPressed: () => context.push('/posts/${post.id}/edit')),
-          if (!draft) AppIconButton(icon: LucideIcons.share2, label: 'Chia sẻ hành trình', onPressed: () => sharePath('/posts/${post.id}', post.title)),
+          if (isAuthor) AppIconButton(icon: LucideIcons.pencil, label: t('Chỉnh sửa hành trình'), onPressed: () => context.push('/posts/${post.id}/edit')),
+          if (!draft) AppIconButton(icon: LucideIcons.share2, label: t('Chia sẻ hành trình'), onPressed: () => sharePath('/posts/${post.id}', post.title)),
           const SizedBox(width: 8),
         ],
       ),
@@ -104,12 +105,12 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                   children: [
                     InviteBanner(post: post, viewerId: viewerId),
                     if (draft) ...[
-                      const Align(alignment: Alignment.centerLeft, child: AppBadge('Bản nháp, chỉ bạn thấy', uppercase: true)),
+                      Align(alignment: Alignment.centerLeft, child: AppBadge(t('Bản nháp, chỉ bạn thấy'), uppercase: true)),
                       const SizedBox(height: 12),
                     ],
                     Text('${regionLabel(post.region)} · ${seasonLabel(post.season)} · ${tripLengthLabel(post.days.length)}', style: AppText.meta),
                     const SizedBox(height: 8),
-                    Text(post.title.isEmpty ? 'Hành trình chưa đặt tên' : post.title, style: AppText.h1),
+                    Text(post.title.isEmpty ? t('Hành trình chưa đặt tên') : post.title, style: AppText.h1),
                     if (post.summary.isNotEmpty) ...[const SizedBox(height: 10), Text(post.summary, style: AppText.body)],
                     const SizedBox(height: 14),
                     if (author != null)
@@ -127,13 +128,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(author.displayName, style: AppText.label),
-                                    Text('Đăng ${relativeTime(post.createdAt)}', style: AppText.meta),
+                                    Text(t('Đăng {time}', {'time': relativeTime(post.createdAt)}), style: AppText.meta),
                                   ],
                                 ),
                               ),
                               if (isAuthor)
                                 AppButton(
-                                  label: 'Chỉnh sửa',
+                                  label: t('Chỉnh sửa'),
                                   icon: LucideIcons.pencil,
                                   variant: ButtonVariant.outline,
                                   size: ButtonSize.sm,
@@ -150,7 +151,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: AppButton(
-                            label: 'Mời bạn đi cùng',
+                            label: t('Mời bạn đi cùng'),
                             icon: LucideIcons.userPlus,
                             variant: ButtonVariant.outline,
                             size: ButtonSize.sm,
@@ -161,23 +162,23 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     CompanionsRow(post: post, viewerId: viewerId),
                     if (post.tags.isNotEmpty) ...[const SizedBox(height: 12), TagList(tags: post.tags, linked: true)],
                     const SizedBox(height: 24),
-                    _Fact(icon: LucideIcons.calendarRange, label: 'Thời gian', value: formatDateRange(post.startDate, post.endDate)),
+                    _Fact(icon: LucideIcons.calendarRange, label: t('Thời gian'), value: formatDateRange(post.startDate, post.endDate)),
                     const SizedBox(height: 10),
-                    _Fact(icon: LucideIcons.wallet, label: 'Tổng chi phí ước tính', value: formatVnd(post.totalEstCost)),
+                    _Fact(icon: LucideIcons.wallet, label: t('Tổng chi phí ước tính'), value: formatVnd(post.totalEstCost)),
                     const SizedBox(height: 10),
-                    _Fact(icon: LucideIcons.piggyBank, label: 'Mức chi tiêu', value: budgetLabel(post.budgetLevel)),
+                    _Fact(icon: LucideIcons.piggyBank, label: t('Mức chi tiêu'), value: budgetLabel(post.budgetLevel)),
                     const SizedBox(height: 28),
-                    Text('Lịch trình từng ngày', style: AppText.h2),
+                    Text(t('Lịch trình từng ngày'), style: AppText.h2),
                     const SizedBox(height: 14),
-                    if (post.days.isEmpty) Text('Hành trình này chưa có ngày nào.', style: AppText.meta),
+                    if (post.days.isEmpty) Text(t('Hành trình này chưa có ngày nào.'), style: AppText.meta),
                     for (final day in post.days) ...[DayItinerary(day: day), const SizedBox(height: 14)],
                     const SizedBox(height: 14),
-                    Text('Bản đồ tuyến', style: AppText.h2),
+                    Text(t('Bản đồ tuyến'), style: AppText.h2),
                     const SizedBox(height: 14),
-                    RouteMap(days: post.days, height: 300, label: 'Bản đồ tuyến đường của ${post.title}'),
+                    RouteMap(days: post.days, height: 300, label: t('Bản đồ tuyến đường của {title}', {'title': post.title})),
                     const SizedBox(height: 10),
                     Text(
-                      'Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.',
+                      t('Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.'),
                       style: AppText.meta,
                     ),
                     const SizedBox(height: 28),
@@ -219,22 +220,23 @@ class _ActionBar extends ConsumerWidget {
           _Counter(
             icon: counts.liked ? Icons.favorite : LucideIcons.heart,
             value: counts.likeCount,
-            label: counts.liked ? 'Bỏ thích' : 'Thích',
+            label: counts.liked ? t('Bỏ thích') : t('Thích'),
             color: counts.liked ? AppColors.social : AppColors.meta,
             onTap: () => toggleLike(context, ref, post),
           ),
-          _Counter(icon: LucideIcons.messageCircle, value: counts.commentCount, label: 'Bình luận', color: AppColors.meta, onTap: onComment),
+          _Counter(icon: LucideIcons.messageCircle, value: counts.commentCount, label: t('Bình luận'), color: AppColors.meta, onTap: onComment),
           _Counter(
             icon: counts.saved ? Icons.bookmark : LucideIcons.bookmark,
             value: counts.saveCount,
-            label: counts.saved ? 'Bỏ lưu' : 'Lưu bài viết',
+            label: counts.saved ? t('Bỏ lưu') : t('Lưu bài viết'),
             color: counts.saved ? AppColors.cream : AppColors.meta,
             onTap: () => toggleSave(context, ref, post),
           ),
           const SizedBox(width: 6),
           Expanded(
             child: AppButton(
-              label: 'Dùng làm lịch trình',
+              // Beside the AI button there is room for one word.
+              label: AiCloneService.canAiClone(post.id) ? t('Sao chép') : t('Dùng làm lịch trình'),
               icon: LucideIcons.copy,
               variant: AiCloneService.canAiClone(post.id) ? ButtonVariant.secondary : ButtonVariant.primary,
               onPressed: () {

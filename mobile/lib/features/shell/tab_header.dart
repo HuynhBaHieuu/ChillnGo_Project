@@ -8,6 +8,7 @@ import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// The top bar of every tab: the wordmark (or the tab's title), the
 /// notification bell and the account button: the web navbar on a phone.
@@ -47,11 +48,11 @@ class TabHeader extends ConsumerWidget {
             ),
             ...actions.expand((a) => [a, const SizedBox(width: 8)]),
             if (user != null) ...[
-              AppIconButton(icon: LucideIcons.sparkles, label: 'Trợ lý du lịch AI', tone: IconTone.well, size: 38, onPressed: () => context.push('/assistant')),
+              AppIconButton(icon: LucideIcons.sparkles, label: t('Trợ lý du lịch AI'), tone: IconTone.well, size: 38, onPressed: () => context.push('/assistant')),
               const SizedBox(width: 8),
               AppIconButton(
                 icon: LucideIcons.bell,
-                label: unread > 0 ? 'Thông báo ($unread chưa đọc)' : 'Thông báo',
+                label: unread > 0 ? t('Thông báo ({unread} chưa đọc)', {'unread': unread}) : t('Thông báo'),
                 tone: IconTone.well,
                 size: 38,
                 dot: unread > 0,
@@ -60,7 +61,7 @@ class TabHeader extends ConsumerWidget {
               const SizedBox(width: 8),
               Semantics(
                 button: true,
-                label: 'Tài khoản',
+                label: t('Tài khoản'),
                 child: InkWell(
                   customBorder: const CircleBorder(),
                   onTap: () => context.push('/menu'),
@@ -69,7 +70,7 @@ class TabHeader extends ConsumerWidget {
               ),
             ] else
               // As on the web at phone width: one button; sign-in is a link on that page.
-              BeamButton(label: 'Bắt đầu ngay', onPressed: () => context.push('/register')),
+              BeamButton(label: t('Bắt đầu ngay'), onPressed: () => context.push('/register')),
           ],
         ),
       ),

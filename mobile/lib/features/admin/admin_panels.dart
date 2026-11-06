@@ -19,6 +19,7 @@ import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../auth/auth_widgets.dart';
 import 'admin_common.dart';
+import '../../core/i18n.dart';
 
 final adminStatsProvider = FutureProvider.autoDispose<AdminStats>((ref) => AdminService.getStats());
 
@@ -44,7 +45,7 @@ class StatsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(adminVersionProvider);
     final stats = ref.watch(adminStatsProvider);
-    if (stats.isLoading && !stats.hasValue) return const LoadingView(message: 'Đang tải thống kê…');
+    if (stats.isLoading && !stats.hasValue) return LoadingView(message: t('Đang tải thống kê…'));
     if (stats.hasError && !stats.hasValue) return ErrorPanel(error: stats.error, onRetry: () => ref.invalidate(adminStatsProvider));
     final s = stats.value!;
     return Column(
@@ -52,26 +53,26 @@ class StatsPanel extends ConsumerWidget {
       children: [
         _TileGrid(
           tiles: [
-            _Tile('Tổng tài khoản', s.total),
-            _Tile('Đăng ký mới 7 ngày', s.new7),
-            _Tile('Đăng ký mới 30 ngày', s.new30),
-            _Tile('Đã xác nhận email', s.verified, of: s.total),
-            _Tile('Liên kết Google', s.googleLinked, of: s.total),
-            _Tile('Đang bị khoá', s.locked, of: s.total),
+            _Tile(t('Tổng tài khoản'), s.total),
+            _Tile(t('Đăng ký mới 7 ngày'), s.new7),
+            _Tile(t('Đăng ký mới 30 ngày'), s.new30),
+            _Tile(t('Đã xác nhận email'), s.verified, of: s.total),
+            _Tile(t('Liên kết Google'), s.googleLinked, of: s.total),
+            _Tile(t('Đang bị khoá'), s.locked, of: s.total),
           ],
         ),
         const SizedBox(height: 20),
         if (s.signupsByDay.isNotEmpty) _SignupChart(data: s.signupsByDay),
         if (s.scope == 'full' && s.byRole != null) ...[
           const SizedBox(height: 20),
-          Text('Chỉ dành cho Super Admin', style: AppText.label),
+          Text(t('Chỉ dành cho Super Admin'), style: AppText.label),
           const SizedBox(height: 10),
           _TileGrid(
             tiles: [
               _Tile(roleLabels['user']!, s.byRole!['user'] ?? 0),
               _Tile(roleLabels['admin']!, s.byRole!['admin'] ?? 0),
               _Tile(roleLabels['superadmin']!, s.byRole!['superadmin'] ?? 0),
-              _Tile('Thao tác quản trị 7 ngày', s.adminActions7 ?? 0),
+              _Tile(t('Thao tác quản trị 7 ngày'), s.adminActions7 ?? 0),
             ],
           ),
         ],
@@ -174,10 +175,10 @@ class _SignupChartState extends State<_SignupChart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Đăng ký mới mỗi ngày, 30 ngày qua', style: AppText.label),
+          Text(t('Đăng ký mới mỗi ngày, 30 ngày qua'), style: AppText.label),
           const SizedBox(height: 4),
           Text(
-            shown != null ? '${_dayLabel(shown.$1)}: ${shown.$2} tài khoản' : 'Tổng $total tài khoản · cao nhất ${total == 0 ? 0 : max}/ngày',
+            shown != null ? t('{value}: {value2} tài khoản', {'value': _dayLabel(shown.$1), 'value2': shown.$2}) : t('Tổng {total} tài khoản · cao nhất {value}/ngày', {'total': total, 'value': total == 0 ? 0 : max}),
             style: AppText.meta.copyWith(fontSize: 12),
           ),
           const SizedBox(height: 14),
@@ -206,7 +207,7 @@ class _SignupChartState extends State<_SignupChart> {
                         for (var i = 0; i < data.length; i++)
                           Expanded(
                             child: Semantics(
-                              label: '${_dayLabel(data[i].$1)}: ${data[i].$2} tài khoản',
+                              label: t('{value}: {value2} tài khoản', {'value': _dayLabel(data[i].$1), 'value2': data[i].$2}),
                               child: GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTapDown: (_) => setState(() => _active = i),
@@ -251,7 +252,7 @@ class _SignupChartState extends State<_SignupChart> {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
-            child: TextLink(label: _table ? 'Ẩn bảng' : 'Xem dạng bảng', color: AppColors.meta, onPressed: () => setState(() => _table = !_table)),
+            child: TextLink(label: _table ? t('Ẩn bảng') : t('Xem dạng bảng'), color: AppColors.meta, onPressed: () => setState(() => _table = !_table)),
           ),
           if (_table)
             for (final d in data)
@@ -352,7 +353,7 @@ class _UsersPanelState extends ConsumerState<UsersPanel> {
         AppTextField(
           controller: _search,
           icon: LucideIcons.search,
-          hint: 'Tìm theo tên, tên người dùng hoặc email',
+          hint: t('Tìm theo tên, tên người dùng hoặc email'),
           autocorrect: false,
           onChanged: (text) {
             _debounce?.cancel();
@@ -371,7 +372,7 @@ class _UsersPanelState extends ConsumerState<UsersPanel> {
               Expanded(
                 child: SelectField<String>(
                   value: _role,
-                  options: [const SelectOption('all', 'Mọi vai trò'), for (final r in roleLabels.keys) SelectOption(r, roleLabels[r]!)],
+                  options: [SelectOption('all', t('Mọi vai trò')), for (final r in roleLabels.keys) SelectOption(r, roleLabels[r]!)],
                   onChanged: (v) {
                     setState(() {
                       _role = v;
@@ -386,7 +387,7 @@ class _UsersPanelState extends ConsumerState<UsersPanel> {
             Expanded(
               child: SelectField<String>(
                 value: _status,
-                options: const [SelectOption('all', 'Mọi trạng thái'), SelectOption('active', 'Hoạt động'), SelectOption('locked', 'Đã khoá')],
+                options: [SelectOption('all', t('Mọi trạng thái')), SelectOption('active', t('Hoạt động')), SelectOption('locked', t('Đã khoá'))],
                 onChanged: (v) {
                   setState(() {
                     _status = v;
@@ -400,7 +401,7 @@ class _UsersPanelState extends ConsumerState<UsersPanel> {
         ),
         const SizedBox(height: 14),
         if (_loading && data == null)
-          const LoadingView(message: 'Đang tải danh sách…')
+          LoadingView(message: t('Đang tải danh sách…'))
         else if (_error != null && data == null)
           ErrorPanel(error: _error, onRetry: _load)
         else if (data == null || data.items.isEmpty)
@@ -410,14 +411,14 @@ class _UsersPanelState extends ConsumerState<UsersPanel> {
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: AppColors.borderStrong),
             ),
-            child: Text('Không có tài khoản nào khớp bộ lọc.', style: AppText.meta, textAlign: TextAlign.center),
+            child: Text(t('Không có tài khoản nào khớp bộ lọc.'), style: AppText.meta, textAlign: TextAlign.center),
           )
         else ...[
           if (_loading) const LinearProgressIndicator(minHeight: 2),
           for (final u in data.items) ...[_UserCard(actor: widget.actor, user: u, showPermissions: widget.showPermissions), const SizedBox(height: 10)],
           Row(
             children: [
-              Text('${data.total} tài khoản', style: AppText.meta.copyWith(fontSize: 12)),
+              Text(t('{total} tài khoản', {'total': data.total}), style: AppText.meta.copyWith(fontSize: 12)),
               const Spacer(),
               Pagination(
                 page: data.page,
@@ -463,19 +464,19 @@ class _UserCard extends ConsumerWidget {
                         style: AppText.label,
                         children: [
                           TextSpan(text: user.displayName),
-                          if (user.id == actor.id) TextSpan(text: '  (bạn)', style: AppText.meta.copyWith(fontSize: 12)),
+                          if (user.id == actor.id) TextSpan(text: t('  (bạn)'), style: AppText.meta.copyWith(fontSize: 12)),
                         ],
                       ),
                     ),
                     Text('@${user.username} · ${user.email}', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta.copyWith(fontSize: 12)),
-                    if (!user.emailVerified) Text('Chưa xác nhận email', style: AppText.meta.copyWith(fontSize: 12)),
+                    if (!user.emailVerified) Text(t('Chưa xác nhận email'), style: AppText.meta.copyWith(fontSize: 12)),
                   ],
                 ),
               ),
               if (canManage(actor, user))
                 AppIconButton(
                   icon: LucideIcons.ellipsis,
-                  label: 'Thao tác với ${user.displayName} (@${user.username})',
+                  label: t('Thao tác với {displayName} (@{username})', {'displayName': user.displayName, 'username': user.username}),
                   onPressed: () => showUserActions(context, ref, actor, user),
                 ),
             ],
@@ -493,17 +494,17 @@ class _UserCard extends ConsumerWidget {
           ),
           if (user.status == 'locked' && user.lockedReason.isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text('Lý do khoá: ${user.lockedReason}', style: AppText.meta.copyWith(fontSize: 12)),
+            Text(t('Lý do khoá: {lockedReason}', {'lockedReason': user.lockedReason}), style: AppText.meta.copyWith(fontSize: 12)),
           ],
           const SizedBox(height: 8),
           if (showPermissions)
             user.role == 'superadmin'
-                ? Text('Toàn quyền', style: AppText.meta.copyWith(fontSize: 12))
+                ? Text(t('Toàn quyền'), style: AppText.meta.copyWith(fontSize: 12))
                 : user.permissions.isEmpty
-                ? Text('Chưa được cấp quyền nào', style: AppText.meta.copyWith(fontSize: 12))
+                ? Text(t('Chưa được cấp quyền nào'), style: AppText.meta.copyWith(fontSize: 12))
                 : Wrap(spacing: 4, runSpacing: 4, children: [for (final p in user.permissions) AppBadge(moduleLabels[p]?.$1 ?? p)])
           else
-            Text('Đăng nhập gần nhất: ${formatDateTime(user.lastLoginAt)}', style: AppText.meta.copyWith(fontSize: 12)),
+            Text(t('Đăng nhập gần nhất: {time}', {'time': formatDateTime(user.lastLoginAt)}), style: AppText.meta.copyWith(fontSize: 12)),
         ],
       ),
     );
@@ -519,16 +520,16 @@ Future<void> showUserActions(BuildContext context, WidgetRef ref, User actor, Ad
     title: name,
     actions: [
       if (target.status == 'active')
-        const MenuAction('lock', 'Khoá tài khoản', icon: LucideIcons.lock)
+        MenuAction('lock', t('Khoá tài khoản'), icon: LucideIcons.lock)
       else
-        const MenuAction('unlock', 'Mở khoá', icon: LucideIcons.lockOpen),
-      const MenuAction('reset', 'Đặt lại mật khẩu', icon: LucideIcons.keyRound),
+        MenuAction('unlock', t('Mở khoá'), icon: LucideIcons.lockOpen),
+      MenuAction('reset', t('Đặt lại mật khẩu'), icon: LucideIcons.keyRound),
       if (superadmin) ...[
         if (target.role == 'user')
-          const MenuAction('promote', 'Đặt làm Admin', icon: LucideIcons.shieldCheck)
+          MenuAction('promote', t('Đặt làm Admin'), icon: LucideIcons.shieldCheck)
         else ...[
-          const MenuAction('permissions', 'Phân quyền', icon: LucideIcons.shieldCheck),
-          const MenuAction('demote', 'Hạ xuống người dùng', icon: LucideIcons.shieldMinus),
+          MenuAction('permissions', t('Phân quyền'), icon: LucideIcons.shieldCheck),
+          MenuAction('demote', t('Hạ xuống người dùng'), icon: LucideIcons.shieldMinus),
         ],
       ],
     ],
@@ -555,51 +556,51 @@ Future<void> showUserActions(BuildContext context, WidgetRef ref, User actor, Ad
       final reason = TextEditingController();
       await confirmAction(
         context,
-        title: 'Khoá tài khoản',
+        title: t('Khoá tài khoản'),
         description:
-            '$name sẽ không đăng nhập được, và phiên đang mở sẽ bị đăng xuất ở lần tải trang tiếp theo. Buổi livestream đang phát (nếu có) sẽ kết thúc, và tài khoản không còn được tính vào số người theo dõi / đang theo dõi của người khác cho tới khi được mở khoá.',
-        confirmLabel: 'Khoá tài khoản',
+            t('{name} sẽ không đăng nhập được, và phiên đang mở sẽ bị đăng xuất ở lần tải trang tiếp theo. Buổi livestream đang phát (nếu có) sẽ kết thúc, và tài khoản không còn được tính vào số người theo dõi / đang theo dõi của người khác cho tới khi được mở khoá.', {'name': name}),
+        confirmLabel: t('Khoá tài khoản'),
         destructive: true,
         content: Padding(
           padding: const EdgeInsets.only(top: 12),
-          child: AppTextField(controller: reason, label: 'Lý do (người dùng sẽ thấy khi đăng nhập)', maxLength: 200, maxLines: 3, minLines: 2),
+          child: AppTextField(controller: reason, label: t('Lý do (người dùng sẽ thấy khi đăng nhập)'), maxLength: 200, maxLines: 3, minLines: 2),
         ),
         onConfirm: () => run(() async {
           await AdminService.lockUser(target.id, reason.text.trim());
-          return 'Đã khoá $name.';
+          return t('Đã khoá {name}.', {'name': name});
         }),
       );
       reason.dispose();
     case 'unlock':
       await confirmAction(
         context,
-        title: 'Mở khoá tài khoản',
-        description: '$name sẽ đăng nhập lại được bình thường, và các lượt theo dõi được tính lại như cũ.',
-        confirmLabel: 'Mở khoá',
+        title: t('Mở khoá tài khoản'),
+        description: t('{name} sẽ đăng nhập lại được bình thường, và các lượt theo dõi được tính lại như cũ.', {'name': name}),
+        confirmLabel: t('Mở khoá'),
         onConfirm: () => run(() async {
           await AdminService.unlockUser(target.id);
-          return 'Đã mở khoá $name.';
+          return t('Đã mở khoá {name}.', {'name': name});
         }),
       );
     case 'reset':
       await confirmAction(
         context,
-        title: 'Đặt lại mật khẩu',
+        title: t('Đặt lại mật khẩu'),
         description:
-            'Hệ thống tạo một mật khẩu tạm thời ngẫu nhiên và gửi tới ${target.email}. Mật khẩu hiện tại sẽ không dùng được nữa. Bạn sẽ không nhìn thấy mật khẩu mới.',
-        confirmLabel: 'Đặt lại và gửi email',
+            t('Hệ thống tạo một mật khẩu tạm thời ngẫu nhiên và gửi tới {email}. Mật khẩu hiện tại sẽ không dùng được nữa. Bạn sẽ không nhìn thấy mật khẩu mới.', {'email': target.email}),
+        confirmLabel: t('Đặt lại và gửi email'),
         onConfirm: () => run(() => AdminService.resetPassword(target.id)),
       );
     case 'demote':
       await confirmAction(
         context,
-        title: 'Hạ xuống người dùng thường',
-        description: '$name sẽ mất toàn bộ quyền quản trị. Tài khoản vẫn giữ nguyên.',
-        confirmLabel: 'Hạ quyền',
+        title: t('Hạ xuống người dùng thường'),
+        description: t('{name} sẽ mất toàn bộ quyền quản trị. Tài khoản vẫn giữ nguyên.', {'name': name}),
+        confirmLabel: t('Hạ quyền'),
         destructive: true,
         onConfirm: () => run(() async {
           await AdminService.setRole(target.id, 'user');
-          return '$name đã trở về người dùng thường.';
+          return t('{name} đã trở về người dùng thường.', {'name': name});
         }),
       );
     case 'promote':
@@ -607,20 +608,20 @@ Future<void> showUserActions(BuildContext context, WidgetRef ref, User actor, Ad
       final promote = choice == 'promote';
       await showAppSheet<void>(
         context,
-        title: promote ? 'Đặt ${target.displayName} làm Admin' : 'Phân quyền cho ${target.displayName}',
-        description: 'Chọn những mục Admin này được dùng trong trang quản trị.',
+        title: promote ? t('Đặt {displayName} làm Admin', {'displayName': target.displayName}) : t('Phân quyền cho {displayName}', {'displayName': target.displayName}),
+        description: t('Chọn những mục Admin này được dùng trong trang quản trị.'),
         builder: (sheetContext) => _PermissionsForm(
           initial: target.role == 'admin' ? target.permissions : const [],
-          confirmLabel: promote ? 'Đặt làm Admin' : 'Lưu quyền',
+          confirmLabel: promote ? t('Đặt làm Admin') : t('Lưu quyền'),
           onConfirm: (value) async {
             try {
               await run(() async {
                 if (promote) {
                   await AdminService.setRole(target.id, 'admin', value);
-                  return '$name giờ là Admin.';
+                  return t('{name} giờ là Admin.', {'name': name});
                 }
                 await AdminService.setPermissions(target.id, value);
-                return 'Đã cập nhật quyền của $name.';
+                return t('Đã cập nhật quyền của {name}.', {'name': name});
               });
             } catch (_) {
               // Shown in the notice bar.
@@ -657,7 +658,7 @@ class _PermissionsFormState extends State<_PermissionsForm> {
         Row(
           children: [
             Expanded(
-              child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
+              child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -691,17 +692,17 @@ class AdminsPanel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Muốn nâng một người dùng có sẵn lên Admin? Vào mục Người dùng, mở menu của tài khoản đó và chọn “Đặt làm Admin”.', style: AppText.meta),
+        Text(t('Muốn nâng một người dùng có sẵn lên Admin? Vào mục Người dùng, mở menu của tài khoản đó và chọn “Đặt làm Admin”.'), style: AppText.meta),
         const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerLeft,
           child: AppButton(
-            label: 'Tạo Admin mới',
+            label: t('Tạo Admin mới'),
             icon: LucideIcons.userPlus,
             onPressed: () => showAppSheet<void>(
               context,
-              title: 'Tạo Admin mới',
-              description: 'Tài khoản được kích hoạt ngay, không cần xác nhận email. Admin nên đổi mật khẩu sau lần đăng nhập đầu tiên.',
+              title: t('Tạo Admin mới'),
+              description: t('Tài khoản được kích hoạt ngay, không cần xác nhận email. Admin nên đổi mật khẩu sau lần đăng nhập đầu tiên.'),
               tall: true,
               builder: (_) => const _CreateAdminForm(),
             ),
@@ -742,13 +743,13 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
   Future<void> _submit() async {
     String? problem;
     if (_name.text.trim().isEmpty) {
-      problem = 'Vui lòng nhập tên hiển thị.';
+      problem = t('Vui lòng nhập tên hiển thị.');
     } else if (!RegExp(r'^[A-Za-z0-9._]{3,30}$').hasMatch(_username.text.trim())) {
-      problem = 'Tên người dùng dài 3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới.';
+      problem = t('Tên người dùng dài 3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới.');
     } else if (!looksLikeEmail(_email.text)) {
-      problem = 'Email không hợp lệ.';
+      problem = t('Email không hợp lệ.');
     } else if (!passwordMeetsRules(_password.text)) {
-      problem = 'Mật khẩu chưa đạt đủ yêu cầu.';
+      problem = t('Mật khẩu chưa đạt đủ yêu cầu.');
     }
     if (problem != null) {
       setState(() => _error = problem);
@@ -768,7 +769,7 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
       );
       ref
           .read(adminNoticeProvider.notifier)
-          .show(Notice('Đã tạo Admin ${user.displayName} (@${user.username}). Hãy gửi email và mật khẩu cho họ qua kênh an toàn.'));
+          .show(Notice(t('Đã tạo Admin {displayName} (@{username}). Hãy gửi email và mật khẩu cho họ qua kênh an toàn.', {'displayName': user.displayName, 'username': user.username})));
       ref.read(adminVersionProvider.notifier).bump();
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
@@ -783,13 +784,13 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppTextField(controller: _name, label: 'Tên hiển thị', maxLength: 60),
+        AppTextField(controller: _name, label: t('Tên hiển thị'), maxLength: 60),
         const SizedBox(height: 12),
-        AppTextField(controller: _username, label: 'Tên người dùng', maxLength: 30, autocorrect: false),
+        AppTextField(controller: _username, label: t('Tên người dùng'), maxLength: 30, autocorrect: false),
         const SizedBox(height: 12),
         AppTextField(controller: _email, label: 'Email', keyboardType: TextInputType.emailAddress, autocorrect: false),
         const SizedBox(height: 12),
-        PasswordField(controller: _password, label: 'Mật khẩu ban đầu', autofillHints: const [AutofillHints.newPassword], onChanged: (_) => setState(() {})),
+        PasswordField(controller: _password, label: t('Mật khẩu ban đầu'), autofillHints: const [AutofillHints.newPassword], onChanged: (_) => setState(() {})),
         const SizedBox(height: 8),
         PasswordChecklist(password: _password.text),
         const SizedBox(height: 14),
@@ -799,11 +800,11 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
         Row(
           children: [
             Expanded(
-              child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
+              child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: AppButton(label: 'Tạo Admin', loading: _pending, onPressed: _submit),
+              child: AppButton(label: t('Tạo Admin'), loading: _pending, onPressed: _submit),
             ),
           ],
         ),
@@ -815,7 +816,7 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
 /* -------------------------------------------------------------- Nội dung */
 
 /// Modules the permission model already has, but whose data is not on the server yet.
-const _notReady = [('content', 'bài đăng, lịch trình và bình luận'), ('reports', 'báo cáo vi phạm từ người dùng'), ('categories', 'danh mục địa điểm và tag')];
+List<(String, String)> get _notReady => [('content', t('bài đăng, lịch trình và bình luận')), ('reports', t('báo cáo vi phạm từ người dùng')), ('categories', t('danh mục địa điểm và tag'))];
 
 bool contentAllowed(User user) => _notReady.any((m) => hasModule(user, m.$1));
 
@@ -832,7 +833,7 @@ class ContentPanel extends StatelessWidget {
           EmptyState(
             icon: LucideIcons.construction,
             title: moduleLabels[module]!.$1,
-            description: 'Chưa dùng được: $needs vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.',
+            description: t('Chưa dùng được: {needs} vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.', {'needs': needs}),
           ),
           const SizedBox(height: 12),
         ],
@@ -843,22 +844,22 @@ class ContentPanel extends StatelessWidget {
 
 /* ---------------------------------------------------------------- Nhật ký */
 
-const _actionLabels = {
-  'user.lock': 'Khoá tài khoản',
-  'user.unlock': 'Mở khoá tài khoản',
-  'user.reset_password': 'Đặt lại mật khẩu',
-  'user.delete': 'Xoá tài khoản',
-  'user.role': 'Đổi vai trò',
-  'admin.create': 'Tạo Admin',
-  'admin.permissions': 'Phân quyền Admin',
-  'settings.update': 'Đổi cấu hình hệ thống',
-  'system.reset_users': 'Reset toàn bộ tài khoản',
-  'system.seed_superadmin': 'Tạo Super Admin (script)',
+Map<String, String> get _actionLabels => {
+  'user.lock': t('Khoá tài khoản'),
+  'user.unlock': t('Mở khoá tài khoản'),
+  'user.reset_password': t('Đặt lại mật khẩu'),
+  'user.delete': t('Xoá tài khoản'),
+  'user.role': t('Đổi vai trò'),
+  'admin.create': t('Tạo Admin'),
+  'admin.permissions': t('Phân quyền Admin'),
+  'settings.update': t('Đổi cấu hình hệ thống'),
+  'system.reset_users': t('Reset toàn bộ tài khoản'),
+  'system.seed_superadmin': t('Tạo Super Admin (script)'),
 };
 
 String _modules(Object? list) {
   final items = list is List ? list.map((e) => e.toString()).toList() : const <String>[];
-  return items.isEmpty ? 'không có quyền nào' : items.map((m) => moduleLabels[m]?.$1 ?? m).join(', ');
+  return items.isEmpty ? t('không có quyền nào') : items.map((m) => moduleLabels[m]?.$1 ?? m).join(', ');
 }
 
 String _role(Object? role) => roleLabels[role?.toString()] ?? '${role ?? ''}';
@@ -869,29 +870,29 @@ String _describe(AuditEntry entry) {
   Map<String, dynamic> m(Object? v) => v is Map ? v.cast<String, dynamic>() : const {};
   switch (entry.action) {
     case 'user.lock':
-      return (d['reason'] ?? '').toString().isNotEmpty ? 'Lý do: ${d['reason']}' : 'Không ghi lý do';
+      return (d['reason'] ?? '').toString().isNotEmpty ? t('Lý do: {value}', {'value': d['reason']}) : t('Không ghi lý do');
     case 'user.delete':
       return '${d['email'] ?? ''} · ${_role(d['role'])}';
     case 'user.role':
       return '${_role(m(d['before'])['role'])} → ${_role(m(d['after'])['role'])}';
     case 'admin.create':
-      return 'Quyền: ${_modules(d['permissions'])}';
+      return t('Quyền: {value}', {'value': _modules(d['permissions'])});
     case 'admin.permissions':
       return '${_modules(d['before'])} → ${_modules(d['after'])}';
     case 'settings.update':
       final before = m(d['before']);
       final after = m(d['after']);
       final changes = <String>[];
-      if (before['registrationOpen'] != after['registrationOpen']) changes.add(after['registrationOpen'] == true ? 'Mở đăng ký' : 'Đóng đăng ký');
+      if (before['registrationOpen'] != after['registrationOpen']) changes.add(after['registrationOpen'] == true ? t('Mở đăng ký') : t('Đóng đăng ký'));
       if (before['announcement'] != after['announcement']) {
         final text = (after['announcement'] ?? '').toString();
-        changes.add(text.isNotEmpty ? 'Thông báo: “$text”' : 'Gỡ thông báo');
+        changes.add(text.isNotEmpty ? t('Thông báo: “{text}”', {'text': text}) : t('Gỡ thông báo'));
       }
-      return changes.isEmpty ? 'Không đổi gì' : changes.join(' · ');
+      return changes.isEmpty ? t('Không đổi gì') : changes.join(' · ');
     case 'system.reset_users':
-      return 'Đã xoá ${d['deletedUsers'] ?? 0} tài khoản';
+      return t('Đã xoá {value} tài khoản', {'value': d['deletedUsers'] ?? 0});
     case 'system.seed_superadmin':
-      return d['created'] == true ? 'Tạo mới' : 'Khôi phục quyền Super Admin cho tài khoản có sẵn';
+      return d['created'] == true ? t('Tạo mới') : t('Khôi phục quyền Super Admin cho tài khoản có sẵn');
     default:
       return '';
   }
@@ -956,12 +957,12 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Mọi thao tác của Admin và Super Admin đều được ghi lại ở đây. Nhật ký không sửa hay xoá được từ giao diện.', style: AppText.meta),
+        Text(t('Mọi thao tác của Admin và Super Admin đều được ghi lại ở đây. Nhật ký không sửa hay xoá được từ giao diện.'), style: AppText.meta),
         const SizedBox(height: 12),
         AppTextField(
           controller: _search,
           icon: LucideIcons.search,
-          hint: 'Tìm trong nhật ký',
+          hint: t('Tìm trong nhật ký'),
           onChanged: (text) {
             _debounce?.cancel();
             _debounce = Timer(const Duration(milliseconds: 300), () {
@@ -974,7 +975,7 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
         const SizedBox(height: 10),
         SelectField<String>(
           value: _action,
-          options: [const SelectOption('all', 'Mọi hành động'), for (final e in _actionLabels.entries) SelectOption(e.key, e.value)],
+          options: [SelectOption('all', t('Mọi hành động')), for (final e in _actionLabels.entries) SelectOption(e.key, e.value)],
           onChanged: (v) {
             setState(() {
               _action = v;
@@ -985,7 +986,7 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
         ),
         const SizedBox(height: 14),
         if (_loading && data == null)
-          const LoadingView(message: 'Đang tải nhật ký…')
+          LoadingView(message: t('Đang tải nhật ký…'))
         else if (_error != null && data == null)
           ErrorPanel(error: _error, onRetry: _load)
         else if (data == null || data.items.isEmpty)
@@ -995,7 +996,7 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: AppColors.borderStrong),
             ),
-            child: Text('Chưa có hoạt động nào khớp bộ lọc.', style: AppText.meta, textAlign: TextAlign.center),
+            child: Text(t('Chưa có hoạt động nào khớp bộ lọc.'), style: AppText.meta, textAlign: TextAlign.center),
           )
         else ...[
           if (_loading) const LinearProgressIndicator(minHeight: 2),
@@ -1013,10 +1014,10 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${entry.actorName} · ${entry.actorRole == 'system' ? 'Hệ thống' : _role(entry.actorRole)}${entry.ip.isNotEmpty ? ' · ${entry.ip}' : ''}',
+                    '${entry.actorName} · ${entry.actorRole == 'system' ? t('Hệ thống') : _role(entry.actorRole)}${entry.ip.isNotEmpty ? ' · ${entry.ip}' : ''}',
                     style: AppText.meta.copyWith(fontSize: 12),
                   ),
-                  Text('Đối tượng: ${entry.targetLabel.isEmpty ? '—' : entry.targetLabel}', style: AppText.bodySmall),
+                  Text(t('Đối tượng: {value}', {'value': entry.targetLabel.isEmpty ? '—' : entry.targetLabel}), style: AppText.bodySmall),
                   if (_describe(entry).isNotEmpty) Text(_describe(entry), style: AppText.meta.copyWith(fontSize: 12)),
                 ],
               ),
@@ -1025,7 +1026,7 @@ class _AuditPanelState extends ConsumerState<AuditPanel> {
           ],
           Row(
             children: [
-              Text('${data.total} mục', style: AppText.meta.copyWith(fontSize: 12)),
+              Text(t('{total} mục', {'total': data.total}), style: AppText.meta.copyWith(fontSize: 12)),
               const Spacer(),
               Pagination(
                 page: data.page,
@@ -1054,7 +1055,7 @@ class SettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(adminSettingsProvider);
-    if (current.isLoading && !current.hasValue) return const LoadingView(message: 'Đang tải cấu hình…');
+    if (current.isLoading && !current.hasValue) return LoadingView(message: t('Đang tải cấu hình…'));
     if (current.hasError && !current.hasValue) return ErrorPanel(error: current.error, onRetry: () => ref.invalidate(adminSettingsProvider));
     final saved = current.value!;
     // Re-mount the form whenever the saved values change, so it starts from them.
@@ -1088,7 +1089,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     setState(() => _saving = true);
     try {
       await AdminService.saveSettings(AppSettings(registrationOpen: _open, announcement: _announcement.text.trim()));
-      ref.read(adminNoticeProvider.notifier).show(const Notice('Đã lưu cấu hình hệ thống.'));
+      ref.read(adminNoticeProvider.notifier).show(Notice(t('Đã lưu cấu hình hệ thống.')));
       ref.invalidate(adminSettingsProvider);
       ref.invalidate(publicSettingsProvider);
       ref.read(adminVersionProvider.notifier).bump();
@@ -1107,17 +1108,17 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
         CheckboxRow(
           checked: _open,
           onChanged: (v) => setState(() => _open = v),
-          title: 'Cho phép đăng ký tài khoản mới',
-          description: 'Khi tắt, trang đăng ký báo tạm ngừng, và đăng nhập Google lần đầu không tạo được tài khoản mới. Người đã có tài khoản vẫn đăng nhập bình thường.',
+          title: t('Cho phép đăng ký tài khoản mới'),
+          description: t('Khi tắt, trang đăng ký báo tạm ngừng, và đăng nhập Google lần đầu không tạo được tài khoản mới. Người đã có tài khoản vẫn đăng nhập bình thường.'),
         ),
         const SizedBox(height: 16),
         AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Thông báo toàn trang', style: AppText.label),
+              Text(t('Thông báo toàn trang'), style: AppText.label),
               const SizedBox(height: 4),
-              Text('Hiện thành một dải thông báo trên mọi trang, ví dụ lịch bảo trì. Để trống để tắt.', style: AppText.meta),
+              Text(t('Hiện thành một dải thông báo trên mọi trang, ví dụ lịch bảo trì. Để trống để tắt.'), style: AppText.meta),
               const SizedBox(height: 10),
               AppTextField(
                 controller: _announcement,
@@ -1133,11 +1134,11 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
         const SizedBox(height: 16),
         Row(
           children: [
-            AppButton(label: 'Lưu cấu hình', loading: _saving, onPressed: _dirty ? _save : null),
+            AppButton(label: t('Lưu cấu hình'), loading: _saving, onPressed: _dirty ? _save : null),
             if (_dirty) ...[
               const SizedBox(width: 10),
               AppButton(
-                label: 'Huỷ thay đổi',
+                label: t('Huỷ thay đổi'),
                 variant: ButtonVariant.ghost,
                 onPressed: _saving
                     ? null

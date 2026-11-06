@@ -15,6 +15,7 @@ import '../../ui/surfaces.dart';
 import 'discover_cards.dart';
 import 'interests.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 const _minRow = 2;
 
@@ -44,7 +45,7 @@ class InterestScreen extends ConsumerWidget {
     final journal = [...newest, ?featured].take(3).toList();
 
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: Text('#$tag')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text('#${tx(tag)}')),
       body: all.isLoading && !all.hasValue
           ? const Padding(
               padding: EdgeInsets.all(kGutter),
@@ -69,17 +70,17 @@ class InterestScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: kGutter),
                         child: EmptyState(
                           icon: LucideIcons.searchX,
-                          title: 'Chưa có hành trình nào về “$tag”',
-                          description: 'Thử một sở thích khác bên dưới, hoặc là người đầu tiên chia sẻ.',
-                          action: AppButton(label: 'Đăng hành trình', onPressed: () => context.push('/posts/new')),
+                          title: t('Chưa có hành trình nào về “{tag}”', {'tag': tag}),
+                          description: t('Thử một sở thích khác bên dưới, hoặc là người đầu tiên chia sẻ.'),
+                          action: AppButton(label: t('Đăng hành trình'), onPressed: () => context.push('/posts/new')),
                         ),
                       ),
-                      if (others.isNotEmpty) ...[const SizedBox(height: 32), InterestRow(tiles: others, title: 'Sở thích khác')],
+                      if (others.isNotEmpty) ...[const SizedBox(height: 32), InterestRow(tiles: others, title: t('Sở thích khác'))],
                     ]
                   : [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: kGutter),
-                        child: _InterestHero(title: interestHeadline(tag), subtitle: '${trips.length} hành trình gắn thẻ “$tag”', images: covers),
+                        child: _InterestHero(title: interestHeadline(tag), subtitle: t('{n} hành trình gắn thẻ “{tag}”', {'n': trips.length, 'tag': tag}), images: covers),
                       ),
                       const SizedBox(height: 32),
                       Padding(
@@ -97,8 +98,8 @@ class InterestScreen extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Bảng xếp hạng cộng đồng', style: AppText.h2),
-                                  Text('Những hành trình “$tag” được lưu nhiều nhất', style: AppText.meta),
+                                  Text(t('Bảng xếp hạng cộng đồng'), style: AppText.h2),
+                                  Text(t('Những hành trình “{tag}” được lưu nhiều nhất', {'tag': tx(tag)}), style: AppText.meta),
                                 ],
                               ),
                             ),
@@ -113,8 +114,8 @@ class InterestScreen extends ConsumerWidget {
                       if (featured != null && newest.length >= _minRow) ...[
                         const SizedBox(height: 32),
                         Band(
-                          title: 'Câu chuyện nổi bật',
-                          description: 'Được thả tim nhiều nhất, cùng những chuyến mới đăng',
+                          title: t('Câu chuyện nổi bật'),
+                          description: t('Được thả tim nhiều nhất, cùng những chuyến mới đăng'),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -140,7 +141,7 @@ class InterestScreen extends ConsumerWidget {
                             children: [
                               FeaturedStory(post: spreadPhoto, height: 300),
                               const SizedBox(height: 14),
-                              const SectionHeader(title: 'Đi vừa túi tiền', subtitle: 'Từ chuyến rẻ nhất trở lên'),
+                              SectionHeader(title: t('Đi vừa túi tiền'), subtitle: t('Từ chuyến rẻ nhất trở lên')),
                               const SizedBox(height: 14),
                               CardGrid(
                                 children: [for (final p in cheapest) DiscoverCard(post: p, chip: regionLabel(p.region))],
@@ -152,7 +153,7 @@ class InterestScreen extends ConsumerWidget {
                       if (regionTiles.isNotEmpty) ...[
                         const SizedBox(height: 32),
                         Band(
-                          title: 'Đi đâu để “$tag”',
+                          title: t('Đi đâu để “{tag}”', {'tag': tag}),
                           child: Carousel<({String region, String image})>(
                             items: regionTiles,
                             cardShare: 0.5,
@@ -167,8 +168,8 @@ class InterestScreen extends ConsumerWidget {
                       ],
                       const SizedBox(height: 32),
                       Band(
-                        title: 'Nhật ký hành trình',
-                        description: 'Lên kế hoạch cho chuyến tới, đọc từ người đã đi',
+                        title: t('Nhật ký hành trình'),
+                        description: t('Lên kế hoạch cho chuyến tới, đọc từ người đã đi'),
                         bleed: false,
                         child: Column(
                           children: [
@@ -178,7 +179,7 @@ class InterestScreen extends ConsumerWidget {
                       ),
                       if (others.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        InterestRow(tiles: others, title: 'Sở thích khác', description: 'Còn nhiều cách khác để lên đường.'),
+                        InterestRow(tiles: others, title: t('Sở thích khác'), description: t('Còn nhiều cách khác để lên đường.')),
                       ],
                     ],
             ),
@@ -276,7 +277,7 @@ class _InterestHeroState extends State<_InterestHero> {
                   if (_canPlay)
                     AppIconButton(
                       icon: _playing == true ? LucideIcons.pause : LucideIcons.play,
-                      label: _playing == true ? 'Tạm dừng trình chiếu' : 'Phát trình chiếu',
+                      label: _playing == true ? t('Tạm dừng trình chiếu') : t('Phát trình chiếu'),
                       tone: IconTone.overlay,
                       size: 38,
                       onPressed: () {

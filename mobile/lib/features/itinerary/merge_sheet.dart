@@ -14,6 +14,7 @@ import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// A selected day, keyed by its post too: duplicated journeys share day ids.
 String _keyOf(String postId, String dayId) => '$postId::$dayId';
@@ -22,8 +23,8 @@ String _keyOf(String postId, String dayId) => '$postId::$dayId';
 Future<void> showMergeSheet(BuildContext context, ClonedItinerary itinerary) {
   return showAppSheet<void>(
     context,
-    title: 'Ghép ngày từ bài viết khác',
-    description: 'Chọn những ngày bạn muốn thêm. Ngày được ghép sẽ nối vào cuối và đánh số lại.',
+    title: t('Ghép ngày từ bài viết khác'),
+    description: t('Chọn những ngày bạn muốn thêm. Ngày được ghép sẽ nối vào cuối và đánh số lại.'),
     tall: true,
     builder: (_) => _MergeForm(itinerary: itinerary, parentContext: context),
   );
@@ -70,7 +71,7 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
       if (!mounted) return;
       final count = _selected.length;
       Navigator.of(context).pop();
-      if (widget.parentContext.mounted) toast(widget.parentContext, 'Đã ghép $count ngày vào lịch trình.');
+      if (widget.parentContext.mounted) toast(widget.parentContext, t('Đã ghép {n} ngày vào lịch trình.', {'n': count}));
     } catch (error) {
       if (mounted) setState(() => _error = errorMessage(error));
     } finally {
@@ -94,7 +95,7 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
       children: [
         AppTextField(
           controller: _query,
-          label: 'Tìm hành trình theo tên hoặc thẻ',
+          label: t('Tìm hành trình theo tên hoặc thẻ'),
           icon: LucideIcons.search,
           autocorrect: false,
           onChanged: (_) => setState(() {}),
@@ -105,7 +106,7 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
             TextSpan(
               style: AppText.meta,
               children: [
-                TextSpan(text: 'Đã chọn ${_selected.length} ngày · thêm khoảng '),
+                TextSpan(text: t('Đã chọn {n} ngày · thêm khoảng ', {'n': _selected.length})),
                 TextSpan(
                   text: formatVnd(selectedCost),
                   style: const TextStyle(color: AppColors.cream),
@@ -118,19 +119,19 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
         if (async.isLoading && !async.hasValue)
           for (var i = 0; i < 3; i++) ...[const Skeleton(height: 64), const SizedBox(height: 8)],
         if (async.hasError && !async.hasValue) ErrorPanel(error: async.error, onRetry: () => ref.invalidate(publishedPostsProvider)),
-        if (async.hasValue && filtered.isEmpty) Text('Không tìm thấy hành trình nào khớp.', style: AppText.meta, textAlign: TextAlign.center),
+        if (async.hasValue && filtered.isEmpty) Text(t('Không tìm thấy hành trình nào khớp.'), style: AppText.meta, textAlign: TextAlign.center),
         for (final post in filtered) ...[_postTile(post), const SizedBox(height: 8)],
         if (_error != null) ...[const SizedBox(height: 6), ErrorText(_error)],
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
+              child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: AppButton(
-                label: _selected.isNotEmpty ? 'Ghép ${_selected.length} ngày' : 'Ghép',
+                label: _selected.isNotEmpty ? t('Ghép {n} ngày', {'n': _selected.length}) : t('Ghép'),
                 icon: LucideIcons.gitMerge,
                 loading: _pending,
                 onPressed: _selected.isEmpty ? null : () => _merge(posts),
@@ -172,7 +173,7 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
                           style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.cream),
                         ),
                         Text(
-                          '${post.days.length} ngày · ${post.author?.displayName ?? ''}${widget.itinerary.sourcePostIds.contains(post.id) ? ' · đã ghép trước đó' : ''}',
+                          t('{n} ngày · {value}{value2}', {'n': post.days.length, 'value': post.author?.displayName ?? '', 'value2': widget.itinerary.sourcePostIds.contains(post.id) ? t(' · đã ghép trước đó') : ''}),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppText.meta,
@@ -229,12 +230,12 @@ class _MergeFormState extends ConsumerState<_MergeForm> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Ngày ${day.dayNumber}: ${day.title.isEmpty ? 'Chưa đặt tên' : day.title}',
+                              t('Ngày {dayNumber}: {value}', {'dayNumber': day.dayNumber, 'value': day.title.isEmpty ? t('Chưa đặt tên') : day.title}),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppText.bodySmall,
                             ),
-                            Text('${day.locations.length} điểm dừng', style: AppText.meta),
+                            Text(t('{n} điểm dừng', {'n': day.locations.length}), style: AppText.meta),
                           ],
                         ),
                       ),

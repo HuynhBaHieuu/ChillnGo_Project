@@ -1,5 +1,6 @@
 import '../../core/text.dart';
 import '../../data/models.dart';
+import '../../core/i18n.dart';
 
 class InterestTile {
   const InterestTile({required this.tag, required this.image});
@@ -10,19 +11,19 @@ class InterestTile {
 
 String interestPath(String tag) => '/discover/interest/${Uri.encodeComponent(tag)}';
 
-const _headlines = {
-  'ẩm thực': 'Đi để ăn',
-  'biển': 'Ra biển thôi',
-  'núi': 'Lên núi thôi',
-  'tiết kiệm': 'Đi xa, tiêu ít',
-  'săn mây': 'Săn mây trên đỉnh',
-  'trekking': 'Xỏ giày lên đường',
-  'cà phê': 'Đi để ngồi cà phê',
-  'văn hóa': 'Đi để hiểu',
-  'lặn biển': 'Lặn xuống biển xanh',
+Map<String, String> get _headlines => {
+  'ẩm thực': t('Đi để ăn'),
+  'biển': t('Ra biển thôi'),
+  'núi': t('Lên núi thôi'),
+  'tiết kiệm': t('Đi xa, tiêu ít'),
+  'săn mây': t('Săn mây trên đỉnh'),
+  'trekking': t('Xỏ giày lên đường'),
+  'cà phê': t('Đi để ngồi cà phê'),
+  'văn hóa': t('Đi để hiểu'),
+  'lặn biển': t('Lặn xuống biển xanh'),
 };
 
-String interestHeadline(String tag) => _headlines[tag] ?? 'Dành cho người mê $tag';
+String interestHeadline(String tag) => _headlines[tag] ?? t('Dành cho người mê {tag}', {'tag': tag});
 
 /// The most-used tags, each pictured by the trip that lists it earliest among
 /// its own tags; a cover is used at most once. [posts] must be sorted by saves.
@@ -97,8 +98,8 @@ List<SuggestionGroup> buildSuggestions(List<TripPost> posts, String query, Strin
 
   if (q.isEmpty) {
     return [
-      SuggestionGroup('Tìm kiếm gần đây', recent.take(4).map(RecentSuggestion.new).toList()),
-      SuggestionGroup('Hành trình phổ biến', scoped.take(5).map(TripSuggestion.new).toList()),
+      SuggestionGroup(t('Tìm kiếm gần đây'), recent.take(4).map(RecentSuggestion.new).toList()),
+      SuggestionGroup(t('Hành trình phổ biến'), scoped.take(5).map(TripSuggestion.new).toList()),
     ].where((g) => g.items.isNotEmpty).toList();
   }
 
@@ -126,9 +127,9 @@ List<SuggestionGroup> buildSuggestions(List<TripPost> posts, String query, Strin
   final tags = (tagCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).take(3).map((e) => TagSuggestion(e.key, e.value)).toList();
 
   return [
-    SuggestionGroup('Hành trình', trips.map(TripSuggestion.new).toList()),
-    SuggestionGroup('Điểm dừng', stops.take(4).toList()),
-    SuggestionGroup('Thẻ', tags),
+    SuggestionGroup(t('Hành trình'), trips.map(TripSuggestion.new).toList()),
+    SuggestionGroup(t('Điểm dừng'), stops.take(4).toList()),
+    SuggestionGroup(t('Thẻ'), tags),
     SuggestionGroup(null, [AllSuggestion(query.trim())]),
   ].where((g) => g.items.isNotEmpty).toList();
 }

@@ -61,6 +61,8 @@ flutter:
   assets:
     # Demo journeys, comments, follows… shared with the web app (web/src/mocks).
     - assets/mocks/
+    # Translations: web.json from web/src/i18n (node scripts/export-i18n.mjs), mobile.json the app's own.
+    - assets/i18n/
 
   # The web's "void" theme (web/src/styles/theme-void.css), turned on by
   # data-theme="void" in web/index.html.

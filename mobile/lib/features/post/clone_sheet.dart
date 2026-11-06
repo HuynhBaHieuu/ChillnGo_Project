@@ -14,13 +14,14 @@ import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../../core/i18n.dart';
 
 /// "Dùng làm lịch trình của tôi": name the copy, pick a start date (web: CloneDialog).
 Future<void> showCloneSheet(BuildContext context, TripPost post) {
   return showAppSheet<void>(
     context,
-    title: 'Dùng làm lịch trình của tôi',
-    description: 'Sao chép ${post.days.length} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể đổi thứ tự và ghép thêm ngày từ bài khác sau.',
+    title: t('Dùng làm lịch trình của tôi'),
+    description: t('Sao chép {n} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể đổi thứ tự và ghép thêm ngày từ bài khác sau.', {'n': post.days.length}),
     builder: (_) => _CloneForm(post: post, parentContext: context),
   );
 }
@@ -36,7 +37,7 @@ class _CloneForm extends ConsumerStatefulWidget {
 }
 
 class _CloneFormState extends ConsumerState<_CloneForm> {
-  late final _title = TextEditingController(text: '${widget.post.title} (bản của tôi)');
+  late final _title = TextEditingController(text: t('{title} (bản của tôi)', {'title': widget.post.title}));
   late String _startDate = widget.post.startDate;
   bool _pending = false;
   String? _error;
@@ -61,7 +62,7 @@ class _CloneFormState extends ConsumerState<_CloneForm> {
       Navigator.of(context).pop();
       final parent = widget.parentContext;
       if (parent.mounted) {
-        toast(parent, 'Đã sao chép vào Hành trình của tôi.');
+        toast(parent, t('Đã sao chép vào Hành trình của tôi.'));
         parent.push('/itineraries/${itinerary.id}');
       }
     } catch (error) {
@@ -100,24 +101,24 @@ class _CloneFormState extends ConsumerState<_CloneForm> {
           ),
         ),
         const SizedBox(height: 16),
-        AppTextField(controller: _title, label: 'Tên lịch trình', maxLength: 150),
+        AppTextField(controller: _title, label: t('Tên lịch trình'), maxLength: 150),
         const SizedBox(height: 14),
         DateField(
-          label: 'Ngày khởi hành',
+          label: t('Ngày khởi hành'),
           value: _startDate,
           onChanged: (v) => setState(() => _startDate = v),
-          helper: 'Các ngày trong lịch trình sẽ được đánh lại từ ngày này.',
+          helper: t('Các ngày trong lịch trình sẽ được đánh lại từ ngày này.'),
         ),
         if (_error != null) ...[const SizedBox(height: 10), ErrorText(_error)],
         const SizedBox(height: 18),
         Row(
           children: [
             Expanded(
-              child: AppButton(label: 'Huỷ', variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
+              child: AppButton(label: t('Huỷ'), variant: ButtonVariant.outline, onPressed: _pending ? null : () => Navigator.of(context).pop()),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: AppButton(label: 'Sao chép hành trình', icon: LucideIcons.copy, loading: _pending, onPressed: _clone),
+              child: AppButton(label: t('Sao chép hành trình'), icon: LucideIcons.copy, loading: _pending, onPressed: _clone),
             ),
           ],
         ),

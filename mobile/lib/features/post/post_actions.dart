@@ -13,6 +13,7 @@ import '../../data/services/post_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/sheets.dart';
+import '../../core/i18n.dart';
 
 /// Sends a signed-out user to sign in, returning to the current page. True when signed in.
 bool requireSignIn(BuildContext context, WidgetRef ref) {
@@ -51,7 +52,7 @@ Future<void> toggleSave(BuildContext context, WidgetRef ref, TripPost post) asyn
     final result = await PostService.toggleBookmark(post.id, viewerId);
     overlays.patch(post.id, PostOverlay(saved: result.bookmarkedByMe, saveCount: result.bookmarkCount));
     ref.invalidate(bookmarksProvider);
-    if (context.mounted) toast(context, result.bookmarkedByMe ? 'Đã lưu hành trình.' : 'Đã bỏ lưu hành trình.');
+    if (context.mounted) toast(context, result.bookmarkedByMe ? t('Đã lưu hành trình.') : t('Đã bỏ lưu hành trình.'));
   } catch (error) {
     overlays.patch(post.id, PostOverlay(saved: before.saved, saveCount: before.saveCount));
     if (context.mounted) toast(context, errorMessage(error), error: true);

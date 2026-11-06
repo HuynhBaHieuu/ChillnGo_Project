@@ -11,14 +11,15 @@ import '../../data/services/activity_service.dart';
 import '../../state/session.dart';
 import '../../ui/surfaces.dart';
 import 'interests.dart';
+import '../../core/i18n.dart';
 
-const _regionTabs = [
-  (value: 'all', label: 'Tất cả', icon: LucideIcons.globe, heading: 'Bạn muốn đi đâu?', placeholder: 'Điểm đến, hành trình, thẻ…'),
-  (value: 'north', label: 'Miền Bắc', icon: LucideIcons.mountain, heading: 'Lên núi săn mây', placeholder: 'Hà Giang, Sa Pa, Ninh Bình…'),
-  (value: 'central', label: 'Miền Trung', icon: LucideIcons.landmark, heading: 'Về miền di sản', placeholder: 'Huế, Hội An, Đà Lạt…'),
-  (value: 'south', label: 'Miền Nam', icon: LucideIcons.treePalm, heading: 'Xuôi về phương Nam', placeholder: 'Sài Gòn, Cần Thơ, Vũng Tàu…'),
-  (value: 'islands', label: 'Hải đảo', icon: LucideIcons.sailboat, heading: 'Ra đảo thôi', placeholder: 'Phú Quốc, Côn Đảo, Cát Bà…'),
-  (value: 'overseas', label: 'Nước ngoài', icon: LucideIcons.plane, heading: 'Đi xa hơn một chút', placeholder: 'Bangkok, Seoul, Tokyo…'),
+List<({String value, String label, IconData icon, String heading, String placeholder})> get _regionTabs => [
+  (value: 'all', label: t('Tất cả'), icon: LucideIcons.globe, heading: t('Bạn muốn đi đâu?'), placeholder: t('Điểm đến, hành trình, thẻ…')),
+  (value: 'north', label: t('Miền Bắc'), icon: LucideIcons.mountain, heading: t('Lên núi săn mây'), placeholder: t('Hà Giang, Sa Pa, Ninh Bình…')),
+  (value: 'central', label: t('Miền Trung'), icon: LucideIcons.landmark, heading: t('Về miền di sản'), placeholder: t('Huế, Hội An, Đà Lạt…')),
+  (value: 'south', label: t('Miền Nam'), icon: LucideIcons.treePalm, heading: t('Xuôi về phương Nam'), placeholder: t('Sài Gòn, Cần Thơ, Vũng Tàu…')),
+  (value: 'islands', label: t('Hải đảo'), icon: LucideIcons.sailboat, heading: t('Ra đảo thôi'), placeholder: t('Phú Quốc, Côn Đảo, Cát Bà…')),
+  (value: 'overseas', label: t('Nước ngoài'), icon: LucideIcons.plane, heading: t('Đi xa hơn một chút'), placeholder: 'Bangkok, Seoul, Tokyo…'),
 ];
 
 /// Recent journey searches of the signed-in user (from Search History).
@@ -197,13 +198,13 @@ class _SearchHeroState extends ConsumerState<SearchHero> {
                 ),
                 if (_open)
                   IconButton(
-                    tooltip: 'Đóng gợi ý',
+                    tooltip: t('Đóng gợi ý'),
                     icon: const Icon(LucideIcons.x, size: 20, color: AppColors.meta),
                     onPressed: _close,
                   )
                 else if (_text.text.isNotEmpty)
                   IconButton(
-                    tooltip: 'Xoá tìm kiếm',
+                    tooltip: t('Xoá tìm kiếm'),
                     icon: const Icon(LucideIcons.x, size: 20, color: AppColors.meta),
                     onPressed: () => _submit(''),
                   ),
@@ -261,9 +262,9 @@ class _SuggestionRow extends StatelessWidget {
         post.title,
         '${regionLabel(post.region)} · ${tripLengthLabel(post.days.length)}',
       ),
-      StopSuggestion(:final post, :final name) => (icon(LucideIcons.mapPin), name, 'Trong hành trình: ${post.title}'),
-      TagSuggestion(:final tag, :final count) => (icon(LucideIcons.hash), tag, '$count hành trình'),
-      AllSuggestion(:final query) => (icon(LucideIcons.search), 'Xem tất cả kết quả cho “$query”', null),
+      StopSuggestion(:final post, :final name) => (icon(LucideIcons.mapPin), name, t('Trong hành trình: {title}', {'title': post.title})),
+      TagSuggestion(:final tag, :final count) => (icon(LucideIcons.hash), tx(tag), t('{n} hành trình', {'n': count})),
+      AllSuggestion(:final query) => (icon(LucideIcons.search), t('Xem tất cả kết quả cho “{query}”', {'query': query}), null),
     };
 
     return InkWell(

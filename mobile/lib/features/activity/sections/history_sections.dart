@@ -12,12 +12,13 @@ import '../../../ui/buttons.dart';
 import '../../../ui/sheets.dart';
 import '../../../ui/surfaces.dart';
 import '../activity_common.dart';
+import '../../../core/i18n.dart';
 
-const _searchTypes = {
-  'journey': ('Hành trình', LucideIcons.map),
-  'place': ('Địa điểm', LucideIcons.mapPin),
-  'post': ('Bài viết', LucideIcons.fileText),
-  'user': ('Người dùng', LucideIcons.user),
+Map<String, (String, IconData)> get _searchTypes => {
+  'journey': (t('Hành trình'), LucideIcons.map),
+  'place': (t('Địa điểm'), LucideIcons.mapPin),
+  'post': (t('Bài viết'), LucideIcons.fileText),
+  'user': (t('Người dùng'), LucideIcons.user),
 };
 
 class SearchHistorySection extends ConsumerStatefulWidget {
@@ -45,9 +46,9 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
   Future<void> _clear() async {
     final done = await confirmAction(
       context,
-      title: 'Xoá toàn bộ lịch sử tìm kiếm?',
-      description: 'Mọi lượt tìm kiếm trong lịch sử sẽ bị xoá. Không thể hoàn tác.',
-      confirmLabel: 'Xoá tất cả',
+      title: t('Xoá toàn bộ lịch sử tìm kiếm?'),
+      description: t('Mọi lượt tìm kiếm trong lịch sử sẽ bị xoá. Không thể hoàn tác.'),
+      confirmLabel: t('Xoá tất cả'),
       destructive: true,
       onConfirm: ActivityService.clearSearchHistory,
     );
@@ -62,9 +63,9 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionIntro(
-          title: 'Lịch sử tìm kiếm',
-          description: 'Những lần bạn tìm kiếm ở trang Khám phá và khi chọn địa điểm check-in. Chỉ mình bạn thấy được.',
-          action: list.isNotEmpty ? AppButton(label: 'Xoá tất cả', variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _clear) : null,
+          title: t('Lịch sử tìm kiếm'),
+          description: t('Những lần bạn tìm kiếm ở trang Khám phá và khi chọn địa điểm check-in. Chỉ mình bạn thấy được.'),
+          action: list.isNotEmpty ? AppButton(label: t('Xoá tất cả'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: _clear) : null,
         ),
         const SizedBox(height: 16),
         if (history.isLoading && !history.hasValue)
@@ -72,10 +73,10 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
         else if (history.hasError && !history.hasValue)
           ErrorPanel(error: history.error, onRetry: () => ref.invalidate(searchHistoryProvider))
         else if (list.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: LucideIcons.search,
-            title: 'Chưa có lượt tìm kiếm nào',
-            description: 'Tìm hành trình ở trang Khám phá, các lượt tìm của bạn sẽ được liệt kê ở đây.',
+            title: t('Chưa có lượt tìm kiếm nào'),
+            description: t('Tìm hành trình ở trang Khám phá, các lượt tìm của bạn sẽ được liệt kê ở đây.'),
           )
         else
           for (final entry in list)
@@ -101,7 +102,7 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
                 ),
                 AppIconButton(
                   icon: LucideIcons.x,
-                  label: 'Xoá “${entry.query}” khỏi lịch sử tìm kiếm',
+                  label: t('Xoá “{query}” khỏi lịch sử tìm kiếm', {'query': entry.query}),
                   loading: _removing == entry.id,
                   onPressed: () => _remove(entry),
                 ),
@@ -112,18 +113,18 @@ class _SearchHistorySectionState extends ConsumerState<SearchHistorySection> {
   }
 }
 
-const _events = {
-  'account_created': ('Tạo tài khoản', LucideIcons.sparkles),
-  'email_verified': ('Xác minh địa chỉ email', LucideIcons.badgeCheck),
-  'password_reset': ('Đặt lại mật khẩu', LucideIcons.keyRound),
-  'avatar_changed': ('Đổi ảnh đại diện', LucideIcons.image),
-  'avatar_removed': ('Gỡ ảnh đại diện', LucideIcons.imageOff),
-  'cover_changed': ('Đổi ảnh bìa', LucideIcons.image),
-  'cover_removed': ('Gỡ ảnh bìa', LucideIcons.imageOff),
-  'username_changed': ('Đổi tên người dùng', LucideIcons.atSign),
-  'display_name_changed': ('Đổi tên hiển thị', LucideIcons.userPen),
-  'bio_changed': ('Đổi phần giới thiệu', LucideIcons.fileText),
-  'location_changed': ('Đổi nơi sống', LucideIcons.mapPin),
+Map<String, (String, IconData)> get _events => {
+  'account_created': (t('Tạo tài khoản'), LucideIcons.sparkles),
+  'email_verified': (t('Xác minh địa chỉ email'), LucideIcons.badgeCheck),
+  'password_reset': (t('Đặt lại mật khẩu'), LucideIcons.keyRound),
+  'avatar_changed': (t('Đổi ảnh đại diện'), LucideIcons.image),
+  'avatar_removed': (t('Gỡ ảnh đại diện'), LucideIcons.imageOff),
+  'cover_changed': (t('Đổi ảnh bìa'), LucideIcons.image),
+  'cover_removed': (t('Gỡ ảnh bìa'), LucideIcons.imageOff),
+  'username_changed': (t('Đổi tên người dùng'), LucideIcons.atSign),
+  'display_name_changed': (t('Đổi tên hiển thị'), LucideIcons.userPen),
+  'bio_changed': (t('Đổi phần giới thiệu'), LucideIcons.fileText),
+  'location_changed': (t('Đổi nơi sống'), LucideIcons.mapPin),
 };
 
 String? _detail(AccountEvent event) {
@@ -132,8 +133,8 @@ String? _detail(AccountEvent event) {
   final via = event.details['via'];
   if (event.type == 'username_changed' && from != null && to != null) return '@$from → @$to';
   if ((event.type == 'display_name_changed' || event.type == 'location_changed') && to != null) return from != null ? '$from → $to' : to;
-  if (via == 'google') return event.type == 'account_created' ? 'Đăng ký bằng Google' : 'Xác nhận qua Google';
-  if (via == 'email' && event.type == 'account_created') return 'Đăng ký bằng email';
+  if (via == 'google') return event.type == 'account_created' ? t('Đăng ký bằng Google') : t('Xác nhận qua Google');
+  if (via == 'email' && event.type == 'account_created') return t('Đăng ký bằng email');
   return null;
 }
 
@@ -147,17 +148,17 @@ class AccountHistorySection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionIntro(title: 'Lịch sử tài khoản', description: 'Những thay đổi bạn đã thực hiện trên tài khoản. Chỉ hiện các sự kiện đã được ghi lại.'),
+        SectionIntro(title: t('Lịch sử tài khoản'), description: t('Những thay đổi bạn đã thực hiện trên tài khoản. Chỉ hiện các sự kiện đã được ghi lại.')),
         const SizedBox(height: 16),
         if (history.isLoading && !history.hasValue)
           const ListSkeleton()
         else if (history.hasError && !history.hasValue)
           ErrorPanel(error: history.error, onRetry: () => ref.invalidate(accountHistoryProvider))
         else if (list.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: LucideIcons.rotateCcwClock,
-            title: 'Chưa có lịch sử tài khoản',
-            description: 'Các thay đổi trên hồ sơ của bạn sẽ được ghi lại ở đây.',
+            title: t('Chưa có lịch sử tài khoản'),
+            description: t('Các thay đổi trên hồ sơ của bạn sẽ được ghi lại ở đây.'),
           )
         else
           for (var i = 0; i < list.length; i++)

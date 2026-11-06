@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../ui/surfaces.dart';
 import 'activity_common.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
 /// /activity: the list of sections, each opening as its own screen, like a settings app.
 class ActivityScreen extends StatelessWidget {
@@ -14,11 +15,11 @@ class ActivityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackOrHome(), title: const Text('Hoạt động của bạn')),
+      appBar: AppBar(leading: const BackOrHome(), title: Text(t('Hoạt động của bạn'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(kGutter, 4, kGutter, 40),
         children: [
-          Text('Xem lại và quản lý mọi hoạt động của bạn trên ChillnGo.', style: AppText.meta),
+          Text(t('Xem lại và quản lý mọi hoạt động của bạn trên ChillnGo.'), style: AppText.meta),
           const SizedBox(height: 14),
           AppCard(
             surface: Surface.surface,

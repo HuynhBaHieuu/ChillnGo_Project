@@ -26,8 +26,9 @@ import 'live_format.dart';
 import 'live_room.dart';
 import 'live_widgets.dart';
 import '../../ui/navigation.dart';
+import '../../core/i18n.dart';
 
-const _audienceNote = {'public': null, 'followers': 'Chỉ người theo dõi', 'private': 'Chỉ mình bạn xem được'};
+Map<String, String?> get _audienceNote => {'public': null, 'followers': t('Chỉ người theo dõi'), 'private': t('Chỉ mình bạn xem được')};
 
 /// /live/:id: the host's broadcast view or a viewer's watch view (decided by
 /// the server's token) while live; the replay and statistics once it is over
@@ -48,18 +49,18 @@ class LiveScreen extends ConsumerWidget {
         child: EmptyState(
           title: title,
           description: text,
-          action: AppButton(label: 'Về Newsfeed', onPressed: () => context.go('/feed')),
+          action: AppButton(label: t('Về Newsfeed'), onPressed: () => context.go('/feed')),
         ),
       ),
     );
 
     final Widget body;
     if (stream == null && async.isLoading) {
-      body = const LoadingView(message: 'Đang mở livestream…');
+      body = LoadingView(message: t('Đang mở livestream…'));
     } else if (stream == null) {
-      body = notice('Không mở được livestream', errorMessage(async.error));
+      body = notice(t('Không mở được livestream'), errorMessage(async.error));
     } else if (stream.blockedMe) {
-      body = notice('Bạn không xem được livestream này', 'Người phát đã chặn bạn khỏi buổi phát này.');
+      body = notice(t('Bạn không xem được livestream này'), t('Người phát đã chặn bạn khỏi buổi phát này.'));
     } else if (!stream.isLive) {
       body = LiveEnded(key: ValueKey('ended-${stream.id}'), stream: stream);
     } else {
@@ -224,9 +225,9 @@ class _LiveViewState extends ConsumerState<_LiveView> {
   Future<void> _confirmEnd() async {
     await confirmAction(
       context,
-      title: 'Kết thúc livestream?',
-      description: 'Người xem sẽ được báo là buổi phát đã kết thúc. Camera và micro sẽ tắt.',
-      confirmLabel: 'Kết thúc',
+      title: t('Kết thúc livestream?'),
+      description: t('Người xem sẽ được báo là buổi phát đã kết thúc. Camera và micro sẽ tắt.'),
+      confirmLabel: t('Kết thúc'),
       destructive: true,
       onConfirm: () async {
         await LivestreamService.end(stream.id);
@@ -248,10 +249,10 @@ class _LiveViewState extends ConsumerState<_LiveView> {
   Future<void> _block(LiveComment comment) async {
     final done = await confirmAction(
       context,
-      title: 'Chặn ${comment.author.displayName}?',
+      title: t('Chặn {displayName}?', {'displayName': comment.author.displayName}),
       description:
-          'Người này bị đưa ra khỏi livestream, không vào xem lại, bình luận hay thả cảm xúc được nữa. Các bình luận của họ trong buổi phát này sẽ bị xoá.',
-      confirmLabel: 'Chặn',
+          t('Người này bị đưa ra khỏi livestream, không vào xem lại, bình luận hay thả cảm xúc được nữa. Các bình luận của họ trong buổi phát này sẽ bị xoá.'),
+      confirmLabel: t('Chặn'),
       destructive: true,
       onConfirm: () => LivestreamService.blockViewer(stream.id, comment.author.id),
     );
@@ -289,9 +290,9 @@ class _LiveViewState extends ConsumerState<_LiveView> {
         padding: const EdgeInsets.all(kGutter),
         child: Center(
           child: EmptyState(
-            title: 'Bạn đã bị chặn',
-            description: 'Người phát đã chặn bạn khỏi livestream này.',
-            action: AppButton(label: 'Về Newsfeed', onPressed: () => context.go('/feed')),
+            title: t('Bạn đã bị chặn'),
+            description: t('Người phát đã chặn bạn khỏi livestream này.'),
+            action: AppButton(label: t('Về Newsfeed'), onPressed: () => context.go('/feed')),
           ),
         ),
       );
@@ -352,15 +353,15 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                                     children: [
                                       const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.cream)),
                                       const SizedBox(width: 10),
-                                      Text('Livestream đã kết thúc', style: AppText.h2),
+                                      Text(t('Livestream đã kết thúc'), style: AppText.h2),
                                     ],
                                   )
                                 else if (_connecting || room?.state == LinkState.connecting)
-                                  Text('Đang kết nối…', style: AppText.label)
+                                  Text(t('Đang kết nối…'), style: AppText.label)
                                 else if (isHost && !(room?.camOn ?? true))
-                                  Text('Camera đang tắt. Người xem vẫn nghe được bạn.', style: AppText.label, textAlign: TextAlign.center)
+                                  Text(t('Camera đang tắt. Người xem vẫn nghe được bạn.'), style: AppText.label, textAlign: TextAlign.center)
                                 else
-                                  Text(isHost ? 'Đang bật camera…' : 'Đang chờ hình ảnh từ người phát…', style: AppText.label, textAlign: TextAlign.center),
+                                  Text(isHost ? t('Đang bật camera…') : t('Đang chờ hình ảnh từ người phát…'), style: AppText.label, textAlign: TextAlign.center),
                               ],
                             ),
                           ),
@@ -393,7 +394,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                               children: [
                                 if (!isOver && !rewinding) LiveClock(baseSec: _baseSec, baseAt: _baseAt),
                                 if (!isOver && rewinding)
-                                  const AppBadge('Đang xem lại', icon: LucideIcons.rotateCcwClock, tone: BadgeTone.overlay, uppercase: true),
+                                  AppBadge(t('Đang xem lại'), icon: LucideIcons.rotateCcwClock, tone: BadgeTone.overlay, uppercase: true),
                                 if (!isOver) ViewerCount(count: room?.viewerCount ?? 0),
                                 if (!isOver && reactionTotal > 0)
                                   Container(
@@ -409,7 +410,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                           ),
                           AppIconButton(
                             icon: LucideIcons.x,
-                            label: (room?.isHost ?? false) && !isOver ? 'Kết thúc và rời livestream' : 'Rời livestream',
+                            label: (room?.isHost ?? false) && !isOver ? t('Kết thúc và rời livestream') : t('Rời livestream'),
                             tone: IconTone.overlay,
                             onPressed: _leave,
                           ),
@@ -431,7 +432,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                             children: [
                               const Icon(LucideIcons.wifiOff, size: 14, color: AppColors.white),
                               const SizedBox(width: 8),
-                              Text('Mạng chập chờn, đang kết nối lại…', style: AppText.meta.copyWith(color: AppColors.white, fontSize: 12)),
+                              Text(t('Mạng chập chờn, đang kết nối lại…'), style: AppText.meta.copyWith(color: AppColors.white, fontSize: 12)),
                             ],
                           ),
                         ),
@@ -479,8 +480,8 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                               on: room!.micOn,
                               iconOn: LucideIcons.mic,
                               iconOff: LucideIcons.micOff,
-                              labelOn: 'Tắt micro',
-                              labelOff: 'Bật micro',
+                              labelOn: t('Tắt micro'),
+                              labelOff: t('Bật micro'),
                               onTap: room.toggleMic,
                             ),
                             const SizedBox(width: 12),
@@ -488,8 +489,8 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                               on: room.camOn,
                               iconOn: LucideIcons.video,
                               iconOff: LucideIcons.videoOff,
-                              labelOn: 'Tắt camera',
-                              labelOff: 'Bật camera',
+                              labelOn: t('Tắt camera'),
+                              labelOff: t('Bật camera'),
                               onTap: room.toggleCamera,
                             ),
                             if (room.camOn) ...[
@@ -498,8 +499,8 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                                 on: true,
                                 iconOn: LucideIcons.switchCamera,
                                 iconOff: LucideIcons.switchCamera,
-                                labelOn: 'Đổi camera',
-                                labelOff: 'Đổi camera',
+                                labelOn: t('Đổi camera'),
+                                labelOff: t('Đổi camera'),
                                 onTap: room.switchCamera,
                               ),
                             ],
@@ -517,7 +518,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                                     children: [
                                       const Icon(LucideIcons.phoneOff, size: 16, color: AppColors.white),
                                       const SizedBox(width: 8),
-                                      Text('Kết thúc', style: AppText.label.copyWith(color: AppColors.white)),
+                                      Text(t('Kết thúc'), style: AppText.label.copyWith(color: AppColors.white)),
                                     ],
                                   ),
                                 ),
@@ -547,7 +548,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                         ),
                         if (room?.state == LinkState.disconnected)
                           AppButton(
-                            label: 'Thử lại',
+                            label: t('Thử lại'),
                             icon: LucideIcons.refreshCw,
                             variant: ButtonVariant.ghost,
                             size: ButtonSize.sm,
@@ -587,7 +588,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                                 ),
                                 TextSpan(
                                   text:
-                                      ' · bắt đầu ${relativeTime(stream.startedAt)}${_audienceNote[stream.audience] != null ? ' · ${_audienceNote[stream.audience]}' : ''}${stream.recording.status == 'recording' ? ' · Đang được ghi lại' : ''}',
+                                      t(' · bắt đầu {time}{value}{value2}', {'time': relativeTime(stream.startedAt), 'value': _audienceNote[stream.audience] != null ? ' · ${_audienceNote[stream.audience]}' : '', 'value2': stream.recording.status == 'recording' ? t(' · Đang được ghi lại') : ''}),
                                 ),
                               ],
                             ),
@@ -610,7 +611,7 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                   comments: _comments,
                   onSend: (text) async => _addComment(await LivestreamService.sendComment(stream.id, text)),
                   disabled: isOver || me == null,
-                  disabledReason: isOver ? 'Livestream đã kết thúc.' : 'Đăng nhập để bình luận.',
+                  disabledReason: isOver ? t('Livestream đã kết thúc.') : t('Đăng nhập để bình luận.'),
                   hostId: stream.host.id,
                   meId: me?.id,
                   onDelete: _deleteComment,
