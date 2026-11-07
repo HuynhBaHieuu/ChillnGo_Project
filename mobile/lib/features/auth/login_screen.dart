@@ -64,14 +64,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
           children: [
-            Text(t('Chào mừng trở lại'), style: AppText.h1),
-            const SizedBox(height: 8),
-            Text(t('Đăng nhập để theo dõi hành trình của những người bạn đi cùng, và tiếp tục những lịch trình bạn đã lưu.'), style: AppText.meta),
-            const SizedBox(height: 20),
             AppCard(
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Text(t('Chào mừng trở lại'), style: AppText.hero),
+                  const SizedBox(height: 10),
+                  Text(t('Đăng nhập để theo dõi hành trình của những người bạn đi cùng, và tiếp tục những lịch trình bạn đã lưu.'), style: AppText.meta),
+                  const SizedBox(height: 24),
                   AppTextField(
                     controller: _email,
                     label: 'Email',
@@ -82,16 +83,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 16),
-                  PasswordField(controller: _password, textInputAction: TextInputAction.go, onChanged: (_) => setState(() {}), onSubmitted: (_) => _submit()),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: AppButton(
-                      label: t('Quên mật khẩu?'),
-                      variant: ButtonVariant.ghost,
-                      size: ButtonSize.sm,
-                      onPressed: () => context.push('/forgot-password?email=${Uri.encodeComponent(_email.text.trim())}'),
-                    ),
+                  // The label, with "Quên mật khẩu?" across from it (web: LoginPage).
+                  Row(
+                    children: [
+                      Expanded(child: Text(t('Mật khẩu'), style: AppText.label)),
+                      TextLink(
+                        label: t('Quên mật khẩu?'),
+                        color: AppColors.meta,
+                        onPressed: () => context.push('/forgot-password?email=${Uri.encodeComponent(_email.text.trim())}'),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 2),
+                  PasswordField(controller: _password, label: null, textInputAction: TextInputAction.go, onChanged: (_) => setState(() {}), onSubmitted: (_) => _submit()),
                   if (_error != null && !needsVerification) ...[const SizedBox(height: 12), ErrorText(_error!.message)],
                   if (needsVerification) ...[
                     const SizedBox(height: 14),
@@ -129,18 +133,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  AppButton(label: t('Đăng nhập'), size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _canSubmit ? _submit : null),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
+                  BeamButton(label: t('Đăng nhập'), large: true, loading: _pending, onPressed: _canSubmit ? _submit : null),
+                  const SizedBox(height: 24),
                   GoogleSignInButton(onSignedIn: (session) => completeSignIn(context, ref, session, widget.next)),
+                  const SizedBox(height: 24),
+                  AuthSwitchLink(
+                    question: t('Chưa có tài khoản?'),
+                    action: t('Đăng ký'),
+                    onTap: () => context.pushReplacement(widget.next == null ? '/register' : '/register?next=${Uri.encodeComponent(widget.next!)}'),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            AuthSwitchLink(
-              question: t('Chưa có tài khoản?'),
-              action: t('Đăng ký'),
-              onTap: () => context.pushReplacement(widget.next == null ? '/register' : '/register?next=${Uri.encodeComponent(widget.next!)}'),
             ),
             const SizedBox(height: 24),
             const ServerAddressLink(),

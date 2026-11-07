@@ -97,9 +97,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PostGallery(coverUrl: post.coverUrl, images: post.coverImages ?? const []),
               Padding(
-                padding: const EdgeInsets.fromLTRB(kGutter, 20, kGutter, 0),
+                padding: const EdgeInsets.fromLTRB(kGutter, 8, kGutter, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -111,7 +110,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     Text('${regionLabel(post.region)} · ${seasonLabel(post.season)} · ${tripLengthLabel(post.days.length)}', style: AppText.meta),
                     const SizedBox(height: 8),
                     Text(post.title.isEmpty ? t('Hành trình chưa đặt tên') : post.title, style: AppText.h1),
-                    if (post.summary.isNotEmpty) ...[const SizedBox(height: 10), Text(post.summary, style: AppText.body)],
+                    if (post.summary.isNotEmpty) ...[const SizedBox(height: 10), Text(post.summary, style: AppText.body.copyWith(color: AppColors.meta))],
                     const SizedBox(height: 14),
                     if (author != null)
                       InkWell(
@@ -160,7 +159,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                         ),
                       ),
                     CompanionsRow(post: post, viewerId: viewerId),
-                    if (post.tags.isNotEmpty) ...[const SizedBox(height: 12), TagList(tags: post.tags, linked: true)],
+                    if (post.tags.isNotEmpty) ...[const SizedBox(height: 16), TagList(tags: post.tags, linked: true)],
+                    const SizedBox(height: 28),
+                    PostGallery(coverUrl: post.coverUrl, images: post.coverImages ?? const []),
                     const SizedBox(height: 24),
                     _Fact(icon: LucideIcons.calendarRange, label: t('Thời gian'), value: formatDateRange(post.startDate, post.endDate)),
                     const SizedBox(height: 10),
@@ -178,7 +179,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     RouteMap(days: post.days, height: 300, label: t('Bản đồ tuyến đường của {title}', {'title': post.title})),
                     const SizedBox(height: 10),
                     Text(
-                      t('Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.'),
+                      t(
+                        'Mỗi màu là một ngày, số là thứ tự điểm dừng trong ngày. Chọn một ngày hoặc một điểm để xem đường đi: đường bộ theo đường thật, nét đứt là máy bay hoặc tàu, phà. Chạm vào một chặng để xem phương tiện và thời gian.',
+                      ),
                       style: AppText.meta,
                     ),
                     const SizedBox(height: 28),
@@ -208,54 +211,74 @@ class _ActionBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final counts = postCounts(post, ref.watch(postOverlaysProvider.select((m) => m[post.id])));
-    return Container(
-      padding: EdgeInsets.fromLTRB(10, 10, 10, MediaQuery.paddingOf(context).bottom.clamp(10, 40)),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
-        boxShadow: AppShadows.raised,
-      ),
-      child: Row(
-        children: [
-          _Counter(
-            icon: counts.liked ? Icons.favorite : LucideIcons.heart,
-            value: counts.likeCount,
-            label: counts.liked ? t('Bỏ thích') : t('Thích'),
-            color: counts.liked ? AppColors.social : AppColors.meta,
-            onTap: () => toggleLike(context, ref, post),
-          ),
-          _Counter(icon: LucideIcons.messageCircle, value: counts.commentCount, label: t('Bình luận'), color: AppColors.meta, onTap: onComment),
-          _Counter(
-            icon: counts.saved ? Icons.bookmark : LucideIcons.bookmark,
-            value: counts.saveCount,
-            label: counts.saved ? t('Bỏ lưu') : t('Lưu bài viết'),
-            color: counts.saved ? AppColors.cream : AppColors.meta,
-            onTap: () => toggleSave(context, ref, post),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: AppButton(
-              // Beside the AI button there is room for one word.
-              label: AiCloneService.canAiClone(post.id) ? t('Sao chép') : t('Dùng làm lịch trình'),
+    final aiClone = AiCloneService.canAiClone(post.id);
+    // A floating glass card: the counts, then the two ways to clone (web: PostActionBar).
+    return Padding(
+      padding: EdgeInsets.fromLTRB(12, 0, 12, MediaQuery.paddingOf(context).bottom.clamp(12, 40)),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xF2111111),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(color: AppColors.borderStrong),
+          boxShadow: AppShadows.raised,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                _Counter(
+                  icon: counts.liked ? Icons.favorite : LucideIcons.heart,
+                  value: counts.likeCount,
+                  label: counts.liked ? t('Bỏ thích') : t('Thích'),
+                  color: counts.liked ? AppColors.social : AppColors.meta,
+                  onTap: () => toggleLike(context, ref, post),
+                ),
+                _Counter(icon: LucideIcons.messageCircle, value: counts.commentCount, label: t('Bình luận'), color: AppColors.meta, onTap: onComment),
+                _Counter(
+                  icon: counts.saved ? Icons.bookmark : LucideIcons.bookmark,
+                  value: counts.saveCount,
+                  label: counts.saved ? t('Bỏ lưu') : t('Lưu bài viết'),
+                  color: counts.saved ? AppColors.cream : AppColors.meta,
+                  onTap: () => toggleSave(context, ref, post),
+                ),
+                const Spacer(),
+                const Icon(LucideIcons.copy, size: 16, color: AppColors.meta),
+                const SizedBox(width: 6),
+                // The count only: the label is in its tooltip, so the row never cuts it.
+                Tooltip(
+                  message: t('{n} lượt sao chép', {'n': formatCount(post.cloneCount)}),
+                  child: Text(formatCount(post.cloneCount), style: AppText.label.copyWith(color: AppColors.meta)),
+                ),
+                const SizedBox(width: 10),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // One button a row, so neither label is cut (web: they wrap below sm).
+            if (aiClone) ...[
+              AppButton(
+                label: t('Sao chép bằng AI'),
+                icon: LucideIcons.sparkles,
+                fullWidth: true,
+                onPressed: () {
+                  if (requireSignIn(context, ref)) context.push('/posts/${post.id}/ai-clone');
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+            AppButton(
+              label: t('Dùng làm lịch trình của tôi'),
               icon: LucideIcons.copy,
-              variant: AiCloneService.canAiClone(post.id) ? ButtonVariant.secondary : ButtonVariant.primary,
+              fullWidth: true,
+              variant: aiClone ? ButtonVariant.secondary : ButtonVariant.primary,
               onPressed: () {
                 if (requireSignIn(context, ref)) showCloneSheet(context, post);
               },
             ),
-          ),
-          // Only journeys the API stores: the AI may only use what ChillnGo's database holds.
-          if (AiCloneService.canAiClone(post.id)) ...[
-            const SizedBox(width: 8),
-            AppButton(
-              label: 'AI',
-              icon: LucideIcons.sparkles,
-              onPressed: () {
-                if (requireSignIn(context, ref)) context.push('/posts/${post.id}/ai-clone');
-              },
-            ),
           ],
-        ],
+        ),
       ),
     );
   }

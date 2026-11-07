@@ -199,14 +199,15 @@ class _TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // web: TagChip, a faint grey pill.
     final chip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.well,
+        color: const Color(0x1A999999),
         borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0x33999999)),
       ),
-      child: Text('#${tx(tag)}', style: AppText.label.copyWith(fontSize: 12.5, color: AppColors.sage)),
+      child: Text(tx(tag), style: AppText.meta.copyWith(fontSize: 12)),
     );
     if (onTap == null) return chip;
     return InkWell(borderRadius: BorderRadius.circular(AppRadius.pill), onTap: onTap, child: chip);

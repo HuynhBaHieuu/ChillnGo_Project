@@ -38,16 +38,14 @@ class TabHeader extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                title ?? 'ChillnGo',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: title == null
-                    ? const TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w600, fontSize: 23, color: AppColors.cream, letterSpacing: -0.7)
-                    : AppText.h2,
-              ),
+              child: title == null
+                  // The web's compass and wordmark (LiquidLogo, drawn still).
+                  ? Align(alignment: Alignment.centerLeft, child: Image.asset('assets/images/logo.png', height: 28, semanticLabel: 'ChillnGo'))
+                  : Text(title!, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.h2),
             ),
             ...actions.expand((a) => [a, const SizedBox(width: 8)]),
+            const LanguageButton(),
+            const SizedBox(width: 8),
             if (user != null) ...[
               AppIconButton(icon: LucideIcons.sparkles, label: t('Trợ lý du lịch AI'), tone: IconTone.well, size: 38, onPressed: () => context.push('/assistant')),
               const SizedBox(width: 8),
@@ -70,9 +68,6 @@ class TabHeader extends ConsumerWidget {
                 ),
               ),
             ] else ...[
-              // Signed in, the language is in the account menu; signed out, here (web: LanguageSwitcher in the navbar).
-              AppIconButton(icon: LucideIcons.languages, label: t('Ngôn ngữ'), tone: IconTone.well, size: 38, onPressed: () => pickLanguage(context)),
-              const SizedBox(width: 8),
               // As on the web at phone width: one button; sign-in is a link on that page.
               BeamButton(label: t('Bắt đầu ngay'), onPressed: () => context.push('/register')),
             ],

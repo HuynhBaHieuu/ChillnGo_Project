@@ -197,7 +197,9 @@ class _Stop extends StatelessWidget {
                         const SizedBox(height: 8),
                         Semantics(
                           button: true,
-                          label: t('Xem ảnh {value} cỡ lớn', {'value': location.name.isEmpty ? t('điểm dừng {value}', {'value': index + 1}) : location.name}),
+                          label: t('Xem ảnh {value} cỡ lớn', {
+                            'value': location.name.isEmpty ? t('điểm dừng {value}', {'value': index + 1}) : location.name,
+                          }),
                           child: GestureDetector(
                             onTap: () => showPhotoViewer(context, [location.photoUrl!], 0),
                             child: ConstrainedBox(
@@ -242,45 +244,48 @@ class _PostGalleryState extends State<PostGallery> {
   @override
   Widget build(BuildContext context) {
     final photos = widget.images.isNotEmpty ? widget.images : [widget.coverUrl];
-    final width = MediaQuery.sizeOf(context).width;
-    return SizedBox(
-      height: (width * 0.68).roundToDouble(),
-      child: Stack(
-        children: [
-          PageView.builder(
-            itemCount: photos.length,
-            onPageChanged: (i) => setState(() => _index = i),
-            itemBuilder: (context, i) => Semantics(
-              button: true,
-              label: t('Ảnh {value} trên {n}', {'value': i + 1, 'n': photos.length}),
-              child: GestureDetector(
-                onTap: () => showPhotoViewer(context, photos, i),
-                child: NetImage(photos[i], placeholderColor: AppColors.canopy),
-              ),
-            ),
-          ),
-          if (photos.length > 1)
-            Positioned(
-              bottom: 12,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (var i = 0; i < photos.length; i++)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        width: i == _index ? 18 : 7,
-                        height: 7,
-                        decoration: BoxDecoration(color: i == _index ? AppColors.white : const Color(0x80FFFFFF), borderRadius: BorderRadius.circular(4)),
-                      ),
-                  ],
+    // Inside the page's gutter, 16:10 with rounded corners (web: PostGallery).
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: AspectRatio(
+        aspectRatio: 16 / 10,
+        child: Stack(
+          children: [
+            PageView.builder(
+              itemCount: photos.length,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (context, i) => Semantics(
+                button: true,
+                label: t('Ảnh {value} trên {n}', {'value': i + 1, 'n': photos.length}),
+                child: GestureDetector(
+                  onTap: () => showPhotoViewer(context, photos, i),
+                  child: NetImage(photos[i], placeholderColor: AppColors.canopy),
                 ),
               ),
             ),
-        ],
+            if (photos.length > 1)
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < photos.length; i++)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: i == _index ? 18 : 7,
+                          height: 7,
+                          decoration: BoxDecoration(color: i == _index ? AppColors.white : const Color(0x80FFFFFF), borderRadius: BorderRadius.circular(4)),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

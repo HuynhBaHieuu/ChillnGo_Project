@@ -65,13 +65,7 @@ class DiscoverCard extends ConsumerWidget {
                         if (rank != null)
                           Text(
                             '$rank',
-                            style: const TextStyle(
-                              fontFamily: AppFonts.display,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 30,
-                              height: 1.15,
-                              color: AppColors.cream,
-                            ),
+                            style: const TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w900, fontSize: 30, height: 1.15, color: AppColors.cream),
                           ),
                         if (chip != null) ...[AppBadge(chip!), const SizedBox(height: 6)],
                         Text(post.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.h3),
@@ -233,12 +227,7 @@ class _BottomShade extends StatelessWidget {
   Widget build(BuildContext context) {
     return const DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x00000000), Color(0x00000000), Color(0xBF000000)],
-          stops: [0, 0.4, 1],
-        ),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x00000000), Color(0x00000000), Color(0xBF000000)], stops: [0, 0.4, 1]),
       ),
     );
   }
@@ -312,14 +301,15 @@ class PhotoTile extends StatelessWidget {
                 NetImage(image, placeholderColor: AppColors.canopy),
                 const _BottomShade(),
                 Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 10,
+                  left: 16,
+                  right: 16,
+                  bottom: 14,
                   child: Text(
-                    label,
+                    // web: first-letter:uppercase, so the tag "food" reads "Food".
+                    label.isEmpty ? label : label[0].toUpperCase() + label.substring(1),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.white),
+                    style: const TextStyle(fontFamily: AppFonts.display, fontWeight: FontWeight.w700, fontSize: 22, height: 1.2, color: AppColors.white),
                   ),
                 ),
               ],
@@ -356,10 +346,7 @@ class Carousel<T> extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const SizedBox(width: 12),
-            SizedBox(width: cardWidth, height: height, child: itemBuilder(context, items[i], cardWidth)),
-          ],
+          for (var i = 0; i < items.length; i++) ...[if (i > 0) const SizedBox(width: 12), SizedBox(width: cardWidth, height: height, child: itemBuilder(context, items[i], cardWidth))],
         ],
       ),
     );

@@ -110,6 +110,37 @@ Future<void> pickLanguage(BuildContext context) async {
   if (picked != null) await setLocale(picked.value);
 }
 
+/// The globe pill that switches the language (web: LanguageSwitcher in the navbar).
+class LanguageButton extends StatelessWidget {
+  const LanguageButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: t('Ngôn ngữ'),
+    excludeSemantics: true,
+    child: Material(
+      color: const Color(0x14FFFFFF),
+      shape: const StadiumBorder(side: BorderSide(color: AppColors.border)),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: () => pickLanguage(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(LucideIcons.globe, size: 16, color: AppColors.cream),
+              const SizedBox(width: 6),
+              Text(localeShort[locale.value]!, style: AppText.label.copyWith(fontSize: 12)),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class _OptionTile<T> extends StatelessWidget {
   const _OptionTile({required this.option, required this.selected, required this.onTap});
 

@@ -21,7 +21,9 @@ Future<void> showCloneSheet(BuildContext context, TripPost post) {
   return showAppSheet<void>(
     context,
     title: t('Dùng làm lịch trình của tôi'),
-    description: t('Sao chép {n} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể đổi thứ tự và ghép thêm ngày từ bài khác sau.', {'n': post.days.length}),
+    description: t('Sao chép {n} ngày từ hành trình này thành lịch trình của riêng bạn. Bạn có thể đổi thứ tự và ghép thêm ngày từ bài khác sau.', {
+      'n': post.days.length,
+    }),
     builder: (_) => _CloneForm(post: post, parentContext: context),
   );
 }

@@ -166,13 +166,14 @@ String travelPhoto(String seed, {int w = 900, int h = 700, PhotoTheme? theme}) {
   return _unsplashUrl(pool[_hash(seed) % pool.length], w, h);
 }
 
-enum LandingPhoto { saPa, riceTerraces, quyNhon, hoiAn }
+enum LandingPhoto { saPa, riceTerraces, haLong, mountainRoad, beach }
 
 const _landingIds = {
   LandingPhoto.saPa: '1506905925346-21bda4d32df4',
   LandingPhoto.riceTerraces: '1570366583862-f91883984fde',
-  LandingPhoto.quyNhon: '1573790387438-4da905039392',
-  LandingPhoto.hoiAn: '1508009603885-50cf7c579365',
+  LandingPhoto.haLong: '1528127269322-539801943592',
+  LandingPhoto.mountainRoad: '1470071459604-3b5ec3a7fe05',
+  LandingPhoto.beach: '1507525428034-b723cf961d3e',
 };
 
 String landingPhoto(LandingPhoto name, int w, int h) => _unsplashUrl(_landingIds[name]!, w, h);
