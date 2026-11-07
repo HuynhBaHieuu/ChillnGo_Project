@@ -66,6 +66,7 @@ flutter:
     - assets/i18n/
     # The web's assistant robot in one page (node scripts/export-robot.mjs).
     - assets/robot/
+    - assets/images/
 
   # The web's "void" theme (web/src/styles/theme-void.css), turned on by
   # data-theme="void" in web/index.html.
@@ -79,6 +80,10 @@ flutter:
           weight: 600
         - asset: assets/fonts/PlusJakartaSans_700Bold.ttf
           weight: 700
+    # The hero's "Việt Nam" and "Bắc — Nam" (web: font-condensed)
+    - family: Oswald
+      fonts:
+        - asset: assets/fonts/Oswald.ttf
     # Running text
     - family: Inter
       fonts:

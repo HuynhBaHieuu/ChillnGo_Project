@@ -112,11 +112,7 @@ class AppButton extends StatelessWidget {
               constraints: BoxConstraints(minHeight: s.height, minWidth: fullWidth ? double.infinity : 0),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: s.px),
-                child: Row(
-                  mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: iconRight ? children.reversed.toList() : children,
-                ),
+                child: Row(mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: iconRight ? children.reversed.toList() : children),
               ),
             ),
           ),
@@ -288,33 +284,88 @@ class TextLink extends StatelessWidget {
   }
 }
 
-/// The web's "light beam" button (styles/light-beam.css in the void theme): a
-/// dark key with a hairline and a soft blue glow, for "Bắt đầu ngay".
-class BeamButton extends StatelessWidget {
-  const BeamButton({super.key, required this.label, required this.onPressed});
+/// A dark key with a beam of light running round its edge and a soft blue glow
+/// (web: GlassButton tone="beam", styles/light-beam.css): the site's call to
+/// action. A pill in the navbar; a rounded rectangle as a form's submit.
+class BeamButton extends StatefulWidget {
+  const BeamButton({super.key, required this.label, required this.onPressed, this.large = false, this.loading = false});
 
   final String label;
   final VoidCallback? onPressed;
 
+  /// Full width, taller and rounded rather than a pill, for a form's submit.
+  final bool large;
+  final bool loading;
+
+  @override
+  State<BeamButton> createState() => _BeamButtonState();
+}
+
+class _BeamButtonState extends State<BeamButton> with SingleTickerProviderStateMixin {
+  late final _spin = AnimationController(vsync: this, duration: const Duration(milliseconds: 2800))..repeat();
+
+  @override
+  void dispose() {
+    _spin.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        boxShadow: const [BoxShadow(color: Color(0x800099FF), blurRadius: 22, spreadRadius: -6)],
-      ),
-      child: Material(
-        color: AppColors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          side: const BorderSide(color: Color(0x1FFFFFFF)),
+    final disabled = widget.onPressed == null || widget.loading;
+    if (MediaQuery.disableAnimationsOf(context)) _spin.stop();
+    final outer = widget.large ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)) : const StadiumBorder();
+    final inner = widget.large ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)) : const StadiumBorder();
+    final label = Row(
+      mainAxisSize: widget.large ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.loading) ...[const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.cream)), const SizedBox(width: 8)],
+        Text(
+          widget.label,
+          style: AppText.label.copyWith(fontSize: widget.large ? 15 : 13.5, fontWeight: FontWeight.w700),
         ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-            child: Text(label, style: AppText.label.copyWith(fontSize: 13.5)),
+      ],
+    );
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      label: widget.label,
+      excludeSemantics: true,
+      child: Opacity(
+        opacity: disabled && !widget.loading ? 0.5 : 1,
+        child: DecoratedBox(
+          // The faint resting ring and the soft blue glow.
+          decoration: ShapeDecoration(
+            shape: outer.copyWith(side: const BorderSide(color: Color(0x24FFFFFF))),
+            shadows: const [BoxShadow(color: Color(0x730099FF), blurRadius: 22, spreadRadius: -6)],
+          ),
+          child: AnimatedBuilder(
+            animation: _spin,
+            builder: (context, child) => Container(
+              padding: const EdgeInsets.all(2),
+              decoration: ShapeDecoration(
+                shape: outer,
+                gradient: SweepGradient(
+                  transform: GradientRotation(_spin.value * 6.2832),
+                  colors: const [Color(0x000099FF), AppColors.primary, AppColors.cream, Color(0x00FFFFFF), Color(0x00FFFFFF)],
+                  stops: const [0, 0.38, 0.5, 0.62, 1],
+                ),
+              ),
+              child: child,
+            ),
+            child: Material(
+              color: AppColors.well,
+              shape: inner,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: disabled ? null : widget.onPressed,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: widget.large ? 20 : 14, vertical: widget.large ? 15 : 9),
+                  child: label,
+                ),
+              ),
+            ),
           ),
         ),
       ),

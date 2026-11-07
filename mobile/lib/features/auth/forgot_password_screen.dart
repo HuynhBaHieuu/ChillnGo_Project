@@ -89,14 +89,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   List<Widget> _formView(BuildContext context) {
     return [
-      Text(t('Quên mật khẩu'), style: AppText.h1),
-      const SizedBox(height: 8),
-      Text(t('Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để bạn đặt mật khẩu mới.'), style: AppText.meta),
-      const SizedBox(height: 20),
       AppCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(t('Quên mật khẩu'), style: AppText.hero),
+            const SizedBox(height: 10),
+            Text(t('Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để bạn đặt mật khẩu mới.'), style: AppText.meta),
+            const SizedBox(height: 24),
             AppTextField(
               controller: _email,
               label: 'Email',
@@ -109,13 +110,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
             const SizedBox(height: 16),
-            AppButton(
-              label: t('Gửi liên kết đặt lại'),
-              size: ButtonSize.lg,
-              fullWidth: true,
-              loading: _pending,
-              onPressed: _email.text.trim().isEmpty ? null : _send,
-            ),
+            BeamButton(label: t('Gửi liên kết đặt lại'), large: true, loading: _pending, onPressed: _email.text.trim().isEmpty ? null : _send),
           ],
         ),
       ),

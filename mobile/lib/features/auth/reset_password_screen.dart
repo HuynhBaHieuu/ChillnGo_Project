@@ -109,12 +109,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   List<Widget> _doneView(BuildContext context) {
     return [
-      Text(t('Đã đổi mật khẩu'), style: AppText.h1),
-      const SizedBox(height: 20),
       AppCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(t('Đã đổi mật khẩu'), style: AppText.hero),
+            const SizedBox(height: 24),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -133,12 +134,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   List<Widget> _failedView(BuildContext context) {
     return [
-      Text(t('Liên kết không dùng được'), style: AppText.h1),
-      const SizedBox(height: 20),
       AppCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(t('Liên kết không dùng được'), style: AppText.hero),
+            const SizedBox(height: 24),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -159,14 +161,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final mismatch = _confirm.text.isNotEmpty && _confirm.text != _password.text;
     final canSubmit = _password.text.isNotEmpty && _confirm.text.isNotEmpty && (_hasToken || _link.text.trim().isNotEmpty);
     return [
-      Text(t('Đặt mật khẩu mới'), style: AppText.h1),
-      const SizedBox(height: 8),
-      Text(t('Chọn mật khẩu mới cho tài khoản ChillnGo của bạn.'), style: AppText.meta),
-      const SizedBox(height: 20),
       AppCard(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(t('Đặt mật khẩu mới'), style: AppText.hero),
+            const SizedBox(height: 10),
+            Text(t('Chọn mật khẩu mới cho tài khoản ChillnGo của bạn.'), style: AppText.meta),
+            const SizedBox(height: 24),
             if (!_hasToken) ...[
               AppTextField(
                 controller: _link,
@@ -200,13 +203,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ),
             if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
             const SizedBox(height: 16),
-            AppButton(
-              label: t('Đặt mật khẩu mới'),
-              size: ButtonSize.lg,
-              fullWidth: true,
-              loading: _pending,
-              onPressed: canSubmit ? _submit : null,
-            ),
+            BeamButton(label: t('Đặt mật khẩu mới'), large: true, loading: _pending, onPressed: canSubmit ? _submit : null),
           ],
         ),
       ),

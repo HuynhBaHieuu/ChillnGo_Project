@@ -143,7 +143,9 @@ class PasswordField extends StatefulWidget {
   });
 
   final TextEditingController controller;
-  final String label;
+
+  /// Null: the screen draws its own label (with a link beside it).
+  final String? label;
   final String? error;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -161,7 +163,7 @@ class _PasswordFieldState extends State<PasswordField> {
   Widget build(BuildContext context) {
     return AppTextField(
       controller: widget.controller,
-      label: tx(widget.label),
+      label: widget.label == null ? null : tx(widget.label!),
       error: widget.error,
       icon: LucideIcons.lock,
       obscureText: !_shown,

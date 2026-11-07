@@ -123,25 +123,32 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(child: Divider(color: AppColors.borderStrong)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text(t('hoặc'), style: AppText.meta),
+        const AuthDivider(),
+        const SizedBox(height: 20),
+        // Google's own button: a white pill with the G (web: the button Google Identity renders).
+        Material(
+          color: AppColors.white,
+          shape: const StadiumBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: _pending ? null : _signIn,
+            child: SizedBox(
+              height: 46,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _pending
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1F1F1F)))
+                      : Image.asset('assets/images/google.png', width: 18, height: 18),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.signUp ? t('Đăng ký với Google') : t('Tiếp tục với Google'),
+                    style: const TextStyle(fontFamily: AppFonts.body, fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF1F1F1F)),
+                  ),
+                ],
+              ),
             ),
-            const Expanded(child: Divider(color: AppColors.borderStrong)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        AppButton(
-          label: widget.signUp ? t('Đăng ký với Google') : t('Tiếp tục với Google'),
-          icon: LucideIcons.logIn,
-          variant: ButtonVariant.secondary,
-          size: ButtonSize.lg,
-          fullWidth: true,
-          loading: _pending,
-          onPressed: _signIn,
+          ),
         ),
         if (_error != null) ...[const SizedBox(height: 8), ErrorText(_error)],
       ],
@@ -317,4 +324,18 @@ class AuthSwitchLink extends StatelessWidget {
       textAlign: TextAlign.center,
     );
   }
+}
+
+/// "HOẶC" between a form and Google sign-in (web: AuthDivider).
+class AuthDivider extends StatelessWidget {
+  const AuthDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      const Expanded(child: Divider(color: AppColors.border)),
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(t('hoặc').toUpperCase(), style: AppText.caps)),
+      const Expanded(child: Divider(color: AppColors.border)),
+    ],
+  );
 }

@@ -231,7 +231,10 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
         AppTextField(controller: _query, hint: t('Tìm bạn bè'), icon: LucideIcons.search, onChanged: (_) => setState(() {})),
         const SizedBox(height: 12),
         if (friends.isLoading)
-          const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
         else if (friends.hasError)
           ErrorText(errorMessage(friends.error))
         else if (candidates.isEmpty)
@@ -266,7 +269,10 @@ class _InviteFormState extends ConsumerState<_InviteForm> {
               ),
             ),
           ),
-        if (_picked.length > widget.left) ...[const SizedBox(height: 10), ErrorText(t('Chỉ còn mời được {left} người.', {'left': widget.left}))],
+        if (_picked.length > widget.left) ...[
+          const SizedBox(height: 10),
+          ErrorText(t('Chỉ còn mời được {left} người.', {'left': widget.left})),
+        ],
         if (_error != null) ...[const SizedBox(height: 10), ErrorText(_error)],
         const SizedBox(height: 18),
         AppButton(

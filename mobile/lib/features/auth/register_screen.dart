@@ -108,14 +108,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
       children: [
-        Text(t('Bắt đầu ngay'), style: AppText.h1),
-        const SizedBox(height: 8),
-        Text(t('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.'), style: AppText.meta),
-        const SizedBox(height: 20),
         AppCard(
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(t('Bắt đầu ngay'), style: AppText.hero),
+              const SizedBox(height: 10),
+              Text(t('Tạo tài khoản để chia sẻ hành trình của bạn, và sao chép những lịch trình bạn thích về làm của mình.'), style: AppText.meta),
+              const SizedBox(height: 24),
               AppTextField(
                 controller: _displayName,
                 label: t('Tên hiển thị'),
@@ -170,17 +171,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ],
               if (_error != null) ...[const SizedBox(height: 12), ErrorText(_error)],
               const SizedBox(height: 16),
-              AppButton(label: t('Tạo tài khoản'), size: ButtonSize.lg, fullWidth: true, loading: _pending, onPressed: _submit),
-              const SizedBox(height: 16),
+              BeamButton(label: t('Tạo tài khoản'), large: true, loading: _pending, onPressed: _submit),
+              const SizedBox(height: 24),
               GoogleSignInButton(signUp: true, onSignedIn: (session) => completeSignIn(context, ref, session, widget.next)),
+              const SizedBox(height: 24),
+              AuthSwitchLink(
+                question: t('Đã có tài khoản?'),
+                action: t('Đăng nhập'),
+                onTap: () => context.pushReplacement(widget.next == null ? '/login' : '/login?next=${Uri.encodeComponent(widget.next!)}'),
+              ),
             ],
           ),
-        ),
-        const SizedBox(height: 20),
-        AuthSwitchLink(
-          question: t('Đã có tài khoản?'),
-          action: t('Đăng nhập'),
-          onTap: () => context.pushReplacement(widget.next == null ? '/login' : '/login?next=${Uri.encodeComponent(widget.next!)}'),
         ),
       ],
     );
@@ -198,14 +199,15 @@ class _CheckEmail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 40),
       children: [
-        Text(t('Kiểm tra email'), style: AppText.h1),
-        const SizedBox(height: 8),
-        Text(t('Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong.'), style: AppText.meta),
-        const SizedBox(height: 16),
         AppCard(
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(t('Kiểm tra email'), style: AppText.hero),
+              const SizedBox(height: 10),
+              Text(t('Tài khoản của bạn đã được tạo. Chỉ còn bước xác nhận email là xong.'), style: AppText.meta),
+              const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(color: AppColors.well, borderRadius: BorderRadius.circular(12)),

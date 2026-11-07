@@ -24,6 +24,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The languages the app speaks, by code, named in their own language.
 const locales = {'vi': 'Tiếng Việt', 'en': 'English', 'zh': '中文', 'ja': '日本語', 'ko': '한국어'};
 
+/// Short names for tight spots (web: LOCALE_INFO.short).
+const localeShort = {'vi': 'VI', 'en': 'EN', 'zh': '中', 'ja': '日', 'ko': '한'};
+
 /// BCP 47 tags, for dates.
 const localeTags = {'vi': 'vi_VN', 'en': 'en_US', 'zh': 'zh_CN', 'ja': 'ja_JP', 'ko': 'ko_KR'};
 

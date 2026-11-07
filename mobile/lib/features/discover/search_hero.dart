@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../data/models.dart';
 import '../../data/services/activity_service.dart';
 import '../../state/session.dart';
+import '../../ui/buttons.dart';
 import '../../ui/surfaces.dart';
 import 'interests.dart';
 import '../../core/i18n.dart';
@@ -32,16 +33,7 @@ final _recentSearchesProvider = FutureProvider.autoDispose<List<String>>((ref) a
 /// "Bạn muốn đi đâu?": the title, region tabs and the search box with live
 /// suggestions (web: DiscoverHero).
 class SearchHero extends ConsumerStatefulWidget {
-  const SearchHero({
-    super.key,
-    required this.posts,
-    required this.query,
-    required this.region,
-    required this.onSearch,
-    required this.onRegionChange,
-    required this.onPickTag,
-    this.onOpenChange,
-  });
+  const SearchHero({super.key, required this.posts, required this.query, required this.region, required this.onSearch, required this.onRegionChange, required this.onPickTag, this.onOpenChange});
 
   /// Every published trip, most saved first.
   final List<TripPost> posts;
@@ -167,7 +159,7 @@ class _SearchHeroState extends ConsumerState<SearchHero> {
           padding: const EdgeInsets.symmetric(horizontal: kGutter),
           child: Container(
             height: 52,
-            padding: const EdgeInsets.only(left: 16, right: 6),
+            padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -208,6 +200,8 @@ class _SearchHeroState extends ConsumerState<SearchHero> {
                     icon: const Icon(LucideIcons.x, size: 20, color: AppColors.meta),
                     onPressed: () => _submit(''),
                   ),
+                // web: the blue "Tìm kiếm" key inside the box.
+                AppButton(label: t('Tìm kiếm'), size: ButtonSize.sm, onPressed: () => _submit(_text.text.trim())),
               ],
             ),
           ),
@@ -257,11 +251,7 @@ class _SuggestionRow extends StatelessWidget {
 
     final (Widget media, String title, String? subtitle) = switch (option) {
       RecentSuggestion(:final query) => (icon(LucideIcons.clock), query, null),
-      TripSuggestion(:final post) => (
-        NetImage(post.coverUrl, width: 44, height: 44, radius: 10),
-        post.title,
-        '${regionLabel(post.region)} · ${tripLengthLabel(post.days.length)}',
-      ),
+      TripSuggestion(:final post) => (NetImage(post.coverUrl, width: 44, height: 44, radius: 10), post.title, '${regionLabel(post.region)} · ${tripLengthLabel(post.days.length)}'),
       StopSuggestion(:final post, :final name) => (icon(LucideIcons.mapPin), name, t('Trong hành trình: {title}', {'title': post.title})),
       TagSuggestion(:final tag, :final count) => (icon(LucideIcons.hash), tx(tag), t('{n} hành trình', {'n': count})),
       AllSuggestion(:final query) => (icon(LucideIcons.search), t('Xem tất cả kết quả cho “{query}”', {'query': query}), null),
