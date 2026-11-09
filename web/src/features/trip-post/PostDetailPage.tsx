@@ -1,6 +1,6 @@
-import { CalendarRange, Pencil, UserPlus, Wallet } from 'lucide-react'
+import { CalendarRange, Pencil, Trash2, UserPlus, Wallet } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { PageContainer } from '@/app/layout/PageContainer'
 import { EmptyState } from '@/components/EmptyState'
@@ -10,12 +10,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { DimensionalSwitchSlider } from '@/components/ui/dimensional-switch-slider'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Confirm } from '@/features/activity/components'
+import { useJourneyAction } from '@/features/activity/hooks'
 import { AiCloneDialog } from '@/features/ai-clone/AiCloneDialog'
 import { CloneDialog } from '@/features/itinerary-clone/components/CloneDialog'
 import { CommentSection } from '@/features/trip-post/components/CommentSection'
 import { CompanionsRow, InviteBanner, InviteFriendsDialog } from '@/features/trip-post/components/Companions'
 import { DayItinerary } from '@/features/trip-post/components/DayItinerary'
 import { PostActionBar } from '@/features/trip-post/components/PostActionBar'
+import { ModeratedNotice, ReportMenu } from '@/features/report/ReportMenu'
 import { usePost } from '@/features/trip-post/hooks'
 import {
   BUDGET_LABELS,
@@ -28,6 +31,8 @@ import {
 } from '@/lib/format'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { postService } from '@/services'
+import { isServerPostId } from '@/services/serverPosts'
 import { useAuthStore } from '@/store'
 
 /** Out over the right page margin, up to the gutter's width from the window's edge (large screens). */
@@ -39,6 +44,9 @@ export function PostDetailPage() {
   const [cloneOpen, setCloneOpen] = useState(false)
   const [aiCloneOpen, setAiCloneOpen] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const remove = useJourneyAction(postService.deleteJourney)
+  const navigate = useNavigate()
   const commentsRef = useRef<HTMLDivElement>(null)
   const viewerId = useAuthStore((s) => s.user?._id)
 
@@ -61,11 +69,16 @@ export function PostDetailPage() {
   }
 
   const isAuthor = viewerId === post.authorId
+  // Sample journeys live only in this browser; only the API's own can be deleted.
+  const canDelete = isAuthor && isServerPostId(post._id)
 
   return (
     <PageContainer>
       <article>
         <InviteBanner post={post} viewerId={viewerId} />
+        {isAuthor && post.moderation?.hidden && (
+          <ModeratedNotice removed={post.moderation.action === 'remove'} className="mb-6 text-sm" />
+        )}
 
         {/* Header */}
         <header className="animate-fade-rise">
@@ -107,6 +120,17 @@ export function PostDetailPage() {
               </span>
             </Link>
 
+            {!isAuthor && (
+              <div className="ml-auto">
+                <ReportMenu
+                  targetType="post"
+                  targetId={post._id}
+                  ownerId={post.authorId}
+                  label={t('Thêm thao tác cho {title}', { title: post.title })}
+                />
+              </div>
+            )}
+
             {isAuthor && (
               <div className="ml-auto flex gap-2">
                 {/* Sample journeys have no companions to invite. */}
@@ -122,6 +146,17 @@ export function PostDetailPage() {
                     {t('Chỉnh sửa')}
                   </Link>
                 </Button>
+                {canDelete && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 />
+                    {t('Xoá')}
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -204,6 +239,37 @@ export function PostDetailPage() {
 
       <CloneDialog post={post} open={cloneOpen} onOpenChange={setCloneOpen} />
       <AiCloneDialog post={post} open={aiCloneOpen} onOpenChange={setAiCloneOpen} />
+      {canDelete && (
+        <Confirm
+          open={deleteOpen}
+          onOpenChange={(open) => {
+            setDeleteOpen(open)
+            if (!open) remove.reset()
+          }}
+          title={t('Xoá hành trình này?')}
+          description={
+            <>
+              {t('Hành trình sẽ không còn hiện trên trang cá nhân, Newsfeed và trang Khám phá. Bạn có thể khôi phục trong 30 ngày ở Hoạt động của bạn → Đã xoá gần đây.')}
+              {remove.error && (
+                <span role="alert" className="mt-2 block text-destructive">
+                  {(remove.error as Error).message}
+                </span>
+              )}
+            </>
+          }
+          confirmLabel={t('Xoá hành trình')}
+          destructive
+          pending={remove.isPending}
+          onConfirm={() =>
+            remove.mutate(post._id, {
+              onSuccess: () => {
+                setDeleteOpen(false)
+                void navigate('/itineraries', { replace: true })
+              },
+            })
+          }
+        />
+      )}
       {isAuthor && <InviteFriendsDialog post={post} open={inviteOpen} onOpenChange={setInviteOpen} />}
     </PageContainer>
   )

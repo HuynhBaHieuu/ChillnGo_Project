@@ -10,6 +10,7 @@ import { prepareImageForUpload } from '@/lib/images'
 import { travelAvatar } from '@/lib/photos'
 
 import { http } from './http'
+import type { ModerationInfo } from './types'
 
 export const MAX_CHECKIN_PHOTOS = 4
 /** Longest side sent; photos are shown at most 1600px wide. */
@@ -26,6 +27,8 @@ export interface CheckIn {
   /** Set while the check-in is in "Recently Deleted"; `purgeAt` is when it goes for good. */
   deletedAt?: string | null
   purgeAt?: string | null
+  /** Only for the author: their check-in was hidden by moderation. */
+  moderation?: ModerationInfo | null
   author: { _id: string; username: string; displayName: string; avatarUrl: string }
 }
 

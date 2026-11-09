@@ -24,6 +24,7 @@ import { CoverPicker } from '@/features/trip-post/components/CoverPicker'
 import { DayBuilder } from '@/features/trip-post/components/DayBuilder'
 import { TagPicker } from '@/features/trip-post/components/TagPicker'
 import { useCreatePost, usePost, useUpdatePost } from '@/features/trip-post/hooks'
+import { pinByName } from '@/features/trip-post/pinByName'
 import {
   BUDGET_LABELS,
   BUDGET_LEVELS,
@@ -35,7 +36,6 @@ import {
 } from '@/lib/format'
 import { withLegRoutes } from '@/features/map/legs'
 import { t } from '@/i18n'
-import { searchPlaces } from '@/lib/geo'
 import { UNPINNED, isPinned, totalCostOf } from '@/lib/itinerary'
 import { themeFromText, travelCover } from '@/lib/photos'
 import type {
@@ -259,30 +259,6 @@ export function PostEditorPage() {
 
   /** True while stops are being pinned by name and road legs routed, before saving. */
   const [pinning, setPinning] = useState(false)
-
-  /**
-   * Stops the author described but never pinned get the first place Mapbox
-   * finds for their address (or, without one, their name), so a typed address
-   * still lands on the map. What they typed is kept. Stops nothing is found
-   * for stay off the map.
-   */
-  async function pinByName(days: TripDay[]): Promise<TripDay[]> {
-    const queryOf = (l: TripDay['locations'][number]) => (l.address?.trim() || l.name).trim()
-    const todo = days.flatMap((d) => d.locations).filter((l) => !isPinned(l) && queryOf(l).length >= 2)
-    if (todo.length === 0) return days
-    const found = new Map<string, { lng: number; lat: number }>()
-    await Promise.all(
-      todo.map(async (loc) => {
-        const [place] = await searchPlaces(queryOf(loc)).catch(() => [])
-        if (place) found.set(loc._id, { lng: place.lng, lat: place.lat })
-      }),
-    )
-    if (found.size === 0) return days
-    return days.map((day) => ({
-      ...day,
-      locations: day.locations.map((loc) => ({ ...loc, ...found.get(loc._id) })),
-    }))
-  }
 
   async function submit(event: FormEvent, status: 'draft' | 'published') {
     event.preventDefault()
