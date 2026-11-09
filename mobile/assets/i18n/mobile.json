@@ -2054,6 +2054,12 @@
   "ko": "체크인을 최근 삭제됨으로 옮겼습니다.",
   "zh": "已将打卡移至“最近删除”。"
  },
+ "Đã chuyển hành trình vào mục Đã xoá gần đây.": {
+  "en": "Moved the journey to Recently deleted.",
+  "ja": "旅程を「最近削除した項目」に移動しました。",
+  "ko": "여정을 최근 삭제한 항목으로 옮겼어요.",
+  "zh": "已将行程移至“最近删除”。"
+ },
  "Đã chọn {n} ngày · thêm khoảng ": {
   "en": [
    "{n} day selected · adds about ",

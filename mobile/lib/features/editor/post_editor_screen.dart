@@ -54,7 +54,8 @@ Map<String, dynamic> _routeGeoJson(List<TripDay> days, String title) => {
 
 /// Stops the author described but never pinned get the first place Mapbox
 /// finds for their address (or name), so a typed address still lands on the map.
-Future<void> _pinByName(List<TripDay> days) async {
+/// Also used by the itinerary editor.
+Future<void> pinByName(List<TripDay> days) async {
   String queryOf(TripLocation l) => ((l.address ?? '').trim().isNotEmpty ? l.address! : l.name).trim();
   final todo = [
     for (final d in days)
@@ -239,7 +240,7 @@ class _EditorFormState extends ConsumerState<_EditorForm> {
     setState(() => _saving = true);
     try {
       // Road legs carry their route, so viewers need no Directions call; only changed legs are fetched.
-      await _pinByName(_days).catchError((_) {});
+      await pinByName(_days).catchError((_) {});
       final days = await withLegRoutes(_days).catchError((_) => _days);
       _days = days;
       final payload = _payload(status, days);

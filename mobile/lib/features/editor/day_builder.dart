@@ -24,11 +24,22 @@ TripLocation newStop(String dayId, int number) =>
 /// One day in the editor: its title, date and stops (web: DayBuilder). The
 /// day is edited in place; [onChanged] tells the editor to redraw.
 class DayBuilder extends StatefulWidget {
-  const DayBuilder({super.key, required this.day, required this.index, required this.canRemove, required this.onChanged, required this.onRemove});
+  const DayBuilder({
+    super.key,
+    required this.day,
+    required this.index,
+    required this.canRemove,
+    required this.onChanged,
+    required this.onRemove,
+    this.dateLocked = false,
+  });
 
   final TripDay day;
   final int index;
   final bool canRemove;
+
+  /// The date follows from the trip's start date (a cloned itinerary): shown, not edited.
+  final bool dateLocked;
   final VoidCallback onChanged;
   final VoidCallback onRemove;
 
@@ -99,6 +110,7 @@ class _DayBuilderState extends State<DayBuilder> {
           DateField(
             label: t('Ngày'),
             value: day.date,
+            enabled: !widget.dateLocked,
             onChanged: (date) {
               day.date = date;
               _changed();

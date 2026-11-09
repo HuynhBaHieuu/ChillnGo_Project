@@ -59,8 +59,8 @@ List<_Section> get _sections => [
     path: 'content',
     label: t('Nội dung'),
     title: t('Kiểm duyệt nội dung'),
-    description: (_) => t('Bài đăng, lịch trình, bình luận, báo cáo vi phạm và danh mục.'),
-    icon: LucideIcons.construction,
+    description: (_) => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm.'),
+    icon: LucideIcons.flag,
     allowed: contentAllowed,
   ),
   _Section(

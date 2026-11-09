@@ -18,8 +18,9 @@ CheckIn _withAvatar(CheckIn checkin) {
 
 abstract final class CheckInService {
   /// Newest first. [authors] limits to those accounts (the Newsfeed); omitted, everyone's.
+  /// Sent signed in, so your own check-in hidden by moderation still shows to you, marked.
   static Future<List<CheckIn>> list([List<String>? authors]) async {
-    final data = await Api.get('/api/checkins${queryString({'authors': authors?.join(',')})}', auth: false);
+    final data = await Api.get('/api/checkins${queryString({'authors': authors?.join(',')})}');
     return listOf(data['items'], (c) => _withAvatar(CheckIn.fromJson(mapOf(c))));
   }
 
