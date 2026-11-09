@@ -23,6 +23,8 @@ interface DayBuilderProps {
   day: TripDay
   index: number
   canRemove: boolean
+  /** The date follows from the trip's start date (a cloned itinerary): shown, not edited. */
+  dateLocked?: boolean
   onChange: (day: TripDay) => void
   onRemove: () => void
 }
@@ -30,7 +32,7 @@ interface DayBuilderProps {
 /** Stop photos show at most ~800px wide; 1600 keeps them sharp on retina. */
 const STOP_PHOTO_MAX_SIDE = 1600
 
-export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBuilderProps) {
+export function DayBuilder({ day, index, canRemove, dateLocked = false, onChange, onRemove }: DayBuilderProps) {
   function patchDay(patch: Partial<TripDay>) {
     onChange({ ...day, ...patch })
   }
@@ -78,6 +80,8 @@ export function DayBuilder({ day, index, canRemove, onChange, onRemove }: DayBui
                 id={`${day._id}-date`}
                 type="date"
                 value={day.date}
+                readOnly={dateLocked}
+                disabled={dateLocked}
                 onChange={(e) => patchDay({ date: e.target.value })}
               />
             </div>

@@ -151,7 +151,7 @@ interface Journey {
   updatedAt: Date
 }
 
-const FIELDS = 'authorId title summary region season startDate endDate days tags budgetLevel totalEstCost likeCount bookmarkCount cloneCount status deletedAt createdAt updatedAt'
+const FIELDS = 'authorId title summary region season startDate endDate days tags budgetLevel totalEstCost likeCount bookmarkCount cloneCount status deletedAt moderation createdAt updatedAt'
 /** ponytail: search reads the newest published journeys and filters them here; move to a text index when there are more than this. */
 const SCAN_LIMIT = 500
 
@@ -189,7 +189,12 @@ const clip = (text: string | undefined, max: number) => {
 const stopsOf = (journey: Journey) => journey.days.flatMap((day) => day.locations ?? [])
 
 /** A journey's author may see it; anyone may see a published one that is not deleted. */
-export function visibleTo(journey: Pick<Journey, 'authorId' | 'status' | 'deletedAt'>, userId: string) {
+export function visibleTo(
+  journey: Pick<Journey, 'authorId' | 'status' | 'deletedAt'> & { moderation?: { hidden?: boolean | null } | null },
+  userId: string,
+) {
+  // Hidden by moderation: only its author.
+  if (journey.moderation?.hidden && journey.authorId !== userId) return false
   return !journey.deletedAt && (journey.status === 'published' || journey.authorId === userId)
 }
 
@@ -225,7 +230,7 @@ function summaryOf(journey: Journey, authors: Map<string, string>) {
 
 async function searchJourneys(raw: unknown) {
   const args = searchArgs.parse(raw)
-  const filter: Record<string, unknown> = { status: 'published', deletedAt: null }
+  const filter: Record<string, unknown> = { status: 'published', deletedAt: null, 'moderation.hidden': { $ne: true } }
   if (args.region) filter.region = args.region
   if (args.season) filter.season = args.season
   if (args.budget) filter.budgetLevel = args.budget
@@ -269,7 +274,7 @@ async function searchJourneys(raw: unknown) {
   const authors = await authorNames(shown)
   return {
     totalMatches: matches.length,
-    publishedJourneysOnChillnGo: await TripPost.countDocuments({ status: 'published', deletedAt: null }),
+    publishedJourneysOnChillnGo: await TripPost.countDocuments({ status: 'published', deletedAt: null, 'moderation.hidden': { $ne: true } }),
     results: shown.map((journey) => summaryOf(journey, authors)),
     note: matches.length === 0 ? 'Không có hành trình nào trên ChillnGo khớp yêu cầu này. Đừng bịa ra hành trình.' : undefined,
   }

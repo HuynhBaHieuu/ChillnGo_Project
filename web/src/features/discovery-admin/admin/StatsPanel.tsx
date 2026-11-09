@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { localeTag, t } from '@/i18n'
 import { ROLE_LABELS } from '@/lib/roles'
@@ -23,10 +24,23 @@ export function StatsPanel() {
     return <p className="text-sm text-destructive">{(stats.error as Error).message}</p>
   }
 
-  const { users, signupsByDay, scope, byRole, adminActions7 } = stats.data
+  const { users, signupsByDay, scope, byRole, adminActions7, pendingReports } = stats.data
 
   return (
     <div className="space-y-8">
+      {pendingReports !== undefined && (
+        <Link
+          to="/admin/content"
+          className="flex items-center justify-between gap-4 rounded-2xl border border-foreground/15 bg-card p-5 transition-colors hover:bg-muted/60"
+        >
+          <span>
+            <span className="block text-xs font-medium text-muted-foreground">{t('Báo cáo chờ xử lý')}</span>
+            <span className="mt-2 block font-display text-3xl tabular-nums">{pendingReports.toLocaleString(localeTag())}</span>
+          </span>
+          <span className="text-sm font-semibold underline-offset-4 hover:underline">{t('Mở hàng chờ kiểm duyệt')} →</span>
+        </Link>
+      )}
+
       <dl className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <Tile label={t('Tổng tài khoản')} value={users.total} />
         <Tile label={t('Đăng ký mới 7 ngày')} value={users.new7} />

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format.dart';
@@ -19,6 +20,7 @@ import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
 import '../auth/auth_widgets.dart';
 import 'admin_common.dart';
+import 'reports_panel.dart';
 import '../../core/i18n.dart';
 
 final adminStatsProvider = FutureProvider.autoDispose<AdminStats>((ref) => AdminService.getStats());
@@ -51,6 +53,29 @@ class StatsPanel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (s.pendingReports != null) ...[
+          AppCard(
+            onTap: () => context.go('/admin/content'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Báo cáo chờ xử lý'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatNumber(s.pendingReports!), style: AppText.h1.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+                    ],
+                  ),
+                ),
+                Text(t('Mở hàng chờ kiểm duyệt'), style: AppText.label.copyWith(fontSize: 13)),
+                const SizedBox(width: 4),
+                const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.cream),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         _TileGrid(
           tiles: [
             _Tile(t('Tổng tài khoản'), s.total),
@@ -816,9 +841,10 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
 /* -------------------------------------------------------------- Nội dung */
 
 /// Modules the permission model already has, but whose data is not on the server yet.
-List<(String, String)> get _notReady => [('content', t('bài đăng, lịch trình và bình luận')), ('reports', t('báo cáo vi phạm từ người dùng')), ('categories', t('danh mục địa điểm và tag'))];
+List<(String, String)> get _notReady => [('categories', t('danh mục địa điểm và tag'))];
 
-bool contentAllowed(User user) => _notReady.any((m) => hasModule(user, m.$1));
+/// The modules the Nội dung screen serves.
+bool contentAllowed(User user) => ['reports', 'content', ..._notReady.map((m) => m.$1)].any((m) => hasModule(user, m));
 
 class ContentPanel extends StatelessWidget {
   const ContentPanel({super.key, required this.actor});
@@ -828,7 +854,17 @@ class ContentPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (hasModule(actor, 'reports'))
+          ReportsPanel(actor: actor)
+        else if (hasModule(actor, 'content'))
+          EmptyState(
+            icon: LucideIcons.flag,
+            title: moduleLabels['content']!.$1,
+            description: t('Nội dung được kiểm duyệt từ hàng chờ báo cáo vi phạm. Hãy nhờ Super Admin cấp thêm quyền Báo cáo vi phạm để xem hàng chờ.'),
+          ),
+        if (_notReady.any((m) => hasModule(actor, m.$1))) const SizedBox(height: 20),
         for (final (module, needs) in _notReady.where((m) => hasModule(actor, m.$1))) ...[
           EmptyState(
             icon: LucideIcons.construction,

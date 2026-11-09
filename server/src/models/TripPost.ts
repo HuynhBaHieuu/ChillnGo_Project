@@ -1,5 +1,7 @@
 import { Schema, model } from 'mongoose'
 
+import { moderationField } from './moderation.js'
+
 /**
  * A journey (trip post). Field names match `TripPost` in web/src/services/types.ts.
  *
@@ -46,6 +48,8 @@ const tripPostSchema = new Schema(
     status: { type: String, enum: ['draft', 'published'], default: 'draft', index: true },
     publishedAt: { type: Date, default: null },
     deletedAt: { type: Date, default: null },
+    /** Hidden or removed by moderation (models/moderation.ts). */
+    moderation: moderationField,
   },
   { timestamps: true, versionKey: false, minimize: false },
 )

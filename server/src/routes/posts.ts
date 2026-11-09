@@ -22,7 +22,8 @@
  *   DELETE /api/posts/:id/companions/:userId  the author takes someone off, or you leave
  *
  * A journey that is not yours, or not visible to you, is always a 404: whether
- * someone else's draft exists is not something to reveal.
+ * someone else's draft exists is not something to reveal. A journey or comment
+ * hidden by moderation (models/moderation.ts) is likewise seen only by its author.
  */
 
 import { Router } from 'express'
@@ -37,6 +38,7 @@ import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { friendIdsOf } from '../models/Follow.js'
+import { NOT_MODERATED, isModerated, moderationView } from '../models/moderation.js'
 import { Notification, notify } from '../models/Notification.js'
 import { PostComment, PostLike } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
@@ -218,6 +220,8 @@ function toView(post: TripPostDocument, viewerId: string | undefined) {
     updatedAt: post.updatedAt.toISOString(),
     deletedAt: post.deletedAt ? post.deletedAt.toISOString() : null,
     purgeAt: post.deletedAt ? purgeAt(post.deletedAt).toISOString() : null,
+    /** Only the author hears that their journey was hidden by moderation. */
+    moderation: post.authorId === viewerId ? moderationView(post.moderation) : null,
   }
 }
 
@@ -246,7 +250,7 @@ async function authorsOf(posts: TripPostDocument[], viewerId: string | undefined
   }))
 }
 
-async function adjustPostCount(userId: string, delta: number) {
+export async function adjustPostCount(userId: string, delta: number) {
   await User.updateOne({ _id: userId }, { $inc: { postCount: delta } })
   // Never below zero, whatever happened before this counter existed.
   await User.updateOne({ _id: userId, postCount: { $lt: 0 } }, { $set: { postCount: 0 } })
@@ -330,7 +334,7 @@ const listSchema = z.object({ author: z.string().max(40).optional().catch(undefi
 
 postsRouter.get('/', async (req, res) => {
   const { author } = listSchema.parse(req.query)
-  const filter: Record<string, unknown> = { status: 'published', deletedAt: null }
+  const filter: Record<string, unknown> = { status: 'published', deletedAt: null, ...NOT_MODERATED }
   if (author) filter.authorId = author
   const posts = await TripPost.find(filter).sort({ createdAt: -1 }).limit(200)
   res.json({ items: posts.map((p) => toListView(p, undefined)), authors: await authorsOf(posts, undefined) })
@@ -366,17 +370,23 @@ postsRouter.get('/:id', optionalAuth, async (req, res) => {
   // Someone invited along may look at it before it is published, to decide.
   const invited = post && !post.deletedAt && post.companions.some((c) => c.userId === viewerId)
   const visible = post && ((post.status === 'published' && !post.deletedAt) || post.authorId === viewerId || invited)
-  if (!post || !visible) throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
+  // Hidden by moderation: only its author still sees it.
+  const moderatedAway = post && isModerated(post.moderation) && post.authorId !== viewerId
+  if (!post || !visible || moderatedAway) throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
   const likedByMe = viewerId ? Boolean(await PostLike.exists({ postId: String(post._id), userId: viewerId })) : false
   res.json({ post: toView(post, viewerId), authors: await authorsOf([post], viewerId), likedByMe })
 })
 
 /* ------------------------------------------------------ likes & comments */
 
-/** A published, not-deleted journey that anyone may like or comment on, or 404. */
-async function loadPublished(id: string): Promise<TripPostDocument> {
+/**
+ * A published, not-deleted journey that anyone may like or comment on, or 404.
+ * One hidden by moderation only for its author (`viewerId`), when given.
+ */
+async function loadPublished(id: string, viewerId?: string): Promise<TripPostDocument> {
   const post = isValidObjectId(id) ? await TripPost.findById(id) : null
-  if (!post || post.status !== 'published' || post.deletedAt) {
+  const moderatedAway = post && isModerated(post.moderation) && (viewerId === undefined || post.authorId !== viewerId)
+  if (!post || post.status !== 'published' || post.deletedAt || moderatedAway) {
     throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
   }
   return post
@@ -389,8 +399,8 @@ async function recountLikes(postId: string): Promise<number> {
   return likeCount
 }
 
-async function recountComments(postId: string): Promise<number> {
-  const commentCount = await PostComment.countDocuments({ postId, hidden: { $ne: true } })
+export async function recountComments(postId: string): Promise<number> {
+  const commentCount = await PostComment.countDocuments({ postId, hidden: { $ne: true }, ...NOT_MODERATED })
   await TripPost.updateOne({ _id: postId }, { $set: { commentCount } })
   return commentCount
 }
@@ -434,14 +444,16 @@ postsRouter.post('/:id/like', requireAuth, loadCurrentUser, writeLimiter, async 
 })
 
 postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {
-  const post = await loadPublished(String(req.params.id))
-  const postId = String(post._id)
   const viewerId = res.locals.userId as string | undefined
+  const post = await loadPublished(String(req.params.id), viewerId)
+  const postId = String(post._id)
   const all = await PostComment.find({ postId }).sort({ createdAt: 1 }).limit(500).lean()
 
-  // A hidden comment (and the replies under it) is seen only by its writer and the journey's author.
-  const canSee = (c: { authorId: string; hidden?: boolean | null }) =>
-    !c.hidden || (viewerId !== undefined && (c.authorId === viewerId || post.authorId === viewerId))
+  // A hidden comment (and the replies under it) is seen only by its writer and the journey's author;
+  // one hidden by moderation only by its writer.
+  const canSee = (c: { authorId: string; hidden?: boolean | null; moderation?: { hidden?: boolean | null } | null }) =>
+    (!isModerated(c.moderation) || (viewerId !== undefined && c.authorId === viewerId)) &&
+    (!c.hidden || (viewerId !== undefined && (c.authorId === viewerId || post.authorId === viewerId)))
   const rootVisible = new Map(all.filter((c) => !c.parentId).map((c) => [String(c._id), canSee(c)]))
   const comments = all.filter((c) => canSee(c) && (!c.parentId || rootVisible.get(c.parentId) === true))
 
@@ -457,6 +469,8 @@ postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {
       content: c.content,
       likeCount: 0,
       hidden: Boolean(c.hidden),
+      /** Set only for the comment's writer: hidden by moderation. */
+      moderated: isModerated(c.moderation) || undefined,
       createdAt: c.createdAt.toISOString(),
     })),
     authors: authors.map((u) => ({
@@ -550,14 +564,18 @@ postsRouter.delete('/:id/comments/:commentId', requireAuth, loadCurrentUser, wri
     throw new HttpError(403, 'Bạn không thể xoá bình luận này.', 'FORBIDDEN')
   }
 
-  // A root comment takes its replies with it.
-  const replies = comment.parentId ? [] : await PostComment.find({ postId, parentId: commentId }).select('_id').lean()
+  const { commentCount, deletedIds } = await removeCommentThread(postId, commentId, comment.parentId)
+  res.json({ commentCount, deletedIds })
+})
+
+/** Deletes a comment (a root comment takes its replies with it) and the notifications about it. */
+export async function removeCommentThread(postId: string, commentId: string, parentId: string | null | undefined) {
+  const replies = parentId ? [] : await PostComment.find({ postId, parentId: commentId }).select('_id').lean()
   const doomed = [commentId, ...replies.map((r) => String(r._id))]
   await PostComment.deleteMany({ _id: { $in: doomed } })
   await Notification.deleteMany({ type: 'comment', postId, commentId: { $in: doomed } })
-
-  res.json({ commentCount: await recountComments(postId), deletedIds: doomed })
-})
+  return { commentCount: await recountComments(postId), deletedIds: doomed }
+}
 
 const hideSchema = z.object({ hidden: z.boolean() })
 
@@ -666,6 +684,9 @@ postsRouter.delete('/:id', requireAuth, loadCurrentUser, writeLimiter, async (re
 postsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const user = currentUser(res)
   const post = await loadOwn(user._id, String(req.params.id), true)
+  if (post.moderation?.action === 'remove') {
+    throw new HttpError(403, 'Hành trình này đã bị gỡ do vi phạm quy định cộng đồng nên không thể khôi phục.', 'MODERATED')
+  }
   // Past the window it is gone, even when the clean-up has not run yet.
   if (post.deletedAt && post.deletedAt < restoreCutoff()) {
     await destroyPost(post)

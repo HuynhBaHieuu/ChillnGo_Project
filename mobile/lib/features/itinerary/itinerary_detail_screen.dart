@@ -147,9 +147,18 @@ class _ItineraryDetailScreenState extends ConsumerState<ItineraryDetailScreen> {
           Text(itinerary.title, style: AppText.h1),
           if (itinerary.note.isNotEmpty) ...[const SizedBox(height: 6), Text(tx(itinerary.note), style: AppText.meta)],
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: AppButton(label: t('Ghép từ bài khác'), icon: LucideIcons.gitMerge, onPressed: () => showMergeSheet(context, itinerary)),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              AppButton(label: t('Chỉnh sửa'), icon: LucideIcons.pencil, onPressed: () => context.push('/itineraries/${itinerary.id}/edit')),
+              AppButton(
+                label: t('Ghép từ bài khác'),
+                icon: LucideIcons.gitMerge,
+                variant: ButtonVariant.outline,
+                onPressed: () => showMergeSheet(context, itinerary),
+              ),
+            ],
           ),
           const SizedBox(height: 18),
           AppCard(

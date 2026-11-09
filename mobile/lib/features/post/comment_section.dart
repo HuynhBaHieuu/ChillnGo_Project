@@ -13,6 +13,7 @@ import '../../state/session.dart';
 import '../../ui/buttons.dart';
 import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
+import '../report/report_sheet.dart';
 import '../../core/i18n.dart';
 
 /// Comments under a journey, one level of replies (web: CommentSection).
@@ -238,6 +239,7 @@ class _CommentItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(thread.comment.content, style: AppText.bodySmall),
+                    if (thread.comment.moderated) ...[const SizedBox(height: 6), const ModeratedNotice()],
                     if (!nested && canReply)
                       GestureDetector(
                         onTap: onToggleReply,
@@ -271,6 +273,13 @@ class _CommentItem extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+              ReportButton(
+                targetType: 'comment',
+                targetId: thread.comment.id,
+                ownerId: thread.comment.authorId,
+                size: 32,
+                label: t('Thêm thao tác cho bình luận của {name}', {'name': author.displayName}),
               ),
             ],
           ),

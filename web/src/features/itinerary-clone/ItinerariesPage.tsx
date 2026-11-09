@@ -166,6 +166,11 @@ function MyJourneyCard({ journey }: { journey: ServerTripPost }) {
           >
             {draft ? t('Nháp') : t('Đã đăng')}
           </span>
+          {journey.moderation?.hidden && (
+            <span className="absolute right-3 top-3 rounded-full bg-destructive px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-destructive-foreground">
+              {journey.moderation.action === 'remove' ? t('Đã bị gỡ') : t('Đã bị ẩn')}
+            </span>
+          )}
         </div>
 
         <div className="space-y-3 p-5">

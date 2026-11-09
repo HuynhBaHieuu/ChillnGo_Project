@@ -19,6 +19,7 @@ import '../discover/discover_cards.dart';
 import '../livestream/live_cards.dart';
 import '../post/trip_card.dart';
 import 'follow_button.dart';
+import '../report/report_sheet.dart';
 import '../../core/i18n.dart';
 
 List<({String value, String label, int? count})> get _tabs => [
@@ -178,6 +179,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         size: 36,
                         onPressed: () => sharePath('/users/${profile.id}', profile.displayName),
                       ),
+                      if (!isOwn)
+                        ReportButton(
+                          targetType: 'user',
+                          targetId: profile.id,
+                          ownerId: profile.id,
+                          label: t('Thêm thao tác cho {name}', {'name': profile.displayName}),
+                        ),
                     ],
                   ),
                 ),

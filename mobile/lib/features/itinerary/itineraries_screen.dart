@@ -206,6 +206,12 @@ class _MyJourneyCard extends StatelessWidget {
                   top: 10,
                   child: AppBadge(draft ? t('Nháp') : t('Đã đăng'), tone: draft ? BadgeTone.overlay : BadgeTone.primary, uppercase: true),
                 ),
+                if (journey.moderation != null)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: AppBadge(journey.moderation!.removed ? t('Đã bị gỡ') : t('Đã bị ẩn'), tone: BadgeTone.danger, uppercase: true),
+                  ),
               ],
             ),
           ),

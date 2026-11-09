@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { qk } from '@/lib/queryKeys'
 import { itineraryService } from '@/services'
+import type { ItineraryEdit } from '@/services/itinerary.service'
 import { useViewerId } from '@/store'
 
 export function useMyItineraries() {
@@ -61,6 +62,19 @@ export function useMergeIntoItinerary(itineraryId: string) {
   return useMutation({
     mutationFn: (selections: { postId: string; dayIds: string[] }[]) =>
       itineraryService.mergeIntoItinerary({ itineraryId, ownerId: viewerId as string, selections }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(qk.itinerary.detail(itineraryId, viewerId), updated)
+      void queryClient.invalidateQueries({ queryKey: qk.itinerary.all })
+    },
+  })
+}
+
+export function useUpdateItinerary(itineraryId: string) {
+  const queryClient = useQueryClient()
+  const viewerId = useViewerId()
+
+  return useMutation({
+    mutationFn: (edit: ItineraryEdit) => itineraryService.updateItinerary(itineraryId, edit, viewerId as string),
     onSuccess: (updated) => {
       queryClient.setQueryData(qk.itinerary.detail(itineraryId, viewerId), updated)
       void queryClient.invalidateQueries({ queryKey: qk.itinerary.all })
