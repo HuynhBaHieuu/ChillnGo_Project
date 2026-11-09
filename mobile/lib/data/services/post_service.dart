@@ -135,10 +135,19 @@ abstract final class PostService {
 
   /* -------------------------------------------------------------- comments */
 
-  /// Comments as threads: roots, oldest first, each with its replies.
+  /// Comments as threads: roots, oldest first, each with its replies. The
+  /// API's journeys keep their comments there (web: getComments); sample ones here.
   static Future<List<CommentThread>> getComments(String postId) async {
-    await mockDelay();
-    final forPost = _db.comments.where((c) => c.postId == postId).toList()..sort((a, b) => byNewest(b.createdAt, a.createdAt));
+    List<Comment> forPost;
+    if (isServerId(postId)) {
+      final data = await Api.get('/api/posts/$postId/comments');
+      upsertAuthors(listOf(data['authors'], (u) => User.fromJson(mapOf(u))));
+      forPost = listOf(data['items'], (c) => Comment.fromJson(mapOf(c)));
+    } else {
+      await mockDelay();
+      forPost = _db.comments.where((c) => c.postId == postId).toList();
+    }
+    forPost.sort((a, b) => byNewest(b.createdAt, a.createdAt));
     return forPost
         .where((c) => c.parentId == null)
         .map(
@@ -155,6 +164,11 @@ abstract final class PostService {
   }
 
   static Future<Comment> addComment({required String postId, required String authorId, String? parentId, required String content}) async {
+    if (isServerId(postId)) {
+      final data = await Api.post('/api/posts/$postId/comments', body: {'content': content.trim(), 'parentId': parentId});
+      _db.postById(postId)?.commentCount = intOf(data['commentCount']);
+      return Comment.fromJson(mapOf(data['comment']));
+    }
     await mockDelay();
     final text = content.trim();
     if (text.isEmpty) throw ApiError(t('Bình luận không được để trống.'), status: 400);

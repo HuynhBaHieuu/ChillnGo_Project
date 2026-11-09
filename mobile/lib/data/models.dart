@@ -273,6 +273,7 @@ class TripPost {
     this.updatedAt = '',
     this.deletedAt,
     this.purgeAt,
+    this.moderation,
     this.author,
     this.likedByMe = false,
     this.bookmarkedByMe = false,
@@ -319,6 +320,9 @@ class TripPost {
   String? deletedAt;
   String? purgeAt;
 
+  /// Only for the author, on their own journey hidden by moderation.
+  ModerationInfo? moderation;
+
   User? author;
   bool likedByMe;
   bool bookmarkedByMe;
@@ -351,6 +355,7 @@ class TripPost {
     updatedAt: str(json['updatedAt']),
     deletedAt: strOrNull(json['deletedAt']),
     purgeAt: strOrNull(json['purgeAt']),
+    moderation: ModerationInfo.fromJson(json['moderation']),
     author: mapOrNull(json['author']) != null ? User.fromJson(mapOf(json['author'])) : null,
     likedByMe: boolOf(json['likedByMe']),
     bookmarkedByMe: boolOf(json['bookmarkedByMe']),
@@ -382,6 +387,7 @@ class TripPost {
     'updatedAt': updatedAt,
     'deletedAt': deletedAt,
     'purgeAt': purgeAt,
+    if (moderation != null) 'moderation': moderation!.toJson(),
     if (author != null) 'author': author!.toJson(),
     'likedByMe': likedByMe,
     'bookmarkedByMe': bookmarkedByMe,
@@ -448,7 +454,16 @@ class TripPostPayload {
 /* --------------------------------------------------------------- Comment */
 
 class Comment {
-  Comment({required this.id, required this.postId, required this.authorId, this.parentId, required this.content, this.likeCount = 0, required this.createdAt});
+  Comment({
+    required this.id,
+    required this.postId,
+    required this.authorId,
+    this.parentId,
+    required this.content,
+    this.likeCount = 0,
+    required this.createdAt,
+    this.moderated = false,
+  });
 
   String id;
   String postId;
@@ -458,6 +473,9 @@ class Comment {
   int likeCount;
   String createdAt;
 
+  /// Set only for the comment's writer: hidden by moderation, which only they still see.
+  bool moderated;
+
   factory Comment.fromJson(Json json) => Comment(
     id: str(json['_id']),
     postId: str(json['postId']),
@@ -466,6 +484,7 @@ class Comment {
     content: str(json['content']),
     likeCount: intOf(json['likeCount']),
     createdAt: str(json['createdAt']),
+    moderated: boolOf(json['moderated']),
   );
 
   Json toJson() => {
@@ -476,6 +495,7 @@ class Comment {
     'content': content,
     'likeCount': likeCount,
     'createdAt': createdAt,
+    if (moderated) 'moderated': true,
   };
 }
 
@@ -634,6 +654,7 @@ class AppNotification {
   String userId;
 
   /// 'like' | 'comment' | 'follow' | 'clone' | 'bookmark' | 'system' | 'live' | 'invite' | 'invite_accepted'
+  /// | 'moderation' (your content was hidden or removed) | 'report_resolved' (a report you sent was decided)
   String type;
   String? actorId;
   String? postId;
@@ -763,6 +784,7 @@ class CheckIn {
     required this.createdAt,
     this.deletedAt,
     this.purgeAt,
+    this.moderation,
     required this.author,
   });
 
@@ -774,6 +796,9 @@ class CheckIn {
   final String createdAt;
   final String? deletedAt;
   final String? purgeAt;
+
+  /// Only for the author, on their own check-in hidden by moderation.
+  final ModerationInfo? moderation;
   MiniUser author;
 
   factory CheckIn.fromJson(Json json) => CheckIn(
@@ -788,6 +813,7 @@ class CheckIn {
     createdAt: str(json['createdAt']),
     deletedAt: strOrNull(json['deletedAt']),
     purgeAt: strOrNull(json['purgeAt']),
+    moderation: ModerationInfo.fromJson(json['moderation']),
     author: MiniUser.fromJson(mapOf(json['author'])),
   );
 }
@@ -1092,6 +1118,7 @@ class AdminStats {
     required this.signupsByDay,
     this.byRole,
     this.adminActions7,
+    this.pendingReports,
   });
 
   /// 'users' | 'full'
@@ -1105,6 +1132,9 @@ class AdminStats {
   final List<(String date, int count)> signupsByDay;
   final Map<String, int>? byRole;
   final int? adminActions7;
+
+  /// Reports waiting for a decision; only for accounts with the Reports module.
+  final int? pendingReports;
 
   factory AdminStats.fromJson(Json json) {
     final users = mapOf(json['users']);
@@ -1123,6 +1153,7 @@ class AdminStats {
       }),
       byRole: byRole?.map((k, v) => MapEntry(k, intOf(v))),
       adminActions7: json['adminActions7'] == null ? null : intOf(json['adminActions7']),
+      pendingReports: json['pendingReports'] == null ? null : intOf(json['pendingReports']),
     );
   }
 }
@@ -1169,4 +1200,221 @@ class AppSettings {
   factory AppSettings.fromJson(Json json) => AppSettings(registrationOpen: boolOf(json['registrationOpen'], true), announcement: str(json['announcement']));
 
   Json toJson() => {'registrationOpen': registrationOpen, 'announcement': announcement};
+}
+
+/* ----------------------------------------------------- Reports, moderation */
+
+/// Set only for the author, on their own journey or check-in hidden by moderation.
+class ModerationInfo {
+  const ModerationInfo({required this.action, this.reason = ''});
+
+  /// 'hide' | 'remove' (also taken down for good: it cannot be restored).
+  final String action;
+  final String reason;
+
+  bool get removed => action == 'remove';
+
+  static ModerationInfo? fromJson(Object? value) {
+    final json = mapOrNull(value);
+    if (json == null || !boolOf(json['hidden'])) return null;
+    return ModerationInfo(action: str(json['action'], 'hide'), reason: str(json['reason']));
+  }
+
+  Json toJson() => {'hidden': true, 'action': action, 'reason': reason};
+}
+
+/// 'post' | 'comment' | 'checkin' | 'user'
+typedef ReportTargetType = String;
+
+/// Someone in a report: the reporter, the owner of the content, the moderator.
+class ReportPerson {
+  const ReportPerson({required this.id, required this.username, required this.displayName, this.avatarUrl = '', this.status = 'active', this.role = 'user'});
+
+  final String id;
+  final String username;
+  final String displayName;
+  final String avatarUrl;
+
+  /// 'active' | 'locked'
+  final String status;
+  final String role;
+
+  static ReportPerson? fromJson(Object? value) {
+    final json = mapOrNull(value);
+    if (json == null) return null;
+    return ReportPerson(
+      id: str(json['_id']),
+      username: str(json['username']),
+      displayName: str(json['displayName']),
+      avatarUrl: str(json['avatarUrl']),
+      status: str(json['status'], 'active'),
+      role: str(json['role'], 'user'),
+    );
+  }
+}
+
+/// What the content looked like when it was reported.
+class ReportSnapshot {
+  const ReportSnapshot({this.title = '', this.text = '', this.imageUrl = '', this.postId});
+
+  final String title;
+  final String text;
+  final String imageUrl;
+
+  /// The journey a comment is on.
+  final String? postId;
+
+  factory ReportSnapshot.fromJson(Object? value) {
+    final json = mapOf(value);
+    return ReportSnapshot(title: str(json['title']), text: str(json['text']), imageUrl: str(json['imageUrl']), postId: strOrNull(json['postId']));
+  }
+}
+
+/// The reported content as it is now; it may be gone.
+class ReportTargetState {
+  const ReportTargetState({required this.exists, required this.visible, required this.hidden, this.action, this.hiddenBy});
+
+  final bool exists;
+  final bool visible;
+  final bool hidden;
+  final String? action;
+
+  /// A moderator's id, or "system" for the automatic hide.
+  final String? hiddenBy;
+
+  factory ReportTargetState.fromJson(Object? value) {
+    final json = mapOf(value);
+    return ReportTargetState(
+      exists: boolOf(json['exists']),
+      visible: boolOf(json['visible']),
+      hidden: boolOf(json['hidden']),
+      action: strOrNull(json['action']),
+      hiddenBy: strOrNull(json['hiddenBy']),
+    );
+  }
+}
+
+Map<String, int> _reasonCounts(Object? value) => mapOf(value).map((k, v) => MapEntry(k, intOf(v)));
+
+/// One row of the moderation queue: every report about one piece of content.
+class ReportGroup {
+  const ReportGroup({
+    required this.targetType,
+    required this.targetId,
+    required this.count,
+    required this.reasons,
+    required this.lastReportedAt,
+    this.resolvedAt,
+    required this.action,
+    this.resolvedBy,
+    required this.snapshot,
+    this.owner,
+    required this.target,
+  });
+
+  final ReportTargetType targetType;
+  final String targetId;
+  final int count;
+  final Map<String, int> reasons;
+  final String lastReportedAt;
+  final String? resolvedAt;
+
+  /// 'none' | 'hide' | 'remove' | 'lock'
+  final String action;
+  final ReportPerson? resolvedBy;
+  final ReportSnapshot snapshot;
+  final ReportPerson? owner;
+  final ReportTargetState target;
+
+  factory ReportGroup.fromJson(Json json) => ReportGroup(
+    targetType: str(json['targetType']),
+    targetId: str(json['targetId']),
+    count: intOf(json['count']),
+    reasons: _reasonCounts(json['reasons']),
+    lastReportedAt: str(json['lastReportedAt']),
+    resolvedAt: strOrNull(json['resolvedAt']),
+    action: str(json['action'], 'none'),
+    resolvedBy: ReportPerson.fromJson(json['resolvedBy']),
+    snapshot: ReportSnapshot.fromJson(json['snapshot']),
+    owner: ReportPerson.fromJson(json['owner']),
+    target: ReportTargetState.fromJson(json['target']),
+  );
+}
+
+/// One report, as the moderator sees it.
+class ReportEntry {
+  const ReportEntry({
+    required this.id,
+    this.reporter,
+    required this.reason,
+    this.note = '',
+    required this.status,
+    required this.action,
+    required this.createdAt,
+    this.resolvedAt,
+    this.resolvedBy,
+    this.resolutionNote = '',
+  });
+
+  final String id;
+  final ReportPerson? reporter;
+  final String reason;
+  final String note;
+
+  /// 'pending' | 'resolved' | 'dismissed'
+  final String status;
+  final String action;
+  final String createdAt;
+  final String? resolvedAt;
+  final ReportPerson? resolvedBy;
+  final String resolutionNote;
+
+  factory ReportEntry.fromJson(Json json) => ReportEntry(
+    id: str(json['_id']),
+    reporter: ReportPerson.fromJson(json['reporter']),
+    reason: str(json['reason'], 'other'),
+    note: str(json['note']),
+    status: str(json['status'], 'pending'),
+    action: str(json['action'], 'none'),
+    createdAt: str(json['createdAt']),
+    resolvedAt: strOrNull(json['resolvedAt']),
+    resolvedBy: ReportPerson.fromJson(json['resolvedBy']),
+    resolutionNote: str(json['resolutionNote']),
+  );
+}
+
+/// The reported content with what can be decided about it.
+class ReportTargetDetail {
+  const ReportTargetDetail({
+    required this.targetType,
+    required this.targetId,
+    required this.state,
+    required this.snapshot,
+    this.owner,
+    required this.pendingCount,
+    required this.reasons,
+    required this.allowedActions,
+  });
+
+  final ReportTargetType targetType;
+  final String targetId;
+  final ReportTargetState state;
+  final ReportSnapshot snapshot;
+  final ReportPerson? owner;
+  final int pendingCount;
+  final Map<String, int> reasons;
+
+  /// Some of 'dismiss' | 'hide' | 'remove' | 'lock'.
+  final List<String> allowedActions;
+
+  factory ReportTargetDetail.fromJson(Json json) => ReportTargetDetail(
+    targetType: str(json['targetType']),
+    targetId: str(json['targetId']),
+    state: ReportTargetState.fromJson(json),
+    snapshot: ReportSnapshot.fromJson(json['snapshot']),
+    owner: ReportPerson.fromJson(json['owner']),
+    pendingCount: intOf(json['pendingCount']),
+    reasons: _reasonCounts(json['reasons']),
+    allowedActions: stringList(json['allowedActions']),
+  );
 }
