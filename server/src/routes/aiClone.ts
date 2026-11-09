@@ -203,6 +203,7 @@ aiCloneRouter.get('/posts/:id/ai-clone', requireAuth, loadCurrentUser, async (re
         _id: { $ne: post._id },
         status: 'published',
         deletedAt: null,
+        'moderation.hidden': { $ne: true },
         'days.locations.placeId': { $in: places.map((p) => String(p._id)) },
       })
         .select('title authorId days')
