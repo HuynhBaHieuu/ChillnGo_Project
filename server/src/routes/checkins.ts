@@ -18,9 +18,10 @@ import { confirmCheckinPhoto, destroyImages, signCheckinUpload } from '../lib/cl
 import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { FEELINGS } from '../lib/feelings.js'
 import { purgeAt, restoreCutoff } from '../lib/retention.js'
-import { requireAuth } from '../middleware/requireAuth.js'
+import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { CheckIn } from '../models/CheckIn.js'
+import { NOT_MODERATED, moderationView } from '../models/moderation.js'
 import { User } from '../models/User.js'
 
 export const checkinsRouter = Router()
@@ -39,7 +40,7 @@ const writeLimiter = rateLimit({
 type CheckInDoc = InstanceType<typeof CheckIn>
 
 /** Check-ins with their authors' public profile fields. */
-async function withAuthors(items: CheckInDoc[]) {
+async function withAuthors(items: CheckInDoc[], viewerId?: string) {
   const ids = [...new Set(items.map((c) => c.authorId))]
   const authors = await User.find({ _id: { $in: ids } }).select('username displayName avatarUrl').lean()
   const byId = new Map(authors.map((a) => [a._id, a]))
@@ -56,6 +57,8 @@ async function withAuthors(items: CheckInDoc[]) {
         : null,
       createdAt: c.createdAt.toISOString(),
       deletedAt: c.deletedAt ? c.deletedAt.toISOString() : null,
+      /** Only the author hears that their check-in was hidden by moderation. */
+      moderation: viewerId !== undefined && c.authorId === viewerId ? moderationView(c.moderation) : null,
       purgeAt: c.deletedAt ? purgeAt(c.deletedAt).toISOString() : null,
       author: author
         ? { _id: author._id, username: author.username, displayName: author.displayName, avatarUrl: author.avatarUrl }
@@ -74,15 +77,22 @@ const listSchema = z.object({
   before: z.iso.datetime().optional().catch(undefined),
 })
 
-/** GET /api/checkins — anyone may read. `authors` narrows to those accounts (the Newsfeed). */
-checkinsRouter.get('/', async (req, res) => {
+/**
+ * GET /api/checkins — anyone may read. `authors` narrows to those accounts (the Newsfeed).
+ * Check-ins hidden by moderation are left out, except the viewer's own.
+ */
+checkinsRouter.get('/', optionalAuth, async (req, res) => {
   const { authors, before } = listSchema.parse(req.query)
-  const filter: Record<string, unknown> = { deletedAt: null }
+  const viewerId = res.locals.userId as string | undefined
+  const filter: Record<string, unknown> = {
+    deletedAt: null,
+    ...(viewerId ? { $or: [NOT_MODERATED, { authorId: viewerId }] } : NOT_MODERATED),
+  }
   if (authors) filter.authorId = { $in: authors }
   if (before) filter.createdAt = { $lt: new Date(before) }
 
   const items = await CheckIn.find(filter).sort({ createdAt: -1 }).limit(PAGE_SIZE)
-  res.json({ items: await withAuthors(items) })
+  res.json({ items: await withAuthors(items, viewerId) })
 })
 
 /** POST /api/checkins/upload-signature → { publicId, uploadUrl, fields } */
@@ -164,6 +174,9 @@ checkinsRouter.delete('/:id', requireAuth, loadCurrentUser, async (req, res) => 
 
 checkinsRouter.post('/:id/restore', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
   const checkin = await loadOwn(currentUser(res)._id, String(req.params.id), true)
+  if (checkin.moderation?.action === 'remove') {
+    throw new HttpError(403, 'Check-in này đã bị gỡ do vi phạm quy định cộng đồng nên không thể khôi phục.', 'MODERATED')
+  }
   // Past the window it is gone, even when the clean-up has not run yet.
   if (checkin.deletedAt && checkin.deletedAt < restoreCutoff()) {
     await destroyCheckIn(checkin)

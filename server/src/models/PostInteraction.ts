@@ -1,5 +1,7 @@
 import { Schema, model } from 'mongoose'
 
+import { moderationField } from './moderation.js'
+
 /** `userId` likes journey `postId`. The pair is unique. */
 const postLikeSchema = new Schema(
   {
@@ -30,6 +32,11 @@ const postCommentSchema = new Schema(
      * writer and the journey's author still do. Not counted in `commentCount`.
      */
     hidden: { type: Boolean, default: false },
+    /**
+     * Hidden by a moderator after reports (models/moderation.ts): only its
+     * writer still sees it. Separate from `hidden`, which the journey's author controls.
+     */
+    moderation: moderationField,
   },
   { timestamps: { createdAt: true, updatedAt: false }, versionKey: false },
 )

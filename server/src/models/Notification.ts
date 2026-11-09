@@ -6,7 +6,21 @@ import { Schema, model } from 'mongoose'
  * or clone of a journey, an invite to come along on one and its acceptance);
  * the rest of the app's notifications are still mock data in the web app.
  */
-export const NOTIFICATION_TYPES = ['follow', 'live', 'like', 'comment', 'clone', 'invite', 'invite_accepted'] as const
+/**
+ * 'moderation': your content was hidden or removed, or your account locked, after reports.
+ * 'report_resolved': something you reported has been looked at.
+ */
+export const NOTIFICATION_TYPES = [
+  'follow',
+  'live',
+  'like',
+  'comment',
+  'clone',
+  'invite',
+  'invite_accepted',
+  'moderation',
+  'report_resolved',
+] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
 const notificationSchema = new Schema(
@@ -37,7 +51,7 @@ export const Notification = model('Notification', notificationSchema)
 /** Sends the same notification to many users. Never throws: a failed notification must not fail the action. */
 export async function notify(
   userIds: string[],
-  body: { type: NotificationType; actorId: string; message: string; livestreamId?: string; postId?: string; commentId?: string },
+  body: { type: NotificationType; actorId: string | null; message: string; livestreamId?: string; postId?: string; commentId?: string },
 ): Promise<void> {
   if (userIds.length === 0) return
   await Notification.insertMany(

@@ -14,6 +14,7 @@ import { authRouter } from './routes/auth.js'
 import { checkinsRouter } from './routes/checkins.js'
 import { geoRouter } from './routes/geo.js'
 import { itinerariesRouter } from './routes/itineraries.js'
+import { reportsRouter } from './routes/reports.js'
 import { livestreamsRouter } from './routes/livestreams.js'
 import { notificationsRouter } from './routes/notifications.js'
 import { postsRouter } from './routes/posts.js'
@@ -81,6 +82,7 @@ app.use('/api/activity', activityRouter)
 app.use('/api/geo', geoRouter)
 app.use('/api/assistant', assistantRouter)
 app.use('/api/itineraries', itinerariesRouter)
+app.use('/api/reports', reportsRouter)
 // AI clone: /api/posts/:id/ai-clone and /api/ai-drafts/…
 app.use('/api', aiCloneRouter)
 
