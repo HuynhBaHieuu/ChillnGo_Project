@@ -97,14 +97,6 @@ export async function getAllTags(): Promise<{ tag: string; count: number }[]> {
 
 /* ----------------------------------------------------------------- admin */
 
-/** GET /api/admin/posts?status=pending — the moderation queue. */
-export async function getModerationQueue(): Promise<TripPostWithAuthor[]> {
-  await delay()
-  return db.tripPosts
-    .filter((p) => p.status === 'pending')
-    .map((p) => decorate(p, null))
-}
-
 /** GET /api/admin/users */
 export async function getAllUsers(): Promise<User[]> {
   await delay()

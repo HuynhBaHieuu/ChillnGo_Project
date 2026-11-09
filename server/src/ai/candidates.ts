@@ -77,7 +77,7 @@ export async function destinationOf(posts: TripPostDocument[]): Promise<Destinat
 async function placeStats(placeIds: string[]): Promise<Map<string, PlaceStats>> {
   if (placeIds.length === 0) return new Map()
   const rows = await TripPost.aggregate<{ _id: string } & PlaceStats>([
-    { $match: { status: 'published', deletedAt: null, 'days.locations.placeId': { $in: placeIds } } },
+    { $match: { status: 'published', deletedAt: null, 'moderation.hidden': { $ne: true }, 'days.locations.placeId': { $in: placeIds } } },
     { $unwind: '$days' },
     { $unwind: '$days.locations' },
     { $match: { 'days.locations.placeId': { $in: placeIds } } },

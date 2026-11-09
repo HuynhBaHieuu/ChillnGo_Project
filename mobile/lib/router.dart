@@ -31,6 +31,7 @@ import 'features/editor/post_editor_screen.dart';
 import 'features/feed/feed_screen.dart';
 import 'features/itinerary/itineraries_screen.dart';
 import 'features/itinerary/itinerary_detail_screen.dart';
+import 'features/itinerary/itinerary_edit_screen.dart';
 import 'features/livestream/live_screen.dart';
 import 'features/livestream/live_setup_screen.dart';
 import 'features/livestream/live_tab_screen.dart';
@@ -195,6 +196,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/itineraries/:id',
       builder: (_, state) => ItineraryDetailScreen(id: state.pathParameters['id'] ?? ''),
+    ),
+    GoRoute(
+      path: '/itineraries/:id/edit',
+      builder: (_, state) => ItineraryEditScreen(id: state.pathParameters['id'] ?? ''),
     ),
 
     GoRoute(path: '/activity', builder: (_, _) => const ActivityScreen()),

@@ -16,6 +16,7 @@ import '../../ui/buttons.dart';
 import '../../ui/photo_viewer.dart';
 import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../report/report_sheet.dart';
 import '../../core/i18n.dart';
 
 /// A photo check-in in the Newsfeed (web/src/features/checkin/CheckInCard.tsx).
@@ -76,9 +77,18 @@ class CheckInCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (isMine) AppIconButton(icon: LucideIcons.trash, label: t('Xoá check-in'), size: 36, onPressed: () => _confirmDelete(context, ref)),
+              if (isMine)
+                AppIconButton(icon: LucideIcons.trash, label: t('Xoá check-in'), size: 36, onPressed: () => _confirmDelete(context, ref))
+              else
+                ReportButton(
+                  targetType: 'checkin',
+                  targetId: checkin.id,
+                  ownerId: author.id,
+                  label: t('Thêm thao tác cho check-in của {name}', {'name': author.displayName}),
+                ),
             ],
           ),
+          if (isMine && checkin.moderation != null) ...[const SizedBox(height: 12), ModeratedNotice(removed: checkin.moderation!.removed)],
           if (checkin.caption.isNotEmpty) ...[const SizedBox(height: 12), Text(checkin.caption, style: AppText.body)],
           if (checkin.photos.isNotEmpty) ...[
             const SizedBox(height: 12),

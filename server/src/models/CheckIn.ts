@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose'
 
 import { FEELINGS } from '../lib/feelings.js'
+import { moderationField } from './moderation.js'
 
 /**
  * A check-in: up to four photos, a caption, a feeling or activity, and a place
@@ -37,6 +38,8 @@ const checkInSchema = new Schema(
     },
     /** Set while the check-in is in "Recently Deleted" (see lib/retention.ts). */
     deletedAt: { type: Date, default: null },
+    /** Hidden or removed by moderation (models/moderation.ts). */
+    moderation: moderationField,
   },
   { timestamps: true, versionKey: false },
 )

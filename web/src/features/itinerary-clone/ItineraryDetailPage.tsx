@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { ArrowLeft, GitMerge, Loader2, Sparkles } from 'lucide-react'
+import { ArrowLeft, GitMerge, Loader2, Pencil, Sparkles } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -161,10 +161,18 @@ export function ItineraryDetailPage() {
           )}
         </div>
 
-        <GlassButton size="lg" onClick={() => setMergeOpen(true)} className="shrink-0">
-          <GitMerge />
-          {t('Ghép từ bài khác')}
-        </GlassButton>
+        <div className="flex shrink-0 flex-wrap gap-3">
+          <GlassButton asChild size="lg" tone="sunset">
+            <Link to={`/itineraries/${itinerary._id}/edit`}>
+              <Pencil />
+              {t('Chỉnh sửa')}
+            </Link>
+          </GlassButton>
+          <GlassButton size="lg" onClick={() => setMergeOpen(true)}>
+            <GitMerge />
+            {t('Ghép từ bài khác')}
+          </GlassButton>
+        </div>
       </header>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">

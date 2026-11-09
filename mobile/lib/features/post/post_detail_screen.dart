@@ -8,12 +8,17 @@ import '../../core/labels.dart';
 import '../../core/links.dart';
 import '../../core/theme.dart';
 import '../../data/models.dart';
+import '../../data/server_posts.dart';
 import '../../data/services/ai_clone_service.dart';
+import '../../data/services/post_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
+import '../../ui/sheets.dart';
 import '../../ui/surfaces.dart';
+import '../activity/activity_common.dart';
 import '../map/route_map.dart';
+import '../report/report_sheet.dart';
 import 'clone_sheet.dart';
 import 'comment_section.dart';
 import 'companions.dart';
@@ -39,6 +44,24 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   void _scrollToComments() {
     final target = _commentsKey.currentContext;
     if (target != null) Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+  }
+
+  /// The author deletes their journey: it goes to "Đã xoá gần đây" for 30 days (web: PostDetailPage).
+  Future<void> _delete(TripPost post) async {
+    final done = await confirmAction(
+      context,
+      title: t('Xoá hành trình này?'),
+      description: t(
+        'Hành trình sẽ không còn hiện trên trang cá nhân, Newsfeed và trang Khám phá. Bạn có thể khôi phục trong 30 ngày ở Hoạt động của bạn → Đã xoá gần đây.',
+      ),
+      confirmLabel: t('Xoá hành trình'),
+      destructive: true,
+      onConfirm: () => PostService.deleteJourney(post.id),
+    );
+    if (!done || !mounted) return;
+    invalidateActivity(ref);
+    toast(context, t('Đã chuyển hành trình vào mục Đã xoá gần đây.'));
+    context.pushReplacement('/itineraries');
   }
 
   @override
@@ -73,6 +96,8 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     final author = post.author;
     final isAuthor = viewerId == post.authorId;
     final draft = post.status == 'draft';
+    // Sample journeys live only in this app; only the API's own can be deleted.
+    final canDelete = isAuthor && isServerId(post.id);
 
     return Scaffold(
       appBar: AppBar(
@@ -80,6 +105,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
         actions: [
           if (isAuthor) AppIconButton(icon: LucideIcons.pencil, label: t('Chỉnh sửa hành trình'), onPressed: () => context.push('/posts/${post.id}/edit')),
           if (!draft) AppIconButton(icon: LucideIcons.share2, label: t('Chia sẻ hành trình'), onPressed: () => sharePath('/posts/${post.id}', post.title)),
+          if (canDelete) AppIconButton(icon: LucideIcons.trash2, label: t('Xoá hành trình'), color: AppColors.destructive, onPressed: () => _delete(post)),
           const SizedBox(width: 8),
         ],
       ),
@@ -103,6 +129,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     InviteBanner(post: post, viewerId: viewerId),
+                    if (isAuthor && post.moderation != null) ...[ModeratedNotice(removed: post.moderation!.removed), const SizedBox(height: 12)],
                     if (draft) ...[
                       Align(alignment: Alignment.centerLeft, child: AppBadge(t('Bản nháp, chỉ bạn thấy'), uppercase: true)),
                       const SizedBox(height: 12),
@@ -138,6 +165,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                   variant: ButtonVariant.outline,
                                   size: ButtonSize.sm,
                                   onPressed: () => context.push('/posts/${post.id}/edit'),
+                                )
+                              else
+                                ReportButton(
+                                  targetType: 'post',
+                                  targetId: post.id,
+                                  ownerId: post.authorId,
+                                  label: t('Thêm thao tác cho {title}', {'title': post.title}),
                                 ),
                             ],
                           ),

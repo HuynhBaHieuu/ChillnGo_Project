@@ -278,5 +278,12 @@ export const post = {
     ja: '最大{n}枚、最初の写真がカバーになります。{formats}、1枚あたり最大15 MB。画像は自動で圧縮されます。',
     ko: '최대 {n}장, 첫 번째 사진이 커버예요. {formats}, 장당 최대 15MB. 사진은 자동으로 압축돼요.',
   },
+  'Xoá hành trình': { en: 'Delete journey', zh: '删除行程', ja: '旅程を削除', ko: '여정 삭제' },
+  'Hành trình sẽ không còn hiện trên trang cá nhân, Newsfeed và trang Khám phá. Bạn có thể khôi phục trong 30 ngày ở Hoạt động của bạn → Đã xoá gần đây.': {
+    en: 'The journey will no longer appear on your profile, in the Newsfeed or on Discover. You can restore it within 30 days in Your activity → Recently deleted.',
+    zh: '该行程将不再显示在你的主页、动态和探索页。你可以在 30 天内于“你的活动 → 最近删除”中恢复。',
+    ja: '旅程はプロフィール、フィード、探すページに表示されなくなります。30日以内なら「アクティビティ → 最近削除した項目」から復元できます。',
+    ko: '여정이 프로필, 뉴스피드, 탐색 페이지에 더 이상 표시되지 않아요. 30일 이내에 내 활동 → 최근 삭제에서 복원할 수 있어요.',
+  },
   'Chọn ảnh cho hành trình': { en: 'Choose photos for the journey', zh: '为行程选择照片', ja: '旅程の写真を選ぶ', ko: '여정 사진 선택' },
 } satisfies Messages

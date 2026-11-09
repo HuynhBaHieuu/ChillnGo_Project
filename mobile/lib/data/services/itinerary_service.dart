@@ -69,4 +69,27 @@ abstract final class ItineraryService {
   );
 
   static Future<ClonedItinerary> removeDay(String id, String dayId) async => _read(await Api.delete('/api/itineraries/$id/days/$dayId'));
+
+  /// PATCH /api/itineraries/:id: your own changes to the copy (name, note,
+  /// start date, status, days). The journey it came from is untouched.
+  static Future<ClonedItinerary> updateItinerary(
+    String id, {
+    required String title,
+    required String note,
+    required String startDate,
+    required String status,
+    required List<TripDay> days,
+  }) async => _read(
+    await Api.patch(
+      '/api/itineraries/$id',
+      body: {
+        'title': title.trim(),
+        'note': note.trim(),
+        'startDate': startDate,
+        'status': status,
+        'days': [for (final d in days) d.toJson()],
+      },
+      timeout: const Duration(seconds: 60),
+    ),
+  );
 }

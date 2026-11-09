@@ -27,6 +27,7 @@ comments and itineraries from mock JSON in `web/src/services/`.
 | `npm run dev` | Runs `src/index.ts` with reload on save. |
 | `npm run seed` | Creates or updates the six demo accounts from `web/src/mocks/users.json`. They are already email-verified and all get the password `chillngo` (override with `SEED_PASSWORD`). `admin@chillngo.vn` is the admin. |
 | `npm run seed:superadmin` | Creates the Super Admin from `SUPERADMIN_*` in `.env`. Changes no other account; safe to re-run. See [Super Admin and admins](#super-admin-and-admins). |
+| `npm run seed:moderation-test` | Creates or resets accounts for trying reports by hand: `kiemduyet@chillngo.vn` (Admin with Reports, Content, Users, Stats) and regular users `tester1@chillngo.vn` … `tester6@chillngo.vn`, all with password `Chillngo@123` (override with `MODERATION_TEST_PASSWORD`). Touches no other account. |
 | `npm run seed:places` | Demo data for AI clone: Đà Lạt and Hội An with about 30 places each, the checklist templates, and four published sample journeys linked to them (`src/scripts/data/aiSeed.ts`). A missing author account is created without a password. Safe to re-run. See [AI clone](#ai-clone). |
 | `npm test` | Unit tests (`src/**/*.test.ts`, Node's test runner). The model is faked; nothing calls a real AI. |
 | `npm run typecheck` | Type-checks without emitting. |
@@ -79,7 +80,8 @@ carry a `code`, such as `EMAIL_NOT_VERIFIED` or `INVALID_VERIFY_TOKEN`.
 | `POST /api/auth/login` | `email`, `password` | `200 { token, user }`, or `403` with `code: EMAIL_NOT_VERIFIED`. |
 | `POST /api/users/me/upload-signature` | `kind`: `avatar` or `cover` | `200 { uploadUrl, fields }`: post the file plus `fields` straight to Cloudinary. |
 | `PATCH /api/users/me` | any of `displayName`, `username`, `bio`, `location`, `avatar`/`cover` (`"uploaded"` or `"remove"`) | `200 { user }` |
-| `GET /api/checkins?authors=a,b&before=ISO` | none | `200 { items }`: newest 20 photo check-ins with authors. Public. |
+| `GET /api/checkins?authors=a,b&before=ISO` | none | `200 { items }`: newest 20 photo check-ins with authors. Public. Check-ins hidden by moderation are left out, except your own (with `moderation` set). |
+| `POST /api/reports` | `targetType` (`post`, `comment`, `checkin`, `user`), `targetId`, `reason` (`spam`, `inappropriate`, `scam`, `misinformation`, `harassment`, `other`), `note?` (up to 500, required for `other`) | `201 { report }`. `400 SELF_REPORT` for yourself or your own content, `409 ALREADY_REPORTED` the second time, `429` past 20 an hour. Once 5 different people report the same content (`AUTO_HIDE_THRESHOLD` in `lib/reports.ts`) it is hidden until a moderator decides. |
 | `POST /api/checkins/upload-signature` | none | `200 { publicId, uploadUrl, fields }`: one per photo. |
 | `POST /api/checkins` | `caption`, `photos` (0–4 publicIds), `feeling` (key from `src/lib/feelings.ts`) or null, `location` (`name`, `address`, `lat`, `lng`) or null. Needs photos, a feeling or a caption. | `201 { checkin }` |
 | `DELETE /api/checkins/:id` | none | `200`. Author only; also deletes the photos from Cloudinary. |
@@ -109,13 +111,17 @@ Admin routes, under `/api/admin`, need a staff account; the permission is in bra
 
 | Route | Who |
 | --- | --- |
-| `GET /stats` | [stats] |
+| `GET /stats` | [stats]; with [reports] also `pendingReports` (pieces of content with reports waiting) |
 | `GET /users?q&role&status&page` | [users]; admins only see role `user` |
 | `POST /users/:id/lock` `{ reason }`, `POST /users/:id/unlock` | [users]. Locking bans the account: sign-in is refused, the stream it is hosting ends, and it leaves other accounts' follower / following counts. Unlocking puts the counts back. Accounts are never deleted. |
 | `POST /users/:id/reset-password` | [users] |
 | `PATCH /users/:id/role` `{ role, permissions? }` | Super Admin |
 | `POST /admins` `{ displayName, username, email, password, permissions }` | Super Admin |
 | `PATCH /admins/:id/permissions` `{ permissions }` | Super Admin |
+| `GET /reports?status&targetType&page` | [reports]. Reports grouped by content: count, count per reason, last report, preview and owner. `status`: `pending` (default), `resolved`, `dismissed`. |
+| `GET /reports/target/:targetType/:targetId` | [reports]. The content and every report about it. |
+| `POST /reports/target/:targetType/:targetId/resolve` `{ action, note? }` | [reports]; `lock` also [users]. Decides all pending reports about it: `dismiss` (content the system hid is shown again), `hide`, `remove` (journey / check-in to "Recently Deleted", not restorable; a comment is deleted), `lock` (locks the owner like `/users/:id/lock`, hides the content). An account only takes `dismiss` or `lock`. The owner and the reporters are notified; audited. |
+| `POST /moderation/:targetType/:targetId/unhide` | [content]. Shows hidden or removed content again; audited. |
 | `GET /audit-logs?q&action&page` | Super Admin |
 | `GET /settings`, `PUT /settings` | Super Admin |
 

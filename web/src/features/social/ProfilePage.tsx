@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useMyItineraries } from '@/features/itinerary-clone/hooks'
 import { LiveHistory } from '@/features/livestream/LiveHistory'
 import { FollowButton } from '@/features/social/components/FollowButton'
+import { ReportMenu } from '@/features/report/ReportMenu'
 import { useBookmarkedPosts, useUser } from '@/features/social/hooks'
 import { usePostsByAuthor } from '@/features/trip-post/hooks'
 import { t, translatedList } from '@/i18n'
@@ -105,7 +106,15 @@ export function ProfilePage() {
                 </Button>
               </div>
             ) : (
-              <FollowButton userId={user._id} />
+              <div className="flex items-center gap-2">
+                <FollowButton userId={user._id} />
+                <ReportMenu
+                  targetType="user"
+                  targetId={user._id}
+                  ownerId={user._id}
+                  label={t('Thêm thao tác cho {name}', { name: user.displayName })}
+                />
+              </div>
             )}
           </div>
         </div>

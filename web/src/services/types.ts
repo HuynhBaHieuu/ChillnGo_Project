@@ -37,6 +37,10 @@ export type NotificationType =
   /** A friend invited you along on their journey, or accepted your invite. From the API. */
   | 'invite'
   | 'invite_accepted'
+  /** Your content was hidden or removed, or your account locked, after reports. From the API. */
+  | 'moderation'
+  /** Something you reported has been looked at. From the API. */
+  | 'report_resolved'
 
 /* ------------------------------------------------------------------ User */
 
@@ -174,6 +178,8 @@ export interface TripPost {
    */
   companions?: TripCompanion[]
   status: PostStatus
+  /** Only for the author: their journey was hidden by moderation. From the API. */
+  moderation?: ModerationInfo | null
   createdAt: ISODate
   updatedAt: ISODate
 }
@@ -190,6 +196,8 @@ export interface Comment {
   likeCount: number
   /** Hidden by the journey's author: only the writer and the author still see it. From the API. */
   hidden?: boolean
+  /** Hidden by moderation after reports: only its writer still sees it (and is told so). From the API. */
+  moderated?: boolean
   createdAt: ISODate
 }
 
@@ -209,6 +217,94 @@ export interface Bookmark {
   userId: ObjectId
   postId: ObjectId
   createdAt: ISODate
+}
+
+/* ---------------------------------------------------- Reports, moderation */
+
+/** Set only for the author, on their own journey or check-in hidden by moderation. */
+export interface ModerationInfo {
+  hidden: true
+  /** "remove": also taken down for good (it cannot be restored). */
+  action: 'hide' | 'remove'
+  reason: string
+}
+
+export type ReportTargetType = 'post' | 'comment' | 'checkin' | 'user'
+export type ReportReason = 'spam' | 'inappropriate' | 'scam' | 'misinformation' | 'harassment' | 'other'
+export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
+export type ReportAction = 'none' | 'hide' | 'remove' | 'lock'
+export type ResolveAction = 'dismiss' | 'hide' | 'remove' | 'lock'
+
+export interface ReportInput {
+  targetType: ReportTargetType
+  targetId: ObjectId
+  reason: ReportReason
+  note?: string
+}
+
+export interface ReportPerson {
+  _id: ObjectId
+  username: string
+  displayName: string
+  avatarUrl: string
+  status: 'active' | 'locked'
+  role: 'user' | 'admin' | 'superadmin'
+}
+
+export interface ReportSnapshot {
+  title: string
+  text: string
+  imageUrl: string
+  /** The journey a comment is on. */
+  postId: ObjectId | null
+}
+
+/** The reported content as it is now; it may be gone. */
+export interface ReportTargetState {
+  exists: boolean
+  visible: boolean
+  hidden: boolean
+  action: string | null
+  /** A moderator's id, or "system" for the automatic hide. */
+  hiddenBy: string | null
+}
+
+/** One row of the moderation queue: every report about one piece of content. */
+export interface ReportGroup {
+  targetType: ReportTargetType
+  targetId: ObjectId
+  count: number
+  reasons: Record<ReportReason, number>
+  lastReportedAt: ISODate
+  resolvedAt: ISODate | null
+  action: ReportAction
+  resolvedBy: ReportPerson | null
+  snapshot: ReportSnapshot
+  owner: ReportPerson | null
+  target: ReportTargetState
+}
+
+export interface ReportEntry {
+  _id: ObjectId
+  reporter: ReportPerson | null
+  reason: ReportReason
+  note: string
+  status: ReportStatus
+  action: ReportAction
+  createdAt: ISODate
+  resolvedAt: ISODate | null
+  resolvedBy: ReportPerson | null
+  resolutionNote: string
+}
+
+export interface ReportTargetDetail extends ReportTargetState {
+  targetType: ReportTargetType
+  targetId: ObjectId
+  snapshot: ReportSnapshot
+  owner: ReportPerson | null
+  pendingCount: number
+  reasons: Record<ReportReason, number>
+  allowedActions: ResolveAction[]
 }
 
 /* ------------------------------------------------------- ClonedItinerary */

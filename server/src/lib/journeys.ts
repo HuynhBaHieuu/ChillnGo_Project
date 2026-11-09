@@ -16,7 +16,8 @@ export function isServerPostId(id: string): boolean {
 /** A journey this user may read and clone: published, or their own. Anything else is a 404. */
 export async function readableJourney(id: string, userId: string): Promise<TripPostDocument> {
   const post = isServerPostId(id) ? await TripPost.findById(id) : null
-  if (!post || post.deletedAt || (post.status !== 'published' && post.authorId !== userId)) {
+  const moderatedAway = post?.moderation?.hidden && post.authorId !== userId
+  if (!post || post.deletedAt || moderatedAway || (post.status !== 'published' && post.authorId !== userId)) {
     throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
   }
   return post

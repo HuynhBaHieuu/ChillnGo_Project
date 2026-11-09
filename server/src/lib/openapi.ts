@@ -150,6 +150,7 @@ const OPERATIONS: Operation[] = [
   { method: 'get', path: '/api/itineraries', summary: "The signed-in user's itineraries.", access: 'user' },
   { method: 'get', path: '/api/itineraries/:id', summary: 'One itinerary.', access: 'user' },
   { method: 'post', path: '/api/itineraries', summary: 'Clone a journey into a new itinerary.', access: 'user', body: true, status: 201 },
+  { method: 'patch', path: '/api/itineraries/:id', summary: 'Edit an itinerary: name, note, start date, status, days and stops.', access: 'user', body: true },
   { method: 'patch', path: '/api/itineraries/:id/days', summary: "Reorder or edit an itinerary's days.", access: 'user', body: true },
   { method: 'post', path: '/api/itineraries/:id/merge', summary: 'Add days from another journey.', access: 'user', body: true },
   { method: 'delete', path: '/api/itineraries/:id/days/:dayId', summary: 'Remove a day from an itinerary.', access: 'user' },
@@ -252,6 +253,9 @@ const OPERATIONS: Operation[] = [
   },
   { method: 'post', path: '/api/assistant/chat', summary: 'Ask the site assistant a question.', access: 'user', body: true },
 
+  // Reports
+  { method: 'post', path: '/api/reports', summary: 'Report a journey, comment, check-in or account: { targetType, targetId, reason, note? }.', access: 'user', body: true, status: 201 },
+
   // Admin
   { method: 'get', path: '/api/admin/stats', summary: 'Dashboard counts.', access: 'staff' },
   { method: 'get', path: '/api/admin/users', summary: 'Search and page through accounts.', access: 'staff' },
@@ -261,6 +265,10 @@ const OPERATIONS: Operation[] = [
   { method: 'post', path: '/api/admin/admins', summary: 'Create an admin account.', access: 'superadmin', body: true, status: 201 },
   { method: 'patch', path: '/api/admin/users/:id/role', summary: "Change an account's role.", access: 'superadmin', body: true },
   { method: 'patch', path: '/api/admin/admins/:id/permissions', summary: "Change an admin's permissions.", access: 'superadmin', body: true },
+  { method: 'get', path: '/api/admin/reports', summary: 'Reports grouped by the content they are about.', access: 'staff' },
+  { method: 'get', path: '/api/admin/reports/target/:targetType/:targetId', summary: 'Every report about one piece of content.', access: 'staff' },
+  { method: 'post', path: '/api/admin/reports/target/:targetType/:targetId/resolve', summary: 'Decide every pending report about one piece of content: dismiss, hide, remove or lock.', access: 'staff', body: true },
+  { method: 'post', path: '/api/admin/moderation/:targetType/:targetId/unhide', summary: 'Show content hidden by moderation again.', access: 'staff' },
   { method: 'get', path: '/api/admin/audit-logs', summary: 'The admin audit log.', access: 'superadmin' },
   { method: 'get', path: '/api/admin/settings', summary: 'Site settings.', access: 'superadmin' },
   { method: 'put', path: '/api/admin/settings', summary: 'Change site settings.', access: 'superadmin', body: true },

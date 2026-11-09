@@ -115,6 +115,32 @@ itinerariesRouter.post('/', writeLimiter, async (req, res) => {
   res.status(201).json({ itinerary: itineraryView(itinerary) })
 })
 
+const editSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Hãy đặt tên cho lịch trình.').max(150, 'Tên lịch trình tối đa 150 ký tự'),
+    note: z.string().trim().max(1000, 'Ghi chú tối đa 1000 ký tự'),
+    startDate: dateOnly,
+    status: z.enum(['planning', 'confirmed', 'completed']),
+    days: z.array(daySchema).min(1, 'Lịch trình cần ít nhất một ngày.').max(60, 'Tối đa 60 ngày'),
+  })
+  .partial()
+
+/**
+ * Your own changes to the copy: its name, note, start date and status, and the
+ * days themselves (stops, costs, notes). Days are renumbered and re-dated from
+ * the start date, as after a reorder; the journey it came from is untouched.
+ */
+itinerariesRouter.patch('/:id', writeLimiter, async (req, res) => {
+  const input = editSchema.parse(req.body)
+  const itinerary = await loadOwn(currentUser(res)._id, String(req.params.id))
+  if (input.title !== undefined) itinerary.title = input.title
+  if (input.note !== undefined) itinerary.note = input.note
+  if (input.status !== undefined) itinerary.status = input.status
+  if (input.startDate !== undefined) itinerary.startDate = input.startDate
+  await saveDays(itinerary, input.days ?? (itinerary.days as Record<string, unknown>[]))
+  res.json({ itinerary: itineraryView(itinerary) })
+})
+
 const orderSchema = z.object({ dayIds: z.array(z.string().max(120)).max(60) })
 
 itinerariesRouter.patch('/:id/days', writeLimiter, async (req, res) => {

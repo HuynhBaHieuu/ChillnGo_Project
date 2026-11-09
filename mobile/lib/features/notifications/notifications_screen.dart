@@ -23,6 +23,8 @@ const _icons = {
   'live': LucideIcons.radio,
   'invite': LucideIcons.users,
   'invite_accepted': LucideIcons.users,
+  'moderation': LucideIcons.shieldAlert,
+  'report_resolved': LucideIcons.flag,
 };
 
 /// Where a notification leads: the stream, the post, or the person who followed you.

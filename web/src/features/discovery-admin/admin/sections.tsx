@@ -2,6 +2,7 @@ import {
   BarChart3,
   ClipboardList,
   Construction,
+  Flag,
   Settings,
   ShieldCheck,
   Users,
@@ -18,6 +19,7 @@ import type { User } from '@/services/types'
 
 import { AdminsPanel } from './AdminsPanel'
 import { AuditLogPanel } from './AuditLogPanel'
+import { ReportsPanel } from './ReportsPanel'
 import { SettingsPanel } from './SettingsPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsersTable } from './UsersTable'
@@ -25,10 +27,11 @@ import type { Notice } from './shared'
 
 /** Modules the permission model already has, but whose data is not on the server yet. */
 const NOT_READY: { module: AdminModule; needs: MessageKey }[] = [
-  { module: 'content', needs: 'bài đăng, lịch trình và bình luận' },
-  { module: 'reports', needs: 'báo cáo vi phạm từ người dùng' },
   { module: 'categories', needs: 'danh mục địa điểm và tag' },
 ]
+
+/** The modules the Nội dung screen serves. */
+const CONTENT_MODULES: AdminModule[] = ['reports', 'content', ...NOT_READY.map((n) => n.module)]
 
 export interface AdminSection {
   /** URL segment: /admin/<path>. */
@@ -83,19 +86,34 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     path: 'content',
     label: 'Nội dung',
     title: 'Kiểm duyệt nội dung',
-    description: () => t('Bài đăng, lịch trình, bình luận, báo cáo vi phạm và danh mục.'),
-    icon: Construction,
-    allowed: (user) => NOT_READY.some(({ module }) => hasModule(user, module)),
-    render: ({ user }) => (
-      <div className="grid gap-4 md:grid-cols-3">
-        {NOT_READY.filter(({ module }) => hasModule(user, module)).map(({ module, needs }) => (
-          <EmptyState
-            key={module}
-            icon={Construction}
-            title={MODULE_LABELS[module].title}
-            description={t('Chưa dùng được: {needs} vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.', { needs: t(needs) })}
-          />
-        ))}
+    description: () => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm.'),
+    icon: Flag,
+    allowed: (user) => CONTENT_MODULES.some((module) => hasModule(user, module)),
+    render: ({ user, onNotice }) => (
+      <div className="space-y-8">
+        {hasModule(user, 'reports') ? (
+          <ReportsPanel actor={user} onNotice={onNotice} />
+        ) : (
+          hasModule(user, 'content') && (
+            <EmptyState
+              icon={Flag}
+              title={MODULE_LABELS.content.title}
+              description={t('Nội dung được kiểm duyệt từ hàng chờ báo cáo vi phạm. Hãy nhờ Super Admin cấp thêm quyền Báo cáo vi phạm để xem hàng chờ.')}
+            />
+          )
+        )}
+        {NOT_READY.some(({ module }) => hasModule(user, module)) && (
+          <div className="grid gap-4 md:grid-cols-3">
+            {NOT_READY.filter(({ module }) => hasModule(user, module)).map(({ module, needs }) => (
+              <EmptyState
+                key={module}
+                icon={Construction}
+                title={MODULE_LABELS[module].title}
+                description={t('Chưa dùng được: {needs} vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.', { needs: t(needs) })}
+              />
+            ))}
+          </div>
+        )}
       </div>
     ),
   },

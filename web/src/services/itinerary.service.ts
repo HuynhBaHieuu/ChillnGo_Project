@@ -85,6 +85,21 @@ export async function clonePost(input: {
   return withCover(itinerary)
 }
 
+/** What the owner can change on their copy; days are renumbered and re-dated from `startDate`. */
+export interface ItineraryEdit {
+  title?: string
+  note?: string
+  startDate?: string
+  status?: ClonedItinerary['status']
+  days?: ClonedItinerary['days']
+}
+
+/** PATCH /api/itineraries/:id — edit your copy (name, note, start date, status, days and stops). */
+export async function updateItinerary(id: ObjectId, edit: ItineraryEdit, _ownerId: ObjectId): Promise<ClonedItinerary> {
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}`, { method: 'PATCH', body: edit })
+  return withCover(itinerary)
+}
+
 /** PATCH /api/itineraries/:id/days — a new day order; days are renumbered and re-dated. */
 export async function reorderItineraryDays(
   id: ObjectId,
