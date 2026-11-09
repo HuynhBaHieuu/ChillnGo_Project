@@ -45,6 +45,8 @@ export interface AdminStats {
   signupsByDay: { date: string; count: number }[]
   byRole?: Partial<Record<Role, number>>
   adminActions7?: number
+  /** Pieces of content with reports waiting; only for those with the Reports permission. */
+  pendingReports?: number
 }
 
 export interface AuditEntry {

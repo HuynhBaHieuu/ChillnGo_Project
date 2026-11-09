@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/GlassCard'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ConfirmDialog } from '@/features/discovery-admin/admin/shared'
+import { ModeratedNotice, ReportMenu } from '@/features/report/ReportMenu'
 import { feelingOption, feelingSentence } from '@/lib/feelings'
 import { t } from '@/i18n'
 import { relativeTime } from '@/lib/format'
@@ -65,8 +66,19 @@ export function CheckInCard({ checkin, viewerId }: { checkin: CheckIn; viewerId:
               <time dateTime={checkin.createdAt}>{relativeTime(checkin.createdAt)}</time>
             </p>
           </div>
-          {isMine && <DeleteCheckIn id={checkin._id} />}
+          {isMine ? (
+            <DeleteCheckIn id={checkin._id} />
+          ) : (
+            <ReportMenu
+              targetType="checkin"
+              targetId={checkin._id}
+              ownerId={author._id}
+              label={t('Thêm thao tác cho check-in của {name}', { name: author.displayName })}
+            />
+          )}
         </header>
+
+        {isMine && checkin.moderation?.hidden && <ModeratedNotice removed={checkin.moderation.action === 'remove'} />}
 
         {checkin.caption && <p className="whitespace-pre-line text-[15px] leading-relaxed">{checkin.caption}</p>}
 

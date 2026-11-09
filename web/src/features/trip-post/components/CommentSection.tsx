@@ -8,6 +8,7 @@ import { GlassCard } from '@/components/GlassCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { ModeratedNotice, ReportMenu } from '@/features/report/ReportMenu'
 import { useAddComment, useComments, useDeleteComment, useHideComment } from '@/features/trip-post/hooks'
 import { t } from '@/i18n'
 import { tr } from '@/i18n/rich'
@@ -210,6 +211,8 @@ function CommentItem({
           </time>
         </div>
 
+        {comment.moderated && <ModeratedNotice className="mt-1.5" />}
+
         {comment.hidden && (
           <p className="mt-1 text-xs italic text-muted-foreground">
             {isJourneyAuthor
@@ -243,6 +246,15 @@ function CommentItem({
               {comment.hidden ? t('Bỏ ẩn') : t('Ẩn')}
             </button>
           )}
+
+          <ReportMenu
+            targetType="comment"
+            targetId={comment._id}
+            ownerId={comment.authorId}
+            size="sm"
+            className="-my-1"
+            label={t('Thêm thao tác cho bình luận của {name}', { name: comment.author.displayName })}
+          />
 
           {canDelete &&
             (confirming ? (

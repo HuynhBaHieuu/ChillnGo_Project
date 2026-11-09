@@ -18,6 +18,7 @@ import { live } from './messages/live'
 import { post } from './messages/post'
 import { tags } from './messages/tags'
 import { server } from './messages/server'
+import { report } from './messages/report'
 
 export const catalog = {
   ...common,
@@ -34,5 +35,6 @@ export const catalog = {
   ...live,
   ...post,
   ...tags,
+  ...report,
   ...server,
 }

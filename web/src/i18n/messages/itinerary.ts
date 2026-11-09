@@ -80,6 +80,13 @@ export const itinerary = {
     ko: '이 여정의 {n}일을 나만의 일정으로 복사해요. 나중에 편집하고, 순서를 바꾸고, 다른 게시물의 날을 합칠 수 있어요.',
   },
   'Sao chép hành trình': { en: 'Clone journey', zh: '复制行程', ja: '旅程をクローン', ko: '여정 복제' },
+  'Chỉnh sửa lịch trình': { en: 'Edit itinerary', zh: '编辑行程', ja: '旅程を編集', ko: '일정 편집' },
+  'Sửa lịch trình theo cách bạn muốn đi: đổi tên, ngày khởi hành, thêm bớt ngày và điểm dừng. Hành trình gốc không bị thay đổi.': {
+    en: 'Shape the itinerary the way you want to travel: rename it, change the start date, add or remove days and stops. The original journey stays unchanged.',
+    zh: '按你想要的方式调整行程：改名、改出发日期、增减天数和停靠点。原行程不会被修改。',
+    ja: '自分の旅に合わせて旅程を編集：名前や出発日の変更、日やスポットの追加・削除ができます。元の旅程は変更されません。',
+    ko: '원하는 방식으로 일정을 수정하세요: 이름, 출발일을 바꾸고 날짜와 장소를 추가하거나 뺄 수 있어요. 원래 여정은 바뀌지 않아요.',
+  },
   'Tên lịch trình': { en: 'Itinerary name', zh: '行程名称', ja: '旅程名', ko: '일정 이름' },
   'Ngày khởi hành': { en: 'Start date', zh: '出发日期', ja: '出発日', ko: '출발일' },
   'Các ngày trong lịch trình sẽ được đánh lại từ ngày này.': {
