@@ -202,18 +202,28 @@ lock status fresh from the database, so a change applies immediately.
 
 | | Super Admin | Admin | User |
 | --- | --- | --- | --- |
-| Create, lock, delete, demote Admins; set their permissions | yes | no | no |
+| Create, lock, demote Admins; set their permissions | yes | no | no |
 | Promote a user to Admin | yes | no | no |
 | Lock, unlock, reset password of regular users | yes | with the `users` module | no |
-| Delete any account except the Super Admin | yes | no | no |
+| Review reports: dismiss, hide, remove content | yes | with the `reports` module | no |
+| Lock the owner from a report | yes | with `reports` and `users` | no |
+| Unhide hidden or removed content | yes | with the `content` module | no |
+| Edit the AI catalog: destinations, places, packing checklist | yes | with the `categories` module | no |
 | Statistics | everything | regular users only, with `stats` | no |
 | Audit log, system settings | yes | no | no |
 
-Nobody can lock, delete or re-role the Super Admin through the API, and
-nobody can act on their own account. Admin modules are `users`, `content`,
-`reports`, `categories` and `stats`. The `content`, `reports` and `categories`
-modules exist in the permission model, but their screens wait for posts,
-reports and categories to move from mock JSON into MongoDB.
+No account is ever deleted through the API: banning someone means locking
+the account, and unlocking undoes it. Nobody can lock or re-role the Super
+Admin through the API, and nobody can act on their own account. Admin
+modules are `users`, `content`, `reports`, `categories` and `stats`.
+
+**The catalog** (`/api/admin/catalog`, `categories` module) is the data AI
+clone plans from: destinations (centre, radius, seasons, festivals), their
+places, and the packing checklist. Place categories stay a fixed list
+(`PLACE_CATEGORIES`), because the AI's output schema is built from it; tags are
+checked against the vocabularies in `src/lib/catalog.ts`. Nothing still in use
+is deleted: a destination that has places, or a place a journey links to, is
+refused with `409 IN_USE`.
 
 **Creating the Super Admin.** `npm run seed:superadmin` (from `server/` or the
 project root) creates the account from `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`,

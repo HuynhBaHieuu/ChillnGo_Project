@@ -26,8 +26,8 @@ const livestreamSchema = new Schema(
     roomName: { type: String, required: true, unique: true },
     startedAt: { type: Date, default: () => new Date() },
     endedAt: { type: Date, default: null },
-    /** host: pressed End. host_left: disconnected and did not come back. */
-    endedReason: { type: String, enum: ['host', 'host_left', null], default: null },
+    /** host: pressed End. host_left: disconnected and did not come back. moderator: stopped by an admin. */
+    endedReason: { type: String, enum: ['host', 'host_left', 'moderator', null], default: null },
     /** Last time the server saw the host connected; drives the "host left" timeout. */
     hostSeenAt: { type: Date, default: () => new Date() },
     viewerCount: { type: Number, default: 0 },
