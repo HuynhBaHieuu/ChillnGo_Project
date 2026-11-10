@@ -26,7 +26,7 @@ import { PermissionChecklist } from './PermissionsDialog'
 import { UsersTable } from './UsersTable'
 import type { Notice } from './shared'
 
-/** Quản trị viên: superadmin only. Create, re-permission, lock, demote, delete admins. */
+/** Quản trị viên: superadmin only. Create, re-permission, lock and demote admins. Accounts are never deleted. */
 export function AdminsPanel({ actor, onNotice }: { actor: User; onNotice: (notice: Notice) => void }) {
   const [creating, setCreating] = useState(false)
 
