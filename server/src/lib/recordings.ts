@@ -113,6 +113,14 @@ export async function dvrPlaylist(prefix: string): Promise<string | null> {
   return text
 }
 
+/** Deletes one object (a replay past its keeping time). Nothing when storage is not configured. */
+export async function deleteObject(key: string): Promise<void> {
+  const storage = env.recording
+  const s3Client = s3()
+  if (!storage || !s3Client) return
+  await s3Client.send(new DeleteObjectCommand({ Bucket: storage.bucket, Key: key }))
+}
+
 /** Deletes everything under a prefix (the rewind segments once the replay MP4 is ready). */
 export async function deletePrefix(prefix: string): Promise<void> {
   const storage = env.recording
