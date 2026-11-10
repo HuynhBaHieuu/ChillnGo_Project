@@ -33,6 +33,13 @@ const RULES: Rule[] = [
   [/^Bản nháp chỉ có (\d+) ngày\.$/, (m) => ['Bản nháp chỉ có {n} ngày.', { n: Number(m[1]) }]],
   [/^Tối đa (\d+) ảnh$/, (m) => ['Tối đa {n} ảnh', { n: Number(m[1]) }]],
   [/^Mỗi hành trình mời tối đa (\d+) người đi cùng\.$/, (m) => ['Mỗi hành trình mời tối đa {n} người đi cùng.', { n: Number(m[1]) }]],
+  [/^Bạn đã dùng hết (\d+) lượt AI hôm nay\. Hãy quay lại vào ngày mai hoặc nâng cấp Premium để có thêm lượt\.$/, (m) => ['Bạn đã dùng hết {n} lượt AI hôm nay. Hãy quay lại vào ngày mai hoặc nâng cấp Premium để có thêm lượt.', { n: Number(m[1]) }]],
+  [/^Thanh toán (.+?) thành công\. (.+) có hiệu lực đến (.+)\.$/s, (m) => ['Thanh toán {amount} thành công. {product} có hiệu lực đến {date}.', { amount: m[1], product: tx(m[2]), date: m[3] }]],
+  [/^Gói Premium của bạn sẽ hết hạn vào (.+)\. Gia hạn để tiếp tục dùng nhiều lượt AI và livestream 1080p\.$/s, (m) => ['Gói Premium của bạn sẽ hết hạn vào {date}. Gia hạn để tiếp tục dùng nhiều lượt AI và livestream 1080p.', { date: m[1] }]],
+  [/^Cơ sở “(.*)” đã được duyệt và hiển thị công khai\.$/s, (m) => ['Cơ sở “{name}” đã được duyệt và hiển thị công khai.', { name: m[1] }]],
+  [/^Cơ sở “(.*)” chưa được duyệt: (.*)$/s, (m) => ['Cơ sở “{name}” chưa được duyệt: {reason}', { name: m[1], reason: m[2] }]],
+  [/^Cơ sở “(.*)” đã bị ẩn: (.*)$/s, (m) => ['Cơ sở “{name}” đã bị ẩn: {reason}', { name: m[1], reason: m[2] }]],
+  [/^Cơ sở “(.*)” đã được hiển thị lại\.$/s, (m) => ['Cơ sở “{name}” đã được hiển thị lại.', { name: m[1] }]],
 ]
 
 export function translateServerMessage(message: string): string {

@@ -14,6 +14,7 @@ import {
 } from '@/features/discovery-admin/components/DiscoverCard'
 import { DiscoverHero } from '@/features/discovery-admin/components/DiscoverHero'
 import { DiscoverSection } from '@/features/discovery-admin/components/DiscoverSection'
+import { SponsoredSection } from '@/features/business/SponsoredSection'
 import { InterestGrid } from '@/features/discovery-admin/components/InterestGrid'
 import { PhotoTile } from '@/features/discovery-admin/components/PhotoTile'
 import { ShareTripBanner } from '@/features/discovery-admin/components/ShareTripBanner'
@@ -194,6 +195,8 @@ export function DiscoverPage() {
           className="animate-fade-rise-delay mt-20"
         />
       )}
+
+      <SponsoredSection className="mt-20" />
 
       {allPending && (
         <div className="mt-20 grid grid-cols-2 gap-4 lg:grid-cols-4">

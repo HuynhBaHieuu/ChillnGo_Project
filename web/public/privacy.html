@@ -67,7 +67,7 @@
 
     <main>
       <h1>Chính sách quyền riêng tư</h1>
-      <p class="updated">Cập nhật ngày 6 tháng 11 năm 2026.</p>
+      <p class="updated">Cập nhật ngày 10 tháng 11 năm 2026.</p>
       <p class="lede">
         Trang này nói rõ ChillnGo lưu những dữ liệu nào về bạn, dùng chúng để làm gì, dịch vụ nào xử lý
         chúng, phần nào ai cũng xem được, và cách bạn xoá chúng.
@@ -79,15 +79,23 @@
         <li><strong>Hồ sơ:</strong> ảnh đại diện, ảnh bìa, giới thiệu và nơi sống — những gì bạn tự điền.</li>
         <li><strong>Nội dung bạn đăng:</strong> hành trình (ngày, điểm dừng có toạ độ, ghi chú, chi phí, ảnh), bình luận, lượt thích, check-in (chú thích, ảnh và địa điểm nếu bạn gắn), livestream cùng bình luận và lượt thả cảm xúc, và bản ghi buổi phát khi tính năng ghi hình bật.</li>
         <li><strong>Hoạt động:</strong> người bạn theo dõi, thông báo, lịch sử tìm kiếm, và lịch sử thay đổi tài khoản (ví dụ đổi tên hiển thị, tên đăng nhập hay nơi sống, kèm giá trị cũ và mới) để bạn tự xem lại trong trang Hoạt động.</li>
-        <li><strong>Tính năng AI:</strong> bản nháp lịch trình AI và nội dung bạn trò chuyện với trợ lý.</li>
+        <li><strong>Tính năng AI:</strong> bản nháp lịch trình AI và nội dung bạn trò chuyện với trợ lý, cùng số lượt AI bạn đã dùng mỗi ngày (để áp giới hạn của gói Miễn phí hoặc Premium).</li>
+        <li><strong>Thanh toán:</strong> khi bạn mua gói Premium hoặc gói Đề xuất, ChillnGo lưu đơn hàng: mã đơn, gói, số tiền, trạng thái, thời điểm thanh toán và mã tham chiếu giao dịch do PayOS gửi về. ChillnGo không nhận và không lưu số thẻ, số tài khoản hay mật khẩu ngân hàng của bạn; việc chuyển khoản diễn ra trên trang của PayOS và ứng dụng ngân hàng của bạn.</li>
+        <li><strong>Tài khoản doanh nghiệp:</strong> thông tin cơ sở bạn đăng ký (tên, loại hình, địa chỉ và vị trí trên bản đồ, số điện thoại, website, ảnh, giá, giờ mở cửa, giới thiệu), các bài quảng cáo, và kết quả duyệt của quản trị viên.</li>
       </ul>
 
       <h2 id="use">ChillnGo dùng dữ liệu để làm gì</h2>
       <p>
         Để chạy các tính năng bạn dùng: hiển thị hành trình và hồ sơ, gửi email xác nhận và đặt lại mật
         khẩu, gửi thông báo, giới hạn tần suất thao tác để chống lạm dụng, và để quản trị viên xử lý tài
-        khoản vi phạm. ChillnGo không hiển thị quảng cáo và không dùng công cụ phân tích hay theo dõi của
-        bên thứ ba.
+        khoản vi phạm, kích hoạt gói bạn đã mua.
+      </p>
+      <p>
+        <strong>Nội dung được tài trợ:</strong> cơ sở kinh doanh đã mua gói Đề xuất được hiển thị trong mục
+        "Gợi ý nổi bật" ở trang Khám phá, luôn có nhãn "Tài trợ". Vị trí này không dựa trên dữ liệu cá nhân
+        của bạn: mọi người đều thấy cùng một danh sách, xếp ngẫu nhiên. ChillnGo không bán dữ liệu của bạn
+        cho doanh nghiệp, không hiển thị quảng cáo của mạng quảng cáo bên thứ ba và không dùng công cụ
+        phân tích hay theo dõi của bên thứ ba.
       </p>
 
       <h2 id="processors">Dịch vụ xử lý dữ liệu</h2>
@@ -99,13 +107,17 @@
         <li><strong>Google:</strong> đăng nhập bằng Google; phông chữ của trang tải từ Google Fonts.</li>
         <li><strong>Nhà cung cấp AI</strong> (Google Gemini hoặc một API tương thích OpenAI): nhận nội dung bản nháp và câu hỏi khi bạn dùng tính năng AI.</li>
         <li><strong>Máy chủ email (SMTP):</strong> gửi email xác nhận và đặt lại mật khẩu.</li>
+        <li><strong>PayOS:</strong> cổng thanh toán VietQR, nhận mã đơn và số tiền để tạo trang thanh toán và báo lại khi bạn đã trả tiền.</li>
       </ul>
 
       <h2 id="public">Những gì ai cũng xem được</h2>
       <p>
         Hành trình đã đăng, bình luận trên đó, check-in và hồ sơ công khai (không gồm email) hiển thị cho
         mọi người, kể cả người chưa đăng nhập, và đọc được qua ChillnGo API công khai. Bản nháp chỉ mình
-        bạn thấy. Livestream có ba mức: công khai, chỉ người theo dõi, hoặc riêng tư.
+        bạn thấy. Livestream có ba mức: công khai, chỉ người theo dõi, hoặc riêng tư. Trang cơ sở kinh
+        doanh đã được duyệt và các bài quảng cáo của nó (kể cả địa chỉ và số điện thoại) là công khai. Người
+        khác thấy huy hiệu Premium cạnh tên bạn khi bạn đang dùng Premium, nhưng không thấy đơn hàng hay
+        thời hạn gói của bạn.
       </p>
 
       <h2 id="browser">Trong trình duyệt của bạn</h2>
@@ -119,6 +131,8 @@
         <li>Hành trình và check-in bạn xoá nằm trong "Đã xoá gần đây" 30 ngày rồi bị xoá hẳn; bạn cũng có thể xoá hẳn ngay.</li>
         <li>Bình luận của bạn xoá được bất cứ lúc nào.</li>
         <li>Lịch sử tìm kiếm xoá được từng mục hoặc toàn bộ trong trang Hoạt động.</li>
+        <li>Bản ghi livestream được giữ 30 ngày sau khi sẵn sàng (365 ngày nếu người phát đang dùng Premium lúc đó), rồi bị xoá tự động.</li>
+        <li>Bài quảng cáo của doanh nghiệp xoá được bất cứ lúc nào. Đơn hàng đã thanh toán được giữ lại để đối soát doanh thu, kể cả khi gói đã hết hạn.</li>
         <li>Để xoá cả tài khoản, hãy <a href="/contact">liên hệ ChillnGo</a>.</li>
       </ul>
 

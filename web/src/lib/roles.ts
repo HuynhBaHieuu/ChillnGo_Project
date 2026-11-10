@@ -11,7 +11,7 @@ import type { User } from '@/services/types'
 
 export type Role = 'user' | 'admin' | 'superadmin'
 
-export const ADMIN_MODULES = ['users', 'content', 'reports', 'categories', 'stats'] as const
+export const ADMIN_MODULES = ['users', 'content', 'reports', 'categories', 'stats', 'businesses', 'revenue'] as const
 export type AdminModule = (typeof ADMIN_MODULES)[number]
 
 export const ROLE_LABELS = translated<Role>({
@@ -38,6 +38,8 @@ export const MODULE_LABELS: Record<AdminModule, { readonly title: string; readon
   reports: moduleLabel('Báo cáo vi phạm', 'Xử lý báo cáo spam và nội dung không phù hợp'),
   categories: moduleLabel('Danh mục', 'Quản lý địa điểm và tag'),
   stats: moduleLabel('Thống kê', 'Xem số liệu người dùng trong phạm vi được cấp'),
+  businesses: moduleLabel('Doanh nghiệp', 'Duyệt, từ chối và ẩn trang cơ sở kinh doanh'),
+  revenue: moduleLabel('Doanh thu', 'Xem đơn hàng, doanh thu và số thành viên Premium'),
 }
 
 export function isStaff(user: Pick<User, 'role'> | null | undefined): boolean {

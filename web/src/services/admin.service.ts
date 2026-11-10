@@ -47,6 +47,10 @@ export interface AdminStats {
   adminActions7?: number
   /** Pieces of content with reports waiting; only for those with the Reports permission. */
   pendingReports?: number
+  /** Business pages waiting for review; only with the Businesses permission. */
+  pendingBusinesses?: number
+  /** Paid in the last 30 days and Premium members now; only with the Revenue permission. */
+  revenue?: { revenue30: number; premiumMembers: number }
 }
 
 export interface AuditEntry {
