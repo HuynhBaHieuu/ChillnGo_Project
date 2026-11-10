@@ -15,6 +15,7 @@ import 'discover_cards.dart';
 import 'interests.dart';
 import 'search_hero.dart';
 import '../../core/i18n.dart';
+import '../business/business_screen.dart' show SponsoredRow;
 
 String _currentSeason() {
   final month = DateTime.now().month;
@@ -190,6 +191,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         child: ErrorPanel(error: all.error, onRetry: () => ref.invalidate(discoverProvider)),
                       ),
                     if (interests.length >= _minRow) ...[InterestRow(tiles: interests), const SizedBox(height: 32)],
+                    const SponsoredRow(),
                     if (all.isLoading && !all.hasValue)
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: kGutter),

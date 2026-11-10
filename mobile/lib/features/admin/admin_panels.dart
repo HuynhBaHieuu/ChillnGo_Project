@@ -53,6 +53,59 @@ class StatsPanel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (s.pendingBusinesses != null && s.pendingBusinesses! > 0) ...[
+          AppCard(
+            onTap: () => context.go('/admin/businesses'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Doanh nghiệp chờ duyệt'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatNumber(s.pendingBusinesses!), style: AppText.h1.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+                    ],
+                  ),
+                ),
+                Text(t('Mở hàng chờ duyệt'), style: AppText.label.copyWith(fontSize: 13)),
+                const SizedBox(width: 4),
+                const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.cream),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (s.revenue30 != null) ...[
+          AppCard(
+            onTap: () => context.go('/admin/revenue'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Doanh thu 30 ngày'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatVnd(s.revenue30!), style: AppText.h2),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Thành viên Premium'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatNumber(s.premiumMembers ?? 0), style: AppText.h2),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (s.pendingReports != null) ...[
           AppCard(
             onTap: () => context.go('/admin/content'),
