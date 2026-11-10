@@ -42,6 +42,20 @@ export interface AdminStats {
     new7: number
     new30: number
   }
+  /** Journeys, check-ins, streams, moderation and AI use. Missing from an older server. */
+  content?: {
+    posts: number
+    posts7: number
+    checkins: number
+    checkins7: number
+    liveNow: number
+    streams30: number
+    hidden: number
+    reports7: number
+    aiRequestsToday: number
+    aiUsersToday: number
+    aiDrafts7: number
+  }
   signupsByDay: { date: string; count: number }[]
   byRole?: Partial<Record<Role, number>>
   adminActions7?: number
@@ -140,4 +154,26 @@ export function saveSettings(settings: AppSettings): Promise<{ settings: AppSett
 /** Public: banner text and whether sign-up is open. No sign-in needed. */
 export function getPublicSettings(): Promise<{ settings: AppSettings }> {
   return http('/api/settings/public', { auth: false })
+}
+
+export interface LiveStreamRow {
+  _id: string
+  title: string
+  description: string
+  audience: 'public' | 'followers' | 'private'
+  startedAt: string
+  viewerCount: number
+  peakViewers: number
+  commentCount: number
+  host: { _id: string; username: string; displayName: string; avatarUrl: string; status: 'active' | 'locked'; role: Role } | null
+}
+
+/** GET /api/admin/livestreams — [content]. Every stream live right now. */
+export function listLiveStreams(): Promise<{ items: LiveStreamRow[] }> {
+  return http('/api/admin/livestreams')
+}
+
+/** POST /api/admin/livestreams/:id/end — [content]. Stops a stream; the host is told why. */
+export function endLiveStream(id: string, reason: string): Promise<{ ok: true }> {
+  return http(`/api/admin/livestreams/${id}/end`, { method: 'POST', body: { reason } })
 }

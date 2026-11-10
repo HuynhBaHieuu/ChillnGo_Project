@@ -1138,6 +1138,7 @@ class AdminStats {
     this.pendingBusinesses,
     this.revenue30,
     this.premiumMembers,
+    this.content,
   });
 
   /// 'users' | 'full'
@@ -1162,6 +1163,11 @@ class AdminStats {
   final int? revenue30;
   final int? premiumMembers;
 
+  /// Journeys, check-ins, streams, moderation and AI use (web: AdminStats.content).
+  /// Keys: posts, posts7, checkins, checkins7, liveNow, streams30, hidden,
+  /// reports7, aiRequestsToday, aiUsersToday, aiDrafts7. Null from an older server.
+  final Map<String, int>? content;
+
   factory AdminStats.fromJson(Json json) {
     final users = mapOf(json['users']);
     final byRole = mapOrNull(json['byRole']);
@@ -1173,6 +1179,7 @@ class AdminStats {
       googleLinked: intOf(users['googleLinked']),
       new7: intOf(users['new7']),
       new30: intOf(users['new30']),
+      content: mapOrNull(json['content'])?.map((key, value) => MapEntry(key, intOf(value))),
       signupsByDay: listOf(json['signupsByDay'], (d) {
         final m = mapOf(d);
         return (str(m['date']), intOf(m['count']));

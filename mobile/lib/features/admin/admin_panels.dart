@@ -141,6 +141,21 @@ class StatsPanel extends ConsumerWidget {
         ),
         const SizedBox(height: 20),
         if (s.signupsByDay.isNotEmpty) _SignupChart(data: s.signupsByDay),
+        if (s.content case final c?) ...[
+          const SizedBox(height: 20),
+          Text(t('Nội dung và hoạt động'), style: AppText.label),
+          const SizedBox(height: 10),
+          _TileGrid(
+            tiles: [
+              _Tile(t('Hành trình đã đăng'), c['posts'] ?? 0, note: t('+{n} trong 7 ngày', {'n': c['posts7'] ?? 0})),
+              _Tile(t('Check-in'), c['checkins'] ?? 0, note: t('+{n} trong 7 ngày', {'n': c['checkins7'] ?? 0})),
+              _Tile(t('Đang livestream'), c['liveNow'] ?? 0, note: t('{n} buổi trong 30 ngày', {'n': c['streams30'] ?? 0})),
+              _Tile(t('Báo cáo mới 7 ngày'), c['reports7'] ?? 0, note: t('{n} nội dung đang bị ẩn', {'n': c['hidden'] ?? 0})),
+              _Tile(t('Lượt dùng AI hôm nay'), c['aiRequestsToday'] ?? 0, note: t('{n} người dùng', {'n': c['aiUsersToday'] ?? 0})),
+              _Tile(t('Bản nháp AI 7 ngày'), c['aiDrafts7'] ?? 0),
+            ],
+          ),
+        ],
         if (s.scope == 'full' && s.byRole != null) ...[
           const SizedBox(height: 20),
           Text(t('Chỉ dành cho Super Admin'), style: AppText.label),
@@ -160,11 +175,12 @@ class StatsPanel extends ConsumerWidget {
 }
 
 class _Tile {
-  const _Tile(this.label, this.value, {this.of});
+  const _Tile(this.label, this.value, {this.of, this.note});
 
   final String label;
   final int value;
   final int? of;
+  final String? note;
 }
 
 class _TileGrid extends StatelessWidget {
@@ -208,6 +224,7 @@ class _TileGrid extends StatelessWidget {
                         ],
                       ],
                     ),
+                    if (tile.note != null) ...[const SizedBox(height: 4), Text(tile.note!, style: AppText.meta.copyWith(fontSize: 12))],
                   ],
                 ),
               ),
@@ -759,7 +776,7 @@ class _PermissionsFormState extends State<_PermissionsForm> {
 
 /* --------------------------------------------------------- Quản trị viên */
 
-/// Quản trị viên: superadmin only. Create, re-permission, lock, demote, delete admins.
+/// Quản trị viên: superadmin only. Create, re-permission, lock and demote admins. Accounts are never deleted.
 class AdminsPanel extends ConsumerWidget {
   const AdminsPanel({super.key, required this.actor});
 
@@ -893,39 +910,45 @@ class _CreateAdminFormState extends ConsumerState<_CreateAdminForm> {
 
 /* -------------------------------------------------------------- Nội dung */
 
-/// Modules the permission model already has, but whose data is not on the server yet.
-List<(String, String)> get _notReady => [('categories', t('danh mục địa điểm và tag'))];
-
 /// The modules the Nội dung screen serves.
-bool contentAllowed(User user) => ['reports', 'content', ..._notReady.map((m) => m.$1)].any((m) => hasModule(user, m));
+bool contentAllowed(User user) => ['reports', 'content'].any((m) => hasModule(user, m));
 
-class ContentPanel extends StatelessWidget {
+/// Hàng chờ báo cáo [reports], Đang bị ẩn and Đang phát [content]; tabs when more than one is granted.
+class ContentPanel extends StatefulWidget {
   const ContentPanel({super.key, required this.actor});
 
   final User actor;
 
   @override
+  State<ContentPanel> createState() => _ContentPanelState();
+}
+
+class _ContentPanelState extends State<ContentPanel> {
+  String _tab = 'reports';
+
+  @override
   Widget build(BuildContext context) {
+    // Reports need [reports]; unhiding and stopping a stream need [content].
+    final tabs = [
+      if (hasModule(widget.actor, 'reports')) (value: 'reports', label: t('Hàng chờ báo cáo'), count: null),
+      if (hasModule(widget.actor, 'content')) ...[
+        (value: 'hidden', label: t('Đang bị ẩn'), count: null),
+        (value: 'live', label: t('Đang phát'), count: null),
+      ],
+    ];
+    final current = tabs.any((tab) => tab.value == _tab) ? _tab : tabs.first.value;
+    final panel = switch (current) {
+      'hidden' => const HiddenContentPanel(),
+      'live' => const LiveStreamsPanel(),
+      _ => ReportsPanel(actor: widget.actor),
+    };
+    if (tabs.length == 1) return panel;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (hasModule(actor, 'reports'))
-          ReportsPanel(actor: actor)
-        else if (hasModule(actor, 'content'))
-          EmptyState(
-            icon: LucideIcons.flag,
-            title: moduleLabels['content']!.$1,
-            description: t('Nội dung được kiểm duyệt từ hàng chờ báo cáo vi phạm. Hãy nhờ Super Admin cấp thêm quyền Báo cáo vi phạm để xem hàng chờ.'),
-          ),
-        if (_notReady.any((m) => hasModule(actor, m.$1))) const SizedBox(height: 20),
-        for (final (module, needs) in _notReady.where((m) => hasModule(actor, m.$1))) ...[
-          EmptyState(
-            icon: LucideIcons.construction,
-            title: moduleLabels[module]!.$1,
-            description: t('Chưa dùng được: {needs} vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.', {'needs': needs}),
-          ),
-          const SizedBox(height: 12),
-        ],
+        SegmentTabs<String>(items: tabs, value: current, onChanged: (v) => setState(() => _tab = v)),
+        const SizedBox(height: 16),
+        panel,
       ],
     );
   }
@@ -941,6 +964,21 @@ Map<String, String> get _actionLabels => {
   'user.role': t('Đổi vai trò'),
   'admin.create': t('Tạo Admin'),
   'admin.permissions': t('Phân quyền Admin'),
+  'report.dismiss': t('Bỏ qua báo cáo#log'),
+  'report.hide': t('Ẩn nội dung#log'),
+  'report.remove': t('Gỡ nội dung#log'),
+  'report.lock': t('Khoá chủ nội dung#log'),
+  'content.unhide': t('Bỏ ẩn nội dung#log'),
+  'livestream.end': t('Dừng livestream#log'),
+  'catalog.destination.create': t('Thêm điểm đến#log'),
+  'catalog.destination.update': t('Sửa điểm đến#log'),
+  'catalog.destination.delete': t('Xoá điểm đến#log'),
+  'catalog.place.create': t('Thêm địa điểm#log'),
+  'catalog.place.update': t('Sửa địa điểm#log'),
+  'catalog.place.delete': t('Xoá địa điểm#log'),
+  'catalog.checklist.create': t('Thêm mục chuẩn bị#log'),
+  'catalog.checklist.update': t('Sửa mục chuẩn bị#log'),
+  'catalog.checklist.delete': t('Xoá mục chuẩn bị#log'),
   'settings.update': t('Đổi cấu hình hệ thống'),
   'system.reset_users': t('Reset toàn bộ tài khoản'),
   'system.seed_superadmin': t('Tạo Super Admin (script)'),
@@ -959,7 +997,16 @@ String _describe(AuditEntry entry) {
   Map<String, dynamic> m(Object? v) => v is Map ? v.cast<String, dynamic>() : const {};
   switch (entry.action) {
     case 'user.lock':
+      final reason = (d['reason'] ?? '').toString().isNotEmpty ? t('Lý do: {value}', {'value': d['reason']}) : t('Không ghi lý do');
+      return d['via'] == 'report' ? '$reason · ${t('qua báo cáo vi phạm')}' : reason;
+    case 'report.dismiss' || 'report.hide' || 'report.remove' || 'report.lock':
+      final count = t('{n} báo cáo#log', {'n': d['reports'] is num ? d['reports'] : 0});
+      final note = (d['note'] ?? '').toString();
+      return note.isNotEmpty ? '$count · ${t('Ghi chú: {note}', {'note': note})}' : count;
+    case 'livestream.end':
       return (d['reason'] ?? '').toString().isNotEmpty ? t('Lý do: {value}', {'value': d['reason']}) : t('Không ghi lý do');
+    case 'content.unhide':
+      return d['previousAction'] == 'remove' ? t('Khôi phục nội dung đã gỡ') : t('Hiện lại nội dung đã ẩn');
     case 'user.delete':
       return '${d['email'] ?? ''} · ${_role(d['role'])}';
     case 'user.role':
