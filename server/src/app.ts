@@ -11,6 +11,8 @@ import { adminRouter } from './routes/admin.js'
 import { aiCloneRouter } from './routes/aiClone.js'
 import { assistantRouter } from './routes/assistant.js'
 import { authRouter } from './routes/auth.js'
+import { billingRouter } from './routes/billing.js'
+import { businessesRouter } from './routes/businesses.js'
 import { checkinsRouter } from './routes/checkins.js'
 import { geoRouter } from './routes/geo.js'
 import { itinerariesRouter } from './routes/itineraries.js'
@@ -83,6 +85,8 @@ app.use('/api/geo', geoRouter)
 app.use('/api/assistant', assistantRouter)
 app.use('/api/itineraries', itinerariesRouter)
 app.use('/api/reports', reportsRouter)
+app.use('/api/billing', billingRouter)
+app.use('/api/businesses', businessesRouter)
 // AI clone: /api/posts/:id/ai-clone and /api/ai-drafts/…
 app.use('/api', aiCloneRouter)
 

@@ -24,7 +24,7 @@ type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
  * - user: a signed-in account
  * - staff: an admin with the matching permission
  * - superadmin: the super admin only
- * - webhook: LiveKit, authenticated by its signed Authorization header
+ * - webhook: LiveKit (signed Authorization header) or PayOS (signed body)
  * - dvr-link: anyone holding the signed `access` link from GET /api/livestreams/{id}/dvr
  */
 type Access = 'public' | 'optional' | 'user' | 'staff' | 'superadmin' | 'webhook' | 'dvr-link'
@@ -254,7 +254,24 @@ const OPERATIONS: Operation[] = [
   { method: 'post', path: '/api/assistant/chat', summary: 'Ask the site assistant a question.', access: 'user', body: true },
 
   // Reports
-  { method: 'post', path: '/api/reports', summary: 'Report a journey, comment, check-in or account: { targetType, targetId, reason, note? }.', access: 'user', body: true, status: 201 },
+  { method: 'post', path: '/api/reports', summary: 'Report a journey, comment, check-in, account, business page or business ad: { targetType, targetId, reason, note? }.', access: 'user', body: true, status: 201 },
+
+  // Billing (PayOS)
+  { method: 'get', path: '/api/billing/plans', summary: 'Prices, what Free and Premium give, and your current Premium.', access: 'optional', response: 'PlansResponse' },
+  { method: 'post', path: '/api/billing/checkout', summary: 'Start buying a plan: { product, businessId? } → an order with its PayOS checkout link.', access: 'user', body: true, status: 201 },
+  { method: 'get', path: '/api/billing/orders', summary: 'Your orders, newest first.', access: 'user' },
+  { method: 'get', path: '/api/billing/orders/:orderCode', summary: 'One of your orders; a pending one is checked with PayOS first.', access: 'user' },
+  { method: 'post', path: '/api/billing/payos-webhook', summary: 'PayOS payment events.', access: 'webhook', body: true },
+
+  // Businesses
+  { method: 'get', path: '/api/businesses/sponsored', summary: 'Sponsored businesses and their latest ads for Discover.', access: 'public', response: 'SponsoredResponse' },
+  { method: 'get', path: '/api/businesses/me', summary: 'Your business page (any status) and its ads.', access: 'user' },
+  { method: 'post', path: '/api/businesses', summary: 'Register a business page; it waits for an admin.', access: 'user', body: true, status: 201 },
+  { method: 'patch', path: '/api/businesses/me', summary: 'Edit your business page.', access: 'user', body: true },
+  { method: 'post', path: '/api/businesses/me/posts', summary: 'Write an ad on your business page.', access: 'user', body: true, status: 201 },
+  { method: 'patch', path: '/api/businesses/me/posts/:postId', summary: 'Edit one of your ads.', access: 'user', body: true },
+  { method: 'delete', path: '/api/businesses/me/posts/:postId', summary: 'Delete one of your ads.', access: 'user' },
+  { method: 'get', path: '/api/businesses/:slug', summary: 'A business page and its ads.', access: 'optional', response: 'BusinessPageResponse' },
 
   // Admin
   { method: 'get', path: '/api/admin/stats', summary: 'Dashboard counts.', access: 'staff' },
@@ -269,6 +286,9 @@ const OPERATIONS: Operation[] = [
   { method: 'get', path: '/api/admin/reports/target/:targetType/:targetId', summary: 'Every report about one piece of content.', access: 'staff' },
   { method: 'post', path: '/api/admin/reports/target/:targetType/:targetId/resolve', summary: 'Decide every pending report about one piece of content: dismiss, hide, remove or lock.', access: 'staff', body: true },
   { method: 'post', path: '/api/admin/moderation/:targetType/:targetId/unhide', summary: 'Show content hidden by moderation again.', access: 'staff' },
+  { method: 'get', path: '/api/admin/businesses', summary: 'Business pages to review.', access: 'staff' },
+  { method: 'post', path: '/api/admin/businesses/:id/review', summary: 'Approve, reject, hide or restore a business page: { action, reason }.', access: 'staff', body: true },
+  { method: 'get', path: '/api/admin/orders', summary: 'Orders and the revenue summary.', access: 'staff' },
   { method: 'get', path: '/api/admin/audit-logs', summary: 'The admin audit log.', access: 'superadmin' },
   { method: 'get', path: '/api/admin/settings', summary: 'Site settings.', access: 'superadmin' },
   { method: 'put', path: '/api/admin/settings', summary: 'Change site settings.', access: 'superadmin', body: true },
@@ -317,7 +337,7 @@ const ACCESS_TEXT: Record<Access, string> = {
   user: 'Needs a signed-in account.',
   staff: 'Needs an admin account with the matching permission.',
   superadmin: 'Needs the super admin account.',
-  webhook: 'Called by LiveKit; authenticated by its signed Authorization header.',
+  webhook: 'Called by LiveKit (signed Authorization header) or PayOS (HMAC signature in the body). Not for clients.',
   'dvr-link': 'Authenticated by the signed `access` query value.',
 }
 
@@ -620,7 +640,7 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
   Author: {
     type: 'object',
     required: ['_id', 'username', 'displayName'],
-    properties: { _id: str(), username: str(), displayName: str(), avatarUrl: str() },
+    properties: { _id: str(), username: str(), displayName: str(), avatarUrl: str(), isPremium: { type: 'boolean', description: 'Shows the Premium badge.' } },
   },
   CheckIn: {
     type: 'object',
@@ -646,8 +666,12 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
   CheckInList: list('CheckIn'),
   LivestreamConfig: {
     type: 'object',
-    required: ['live', 'recording'],
-    properties: { live: { type: 'boolean' }, recording: { type: 'boolean' } },
+    required: ['live', 'recording', 'quality'],
+    properties: {
+      live: { type: 'boolean' },
+      recording: { type: 'boolean' },
+      quality: str('Video the caller may publish: 720p, or 1080p for Premium.'),
+    },
   },
   Livestream: {
     type: 'object',
@@ -676,6 +700,8 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
           status: str('none, recording, processing, ready or failed.'),
           url: orNull(str('Signed replay link, when ready.')),
           durationSec: int(),
+          expiresAt: orNull(time('When the replay is deleted: 30 days after it is ready, 365 for a Premium host.')),
+          expired: { type: 'boolean', description: 'The replay was kept its full time and deleted.' },
         },
       },
       thumbnailUrl: str(),
@@ -695,6 +721,94 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
     properties: { _id: str(), text: str(), createdAt: time(), author: ref('Author') },
   },
   LivestreamCommentList: list('LivestreamComment'),
+  Product: {
+    type: 'object',
+    required: ['id', 'kind', 'name', 'days', 'amount'],
+    properties: {
+      id: { type: 'string', enum: ['premium_month', 'premium_year', 'business_boost_month'] },
+      kind: { type: 'string', enum: ['premium', 'boost'] },
+      name: str(),
+      days: int(),
+      amount: int('VND.'),
+    },
+  },
+  PlanBenefits: {
+    type: 'object',
+    required: ['aiDailyLimit', 'liveQuality', 'replayDays'],
+    properties: { aiDailyLimit: int('AI requests per day.'), liveQuality: str('720p or 1080p.'), replayDays: int('Days a replay is kept.') },
+  },
+  PlansResponse: {
+    type: 'object',
+    required: ['paymentsEnabled', 'products', 'benefits', 'current'],
+    properties: {
+      paymentsEnabled: { type: 'boolean', description: 'False when the server has no PayOS keys.' },
+      products: { type: 'array', items: ref('Product') },
+      benefits: {
+        type: 'object',
+        required: ['free', 'premium'],
+        properties: { free: ref('PlanBenefits'), premium: ref('PlanBenefits') },
+      },
+      current: {
+        type: ['object', 'null'],
+        description: 'Your Premium, when signed in.',
+        properties: { isPremium: { type: 'boolean' }, premiumUntil: orNull(time()) },
+      },
+    },
+  },
+  Business: {
+    type: 'object',
+    required: ['_id', 'slug', 'name', 'type', 'address', 'phone', 'photos', 'sponsored'],
+    properties: {
+      _id: str(),
+      ownerId: str(),
+      slug: str(),
+      name: str(),
+      type: { type: 'string', enum: ['homestay', 'hotel', 'restaurant', 'cafe', 'tour'] },
+      description: str(),
+      address: str(),
+      city: str(),
+      lat: orNull({ type: 'number' }),
+      lng: orNull({ type: 'number' }),
+      phone: str(),
+      website: str(),
+      photos: { type: 'array', items: str() },
+      priceFrom: orNull(int('VND.')),
+      priceTo: orNull(int('VND.')),
+      openingHours: str(),
+      sponsored: { type: 'boolean', description: 'Shown in "Gợi ý nổi bật" now.' },
+      createdAt: time(),
+    },
+  },
+  BusinessAd: {
+    type: 'object',
+    required: ['_id', 'businessId', 'title', 'content', 'photos', 'offer', 'createdAt'],
+    properties: {
+      _id: str(),
+      businessId: str(),
+      title: str(),
+      content: str(),
+      photos: { type: 'array', items: str() },
+      offer: str(),
+      createdAt: time(),
+      updatedAt: time(),
+    },
+  },
+  SponsoredResponse: {
+    type: 'object',
+    required: ['businesses', 'posts'],
+    properties: {
+      businesses: { type: 'array', items: ref('Business') },
+      posts: {
+        type: 'array',
+        items: { allOf: [ref('BusinessAd'), { type: 'object', required: ['business'], properties: { business: ref('Business') } }] },
+      },
+    },
+  },
+  BusinessPageResponse: {
+    type: 'object',
+    required: ['business', 'posts'],
+    properties: { business: ref('Business'), posts: { type: 'array', items: ref('BusinessAd') } },
+  },
 }
 
 /** The OpenAPI 3.1 document. `servers` lists where the API can be reached. */

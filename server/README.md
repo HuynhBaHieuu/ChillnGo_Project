@@ -405,6 +405,44 @@ kept in step). Notifications live in `notifications` and delete themselves
 after 90 days. The web app still keeps the demo accounts from its fixtures
 (`u_001`…) on mock data; real accounts use these routes.
 
+## Premium, business pages and payments (PayOS)
+
+Two things are sold, both paid once by VietQR through [PayOS](https://payos.vn)
+and never renewed automatically (buying again adds the days):
+
+| Product | Price | Gives |
+| --- | --- | --- |
+| `premium_month` / `premium_year` | 49.000đ / 30 days, 490.000đ / 365 days | 100 AI requests a day (free: 10), 1080p livestreams (free: 720p), replays kept 365 days (free: 30), the crown badge |
+| `business_boost_month` | 199.000đ / 30 days | an approved business page and its ads in Discover's "Gợi ý nổi bật", marked "Tài trợ" |
+
+Prices and limits live in `src/lib/plans.ts`; the AI limits can be changed
+with `AI_DAILY_LIMIT_PER_USER` and `AI_DAILY_LIMIT_PREMIUM`.
+
+**Setting up PayOS.** At [my.payos.vn](https://my.payos.vn) create a payment
+channel linked to a bank account, then copy its keys into `.env`:
+`PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`. In the channel's
+settings, set the webhook URL to `https://<api>/api/billing/payos-webhook`.
+Without the keys the buy buttons say payments are not set up; nothing else
+changes. Locally PayOS cannot reach the webhook, which is fine: the result
+page (`APP_URL/billing/result`) asks `GET /api/billing/orders/:orderCode`,
+and the API checks a pending order with PayOS itself.
+
+An order is paid exactly once (a conditional update), only with a valid
+signature or PayOS status, and only when the full amount arrived.
+
+| Route | Who | Result |
+| --- | --- | --- |
+| `GET /api/billing/plans` | anyone | products, what Free and Premium give, your Premium |
+| `POST /api/billing/checkout` `{ product, businessId? }` | signed in | `201 { order }` with its `checkoutUrl` |
+| `GET /api/billing/orders` · `GET /api/billing/orders/:orderCode` | signed in | your orders; a pending one is checked with PayOS |
+| `POST /api/billing/payos-webhook` | PayOS | signed payment notice |
+| `GET /api/businesses/sponsored` | anyone | sponsored businesses and their latest ads |
+| `GET` · `POST /api/businesses/me`, `POST /api/businesses`, `PATCH /api/businesses/me` | signed in | your business page (one per account; an admin approves it) |
+| `POST` · `PATCH` · `DELETE /api/businesses/me/posts[/:postId]` | the owner | ads |
+| `GET /api/businesses/:slug` | anyone (owner: any status) | a business page and its ads |
+| `GET /api/admin/businesses` · `POST /api/admin/businesses/:id/review` | `businesses` permission | review queue; approve, reject or hide (with a reason), restore |
+| `GET /api/admin/orders` | `revenue` permission | orders and the revenue summary |
+
 ## Sending email
 
 Verification emails go out over SMTP. The template is in

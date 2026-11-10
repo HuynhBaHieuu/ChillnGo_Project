@@ -9,6 +9,7 @@ import { isValidObjectId } from 'mongoose'
 import { HttpError } from './errors.js'
 import { excerpt } from './reports.js'
 import type { ReportTargetType } from './reports.js'
+import { Business, BusinessPost } from '../models/Business.js'
 import { CheckIn } from '../models/CheckIn.js'
 import { PostComment } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
@@ -92,6 +93,37 @@ export async function findTarget(type: ReportTargetType, id: string): Promise<Re
     }
   }
 
+  if (type === 'business') {
+    const business = await Business.findById(id).lean()
+    if (!business) return null
+    return {
+      type,
+      id,
+      ownerId: business.ownerId,
+      visible: business.status === 'approved',
+      hidden: Boolean(business.moderation?.hidden),
+      action: business.moderation?.action ?? null,
+      hiddenBy: business.moderation?.by ?? null,
+      snapshot: { title: excerpt(business.name, 150), text: excerpt(business.description), imageUrl: business.photos[0] ?? '', postId: null },
+    }
+  }
+
+  if (type === 'businessPost') {
+    const post = await BusinessPost.findById(id).lean()
+    if (!post) return null
+    const business = isValidObjectId(post.businessId) ? await Business.findById(post.businessId).select('status').lean() : null
+    return {
+      type,
+      id,
+      ownerId: post.authorId,
+      visible: !post.deletedAt && business?.status === 'approved',
+      hidden: Boolean(post.moderation?.hidden),
+      action: post.moderation?.action ?? null,
+      hiddenBy: post.moderation?.by ?? null,
+      snapshot: { title: excerpt(post.title, 150), text: excerpt(post.content), imageUrl: post.photos[0] ?? '', postId: null },
+    }
+  }
+
   const user = await User.findById(id).select('username displayName bio avatarUrl status').lean()
   if (!user) return null
   return {
@@ -120,6 +152,10 @@ export async function hideTarget(type: ReportTargetType, id: string, by: string,
   } else if (type === 'comment') {
     const comment = await PostComment.findByIdAndUpdate(id, { $set }).lean()
     if (comment) await recountComments(comment.postId)
+  } else if (type === 'business') {
+    await Business.updateOne({ _id: id }, { $set })
+  } else if (type === 'businessPost') {
+    await BusinessPost.updateOne({ _id: id }, { $set })
   } else {
     throw new HttpError(400, 'Không thể ẩn một tài khoản. Hãy dùng Khoá tài khoản.', 'INVALID_ACTION')
   }
@@ -148,6 +184,14 @@ export async function removeTarget(type: ReportTargetType, id: string, by: strin
     const comment = await PostComment.findById(id).lean()
     if (!comment) throw notFound()
     await removeCommentThread(comment.postId, String(comment._id), comment.parentId)
+  } else if (type === 'business') {
+    // A business page is not deleted: it stays hidden until a moderator shows it again.
+    await Business.updateOne({ _id: id }, { $set: moderation })
+  } else if (type === 'businessPost') {
+    const post = await BusinessPost.findById(id)
+    if (!post) throw notFound()
+    post.set({ ...moderation, deletedAt: post.deletedAt ?? new Date() })
+    await post.save()
   } else {
     throw new HttpError(400, 'Không thể gỡ một tài khoản. Hãy dùng Khoá tài khoản.', 'INVALID_ACTION')
   }
@@ -173,6 +217,14 @@ export async function unhideTarget(type: ReportTargetType, id: string): Promise<
     const comment = await PostComment.findByIdAndUpdate(id, { $set }).lean()
     if (!comment) throw new HttpError(404, 'Bình luận này đã bị xoá hẳn, không khôi phục được.', 'NOT_FOUND')
     await recountComments(comment.postId)
+  } else if (type === 'business') {
+    await Business.updateOne({ _id: id }, { $set })
+  } else if (type === 'businessPost') {
+    const post = await BusinessPost.findById(id)
+    if (!post) throw notFound()
+    const removed = post.moderation?.action === 'remove'
+    post.set({ ...$set, ...(removed ? { deletedAt: null } : {}) })
+    await post.save()
   } else {
     throw new HttpError(400, 'Tài khoản không bị ẩn. Hãy mở khoá ở mục Người dùng.', 'INVALID_ACTION')
   }
