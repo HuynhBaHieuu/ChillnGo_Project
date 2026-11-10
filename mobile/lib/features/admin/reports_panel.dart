@@ -641,3 +641,313 @@ class _PersonLine extends StatelessWidget {
     );
   }
 }
+
+/* ------------------------------------------------------------ Đang bị ẩn */
+
+/// Đang bị ẩn: everything moderation has hidden or removed right now, reports
+/// pending or not (web: HiddenContentPanel). Needs the content module.
+class HiddenContentPanel extends ConsumerStatefulWidget {
+  const HiddenContentPanel({super.key});
+
+  @override
+  ConsumerState<HiddenContentPanel> createState() => _HiddenContentPanelState();
+}
+
+class _HiddenContentPanelState extends ConsumerState<HiddenContentPanel> {
+  String _type = 'post';
+  int _page = 1;
+  AdminPage<HiddenItem>? _data;
+  Object? _error;
+  bool _loading = true;
+  int _request = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final request = ++_request;
+    setState(() => _loading = true);
+    try {
+      final page = await ReportService.listHidden(targetType: _type, page: _page);
+      if (!mounted || request != _request) return;
+      setState(() {
+        _data = page;
+        _error = null;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted || request != _request) return;
+      setState(() {
+        _error = error;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _unhide(HiddenItem item) {
+    final removed = item.action == 'remove';
+    return confirmAction(
+      context,
+      title: removed ? t('Khôi phục nội dung này?') : t('Hiện lại nội dung này?'),
+      description: removed
+          ? t('Nội dung quay lại như trước khi bị gỡ và rời khỏi mục Đã xoá gần đây của tác giả. Mọi người sẽ thấy lại nó.')
+          : t('Mọi người sẽ thấy lại nội dung này. Các báo cáo đang chờ (nếu có) vẫn ở trong hàng chờ.'),
+      confirmLabel: removed ? t('Khôi phục') : t('Hiện lại'),
+      onConfirm: () async {
+        await ReportService.unhide(item.targetType, item.targetId);
+        ref.read(adminNoticeProvider.notifier).show(Notice(removed ? t('Đã khôi phục nội dung.') : t('Đã hiện lại nội dung.')));
+        ref.read(adminVersionProvider.notifier).bump();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(adminVersionProvider, (_, _) => _load());
+    final data = _data;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentTabs<String>(
+          items: [for (final type in ['post', 'checkin', 'comment']) (value: type, label: _capitalized(reportTargetLabels[type] ?? type), count: null)],
+          value: _type,
+          onChanged: (v) {
+            setState(() {
+              _type = v;
+              _page = 1;
+            });
+            _load();
+          },
+        ),
+        const SizedBox(height: 14),
+        if (_loading && data == null)
+          LoadingView(message: t('Đang tải danh sách…'))
+        else if (_error != null && data == null)
+          ErrorPanel(error: _error, onRetry: _load)
+        else if (data == null || data.items.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.borderStrong)),
+            child: Text(t('Không có nội dung nào đang bị ẩn.'), style: AppText.meta, textAlign: TextAlign.center),
+          )
+        else ...[
+          if (_loading) const LinearProgressIndicator(minHeight: 2),
+          for (final item in data.items) ...[_HiddenCard(item: item, onUnhide: () => _unhide(item)), const SizedBox(height: 10)],
+          Row(
+            children: [
+              Text(t('{n} nội dung đang bị ẩn', {'n': data.total}), style: AppText.meta.copyWith(fontSize: 12)),
+              const Spacer(),
+              Pagination(
+                page: data.page,
+                pageCount: data.pageCount,
+                onPage: (p) {
+                  setState(() => _page = p);
+                  _load();
+                },
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _HiddenCard extends StatelessWidget {
+  const _HiddenCard({required this.item, required this.onUnhide});
+
+  final HiddenItem item;
+  final VoidCallback onUnhide;
+
+  @override
+  Widget build(BuildContext context) {
+    final snapshot = item.snapshot;
+    final headline = snapshot.title.isNotEmpty ? snapshot.title : (snapshot.text.isNotEmpty ? snapshot.text : t('(không có tiêu đề)'));
+    final removed = item.action == 'remove';
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Thumb(snapshot: snapshot, type: item.targetType),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        _TypeBadge(type: item.targetType),
+                        AppBadge(removed ? t('Đã gỡ') : (item.hiddenBySystem ? t('Tự động ẩn tạm') : t('Đã ẩn')), tone: BadgeTone.danger),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(headline, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.label),
+                    if (snapshot.title.isNotEmpty && snapshot.text.isNotEmpty)
+                      Text(snapshot.text, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.meta.copyWith(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _PersonLine(person: item.owner),
+          const SizedBox(height: 8),
+          Text(
+            [
+              formatDateTime(item.hiddenAt),
+              if (item.hiddenBySystem) t('bởi hệ thống, sau nhiều báo cáo') else if (item.hiddenBy != null) t('bởi {name}', {'name': item.hiddenBy!.displayName}),
+              if (item.reason.isNotEmpty) item.reason,
+            ].join(' · '),
+            style: AppText.meta.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppButton(
+              label: removed ? t('Khôi phục') : t('Hiện lại'),
+              icon: LucideIcons.eye,
+              variant: ButtonVariant.outline,
+              size: ButtonSize.sm,
+              onPressed: onUnhide,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ------------------------------------------------------------- Đang phát */
+
+Map<String, String> get _audienceLabels => {'public': t('Công khai'), 'followers': t('Người theo dõi'), 'private': t('Riêng tư')};
+
+/// Đang phát: every live stream right now, and the button to stop one
+/// (web: LiveStreamsPanel). Needs the content module.
+class LiveStreamsPanel extends ConsumerStatefulWidget {
+  const LiveStreamsPanel({super.key});
+
+  @override
+  ConsumerState<LiveStreamsPanel> createState() => _LiveStreamsPanelState();
+}
+
+class _LiveStreamsPanelState extends ConsumerState<LiveStreamsPanel> {
+  List<LiveStreamRow>? _items;
+  Object? _error;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final items = await ReportService.listLiveStreams();
+      if (!mounted) return;
+      setState(() {
+        _items = items;
+        _error = null;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _stop(LiveStreamRow stream) async {
+    final reason = TextEditingController();
+    await confirmAction(
+      context,
+      title: t('Dừng buổi livestream này?'),
+      description: t('Người xem bị đưa ra ngoài và phòng đóng lại ngay. Người phát nhận được thông báo kèm lý do. Hành động được ghi vào nhật ký.'),
+      confirmLabel: t('Dừng phát'),
+      destructive: true,
+      content: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: AppTextField(controller: reason, label: t('Lý do (người phát sẽ thấy)'), maxLength: 200, maxLines: 3, minLines: 2),
+      ),
+      onConfirm: () async {
+        await ReportService.endLiveStream(stream.id, reason.text);
+        ref.read(adminNoticeProvider.notifier).show(Notice(t('Đã dừng buổi livestream “{title}”.', {'title': stream.title})));
+        ref.read(adminVersionProvider.notifier).bump();
+      },
+    );
+    reason.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(adminVersionProvider, (_, _) => _load());
+    final items = _items;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(t('Mọi buổi đang phát, kể cả riêng tư. Dừng một buổi sẽ đưa người xem ra ngoài và đóng phòng; bản ghi (nếu có) vẫn được giữ.'), style: AppText.meta),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: AppButton(label: t('Làm mới'), icon: LucideIcons.refreshCw, variant: ButtonVariant.outline, size: ButtonSize.sm, loading: _loading && items != null, onPressed: _load),
+        ),
+        const SizedBox(height: 14),
+        if (items == null)
+          _error != null ? ErrorPanel(error: _error, onRetry: _load) : LoadingView(message: t('Đang tải danh sách…'))
+        else if (items.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.borderStrong)),
+            child: Text(t('Không có buổi livestream nào đang phát.'), style: AppText.meta, textAlign: TextAlign.center),
+          )
+        else
+          for (final s in items) ...[
+            AppCard(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const AppBadge('LIVE', tone: BadgeTone.live),
+                      Text('${_audienceLabels[s.audience] ?? s.audience} · ${formatDateTime(s.startedAt)}', style: AppText.meta.copyWith(fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(s.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.label),
+                  const SizedBox(height: 10),
+                  _PersonLine(person: s.host),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${t('Người xem')}: ${s.viewerCount} · ${t('cao nhất {n} · {c} bình luận', {'n': s.peakViewers, 'c': s.commentCount})}',
+                    style: AppText.meta.copyWith(fontSize: 12),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppButton(label: t('Dừng phát'), icon: LucideIcons.square, variant: ButtonVariant.destructive, size: ButtonSize.sm, onPressed: () => _stop(s)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+      ],
+    );
+  }
+}

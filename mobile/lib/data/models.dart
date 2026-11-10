@@ -1119,6 +1119,7 @@ class AdminStats {
     this.byRole,
     this.adminActions7,
     this.pendingReports,
+    this.content,
   });
 
   /// 'users' | 'full'
@@ -1136,6 +1137,11 @@ class AdminStats {
   /// Reports waiting for a decision; only for accounts with the Reports module.
   final int? pendingReports;
 
+  /// Journeys, check-ins, streams, moderation and AI use (web: AdminStats.content).
+  /// Keys: posts, posts7, checkins, checkins7, liveNow, streams30, hidden,
+  /// reports7, aiRequestsToday, aiUsersToday, aiDrafts7. Null from an older server.
+  final Map<String, int>? content;
+
   factory AdminStats.fromJson(Json json) {
     final users = mapOf(json['users']);
     final byRole = mapOrNull(json['byRole']);
@@ -1147,6 +1153,7 @@ class AdminStats {
       googleLinked: intOf(users['googleLinked']),
       new7: intOf(users['new7']),
       new30: intOf(users['new30']),
+      content: mapOrNull(json['content'])?.map((key, value) => MapEntry(key, intOf(value))),
       signupsByDay: listOf(json['signupsByDay'], (d) {
         final m = mapOf(d);
         return (str(m['date']), intOf(m['count']));
