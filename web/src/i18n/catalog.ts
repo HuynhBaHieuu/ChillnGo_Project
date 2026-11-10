@@ -9,6 +9,7 @@ import { lib } from './messages/lib'
 import { auth } from './messages/auth'
 import { activity } from './messages/activity'
 import { admin } from './messages/admin'
+import { catalogAdmin } from './messages/catalogAdmin'
 import { ai } from './messages/ai'
 import { assistant } from './messages/assistant'
 import { checkin } from './messages/checkin'
@@ -28,6 +29,7 @@ export const catalog = {
   ...auth,
   ...activity,
   ...admin,
+  ...catalogAdmin,
   ...ai,
   ...assistant,
   ...checkin,

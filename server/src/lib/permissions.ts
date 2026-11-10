@@ -2,11 +2,14 @@
  * Roles and admin permissions.
  *
  *   superadmin  everything, implicitly. The only role that can create, lock,
- *               delete or re-permission admins, read the audit log and change
- *               system settings. Cannot be locked or deleted through the API.
+ *               demote or re-permission admins, read the audit log and change
+ *               system settings. Cannot be locked through the API.
  *   admin       only the modules listed in their `adminPermissions`, and only
  *               over regular users, never over other admins.
  *   user        no admin access.
+ *
+ * No account is ever deleted through the API: a ban is a lock, undone by
+ * unlocking.
  *
  * web/src/lib/roles.ts mirrors these names for the UI; keep them in step.
  */

@@ -47,15 +47,23 @@ import {
   requireStaff,
   requireSuperAdmin,
 } from '../middleware/staff.js'
+import { AiDraft } from '../models/AiDraft.js'
+import { AiUsage } from '../models/AiUsage.js'
 import { AuditLog } from '../models/AuditLog.js'
 import { BUSINESS_STATUSES, Business } from '../models/Business.js'
+import { CheckIn } from '../models/CheckIn.js'
 import { countFollowsOf } from '../models/Follow.js'
+import { Livestream } from '../models/Livestream.js'
 import { notify } from '../models/Notification.js'
 import { ORDER_STATUSES, Order } from '../models/Order.js'
+import { PostComment } from '../models/PostInteraction.js'
 import { Report } from '../models/Report.js'
 import { getSettings, Setting } from '../models/Setting.js'
+import { TripPost } from '../models/TripPost.js'
 import { User } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
+
+import { endStreamAsModerator } from './livestreams.js'
 
 export const adminRouter = Router()
 adminRouter.use(requireAuth, loadCurrentUser, requireStaff)
@@ -194,6 +202,7 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
   res.json({
     scope: full ? 'full' : 'users',
     users: { total, verified, locked, googleLinked, new7, new30 },
+    content: await contentStats(new Date(now - 7 * DAY), since30),
     signupsByDay,
     ...(pendingReports !== null && { pendingReports }),
     ...(pendingBusinesses !== null && { pendingBusinesses }),
@@ -204,6 +213,48 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
     }),
   })
 })
+
+/** Today in Vietnam, as AiUsage stores it. */
+function vietnamDay(): string {
+  return new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10)
+}
+
+/** What people post and how the site is used: journeys, check-ins, streams, moderation, AI. */
+async function contentStats(since7: Date, since30: Date) {
+  const visiblePost = { status: 'published' as const, deletedAt: null }
+  const moderated = { 'moderation.hidden': true }
+  const [posts, posts7, checkins, checkins7, liveNow, streams30, hiddenPosts, hiddenCheckins, hiddenComments, reports7, aiToday, drafts7] =
+    await Promise.all([
+      TripPost.countDocuments(visiblePost),
+      TripPost.countDocuments({ ...visiblePost, publishedAt: { $gte: since7 } }),
+      CheckIn.countDocuments({ deletedAt: null }),
+      CheckIn.countDocuments({ deletedAt: null, createdAt: { $gte: since7 } }),
+      Livestream.countDocuments({ status: 'live' }),
+      Livestream.countDocuments({ startedAt: { $gte: since30 } }),
+      TripPost.countDocuments(moderated),
+      CheckIn.countDocuments(moderated),
+      PostComment.countDocuments(moderated),
+      Report.countDocuments({ createdAt: { $gte: since7 } }),
+      AiUsage.aggregate<{ requests: number; people: number }>([
+        { $match: { day: vietnamDay() } },
+        { $group: { _id: null, requests: { $sum: '$count' }, people: { $sum: 1 } } },
+      ]).then((rows) => rows[0] ?? { requests: 0, people: 0 }),
+      AiDraft.countDocuments({ createdAt: { $gte: since7 } }),
+    ])
+  return {
+    posts,
+    posts7,
+    checkins,
+    checkins7,
+    liveNow,
+    streams30,
+    hidden: hiddenPosts + hiddenCheckins + hiddenComments,
+    reports7,
+    aiRequestsToday: aiToday.requests,
+    aiUsersToday: aiToday.people,
+    aiDrafts7: drafts7,
+  }
+}
 
 /* ------------------------------------------------------------------ users */
 
@@ -543,6 +594,77 @@ adminRouter.post('/reports/target/:targetType/:targetId/resolve', requirePermiss
 
 /* ------------------------------------------------------------- moderation */
 
+const HIDDEN_TYPES = ['post', 'comment', 'checkin'] as const
+type HiddenType = (typeof HIDDEN_TYPES)[number]
+
+const hiddenQuerySchema = z.object({
+  targetType: z.enum(HIDDEN_TYPES).catch('post'),
+  page: pageSchema,
+})
+
+/** Ids of one page of moderated content of one type, newest first, and how many there are. */
+async function hiddenPage(type: HiddenType, page: number): Promise<{ ids: string[]; total: number }> {
+  const filter = { 'moderation.hidden': true }
+  const sort = { 'moderation.at': -1 as const, _id: -1 as const }
+  const skip = (page - 1) * PAGE_SIZE
+  const [docs, total] =
+    type === 'post'
+      ? await Promise.all([TripPost.find(filter).sort(sort).skip(skip).limit(PAGE_SIZE).select('_id').lean(), TripPost.countDocuments(filter)])
+      : type === 'checkin'
+        ? await Promise.all([CheckIn.find(filter).sort(sort).skip(skip).limit(PAGE_SIZE).select('_id').lean(), CheckIn.countDocuments(filter)])
+        : await Promise.all([PostComment.find(filter).sort(sort).skip(skip).limit(PAGE_SIZE).select('_id').lean(), PostComment.countDocuments(filter)])
+  return { ids: docs.map((d) => String(d._id)), total }
+}
+
+/**
+ * GET /api/admin/moderation?targetType&page — [content]. Content currently
+ * hidden or removed by a moderator or by the automatic hide, whether or not
+ * reports are still pending, so it can be reviewed and shown again.
+ */
+adminRouter.get('/moderation', requirePermission('content'), async (req, res) => {
+  const query = hiddenQuerySchema.parse(req.query)
+  const { ids, total } = await hiddenPage(query.targetType, query.page)
+  const targets = (await Promise.all(ids.map((id) => findTarget(query.targetType, id)))).filter(
+    (target): target is ReportTarget => target !== null,
+  )
+  const reasons = new Map(
+    (await moderationDetails(query.targetType, ids)).map((d) => [d.id, d] as const),
+  )
+  const users = await usersById(targets.flatMap((target) => [target.ownerId, target.hiddenBy]))
+
+  res.json({
+    items: targets.map((target) => {
+      const detail = reasons.get(target.id)
+      return {
+        targetType: target.type,
+        targetId: target.id,
+        snapshot: target.snapshot,
+        owner: users.get(target.ownerId) ?? null,
+        action: target.action ?? 'hide',
+        reason: detail?.reason ?? '',
+        hiddenAt: detail?.at ? detail.at.toISOString() : null,
+        hiddenBySystem: target.hiddenBy === 'system',
+        hiddenBy: target.hiddenBy && target.hiddenBy !== 'system' ? (users.get(target.hiddenBy) ?? null) : null,
+      }
+    }),
+    total,
+    page: query.page,
+    pageSize: PAGE_SIZE,
+  })
+})
+
+/** The moderation reason and time, which findTarget does not carry. */
+async function moderationDetails(type: HiddenType, ids: string[]): Promise<{ id: string; reason: string; at: Date | null }[]> {
+  const filter = { _id: { $in: ids } }
+  const docs =
+    type === 'post'
+      ? await TripPost.find(filter).select('moderation').lean()
+      : type === 'checkin'
+        ? await CheckIn.find(filter).select('moderation').lean()
+        : await PostComment.find(filter).select('moderation').lean()
+  return docs.map((d) => ({ id: String(d._id), reason: d.moderation?.reason ?? '', at: d.moderation?.at ?? null }))
+}
+
 /**
  * POST /api/admin/moderation/:targetType/:targetId/unhide — [content]. Shows
  * content hidden by a moderator or by the automatic hide again; removed
@@ -718,6 +840,59 @@ adminRouter.get('/orders', requirePermission('revenue'), async (req, res) => {
     page: query.page,
     pageSize: PAGE_SIZE,
   })
+})
+
+/* ------------------------------------------------------------ livestreams */
+
+/**
+ * GET /api/admin/livestreams — [content]. Every stream live right now, of any
+ * audience, so a moderator can step in while it is on air.
+ */
+adminRouter.get('/livestreams', requirePermission('content'), async (_req, res) => {
+  const streams = await Livestream.find({ status: 'live' }).sort({ startedAt: -1 }).limit(100).lean()
+  const users = await usersById(streams.map((s) => s.hostId))
+  res.json({
+    items: streams.map((s) => ({
+      _id: String(s._id),
+      title: s.title,
+      description: s.description,
+      audience: s.audience,
+      startedAt: s.startedAt.toISOString(),
+      viewerCount: s.viewerCount,
+      peakViewers: s.peakViewers,
+      commentCount: s.commentCount,
+      host: users.get(s.hostId) ?? null,
+    })),
+  })
+})
+
+const endStreamSchema = z.object({
+  reason: z.string().trim().max(200, 'Lý do tối đa 200 ký tự').optional().default(''),
+})
+
+/**
+ * POST /api/admin/livestreams/:id/end { reason } — [content]. Stops a live
+ * stream for breaking the rules. The host is told why; the replay is kept, and
+ * can be dealt with by locking the account if needed.
+ */
+adminRouter.post('/livestreams/:id/end', requirePermission('content'), async (req, res) => {
+  const actor = currentUser(res)
+  const { reason } = endStreamSchema.parse(req.body ?? {})
+  const stream = await endStreamAsModerator(String(req.params.id))
+  if (!stream) throw new HttpError(404, 'Buổi livestream này không còn đang phát.', 'NOT_LIVE')
+
+  await audit(req, actor, 'livestream.end', { type: 'livestream', id: String(stream._id), label: stream.title.slice(0, 120) }, {
+    reason,
+    hostId: stream.hostId,
+  })
+  await notify([stream.hostId], {
+    type: 'moderation',
+    actorId: null,
+    message: reason
+      ? `Buổi livestream của bạn đã bị dừng do vi phạm quy định cộng đồng: ${reason}`
+      : 'Buổi livestream của bạn đã bị dừng do vi phạm quy định cộng đồng.',
+  })
+  res.json({ ok: true })
 })
 
 /* ----------------------------------------------------------------- admins */

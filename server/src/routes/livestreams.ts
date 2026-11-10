@@ -145,7 +145,7 @@ async function withReplayLink(stream: LivestreamDocument, host: Author) {
   return view
 }
 
-async function endStream(stream: LivestreamDocument, reason: 'host' | 'host_left'): Promise<void> {
+async function endStream(stream: LivestreamDocument, reason: 'host' | 'host_left' | 'moderator'): Promise<void> {
   if (stream.status === 'ended') return
   // One last look at the room, so the peak includes whoever is still watching.
   const presence = await roomPresence(stream.roomName, stream.hostId).catch(() => null)
@@ -162,6 +162,26 @@ async function endStream(stream: LivestreamDocument, reason: 'host' | 'host_left
   await stream.save()
   if (recordingId) await stopRecording(recordingId)
   await closeRoom(stream.roomName)
+}
+
+/**
+ * Stops a live stream for breaking the rules (POST /api/admin/livestreams/:id/end).
+ * Viewers are sent away and the room closes; the replay is kept, as for any
+ * ended stream. Returns the stream, or null when it is not live any more.
+ */
+export async function endStreamAsModerator(streamId: string): Promise<LivestreamDocument | null> {
+  const stream = isValidObjectId(streamId) ? await Livestream.findOne({ _id: streamId, status: 'live' }) : null
+  if (!stream) return null
+  try {
+    await endStream(stream, 'moderator')
+  } catch (error) {
+    // LiveKit being unreachable must not undo the decision: once the stream is
+    // marked ended, viewers stop getting tokens and LiveKit closes the empty room.
+    const saved = await Livestream.findById(stream._id).select('status').lean()
+    if (saved?.status !== 'ended') throw error
+    console.error(`Livestream ${streamId} ended, but LiveKit could not be told:`, error)
+  }
+  return stream
 }
 
 /**

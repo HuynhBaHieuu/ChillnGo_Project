@@ -31,6 +31,7 @@ import type {
   User,
 } from '@/services/types'
 
+import { linkFor } from './moderationLinks'
 import { Avatar, ConfirmDialog, Pagination, formatDateTime } from './shared'
 import type { Notice } from './shared'
 
@@ -479,14 +480,7 @@ function ReportDetail({
 
 /* ---------------------------------------------------------------- pieces */
 
-function linkFor(type: ReportTargetType, id: string, snapshot: ReportSnapshot): string | null {
-  if (type === 'post') return `/posts/${id}`
-  if (type === 'comment' && snapshot.postId) return `/posts/${snapshot.postId}#comments`
-  if (type === 'user') return `/users/${id}`
-  return null
-}
-
-function TypeBadge({ type }: { type: ReportTargetType }) {
+export function TypeBadge({ type }: { type: ReportTargetType }) {
   return (
     <span className="rounded-full border border-foreground/20 px-2 py-0.5 font-semibold capitalize text-foreground">
       {t(REPORT_TARGET_LABELS[type])}
@@ -510,7 +504,7 @@ function StateBadge({ state }: { state: ReportTargetState }) {
   return <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive">{label}</span>
 }
 
-function Thumb({ snapshot, type }: { snapshot: ReportSnapshot; type: ReportTargetType }) {
+export function Thumb({ snapshot, type }: { snapshot: ReportSnapshot; type: ReportTargetType }) {
   if (!snapshot.imageUrl) {
     return (
       <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-muted text-xs font-semibold uppercase text-muted-foreground">
@@ -528,7 +522,7 @@ function Thumb({ snapshot, type }: { snapshot: ReportSnapshot; type: ReportTarge
   )
 }
 
-function PersonLine({ person }: { person: ReportPerson | null }) {
+export function PersonLine({ person }: { person: ReportPerson | null }) {
   if (!person) return <span className="text-xs text-muted-foreground">{t('Tài khoản đã xoá')}</span>
   return (
     <div className="flex items-center gap-2">

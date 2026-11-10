@@ -12,6 +12,7 @@ import '../../ui/surfaces.dart';
 import '../auth/auth_widgets.dart';
 import 'admin_common.dart';
 import 'admin_panels.dart';
+import 'catalog_panel.dart';
 import '../../core/i18n.dart';
 import 'business_panels.dart';
 
@@ -43,7 +44,7 @@ List<_Section> get _sections => [
     label: t('Người dùng'),
     title: t('Quản lý người dùng'),
     description: (user) => isSuperAdmin(user)
-        ? t('Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu, phân quyền và xoá mọi tài khoản trừ Super Admin.')
+        ? t('Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu và phân quyền mọi tài khoản trừ Super Admin. Tài khoản chỉ bị khoá, không bị xoá.')
         : t('Người dùng thường. Khoá, mở khoá và đặt lại mật khẩu.'),
     icon: LucideIcons.users,
     allowed: (user) => hasModule(user, 'users'),
@@ -52,7 +53,7 @@ List<_Section> get _sections => [
     path: 'admins',
     label: t('Quản trị viên'),
     title: t('Quản trị viên'),
-    description: (_) => t('Tạo, khoá, xoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.'),
+    description: (_) => t('Tạo, khoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.'),
     icon: LucideIcons.shieldCheck,
     allowed: isSuperAdmin,
   ),
@@ -60,7 +61,7 @@ List<_Section> get _sections => [
     path: 'content',
     label: t('Nội dung'),
     title: t('Kiểm duyệt nội dung'),
-    description: (_) => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm.'),
+    description: (_) => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm. Xem và hiện lại những gì đang bị ẩn, dừng livestream vi phạm.'),
     icon: LucideIcons.flag,
     allowed: contentAllowed,
   ),
@@ -79,6 +80,14 @@ List<_Section> get _sections => [
     description: (_) => t('Đơn hàng thanh toán qua PayOS: gói Premium và gói Đề xuất của doanh nghiệp.'),
     icon: LucideIcons.banknote,
     allowed: (user) => hasModule(user, 'revenue'),
+  ),
+  _Section(
+    path: 'catalog',
+    label: t('Danh mục'),
+    title: t('Danh mục địa điểm'),
+    description: (_) => t('Điểm đến, địa điểm và checklist chuẩn bị mà AI dùng để lên lịch trình. AI chỉ gợi ý những gì có ở đây.'),
+    icon: LucideIcons.mapPinned,
+    allowed: (user) => hasModule(user, 'categories'),
   ),
   _Section(
     path: 'audit',
@@ -219,6 +228,7 @@ class AdminScreen extends ConsumerWidget {
                         'content' => ContentPanel(actor: user),
                         'businesses' => const BusinessesPanel(),
                         'revenue' => const RevenuePanel(),
+                        'catalog' => const CatalogPanel(),
                         'audit' => const AuditPanel(),
                         _ => const SettingsPanel(),
                       },
