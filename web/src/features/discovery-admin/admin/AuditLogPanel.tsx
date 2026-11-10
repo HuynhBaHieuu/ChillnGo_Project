@@ -21,6 +21,21 @@ const ACTION_LABELS: Record<string, MessageKey> = {
   'user.role': 'Đổi vai trò',
   'admin.create': 'Tạo Admin#log',
   'admin.permissions': 'Phân quyền Admin',
+  'report.dismiss': 'Bỏ qua báo cáo#log',
+  'report.hide': 'Ẩn nội dung#log',
+  'report.remove': 'Gỡ nội dung#log',
+  'report.lock': 'Khoá chủ nội dung#log',
+  'content.unhide': 'Bỏ ẩn nội dung#log',
+  'livestream.end': 'Dừng livestream#log',
+  'catalog.destination.create': 'Thêm điểm đến#log',
+  'catalog.destination.update': 'Sửa điểm đến#log',
+  'catalog.destination.delete': 'Xoá điểm đến#log',
+  'catalog.place.create': 'Thêm địa điểm#log',
+  'catalog.place.update': 'Sửa địa điểm#log',
+  'catalog.place.delete': 'Xoá địa điểm#log',
+  'catalog.checklist.create': 'Thêm mục chuẩn bị#log',
+  'catalog.checklist.update': 'Sửa mục chuẩn bị#log',
+  'catalog.checklist.delete': 'Xoá mục chuẩn bị#log',
   'settings.update': 'Đổi cấu hình hệ thống',
   'system.reset_users': 'Reset toàn bộ tài khoản',
   'system.seed_superadmin': 'Tạo Super Admin (script)',
@@ -41,8 +56,21 @@ function roleLabel(role: unknown): string {
 function describe(entry: AuditEntry): string {
   const d = entry.details as Record<string, any>
   switch (entry.action) {
-    case 'user.lock':
+    case 'user.lock': {
+      const reason = d.reason ? t('Lý do: {reason}', { reason: d.reason }) : t('Không ghi lý do')
+      return d.via === 'report' ? `${reason} · ${t('qua báo cáo vi phạm')}` : reason
+    }
+    case 'report.dismiss':
+    case 'report.hide':
+    case 'report.remove':
+    case 'report.lock': {
+      const count = t('{n} báo cáo#log', { n: Number(d.reports ?? 0) })
+      return d.note ? `${count} · ${t('Ghi chú: {note}', { note: d.note })}` : count
+    }
+    case 'livestream.end':
       return d.reason ? t('Lý do: {reason}', { reason: d.reason }) : t('Không ghi lý do')
+    case 'content.unhide':
+      return d.previousAction === 'remove' ? t('Khôi phục nội dung đã gỡ') : t('Hiện lại nội dung đã ẩn')
     case 'user.delete':
       return `${d.email ?? ''} · ${roleLabel(d.role)}`
     case 'user.role':

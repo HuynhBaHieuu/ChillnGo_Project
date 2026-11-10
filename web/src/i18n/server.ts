@@ -32,6 +32,10 @@ const RULES: Rule[] = [
   [/^(?:Clone|Sao chép) từ hành trình “(.*)”\.$/s, (m) => ['Sao chép từ hành trình “{title}”.', { title: m[1] }]],
   [/^Bản nháp chỉ có (\d+) ngày\.$/, (m) => ['Bản nháp chỉ có {n} ngày.', { n: Number(m[1]) }]],
   [/^Tối đa (\d+) ảnh$/, (m) => ['Tối đa {n} ảnh', { n: Number(m[1]) }]],
+  [/^Buổi livestream của bạn đã bị dừng do vi phạm quy định cộng đồng: (.*)$/s, (m) => ['Buổi livestream của bạn đã bị dừng do vi phạm quy định cộng đồng: {reason}', { reason: m[1] }]],
+  [/^Tối đa (\d+) ký tự$/,(m) => ['Tối đa {n} ký tự', { n: Number(m[1]) }]],
+  [/^Điểm đến này còn (\d+) địa điểm\. /, (m) => ['Điểm đến này còn {n} địa điểm. Hãy xoá hoặc chuyển chúng sang điểm đến khác trước.', { n: Number(m[1]) }]],
+  [/^Có (\d+) hành trình đang dùng địa điểm này/, (m) => ['Có {n} hành trình đang dùng địa điểm này nên không xoá được. Hãy sửa thông tin thay vì xoá.', { n: Number(m[1]) }]],
   [/^Mỗi hành trình mời tối đa (\d+) người đi cùng\.$/, (m) => ['Mỗi hành trình mời tối đa {n} người đi cùng.', { n: Number(m[1]) }]],
 ]
 

@@ -54,12 +54,6 @@ export const report = {
     ja: 'ユーザーからの報告：確認し、コンテンツを非表示・削除、または違反アカウントをロックします。',
     ko: '사용자 신고: 검토하고 콘텐츠를 숨기거나 삭제하고, 위반 계정을 잠가요.',
   },
-  'Nội dung được kiểm duyệt từ hàng chờ báo cáo vi phạm. Hãy nhờ Super Admin cấp thêm quyền Báo cáo vi phạm để xem hàng chờ.': {
-    en: 'Content is moderated from the report queue. Ask the Super Admin for the Reports permission to see it.',
-    zh: '内容审核在举报队列中进行。请让超级管理员为你开通“举报处理”权限。',
-    ja: 'コンテンツは報告キューから審査します。キューを見るには Super Admin に「違反報告」権限を依頼してください。',
-    ko: '콘텐츠는 신고 대기열에서 검토해요. 대기열을 보려면 Super Admin에게 신고 처리 권한을 요청하세요.',
-  },
   'Trạng thái báo cáo': { en: 'Report status', zh: '举报状态', ja: '報告の状態', ko: '신고 상태' },
   'Chờ xử lý': { en: 'Pending', zh: '待处理', ja: '未対応', ko: '대기 중' },
   'Đã xử lý': { en: 'Resolved', zh: '已处理', ja: '対応済み', ko: '처리됨' },
