@@ -41,6 +41,7 @@ export const APP_ROUTES = [
   '/activity/:section?',
   '/itineraries',
   '/itineraries/:id',
+  '/itineraries/:id/edit',
   '/ai-drafts/:id',
   '/users/:id',
   '/live',

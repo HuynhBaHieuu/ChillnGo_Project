@@ -70,7 +70,7 @@ keeps the API swap contained.
 | `/itineraries`, `/itineraries/:id` | Cloned itineraries, drag to reorder | signed in |
 | `/users/:id` | Profile with Bài viết / Đã lưu / Lịch trình đã clone | — |
 | `/login`, `/register` | Auth forms | — |
-| `/admin/*` | Admin console with its own sidebar layout: overview, users, admins, content, audit log, settings. Real data from the API | admin or superadmin; sections by permission |
+| `/admin/*` | Admin console with its own sidebar layout: overview, users, admins, content, catalog, audit log, settings. Real data from the API | admin or superadmin; sections by permission |
 
 ## Home page scroll experience
 
@@ -128,9 +128,6 @@ table.
   re-based dates; reorder is an array move plus renumbering; merge appends. The
   real versions (route re-optimisation, travel-time reconciliation, conflict
   handling) land with the API. See `itinerary.service.ts`.
-- **Admin content moderation.** The admin console manages accounts for real, but
-  its "Nội dung" section (posts, reports, categories) waits for that data to move
-  to the API.
 
 Submitting the post form logs the full payload to the console in the exact
 `TripPost` shape, so the form and the schema can be checked against each other
