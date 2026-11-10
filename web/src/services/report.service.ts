@@ -12,6 +12,8 @@ import type {
   ReportEntry,
   ReportGroup,
   ReportInput,
+  ReportPerson,
+  ReportSnapshot,
   ReportStatus,
   ReportTargetDetail,
   ReportTargetType,
@@ -66,4 +68,27 @@ export function resolveReport(
 /** POST /api/admin/moderation/:type/:id/unhide — shows hidden content again. */
 export function unhideContent(targetType: ReportTargetType, targetId: string): Promise<{ ok: true }> {
   return http(`/api/admin/moderation/${targetType}/${targetId}/unhide`, { method: 'POST' })
+}
+
+/** Content that can be hidden by moderation (accounts are locked instead). */
+export type HiddenTargetType = Exclude<ReportTargetType, 'user'>
+
+export interface HiddenItem {
+  targetType: HiddenTargetType
+  targetId: string
+  snapshot: ReportSnapshot
+  owner: ReportPerson | null
+  /** "remove" also put it in the author's Recently Deleted. */
+  action: 'hide' | 'remove'
+  reason: string
+  hiddenAt: string | null
+  /** Hidden automatically after enough reports, until someone looks. */
+  hiddenBySystem: boolean
+  hiddenBy: ReportPerson | null
+}
+
+/** GET /api/admin/moderation — [content]. What is hidden or removed right now. */
+export function listHidden(params: { targetType: HiddenTargetType; page?: number }): Promise<Page<HiddenItem>> {
+  const search = new URLSearchParams({ targetType: params.targetType, page: String(params.page ?? 1) })
+  return http(`/api/admin/moderation?${search.toString()}`)
 }

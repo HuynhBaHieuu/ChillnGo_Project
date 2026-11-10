@@ -1,8 +1,8 @@
 import {
   BarChart3,
   ClipboardList,
-  Construction,
   Flag,
+  MapPinned,
   Settings,
   ShieldCheck,
   Users,
@@ -10,28 +10,25 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import type * as React from 'react'
 
-import { EmptyState } from '@/components/EmptyState'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { t, translatedList } from '@/i18n'
-import type { MessageKey } from '@/i18n'
-import { MODULE_LABELS, hasModule, isSuperAdmin } from '@/lib/roles'
+import { hasModule, isSuperAdmin } from '@/lib/roles'
 import type { AdminModule } from '@/lib/roles'
 import type { User } from '@/services/types'
 
 import { AdminsPanel } from './AdminsPanel'
 import { AuditLogPanel } from './AuditLogPanel'
+import { HiddenContentPanel } from './HiddenContentPanel'
+import { LiveStreamsPanel } from './LiveStreamsPanel'
 import { ReportsPanel } from './ReportsPanel'
 import { SettingsPanel } from './SettingsPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsersTable } from './UsersTable'
+import { CatalogPanel } from './catalog/CatalogPanel'
 import type { Notice } from './shared'
 
-/** Modules the permission model already has, but whose data is not on the server yet. */
-const NOT_READY: { module: AdminModule; needs: MessageKey }[] = [
-  { module: 'categories', needs: 'danh mục địa điểm và tag' },
-]
-
 /** The modules the Nội dung screen serves. */
-const CONTENT_MODULES: AdminModule[] = ['reports', 'content', ...NOT_READY.map((n) => n.module)]
+const CONTENT_MODULES: AdminModule[] = ['reports', 'content']
 
 export interface AdminSection {
   /** URL segment: /admin/<path>. */
@@ -67,7 +64,7 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     title: 'Quản lý người dùng',
     description: (user) =>
       isSuperAdmin(user)
-        ? t('Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu, phân quyền và xoá mọi tài khoản trừ Super Admin.')
+        ? t('Tất cả tài khoản. Khoá, mở khoá, đặt lại mật khẩu và phân quyền mọi tài khoản trừ Super Admin. Tài khoản chỉ bị khoá, không bị xoá.')
         : t('Người dùng thường. Khoá, mở khoá và đặt lại mật khẩu.'),
     icon: Users,
     allowed: (user) => hasModule(user, 'users'),
@@ -77,7 +74,7 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     path: 'admins',
     label: 'Quản trị viên',
     title: 'Quản trị viên',
-    description: () => t('Tạo, khoá, xoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.'),
+    description: () => t('Tạo, khoá, hạ quyền và phân quyền từng mục cho Admin. Chỉ Super Admin.'),
     icon: ShieldCheck,
     allowed: (user) => isSuperAdmin(user),
     render: ({ user, onNotice }) => <AdminsPanel actor={user} onNotice={onNotice} />,
@@ -86,36 +83,43 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     path: 'content',
     label: 'Nội dung',
     title: 'Kiểm duyệt nội dung',
-    description: () => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm.'),
+    description: () => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm. Xem và hiện lại những gì đang bị ẩn, dừng livestream vi phạm.'),
     icon: Flag,
     allowed: (user) => CONTENT_MODULES.some((module) => hasModule(user, module)),
-    render: ({ user, onNotice }) => (
-      <div className="space-y-8">
-        {hasModule(user, 'reports') ? (
-          <ReportsPanel actor={user} onNotice={onNotice} />
-        ) : (
-          hasModule(user, 'content') && (
-            <EmptyState
-              icon={Flag}
-              title={MODULE_LABELS.content.title}
-              description={t('Nội dung được kiểm duyệt từ hàng chờ báo cáo vi phạm. Hãy nhờ Super Admin cấp thêm quyền Báo cáo vi phạm để xem hàng chờ.')}
-            />
-          )
-        )}
-        {NOT_READY.some(({ module }) => hasModule(user, module)) && (
-          <div className="grid gap-4 md:grid-cols-3">
-            {NOT_READY.filter(({ module }) => hasModule(user, module)).map(({ module, needs }) => (
-              <EmptyState
-                key={module}
-                icon={Construction}
-                title={MODULE_LABELS[module].title}
-                description={t('Chưa dùng được: {needs} vẫn là dữ liệu mẫu trên trình duyệt, chưa lưu trên máy chủ. Mục này sẽ hoạt động khi phần API đó được làm.', { needs: t(needs) })}
-              />
+    render: ({ user, onNotice }) => {
+      // Reports need [reports]; unhiding and stopping a stream need [content].
+      const tabs = [
+        hasModule(user, 'reports') && { value: 'reports', label: t('Hàng chờ báo cáo'), panel: <ReportsPanel actor={user} onNotice={onNotice} /> },
+        hasModule(user, 'content') && { value: 'hidden', label: t('Đang bị ẩn'), panel: <HiddenContentPanel onNotice={onNotice} /> },
+        hasModule(user, 'content') && { value: 'live', label: t('Đang phát'), panel: <LiveStreamsPanel onNotice={onNotice} /> },
+      ].filter((tab) => tab !== false)
+      if (tabs.length === 1) return tabs[0].panel
+      return (
+        <Tabs defaultValue={tabs[0].value} className="space-y-5">
+          <TabsList className="flex w-full flex-wrap sm:w-auto">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
             ))}
-          </div>
-        )}
-      </div>
-    ),
+          </TabsList>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.value} value={tab.value}>
+              {tab.panel}
+            </TabsContent>
+          ))}
+        </Tabs>
+      )
+    },
+  },
+  {
+    path: 'catalog',
+    label: 'Danh mục',
+    title: 'Danh mục địa điểm',
+    description: () => t('Điểm đến, địa điểm và checklist chuẩn bị mà AI dùng để lên lịch trình. AI chỉ gợi ý những gì có ở đây.'),
+    icon: MapPinned,
+    allowed: (user) => hasModule(user, 'categories'),
+    render: ({ onNotice }) => <CatalogPanel onNotice={onNotice} />,
   },
   {
     path: 'audit',

@@ -24,7 +24,7 @@ export function StatsPanel() {
     return <p className="text-sm text-destructive">{(stats.error as Error).message}</p>
   }
 
-  const { users, signupsByDay, scope, byRole, adminActions7, pendingReports } = stats.data
+  const { users, content, signupsByDay, scope, byRole, adminActions7, pendingReports } = stats.data
 
   return (
     <div className="space-y-8">
@@ -52,6 +52,20 @@ export function StatsPanel() {
 
       <SignupChart data={signupsByDay} />
 
+      {content && (
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold">{t('Nội dung và hoạt động')}</h3>
+          <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <Tile label={t('Hành trình đã đăng')} value={content.posts} note={t('+{n} trong 7 ngày', { n: content.posts7 })} />
+            <Tile label={t('Check-in')} value={content.checkins} note={t('+{n} trong 7 ngày', { n: content.checkins7 })} />
+            <Tile label={t('Đang livestream')} value={content.liveNow} note={t('{n} buổi trong 30 ngày', { n: content.streams30 })} />
+            <Tile label={t('Báo cáo mới 7 ngày')} value={content.reports7} note={t('{n} nội dung đang bị ẩn', { n: content.hidden })} />
+            <Tile label={t('Lượt dùng AI hôm nay')} value={content.aiRequestsToday} note={t('{n} người dùng', { n: content.aiUsersToday })} />
+            <Tile label={t('Bản nháp AI 7 ngày')} value={content.aiDrafts7} />
+          </dl>
+        </section>
+      )}
+
       {scope === 'full' && byRole && (
         <section className="space-y-3">
           <h3 className="text-sm font-semibold">{t('Chỉ dành cho Super Admin')}</h3>
@@ -67,7 +81,7 @@ export function StatsPanel() {
   )
 }
 
-function Tile({ label, value, of }: { label: string; value: number; of?: number }) {
+function Tile({ label, value, of, note }: { label: string; value: number; of?: number; note?: string }) {
   const share = of ? Math.round((value / of) * 100) : null
   return (
     <div className="rounded-2xl border border-foreground/15 bg-card p-5">
@@ -76,6 +90,7 @@ function Tile({ label, value, of }: { label: string; value: number; of?: number 
         <span className="font-display text-3xl tabular-nums">{value.toLocaleString(localeTag())}</span>
         {share !== null && <span className="text-xs text-muted-foreground">{share}%</span>}
       </dd>
+      {note && <dd className="mt-1 text-xs text-muted-foreground">{note}</dd>}
     </div>
   )
 }
