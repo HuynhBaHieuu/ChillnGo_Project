@@ -19,6 +19,9 @@ import 'features/ai_clone/ai_clone_screen.dart';
 import 'features/ai_clone/ai_draft_screen.dart';
 import 'features/assistant/assistant_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
+import 'features/billing/premium_screen.dart';
+import 'features/business/business_screen.dart';
+import 'features/business/my_business_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
 import 'features/auth/reset_password_screen.dart';
@@ -52,6 +55,7 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 bool _needsAccount(String path) {
   if (path == '/posts/new' || path == '/profile/edit' || path == '/live/new' || path == '/checkin/new') return true;
   if (path == '/notifications' || path == '/menu' || path == '/assistant') return true;
+  if (path == '/premium' || path == '/business') return true;
   if (RegExp(r'^/posts/[^/]+/ai-clone$').hasMatch(path) || path.startsWith('/ai-drafts/')) return true;
   if (RegExp(r'^/posts/[^/]+/edit$').hasMatch(path)) return true;
   if (RegExp(r'^/live/[^/]+$').hasMatch(path)) return true;
@@ -178,6 +182,12 @@ final appRouter = GoRouter(
       builder: (_, state) => AiDraftScreen(id: state.pathParameters['id'] ?? ''),
     ),
     GoRoute(path: '/assistant', builder: (_, _) => const AssistantScreen()),
+    GoRoute(path: '/premium', builder: (_, _) => const PremiumScreen()),
+    GoRoute(path: '/business', builder: (_, _) => const MyBusinessScreen()),
+    GoRoute(
+      path: '/b/:slug',
+      builder: (_, state) => BusinessScreen(slug: state.pathParameters['slug'] ?? ''),
+    ),
     GoRoute(
       path: '/posts/:id/edit',
       builder: (_, state) => PostEditorScreen(postId: state.pathParameters['id']),

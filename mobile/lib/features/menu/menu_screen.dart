@@ -45,6 +45,13 @@ class MenuScreen extends ConsumerWidget {
             (label: t('Hành trình của tôi'), hint: t('Bài bạn đăng và lịch trình đã sao chép'), icon: LucideIcons.map, path: '/itineraries'),
             (label: t('Đã lưu'), hint: null, icon: LucideIcons.bookmark, path: '/activity/saved'),
             (label: t('Phát trực tiếp'), hint: null, icon: LucideIcons.radio, path: '/live/new'),
+            (
+              label: user.isPremium ? t('Premium của bạn') : t('Nâng cấp Premium'),
+              hint: t('Nhiều lượt AI, livestream 1080p, giữ video lâu hơn'),
+              icon: LucideIcons.crown,
+              path: '/premium',
+            ),
+            (label: t('Doanh nghiệp của tôi'), hint: t('Trang cơ sở, bài quảng cáo, gói Đề xuất'), icon: LucideIcons.building2, path: '/business'),
             (label: t('Về ChillnGo'), hint: null, icon: LucideIcons.info, path: '/about'),
           ];
 

@@ -21,6 +21,7 @@ import '../post/trip_card.dart';
 import 'follow_button.dart';
 import '../report/report_sheet.dart';
 import '../../core/i18n.dart';
+import '../../ui/premium_badge.dart';
 
 List<({String value, String label, int? count})> get _tabs => [
   (value: 'posts', label: t('Bài viết'), count: null),
@@ -139,7 +140,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(profile.displayName, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.h1),
+                              Row(
+                                children: [
+                                  Flexible(child: Text(profile.displayName, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.h1)),
+                                  if (profile.isPremium) ...[const SizedBox(width: 8), const PremiumBadge(show: true, size: 15)],
+                                ],
+                              ),
                               Text('@${profile.username}', style: AppText.meta),
                             ],
                           ),

@@ -24,6 +24,8 @@ class User {
     this.postCount = 0,
     this.role = 'user',
     this.permissions,
+    this.isPremium = false,
+    this.premiumUntil,
     this.createdAt = '',
   });
 
@@ -44,6 +46,12 @@ class User {
 
   /// Admin modules this account may use. Sent by the API; absent on demo users.
   List<String>? permissions;
+
+  /// Premium right now: shows the crown badge. Sent by the API; false on demo users.
+  bool isPremium;
+
+  /// Only on your own account: when Premium ends.
+  String? premiumUntil;
   String createdAt;
 
   factory User.fromJson(Json json) => User(
@@ -60,6 +68,8 @@ class User {
     postCount: intOf(json['postCount']),
     role: str(json['role'], 'user'),
     permissions: json['permissions'] is List ? stringList(json['permissions']) : null,
+    isPremium: boolOf(json['isPremium']),
+    premiumUntil: strOrNull(json['premiumUntil']),
     createdAt: str(json['createdAt']),
   );
 
@@ -77,6 +87,8 @@ class User {
     'postCount': postCount,
     'role': role,
     if (permissions != null) 'permissions': permissions,
+    if (isPremium) 'isPremium': true,
+    'premiumUntil': ?premiumUntil,
     'createdAt': createdAt,
   };
 
@@ -749,21 +761,25 @@ class Place {
 
 /// The short author record the check-in and livestream APIs send.
 class MiniUser {
-  const MiniUser({required this.id, required this.username, required this.displayName, required this.avatarUrl});
+  const MiniUser({required this.id, required this.username, required this.displayName, required this.avatarUrl, this.isPremium = false});
 
   final String id;
   final String username;
   final String displayName;
   final String avatarUrl;
 
+  /// Shows the Premium crown (sent for livestream hosts).
+  final bool isPremium;
+
   factory MiniUser.fromJson(Json json) => MiniUser(
     id: str(json['_id']),
     username: str(json['username']),
     displayName: str(json['displayName'], str(json['username'])),
     avatarUrl: str(json['avatarUrl']),
+    isPremium: boolOf(json['isPremium']),
   );
 
-  MiniUser withAvatar(String url) => MiniUser(id: id, username: username, displayName: displayName, avatarUrl: url);
+  MiniUser withAvatar(String url) => MiniUser(id: id, username: username, displayName: displayName, avatarUrl: url, isPremium: isPremium);
 }
 
 class CheckInPhoto {
@@ -1119,6 +1135,9 @@ class AdminStats {
     this.byRole,
     this.adminActions7,
     this.pendingReports,
+    this.pendingBusinesses,
+    this.revenue30,
+    this.premiumMembers,
   });
 
   /// 'users' | 'full'
@@ -1135,6 +1154,13 @@ class AdminStats {
 
   /// Reports waiting for a decision; only for accounts with the Reports module.
   final int? pendingReports;
+
+  /// Business pages waiting for review; only with the Businesses module.
+  final int? pendingBusinesses;
+
+  /// Paid in the last 30 days, and Premium members now; only with the Revenue module.
+  final int? revenue30;
+  final int? premiumMembers;
 
   factory AdminStats.fromJson(Json json) {
     final users = mapOf(json['users']);
@@ -1154,6 +1180,9 @@ class AdminStats {
       byRole: byRole?.map((k, v) => MapEntry(k, intOf(v))),
       adminActions7: json['adminActions7'] == null ? null : intOf(json['adminActions7']),
       pendingReports: json['pendingReports'] == null ? null : intOf(json['pendingReports']),
+      pendingBusinesses: json['pendingBusinesses'] == null ? null : intOf(json['pendingBusinesses']),
+      revenue30: json['revenue'] == null ? null : intOf(mapOf(json['revenue'])['revenue30']),
+      premiumMembers: json['revenue'] == null ? null : intOf(mapOf(json['revenue'])['premiumMembers']),
     );
   }
 }
