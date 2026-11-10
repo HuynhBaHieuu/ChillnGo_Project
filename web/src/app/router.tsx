@@ -5,6 +5,10 @@ import { HomePage } from '@/app/landing/home/HomePage'
 import { NotFoundPage } from '@/app/landing/NotFoundPage'
 import { RootLayout } from '@/app/layout/RootLayout'
 import { ActivityPage } from '@/features/activity/ActivityPage'
+import { BillingResultPage } from '@/features/billing/BillingResultPage'
+import { PremiumPage } from '@/features/billing/PremiumPage'
+import { BusinessPage } from '@/features/business/BusinessPage'
+import { MyBusinessPage } from '@/features/business/MyBusinessPage'
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
@@ -121,6 +125,25 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
+
+      { path: '/premium', element: <PremiumPage /> },
+      {
+        path: '/billing/result',
+        element: (
+          <RequireAuth>
+            <BillingResultPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/business',
+        element: (
+          <RequireAuth>
+            <MyBusinessPage />
+          </RequireAuth>
+        ),
+      },
+      { path: '/b/:slug', element: <BusinessPage /> },
 
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },

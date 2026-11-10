@@ -41,6 +41,10 @@ export type NotificationType =
   | 'moderation'
   /** Something you reported has been looked at. From the API. */
   | 'report_resolved'
+  /** A payment went through, or Premium is about to run out. From the API. */
+  | 'billing'
+  /** An admin approved, rejected or hid your business page. From the API. */
+  | 'business'
 
 /* ------------------------------------------------------------------ User */
 
@@ -61,7 +65,11 @@ export interface User {
    * Admin modules this account may use. Sent by the API; absent on mock users.
    * See web/src/lib/roles.ts.
    */
-  permissions?: ('users' | 'content' | 'reports' | 'categories' | 'stats')[]
+  permissions?: ('users' | 'content' | 'reports' | 'categories' | 'stats' | 'businesses' | 'revenue')[]
+  /** Premium right now: shows the crown badge. Sent by the API; absent on mock users. */
+  isPremium?: boolean
+  /** Only on your own account: when Premium ends. */
+  premiumUntil?: ISODate | null
   createdAt: ISODate
 }
 
@@ -229,7 +237,7 @@ export interface ModerationInfo {
   reason: string
 }
 
-export type ReportTargetType = 'post' | 'comment' | 'checkin' | 'user'
+export type ReportTargetType = 'post' | 'comment' | 'checkin' | 'user' | 'business' | 'businessPost'
 export type ReportReason = 'spam' | 'inappropriate' | 'scam' | 'misinformation' | 'harassment' | 'other'
 export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
 export type ReportAction = 'none' | 'hide' | 'remove' | 'lock'
@@ -575,3 +583,99 @@ export interface AiDraft {
   callsLeft: number
   dailyLimit: number
 }
+
+/* ------------------------------------------------------- Billing (PayOS) */
+
+export type ProductId = 'premium_month' | 'premium_year' | 'business_boost_month'
+
+export interface Product {
+  id: ProductId
+  kind: 'premium' | 'boost'
+  name: string
+  days: number
+  /** VND. */
+  amount: number
+}
+
+export interface PlanBenefits {
+  aiDailyLimit: number
+  liveQuality: string
+  replayDays: number
+}
+
+/** GET /api/billing/plans */
+export interface Plans {
+  paymentsEnabled: boolean
+  products: Product[]
+  benefits: { free: PlanBenefits; premium: PlanBenefits }
+  current: { isPremium: boolean; premiumUntil: ISODate | null } | null
+}
+
+export type OrderStatus = 'pending' | 'paid' | 'cancelled' | 'expired'
+
+export interface Order {
+  _id: ObjectId
+  orderCode: number
+  product: ProductId
+  productName: string
+  businessId: ObjectId | null
+  amount: number
+  days: number
+  status: OrderStatus
+  /** The PayOS page, while the order can still be paid. */
+  checkoutUrl: string
+  createdAt: ISODate
+  paidAt: ISODate | null
+  grantedUntil: ISODate | null
+}
+
+/* ------------------------------------------------------------ Businesses */
+
+export type BusinessType = 'homestay' | 'hotel' | 'restaurant' | 'cafe' | 'tour'
+export type BusinessStatus = 'pending' | 'approved' | 'rejected' | 'hidden'
+
+export interface Business {
+  _id: ObjectId
+  ownerId: ObjectId
+  slug: string
+  name: string
+  type: BusinessType
+  description: string
+  address: string
+  city: string
+  lat: number | null
+  lng: number | null
+  phone: string
+  website: string
+  photos: string[]
+  priceFrom: number | null
+  priceTo: number | null
+  openingHours: string
+  /** In "Gợi ý nổi bật" now. */
+  sponsored: boolean
+  createdAt: ISODate
+  /** Owner (and admin) only. */
+  status?: BusinessStatus
+  statusReason?: string
+  promotedUntil?: ISODate | null
+  moderation?: ModerationInfo | null
+}
+
+export interface BusinessAd {
+  _id: ObjectId
+  businessId: ObjectId
+  title: string
+  content: string
+  photos: string[]
+  offer: string
+  createdAt: ISODate
+  updatedAt: ISODate
+  moderation?: ModerationInfo | null
+}
+
+export type BusinessInput = Pick<
+  Business,
+  'name' | 'type' | 'description' | 'address' | 'city' | 'lat' | 'lng' | 'phone' | 'website' | 'photos' | 'priceFrom' | 'priceTo' | 'openingHours'
+>
+
+export type BusinessAdInput = Pick<BusinessAd, 'title' | 'content' | 'photos' | 'offer'>

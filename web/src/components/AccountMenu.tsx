@@ -34,6 +34,8 @@ export function AccountMenu({ user, onSignOut }: { user: User; onSignOut: () => 
     { to: '/profile/edit', label: t('Chỉnh sửa hồ sơ') },
     { to: '/posts/new', label: t('Đăng bài mới') },
     { to: '/activity', label: t('Hoạt động của bạn') },
+    { to: '/premium', label: user.isPremium ? t('Premium của bạn') : t('Nâng cấp Premium') },
+    { to: '/business', label: t('Doanh nghiệp của tôi') },
   ]
 
   return (

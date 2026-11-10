@@ -41,6 +41,7 @@ export const APP_ROUTES = [
   '/activity/:section?',
   '/itineraries',
   '/itineraries/:id',
+  '/itineraries/:id/edit',
   '/ai-drafts/:id',
   '/users/:id',
   '/live',
@@ -51,6 +52,10 @@ export const APP_ROUTES = [
   '/verify-email',
   '/forgot-password',
   '/reset-password',
+  '/premium',
+  '/billing/result',
+  '/business',
+  '/b/:slug',
   // The admin console sends any path under it to its index page.
   '/admin/*',
 ] as const
@@ -363,7 +368,7 @@ Câu hỏi về ChillnGo API hay CLI: đọc [Developer Portal](${origin}/develo
 
   '/privacy': (origin) => `# Chính sách quyền riêng tư — ChillnGo
 
-Cập nhật ngày 6 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nào về bạn, dùng chúng để làm gì, dịch vụ nào xử lý chúng, phần nào ai cũng xem được, và cách bạn xoá chúng.
+Cập nhật ngày 10 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nào về bạn, dùng chúng để làm gì, dịch vụ nào xử lý chúng, phần nào ai cũng xem được, và cách bạn xoá chúng.
 
 ## Dữ liệu ChillnGo lưu
 
@@ -371,19 +376,23 @@ Cập nhật ngày 6 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nào
 - **Hồ sơ:** ảnh đại diện, ảnh bìa, giới thiệu và nơi sống bạn tự điền.
 - **Nội dung bạn đăng:** hành trình, bình luận, lượt thích, check-in (kèm ảnh và địa điểm nếu bạn gắn), livestream cùng bình luận, cảm xúc và bản ghi khi tính năng ghi hình bật.
 - **Hoạt động:** người bạn theo dõi, thông báo, lịch sử tìm kiếm, lịch sử thay đổi tài khoản.
-- **Tính năng AI:** bản nháp lịch trình AI và nội dung trò chuyện với trợ lý.
+- **Tính năng AI:** bản nháp lịch trình AI, nội dung trò chuyện với trợ lý và số lượt AI đã dùng mỗi ngày.
+- **Thanh toán:** đơn hàng Premium và gói Đề xuất (mã đơn, gói, số tiền, trạng thái, thời điểm thanh toán, mã tham chiếu từ PayOS). ChillnGo không nhận và không lưu số thẻ, số tài khoản hay mật khẩu ngân hàng.
+- **Tài khoản doanh nghiệp:** thông tin cơ sở (tên, loại hình, địa chỉ, vị trí, số điện thoại, website, ảnh, giá, giờ mở cửa, giới thiệu), bài quảng cáo và kết quả duyệt.
 
 ## ChillnGo dùng dữ liệu để làm gì
 
-Để chạy các tính năng bạn dùng, gửi email xác nhận và đặt lại mật khẩu, gửi thông báo, chống lạm dụng và xử lý tài khoản vi phạm. ChillnGo không hiển thị quảng cáo và không dùng công cụ phân tích hay theo dõi của bên thứ ba.
+Để chạy các tính năng bạn dùng, gửi email xác nhận và đặt lại mật khẩu, gửi thông báo, chống lạm dụng, xử lý tài khoản vi phạm và kích hoạt gói bạn đã mua.
+
+**Nội dung được tài trợ:** cơ sở kinh doanh mua gói Đề xuất hiện trong mục "Gợi ý nổi bật" ở trang Khám phá, luôn có nhãn "Tài trợ". Vị trí này không dựa trên dữ liệu cá nhân của bạn: mọi người thấy cùng một danh sách, xếp ngẫu nhiên. ChillnGo không bán dữ liệu cho doanh nghiệp, không hiển thị quảng cáo của mạng quảng cáo bên thứ ba và không dùng công cụ phân tích hay theo dõi của bên thứ ba.
 
 ## Dịch vụ xử lý dữ liệu
 
-Vercel (lưu trữ), MongoDB Atlas (cơ sở dữ liệu), Cloudinary (ảnh), LiveKit và kho lưu trữ tương thích S3 (livestream và bản ghi), Google (đăng nhập bằng Google, Google Fonts), nhà cung cấp AI — Google Gemini hoặc API tương thích OpenAI (tính năng AI), máy chủ email SMTP.
+Vercel (lưu trữ), MongoDB Atlas (cơ sở dữ liệu), Cloudinary (ảnh), LiveKit và kho lưu trữ tương thích S3 (livestream và bản ghi), Google (đăng nhập bằng Google, Google Fonts), nhà cung cấp AI — Google Gemini hoặc API tương thích OpenAI (tính năng AI), máy chủ email SMTP, PayOS (cổng thanh toán VietQR: nhận mã đơn và số tiền).
 
 ## Những gì ai cũng xem được
 
-Hành trình đã đăng, bình luận, check-in và hồ sơ công khai (không gồm email) hiển thị cho mọi người và đọc được qua ChillnGo API. Bản nháp chỉ mình bạn thấy. Livestream có ba mức: công khai, chỉ người theo dõi, hoặc riêng tư.
+Hành trình đã đăng, bình luận, check-in và hồ sơ công khai (không gồm email) hiển thị cho mọi người và đọc được qua ChillnGo API. Bản nháp chỉ mình bạn thấy. Livestream có ba mức: công khai, chỉ người theo dõi, hoặc riêng tư. Trang cơ sở kinh doanh đã duyệt và bài quảng cáo của nó (kể cả địa chỉ, số điện thoại) là công khai. Người khác thấy huy hiệu Premium cạnh tên bạn, nhưng không thấy đơn hàng hay thời hạn gói.
 
 ## Trong trình duyệt của bạn
 
@@ -393,6 +402,8 @@ localStorage lưu phiên đăng nhập, ngôn ngữ bạn chọn và thông báo
 
 - Hành trình và check-in đã xoá nằm trong "Đã xoá gần đây" 30 ngày rồi bị xoá hẳn; bạn cũng có thể xoá hẳn ngay.
 - Bình luận xoá được bất cứ lúc nào; lịch sử tìm kiếm xoá được từng mục hoặc toàn bộ.
+- Bản ghi livestream được giữ 30 ngày sau khi sẵn sàng (365 ngày nếu người phát đang dùng Premium lúc đó), rồi tự động bị xoá.
+- Bài quảng cáo xoá được bất cứ lúc nào. Đơn hàng đã thanh toán được giữ lại để đối soát doanh thu.
 - Để xoá cả tài khoản, [liên hệ ChillnGo](${origin}/contact).
 
 ## Thay đổi chính sách

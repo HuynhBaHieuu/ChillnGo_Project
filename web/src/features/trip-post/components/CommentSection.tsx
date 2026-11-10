@@ -1,4 +1,5 @@
 import { Loader2, MessageCircle } from 'lucide-react'
+import { PremiumBadge } from '@/components/PremiumBadge'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
@@ -206,6 +207,7 @@ function CommentItem({
           >
             {comment.author.displayName}
           </Link>
+          <PremiumBadge user={comment.author} />
           <time dateTime={comment.createdAt} className="text-xs text-muted-foreground">
             {relativeTime(comment.createdAt)}
           </time>

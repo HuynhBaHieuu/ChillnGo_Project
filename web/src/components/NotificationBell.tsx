@@ -1,4 +1,4 @@
-import { Bell, Bookmark, Copy, Flag, Heart, MessageCircle, Radio, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { Bell, Bookmark, Building2, Copy, Crown, Flag, Heart, MessageCircle, Radio, ShieldAlert, UserPlus, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -28,6 +28,8 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   invite_accepted: Users,
   moderation: ShieldAlert,
   report_resolved: Flag,
+  billing: Crown,
+  business: Building2,
 }
 
 /** Where a notification leads: the stream, the post (its comments, for a comment), or the person who followed you. */
@@ -35,6 +37,8 @@ function targetOf(n: { livestreamId?: string | null; postId: string | null; type
   if (n.livestreamId) return `/live/${n.livestreamId}`
   if (n.postId) return n.type === 'comment' ? `/posts/${n.postId}#comments` : `/posts/${n.postId}`
   if (n.type === 'follow' && n.actorId) return `/users/${n.actorId}`
+  if (n.type === 'billing') return '/premium'
+  if (n.type === 'business') return '/business'
   return null
 }
 

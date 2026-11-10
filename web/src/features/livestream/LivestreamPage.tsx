@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { PremiumBadge } from '@/components/PremiumBadge'
 import { Ban, History, Loader2, Mic, MicOff, PhoneOff, RefreshCw, SwitchCamera, Video, VideoOff, Volume2, WifiOff, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import type * as React from 'react'
@@ -414,6 +415,7 @@ function LiveView({ stream, fetchedAt }: { stream: Livestream; fetchedAt: number
                   <Link to={`/users/${stream.host._id}`} className="font-semibold text-foreground hover:underline">
                     {stream.host.displayName}
                   </Link>{' '}
+                  <PremiumBadge user={stream.host} />{' '}
                   · {t('bắt đầu {time}', { time: relativeTime(stream.startedAt) })}
                   {audienceNote && ` · ${t(audienceNote)}`}
                   {stream.recording.status === 'recording' && ` · ${t('Đang được ghi lại')}`}
