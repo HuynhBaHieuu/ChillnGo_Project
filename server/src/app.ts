@@ -8,6 +8,7 @@ import { OPENAPI_SERVERS, apiIndex, buildOpenApi } from './lib/openapi.js'
 import { getSettings } from './models/Setting.js'
 import { activityRouter } from './routes/activity.js'
 import { adminRouter } from './routes/admin.js'
+import { catalogRouter } from './routes/adminCatalog.js'
 import { aiCloneRouter } from './routes/aiClone.js'
 import { assistantRouter } from './routes/assistant.js'
 import { authRouter } from './routes/auth.js'
@@ -70,6 +71,7 @@ app.use('/api', async (_req, _res, next) => {
 })
 
 app.use('/api/auth', authRouter)
+app.use('/api/admin/catalog', catalogRouter)
 app.use('/api/admin', adminRouter)
 // Public profiles and follows first; usersRouter (all sign-in only) takes the rest.
 app.use('/api/users', profilesRouter)
