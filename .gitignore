@@ -30,3 +30,6 @@ Thumbs.db
 
 # Playwright MCP snapshots, logs and screenshots
 .playwright-mcp/
+
+# News worker settings (holds the worker key)
+tools/news-worker/worker.env

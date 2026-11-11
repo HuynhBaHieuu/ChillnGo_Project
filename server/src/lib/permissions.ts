@@ -17,7 +17,7 @@
 export const ROLES = ['user', 'admin', 'superadmin'] as const
 export type Role = (typeof ROLES)[number]
 
-export const ADMIN_MODULES = ['users', 'content', 'reports', 'categories', 'stats', 'businesses', 'revenue'] as const
+export const ADMIN_MODULES = ['users', 'content', 'reports', 'categories', 'stats', 'businesses', 'revenue', 'news'] as const
 export type AdminModule = (typeof ADMIN_MODULES)[number]
 
 export function isStaff(role: string): boolean {

@@ -23,6 +23,7 @@ export const GUIDE_TOPICS = [
   'assistant',
   'premium',
   'business',
+  'news',
   'not_available',
 ] as const
 
@@ -45,13 +46,14 @@ export const GUIDE_INDEX: Record<GuideTopic, string> = {
   assistant: 'trợ lý AI làm được gì và không làm được gì',
   premium: 'gói Premium: giá, quyền lợi (lượt AI, livestream 1080p, giữ video xem lại, huy hiệu), cách mua bằng PayOS, gia hạn',
   business: 'tài khoản doanh nghiệp: đăng ký cơ sở (homestay, khách sạn, quán ăn, cà phê, tour), chờ duyệt, bài quảng cáo, gói Đề xuất ở trang Khám phá',
+  news: 'tin tức du lịch trên Newsfeed: tab Dành cho bạn / Đang theo dõi / Tin du lịch, lọc theo vùng, đọc bài gốc, lưu tin, báo cáo tin',
   not_available: 'những tính năng ChillnGo chưa có',
 }
 
 const GUIDE: Record<GuideTopic, string> = {
   overview: [
     'ChillnGo là mạng xã hội du lịch: mọi người kể lại chuyến đi thành hành trình theo từng ngày, từng điểm dừng kèm chi phí, và người khác có thể sao chép về làm lịch trình của mình.',
-    'Thanh điều hướng trên cùng: Khám phá (tìm hành trình), Newsfeed (bài mới từ người bạn theo dõi), Đang live (phát trực tiếp), Hành trình của tôi (bài bạn đăng và lịch trình đã sao chép), Về ChillnGo (trang giới thiệu).',
+    'Thanh điều hướng trên cùng: Khám phá (tìm hành trình), Newsfeed (bài mới từ người bạn theo dõi và tin du lịch), Đang live (phát trực tiếp), Hành trình của tôi (bài bạn đăng và lịch trình đã sao chép), Về ChillnGo (trang giới thiệu).',
     'Góc phải: chuông Thông báo và ảnh đại diện (mở menu Tài khoản: Đăng bài mới, Hoạt động của bạn, Chỉnh sửa hồ sơ, Đăng xuất).',
     'Trên điện thoại có thanh dưới cùng: Home (Newsfeed), Discover (Khám phá), nút + (đăng hành trình), Bookmarks (đã lưu), Profile (trang cá nhân).',
     'Nhiều trang xem được khi chưa đăng nhập (Khám phá, Newsfeed, bài viết, trang cá nhân); đăng bài, sao chép, check-in, livestream và trợ lý AI cần đăng nhập.',
@@ -116,7 +118,7 @@ const GUIDE: Record<GuideTopic, string> = {
     'Trên một hành trình: bấm trái tim để thích, "Bình luận" để viết hoặc trả lời bình luận, biểu tượng dấu trang ("Lưu bài viết") để lưu xem sau, "Dùng làm lịch trình của tôi" để sao chép.',
     'Bài đã lưu: trang cá nhân của bạn → tab "Đã lưu", hoặc Hoạt động của bạn → "Đã lưu" (chỉ mình bạn thấy).',
     'Theo dõi: mở trang cá nhân của một người → "Theo dõi" (bấm lại "Đang theo dõi" để bỏ).',
-    'Newsfeed: hành trình và check-in mới nhất từ bạn và những người bạn theo dõi (chưa đăng nhập thì xem bài mới nhất của mọi người).',
+    'Newsfeed có 3 tab: "Dành cho bạn" (hành trình và check-in của bạn và người bạn theo dõi, xen một tin du lịch sau mỗi 3 bài), "Đang theo dõi" (chỉ bài của người bạn theo dõi) và "Tin du lịch" (chỉ tin tức). Chưa đăng nhập thì xem bài mới nhất của mọi người.',
     'Thông báo (chuông ở góc phải): có người thích, bình luận, theo dõi, lưu hoặc sao chép bài của bạn, và khi người bạn theo dõi bắt đầu phát trực tiếp.',
   ].join('\n'),
 
@@ -173,6 +175,13 @@ const GUIDE: Record<GuideTopic, string> = {
     'Quản trị viên duyệt xong thì trang cơ sở hiện công khai ở địa chỉ /b/<tên-cơ-sở>. Nếu bị từ chối sẽ có lý do; sửa lại và gửi là được xét lại.',
     'Doanh nghiệp tự đăng bài quảng cáo (tiêu đề, nội dung, ảnh, ưu đãi) ở trang Doanh nghiệp của tôi; bài hiện trên trang cơ sở.',
     'Gói Đề xuất: 199.000đ cho 30 ngày, thanh toán bằng PayOS. Trong thời gian còn gói, thẻ cơ sở và các bài quảng cáo hiện ở mục "Gợi ý nổi bật" trên trang Khám phá, có nhãn "Tài trợ". Hết gói thì trang cơ sở vẫn còn, chỉ không được đề xuất.',
+  ].join('\n'),
+
+  news: [
+    'Newsfeed → tab "Tin du lịch": tin tức du lịch mới nhất ChillnGo tổng hợp từ báo điện tử, Google News, YouTube và mạng xã hội. Lọc theo vùng: Miền Bắc, Miền Trung, Miền Nam, Hải đảo, Nước ngoài. Bấm "Xem thêm tin" để tải thêm.',
+    'Mỗi tin có tiêu đề, đoạn tóm tắt 2–3 câu (AI viết), ảnh và nguồn. Bấm vào tin hoặc "Đọc bài gốc" để mở bài trên trang của nguồn. Tin không có bình luận hay lượt thích.',
+    'Bấm biểu tượng lưu để giữ tin; xem lại ở Hoạt động của bạn → Đã lưu → tab "Tin du lịch". Thấy tin sai hoặc không phù hợp thì bấm "…" → Báo cáo.',
+    'Quản trị viên có quyền Tin tức chọn nguồn tin và duyệt tin ở trang Quản trị → Tin tức. Người dùng thường không thêm nguồn tin được; muốn gợi ý nguồn thì liên hệ ChillnGo.',
   ].join('\n'),
 
   not_available: [

@@ -54,6 +54,7 @@ import { BUSINESS_STATUSES, Business } from '../models/Business.js'
 import { CheckIn } from '../models/CheckIn.js'
 import { countFollowsOf } from '../models/Follow.js'
 import { Livestream } from '../models/Livestream.js'
+import { NewsItem } from '../models/News.js'
 import { notify } from '../models/Notification.js'
 import { ORDER_STATUSES, Order } from '../models/Order.js'
 import { PostComment } from '../models/PostInteraction.js'
@@ -143,6 +144,7 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
 
   const seesReports = effectivePermissions(actor).includes('reports')
   const seesBusinesses = effectivePermissions(actor).includes('businesses')
+  const seesNews = effectivePermissions(actor).includes('news')
   const seesRevenue = effectivePermissions(actor).includes('revenue')
 
   const [total, verified, locked, googleLinked, new7, new30, byDay, byRole, adminActions7, pendingReports] =
@@ -186,7 +188,7 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
     return { date: key, count: counts.get(key) ?? 0 }
   })
 
-  const [pendingBusinesses, revenue] = await Promise.all([
+  const [pendingBusinesses, revenue, news] = await Promise.all([
     seesBusinesses ? Business.countDocuments({ status: 'pending' }) : Promise.resolve(null),
     seesRevenue
       ? Promise.all([
@@ -197,6 +199,12 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
           User.countDocuments({ premiumUntil: { $gt: new Date() } }),
         ]).then(([rows, premiumMembers]) => ({ revenue30: rows[0]?.revenue ?? 0, premiumMembers }))
       : Promise.resolve(null),
+    seesNews
+      ? Promise.all([
+          NewsItem.countDocuments({ status: 'published', createdAt: { $gte: new Date(now - DAY) } }),
+          NewsItem.countDocuments({ status: 'pending' }),
+        ]).then(([today, pending]) => ({ today, pending }))
+      : Promise.resolve(null),
   ])
 
   res.json({
@@ -206,6 +214,7 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
     signupsByDay,
     ...(pendingReports !== null && { pendingReports }),
     ...(pendingBusinesses !== null && { pendingBusinesses }),
+    ...(news !== null && { news }),
     ...(revenue !== null && { revenue }),
     ...(full && {
       byRole: Object.fromEntries(byRole.map((r) => [r._id, r.count])),
@@ -582,7 +591,7 @@ adminRouter.post('/reports/target/:targetType/:targetId/resolve', requirePermiss
 
   const postId = targetType === 'post' ? targetId : targetType === 'comment' ? (snapshot?.postId ?? undefined) : undefined
   const ownerMessage = OWNER_MESSAGES[action]
-  if (ownerMessage) await notify([ownerId], { type: 'moderation', actorId: null, message: ownerMessage, postId })
+  if (ownerMessage && !ownerId.startsWith('news:')) await notify([ownerId], { type: 'moderation', actorId: null, message: ownerMessage, postId })
   await notify([...new Set(pending.map((r) => r.reporterId))], {
     type: 'report_resolved',
     actorId: null,
