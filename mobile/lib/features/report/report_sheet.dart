@@ -35,6 +35,7 @@ Map<String, String> get reportTargetLabels => {
   'user': t('tài khoản'),
   'business': t('cơ sở kinh doanh'),
   'businessPost': t('bài quảng cáo'),
+  'news': t('tin du lịch'),
 };
 
 Map<String, String> get reportStatusLabels => {'pending': t('Chờ xử lý'), 'resolved': t('Đã xử lý'), 'dismissed': t('Bỏ qua')};

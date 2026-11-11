@@ -9,6 +9,7 @@ import '../../../core/photos.dart';
 import '../../../core/theme.dart';
 import '../../../data/api.dart';
 import '../../../data/services/checkin_service.dart';
+import '../../../data/services/news_service.dart';
 import '../../../data/services/post_service.dart';
 import '../../../state/providers.dart';
 import '../../../state/session.dart';
@@ -16,6 +17,7 @@ import '../../../ui/buttons.dart';
 import '../../../ui/fields.dart';
 import '../../../ui/sheets.dart';
 import '../../../ui/surfaces.dart';
+import '../../feed/news_card.dart';
 import '../../post/post_actions.dart';
 import '../activity_common.dart';
 import '../../../core/i18n.dart';
@@ -287,28 +289,71 @@ class SavedSection extends StatefulWidget {
 }
 
 class _SavedSectionState extends State<SavedSection> {
-  late String _tab = widget.initialTab == 'places' ? 'places' : 'journeys';
+  late String _tab = const ['places', 'news'].contains(widget.initialTab) ? widget.initialTab! : 'journeys';
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionIntro(title: t('Đã lưu'), description: t('Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')),
+        SectionIntro(title: t('Đã lưu'), description: t('Những hành trình và tin du lịch bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')),
         const SizedBox(height: 16),
         SegmentTabs<String>(
-          items: [(value: 'journeys', label: t('Hành trình'), count: null), (value: 'places', label: t('Địa điểm'), count: null)],
+          items: [
+            (value: 'journeys', label: t('Hành trình'), count: null),
+            (value: 'news', label: t('Tin du lịch'), count: null),
+            (value: 'places', label: t('Địa điểm'), count: null),
+          ],
           value: _tab,
           onChanged: (t) => setState(() => _tab = t),
         ),
         const SizedBox(height: 16),
         if (_tab == 'journeys')
           const _SavedJourneys()
+        else if (_tab == 'news')
+          const _SavedNews()
         else
           NotAvailable(
             icon: LucideIcons.mapPin,
             feature: t('tính năng lưu địa điểm'),
             description: t('Tính năng lưu từng địa điểm sắp có. Hiện tại, hãy lưu hành trình có địa điểm đó.'),
+          ),
+      ],
+    );
+  }
+}
+
+/// News saved from the Newsfeed; unsaving one removes it from here.
+final savedNewsProvider = FutureProvider.autoDispose<List<NewsItem>>((ref) {
+  ref.watch(viewerIdProvider);
+  return NewsService.saved();
+});
+
+class _SavedNews extends ConsumerWidget {
+  const _SavedNews();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final saved = ref.watch(savedNewsProvider);
+    if (saved.isLoading && !saved.hasValue) return const ListSkeleton(rows: 4);
+    if (saved.hasError && !saved.hasValue) return ErrorPanel(error: saved.error, onRetry: () => ref.invalidate(savedNewsProvider));
+    final list = saved.value!;
+    if (list.isEmpty) {
+      return EmptyState(
+        icon: LucideIcons.newspaper,
+        title: t('Chưa lưu tin nào'),
+        description: t('Bấm biểu tượng lưu ở một tin du lịch trên Newsfeed để giữ nó ở đây đọc sau.'),
+        action: AppButton(label: t('Xem tin du lịch'), variant: ButtonVariant.outline, size: ButtonSize.sm, onPressed: () => context.go('/feed')),
+      );
+    }
+    return Column(
+      children: [
+        for (final item in list)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: NewsCard(item: item, compact: true, onSavedChanged: (now) {
+              if (!now) ref.invalidate(savedNewsProvider);
+            }),
           ),
       ],
     );

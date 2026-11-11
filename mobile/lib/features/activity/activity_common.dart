@@ -85,7 +85,7 @@ List<({String slug, String label, String hint, IconData icon})> get activitySect
   (slug: 'search-history', label: t('Lịch sử tìm kiếm'), hint: t('Những gì bạn đã tìm'), icon: LucideIcons.search),
   (slug: 'account-history', label: t('Lịch sử tài khoản'), hint: t('Các thay đổi trên tài khoản'), icon: LucideIcons.clock),
   (slug: 'recently-deleted', label: t('Đã xoá gần đây'), hint: t('Khôi phục trong 30 ngày'), icon: LucideIcons.trash),
-  (slug: 'saved', label: t('Đã lưu'), hint: t('Hành trình bạn đã lưu'), icon: LucideIcons.bookmark),
+  (slug: 'saved', label: t('Đã lưu'), hint: t('Hành trình và tin du lịch đã lưu'), icon: LucideIcons.bookmark),
 ];
 
 class SectionIntro extends StatelessWidget {

@@ -5,7 +5,7 @@ library;
 import '../data/models.dart';
 import '../core/i18n.dart';
 
-const adminModules = ['users', 'content', 'reports', 'categories', 'stats', 'businesses', 'revenue'];
+const adminModules = ['users', 'content', 'reports', 'categories', 'stats', 'businesses', 'revenue', 'news'];
 
 Map<String, String> get roleLabels => {'user': t('Người dùng'), 'admin': 'Admin', 'superadmin': 'Super Admin'};
 
@@ -17,6 +17,7 @@ Map<String, (String, String)> get moduleLabels => {
   'stats': (t('Thống kê'), t('Xem số liệu người dùng trong phạm vi được cấp')),
   'businesses': (t('Doanh nghiệp'), t('Duyệt, từ chối và ẩn trang cơ sở kinh doanh')),
   'revenue': (t('Doanh thu'), t('Xem đơn hàng, doanh thu và số thành viên Premium')),
+  'news': (t('Tin tức'), t('Chọn nguồn tin, duyệt và ẩn tin du lịch trên Newsfeed')),
 };
 
 bool isStaff(User? user) => user?.role == 'admin' || user?.role == 'superadmin';

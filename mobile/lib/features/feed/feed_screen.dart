@@ -3,18 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../core/feed_mix.dart';
+import '../../core/labels.dart';
 import '../../core/theme.dart';
 import '../../data/models.dart';
 import '../../data/server_posts.dart';
 import '../../data/services/livestream_service.dart';
+import '../../data/services/news_service.dart';
 import '../../state/providers.dart';
 import '../../state/session.dart';
 import '../../ui/buttons.dart';
+import '../../ui/paged_list.dart';
 import '../../ui/surfaces.dart';
 import '../checkin/checkin_card.dart';
 import '../livestream/live_cards.dart';
 import '../post/trip_card.dart';
 import '../shell/tab_header.dart';
+import 'news_card.dart';
 import '../../core/i18n.dart';
 
 /// Recorded streams that are over, for the Newsfeed (comma-joined authors, '' for everyone).
@@ -46,33 +51,59 @@ class _ReplayItem extends _FeedItem {
   final Livestream stream;
 }
 
-/// Newsfeed: journeys, photo check-ins and recorded livestreams, newest first.
+/// The first page of travel news, mixed into "Dành cho bạn".
+final feedNewsProvider = FutureProvider<CursorPage<NewsItem>>((ref) {
+  ref.watch(viewerIdProvider);
+  return NewsService.list();
+});
+
+/// Newsfeed, in three tabs (web: FeedPage):
+///   Dành cho bạn   journeys, check-ins and replays, one news item every three
+///   Đang theo dõi  the same timeline without news
+///   Tin du lịch    news only, by region, a page at a time
 /// Signed in: yours and the people you follow. Signed out: everyone's.
-class FeedScreen extends ConsumerWidget {
+class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends ConsumerState<FeedScreen> {
+  var _tab = 'for-you';
+  String? _region;
+  var _newsGeneration = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(sessionProvider.select((s) => s.user));
     final viewerId = user?.id;
     final following = ref.watch(followingIdsProvider);
     final ready = viewerId == null || following.hasValue || following.hasError;
     final authorsKey = viewerId == null ? '' : [viewerId, ...(following.value ?? const <String>[])].join(',');
+    final isNews = _tab == 'news';
 
     final posts = ref.watch(feedProvider);
     final checkins = ready ? ref.watch(checkinsProvider(authorsKey)) : const AsyncLoading<List<CheckIn>>();
     final live = ready ? ref.watch(liveByAuthorsProvider(authorsKey)) : const AsyncLoading<List<Livestream>>();
     final replays = ready ? ref.watch(_feedReplaysProvider(authorsKey)) : const AsyncLoading<CursorPage<Livestream>>();
+    // News that fails to load (API down) leaves the timeline as it was.
+    final news = _tab == 'for-you' ? (ref.watch(feedNewsProvider).value?.items ?? const <NewsItem>[]) : const <NewsItem>[];
 
-    final items = <_FeedItem>[
+    final timeline = <_FeedItem>[
       ...(posts.value ?? const <TripPost>[]).map(_PostItem.new),
       // A check-in or replay list that fails to load (API down) must not hide the journeys.
       ...(checkins.value ?? const <CheckIn>[]).map(_CheckInItem.new),
       ...(replays.value?.items ?? const <Livestream>[]).map(_ReplayItem.new),
     ]..sort((a, b) => b.at.compareTo(a.at));
+    final items = interleave(timeline, news);
     final liveNow = live.value ?? const <Livestream>[];
 
     Future<void> refresh() async {
+      if (isNews) {
+        setState(() => _newsGeneration++);
+        return;
+      }
       invalidateServerPosts();
       ref.invalidate(followingIdsProvider);
       ref.invalidate(feedProvider);
@@ -80,6 +111,7 @@ class FeedScreen extends ConsumerWidget {
       ref.invalidate(liveByAuthorsProvider);
       ref.invalidate(_feedReplaysProvider);
       ref.invalidate(liveNowProvider);
+      ref.invalidate(feedNewsProvider);
       await ref.read(feedProvider.future).catchError((_) => <TripPost>[]);
     }
 
@@ -104,9 +136,11 @@ class FeedScreen extends ConsumerWidget {
                         Text('Newsfeed', style: AppText.hero),
                         const SizedBox(height: 8),
                         Text(
-                          user != null
-                              ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.')
-                              : t('Những hành trình và check-in mới nhất trên ChillnGo. Đăng nhập để chỉ xem người bạn theo dõi.'),
+                          isNews
+                              ? t('Tin tức du lịch mới nhất, ChillnGo tổng hợp và tóm tắt từ báo chí, YouTube và mạng xã hội.')
+                              : user != null
+                              ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi, kèm tin du lịch mới.')
+                              : t('Những hành trình và check-in mới nhất trên ChillnGo, kèm tin du lịch mới. Đăng nhập để chỉ xem người bạn theo dõi.'),
                           style: AppText.meta,
                         ),
                         const SizedBox(height: 14),
@@ -114,24 +148,66 @@ class FeedScreen extends ConsumerWidget {
                           alignment: Alignment.centerLeft,
                           child: AppButton(label: t('Khám phá thêm'), icon: LucideIcons.compass, onPressed: () => context.go('/discover')),
                         ),
-                        const SizedBox(height: 22),
-                        if (user != null) ...[PostComposer(user: user), const SizedBox(height: 16)],
-                        const LiveNowStrip(),
-                        if ((ref.watch(liveNowProvider).value ?? const []).isNotEmpty) const SizedBox(height: 16),
-                        for (var i = 0; i < liveNow.length; i++) ...[LivestreamCard(stream: liveNow[i], preview: i == 0), const SizedBox(height: 16)],
-                        if (posts.isLoading && !posts.hasValue) ...[const TripCardSkeleton(), const SizedBox(height: 16), const TripCardSkeleton()],
-                        if (posts.hasError && !posts.hasValue) ErrorPanel(error: posts.error, onRetry: () => ref.invalidate(feedProvider)),
-                        if (posts.hasValue && items.isEmpty && liveNow.isEmpty)
-                          EmptyState(
-                            icon: LucideIcons.users,
-                            title: t('Newsfeed đang trống'),
-                            description: t('Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá.'),
-                            action: AppButton(label: t('Khám phá hành trình'), onPressed: () => context.go('/discover')),
+                        const SizedBox(height: 18),
+                        SegmentTabs<String>(
+                          items: [
+                            (value: 'for-you', label: t('Dành cho bạn'), count: null),
+                            (value: 'following', label: t('Đang theo dõi'), count: null),
+                            (value: 'news', label: t('Tin du lịch'), count: null),
+                          ],
+                          value: _tab,
+                          onChanged: (tab) => setState(() => _tab = tab),
+                        ),
+                        const SizedBox(height: 18),
+                        if (isNews) ...[
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              AppChip(label: t('Tất cả'), selected: _region == null, onTap: () => setState(() => _region = null)),
+                              for (final r in regions) AppChip(label: regionLabel(r), selected: _region == r, onTap: () => setState(() => _region = r)),
+                            ],
                           ),
+                          const SizedBox(height: 16),
+                        ] else ...[
+                          if (user != null) ...[PostComposer(user: user), const SizedBox(height: 16)],
+                          const LiveNowStrip(),
+                          if ((ref.watch(liveNowProvider).value ?? const []).isNotEmpty) const SizedBox(height: 16),
+                          for (var i = 0; i < liveNow.length; i++) ...[LivestreamCard(stream: liveNow[i], preview: i == 0), const SizedBox(height: 16)],
+                          if (posts.isLoading && !posts.hasValue) ...[const TripCardSkeleton(), const SizedBox(height: 16), const TripCardSkeleton()],
+                          if (posts.hasError && !posts.hasValue) ErrorPanel(error: posts.error, onRetry: () => ref.invalidate(feedProvider)),
+                          if (posts.hasValue && items.isEmpty && liveNow.isEmpty)
+                            EmptyState(
+                              icon: LucideIcons.users,
+                              title: t('Newsfeed đang trống'),
+                              description: t(
+                                'Bạn chưa theo dõi ai, hoặc những người bạn theo dõi chưa đăng gì. Hãy check-in chuyến đi của bạn, hoặc tìm vài người đi cùng gu ở trang Khám phá.',
+                              ),
+                              action: AppButton(label: t('Khám phá hành trình'), onPressed: () => context.go('/discover')),
+                            ),
+                        ],
                       ],
                     ),
                   ),
-                  if (posts.hasValue)
+                  if (isNews)
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 32),
+                      sliver: SliverToBoxAdapter(
+                        child: PagedList<NewsItem>(
+                          pageKey: '${_region ?? 'all'}-$_newsGeneration-$viewerId',
+                          load: (before) => NewsService.list(region: _region, before: before),
+                          itemBuilder: (context, item) => NewsCard(item: item),
+                          empty: EmptyState(
+                            icon: LucideIcons.newspaper,
+                            title: t('Chưa có tin du lịch'),
+                            description: _region != null
+                                ? t('Chưa có tin nào cho vùng này. Thử chọn vùng khác.')
+                                : t('Tin du lịch mới sẽ xuất hiện ở đây khi ChillnGo cập nhật từ các nguồn.'),
+                          ),
+                        ),
+                      ),
+                    )
+                  else if (posts.hasValue)
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(kGutter, 0, kGutter, 32),
                       sliver: SliverList.separated(
@@ -141,6 +217,8 @@ class FeedScreen extends ConsumerWidget {
                           _PostItem(:final post) => TripCard(post: post),
                           _CheckInItem(:final checkin) => CheckInCard(checkin: checkin, viewerId: viewerId),
                           _ReplayItem(:final stream) => ReplayCard(stream: stream, showHost: true),
+                          final NewsItem item => NewsCard(item: item),
+                          _ => const SizedBox.shrink(),
                         },
                       ),
                     ),

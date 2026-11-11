@@ -76,6 +76,36 @@ class StatsPanel extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
         ],
+        if (s.newsToday != null) ...[
+          AppCard(
+            onTap: () => context.go('/admin/news'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Tin mới hôm nay'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatNumber(s.newsToday!), style: AppText.h2),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('Tin chờ duyệt'), style: AppText.meta.copyWith(fontSize: 12)),
+                      const SizedBox(height: 6),
+                      Text(formatNumber(s.newsPending ?? 0), style: AppText.h2),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (s.revenue30 != null) ...[
           AppCard(
             onTap: () => context.go('/admin/revenue'),
