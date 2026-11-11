@@ -1,5 +1,7 @@
 import {
   BarChart3,
+  Banknote,
+  Building2,
   ClipboardList,
   Flag,
   MapPinned,
@@ -18,9 +20,11 @@ import type { User } from '@/services/types'
 
 import { AdminsPanel } from './AdminsPanel'
 import { AuditLogPanel } from './AuditLogPanel'
+import { BusinessesPanel } from './BusinessesPanel'
 import { HiddenContentPanel } from './HiddenContentPanel'
 import { LiveStreamsPanel } from './LiveStreamsPanel'
 import { ReportsPanel } from './ReportsPanel'
+import { RevenuePanel } from './RevenuePanel'
 import { SettingsPanel } from './SettingsPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsersTable } from './UsersTable'
@@ -120,6 +124,24 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     icon: MapPinned,
     allowed: (user) => hasModule(user, 'categories'),
     render: ({ onNotice }) => <CatalogPanel onNotice={onNotice} />,
+  },
+  {
+    path: 'businesses',
+    label: 'Doanh nghiệp',
+    title: 'Duyệt doanh nghiệp',
+    description: () => t('Hồ sơ homestay, khách sạn, quán ăn, cà phê và tour: duyệt, từ chối kèm lý do, ẩn hoặc hiển thị lại.'),
+    icon: Building2,
+    allowed: (user) => hasModule(user, 'businesses'),
+    render: ({ onNotice }) => <BusinessesPanel onNotice={onNotice} />,
+  },
+  {
+    path: 'revenue',
+    label: 'Doanh thu',
+    title: 'Doanh thu',
+    description: () => t('Đơn hàng thanh toán qua PayOS: gói Premium và gói Đề xuất của doanh nghiệp.'),
+    icon: Banknote,
+    allowed: (user) => hasModule(user, 'revenue'),
+    render: () => <RevenuePanel />,
   },
   {
     path: 'audit',

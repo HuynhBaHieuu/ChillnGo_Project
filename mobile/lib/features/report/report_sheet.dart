@@ -28,7 +28,14 @@ Map<String, String> get reportReasonLabels => {
 };
 
 /// "Báo cáo {thing}".
-Map<String, String> get reportTargetLabels => {'post': t('hành trình'), 'comment': t('bình luận'), 'checkin': t('check-in'), 'user': t('tài khoản')};
+Map<String, String> get reportTargetLabels => {
+  'post': t('hành trình'),
+  'comment': t('bình luận'),
+  'checkin': t('check-in'),
+  'user': t('tài khoản'),
+  'business': t('cơ sở kinh doanh'),
+  'businessPost': t('bài quảng cáo'),
+};
 
 Map<String, String> get reportStatusLabels => {'pending': t('Chờ xử lý'), 'resolved': t('Đã xử lý'), 'dismissed': t('Bỏ qua')};
 

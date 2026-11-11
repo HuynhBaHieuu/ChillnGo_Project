@@ -15,6 +15,7 @@ import '../../ui/fields.dart';
 import '../../ui/surfaces.dart';
 import '../report/report_sheet.dart';
 import '../../core/i18n.dart';
+import '../../ui/premium_badge.dart';
 
 /// Comments under a journey, one level of replies (web: CommentSection).
 class CommentSection extends ConsumerStatefulWidget {
@@ -233,6 +234,11 @@ class _CommentItem extends StatelessWidget {
                             text: author.displayName,
                             style: AppText.bodySmall.copyWith(fontWeight: FontWeight.w700, color: AppColors.cream),
                           ),
+                          if (author.isPremium)
+                            const WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Padding(padding: EdgeInsets.only(left: 5), child: PremiumBadge(show: true, size: 10)),
+                            ),
                           TextSpan(text: '  ${relativeTime(thread.comment.createdAt)}', style: AppText.meta),
                         ],
                       ),

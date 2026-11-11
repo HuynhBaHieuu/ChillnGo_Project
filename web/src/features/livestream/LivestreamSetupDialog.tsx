@@ -3,7 +3,7 @@ import { Loader2, Mic, MicOff, Radio, VideoOff } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type * as React from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -316,6 +316,19 @@ function SetupForm({ user, onDone }: { user: User; onDone: () => void }) {
             </span>
           </span>
         </label>
+      )}
+
+      {config.data?.quality && (
+        <p className="text-xs text-muted-foreground">
+          {config.data.quality === '1080p'
+            ? t('Premium: phát 1080p, video xem lại được giữ 365 ngày.')
+            : t('Gói miễn phí: phát 720p, video xem lại được giữ 30 ngày.')}{' '}
+          {config.data.quality !== '1080p' && (
+            <Link to="/premium" className="font-semibold underline">
+              {t('Nâng cấp Premium')}
+            </Link>
+          )}
+        </p>
       )}
 
       {startError && (

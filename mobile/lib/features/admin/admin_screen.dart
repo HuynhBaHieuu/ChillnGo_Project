@@ -14,6 +14,7 @@ import 'admin_common.dart';
 import 'admin_panels.dart';
 import 'catalog_panel.dart';
 import '../../core/i18n.dart';
+import 'business_panels.dart';
 
 class _Section {
   const _Section({required this.path, required this.label, required this.title, required this.description, required this.icon, required this.allowed});
@@ -63,6 +64,22 @@ List<_Section> get _sections => [
     description: (_) => t('Báo cáo vi phạm từ người dùng: xem xét, ẩn, gỡ nội dung hoặc khoá tài khoản vi phạm. Xem và hiện lại những gì đang bị ẩn, dừng livestream vi phạm.'),
     icon: LucideIcons.flag,
     allowed: contentAllowed,
+  ),
+  _Section(
+    path: 'businesses',
+    label: t('Doanh nghiệp'),
+    title: t('Duyệt doanh nghiệp'),
+    description: (_) => t('Hồ sơ homestay, khách sạn, quán ăn, cà phê và tour: duyệt, từ chối kèm lý do, ẩn hoặc hiển thị lại.'),
+    icon: LucideIcons.building2,
+    allowed: (user) => hasModule(user, 'businesses'),
+  ),
+  _Section(
+    path: 'revenue',
+    label: t('Doanh thu'),
+    title: t('Doanh thu'),
+    description: (_) => t('Đơn hàng thanh toán qua PayOS: gói Premium và gói Đề xuất của doanh nghiệp.'),
+    icon: LucideIcons.banknote,
+    allowed: (user) => hasModule(user, 'revenue'),
   ),
   _Section(
     path: 'catalog',
@@ -209,6 +226,8 @@ class AdminScreen extends ConsumerWidget {
                         'users' => UsersPanel(actor: user),
                         'admins' => AdminsPanel(actor: user),
                         'content' => ContentPanel(actor: user),
+                        'businesses' => const BusinessesPanel(),
+                        'revenue' => const RevenuePanel(),
                         'catalog' => const CatalogPanel(),
                         'audit' => const AuditPanel(),
                         _ => const SettingsPanel(),

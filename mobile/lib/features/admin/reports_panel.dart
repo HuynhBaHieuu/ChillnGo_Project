@@ -18,7 +18,7 @@ import 'admin_common.dart';
 import 'admin_panels.dart';
 
 const _statuses = ['pending', 'resolved', 'dismissed'];
-const _types = ['post', 'comment', 'checkin', 'user'];
+const _types = ['post', 'comment', 'checkin', 'user', 'business', 'businessPost'];
 const _all = 'all';
 
 /// The decisions, in the order they are offered (web: ACTION_META).

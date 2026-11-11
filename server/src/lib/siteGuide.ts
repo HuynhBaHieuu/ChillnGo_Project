@@ -21,6 +21,8 @@ export const GUIDE_TOPICS = [
   'profile',
   'activity',
   'assistant',
+  'premium',
+  'business',
   'not_available',
 ] as const
 
@@ -41,6 +43,8 @@ export const GUIDE_INDEX: Record<GuideTopic, string> = {
   profile: 'trang cá nhân và chỉnh sửa hồ sơ',
   activity: 'trang Hoạt động của bạn: tương tác, ảnh và video, bản nháp, lịch sử, đã xoá, đã lưu',
   assistant: 'trợ lý AI làm được gì và không làm được gì',
+  premium: 'gói Premium: giá, quyền lợi (lượt AI, livestream 1080p, giữ video xem lại, huy hiệu), cách mua bằng PayOS, gia hạn',
+  business: 'tài khoản doanh nghiệp: đăng ký cơ sở (homestay, khách sạn, quán ăn, cà phê, tour), chờ duyệt, bài quảng cáo, gói Đề xuất ở trang Khám phá',
   not_available: 'những tính năng ChillnGo chưa có',
 }
 
@@ -156,8 +160,23 @@ const GUIDE: Record<GuideTopic, string> = {
     'Cuộc trò chuyện không được lưu trên máy chủ: tải lại trang là bắt đầu lại. Mỗi phút hỏi được tối đa 10 câu.',
   ].join('\n'),
 
+  premium: [
+    'Gói Miễn phí: 10 lượt AI mỗi ngày (mỗi lần tạo hành trình bằng AI hoặc mỗi tin nhắn chat sửa bản nháp dùng 1 lượt), livestream 720p, video xem lại được giữ 30 ngày.',
+    'Gói Premium: 100 lượt AI mỗi ngày, livestream 1080p, video xem lại được giữ 365 ngày, huy hiệu vương miện cạnh tên. Giá 49.000đ cho 30 ngày hoặc 490.000đ cho 365 ngày.',
+    'Cách mua: menu Tài khoản → "ChillnGo Premium" (hoặc trang /premium) → chọn gói → "Thanh toán" → quét mã VietQR trên trang PayOS bằng app ngân hàng. Thanh toán xong ChillnGo tự kích hoạt và gửi thông báo.',
+    'Không tự động gia hạn: muốn dùng tiếp thì mua thêm, số ngày được cộng dồn vào thời gian còn lại. Còn 3 ngày sẽ có thông báo nhắc. Lịch sử đơn hàng xem ở trang Premium.',
+    'Thời hạn giữ video tính theo gói của người phát lúc video xem lại sẵn sàng.',
+  ].join('\n'),
+
+  business: [
+    'Homestay, khách sạn, quán ăn, quán cà phê hoặc tour có thể mở trang cơ sở: menu Tài khoản → "Doanh nghiệp của tôi" (trang /business) → điền tên, loại hình, địa chỉ, số điện thoại, ảnh, mô tả, khoảng giá, giờ mở cửa → gửi duyệt. Mỗi tài khoản có một cơ sở.',
+    'Quản trị viên duyệt xong thì trang cơ sở hiện công khai ở địa chỉ /b/<tên-cơ-sở>. Nếu bị từ chối sẽ có lý do; sửa lại và gửi là được xét lại.',
+    'Doanh nghiệp tự đăng bài quảng cáo (tiêu đề, nội dung, ảnh, ưu đãi) ở trang Doanh nghiệp của tôi; bài hiện trên trang cơ sở.',
+    'Gói Đề xuất: 199.000đ cho 30 ngày, thanh toán bằng PayOS. Trong thời gian còn gói, thẻ cơ sở và các bài quảng cáo hiện ở mục "Gợi ý nổi bật" trên trang Khám phá, có nhãn "Tài trợ". Hết gói thì trang cơ sở vẫn còn, chỉ không được đề xuất.',
+  ].join('\n'),
+
   not_available: [
-    'ChillnGo hiện CHƯA có: đặt vé máy bay/tàu xe, đặt phòng khách sạn, thanh toán hay mua tour; nhắn tin riêng giữa người dùng; tin (story); chia sẻ lại bài (repost); đánh giá/chấm điểm địa điểm; lưu riêng từng địa điểm (chỉ lưu được cả hành trình); đổi mật khẩu hoặc quên mật khẩu trong giao diện; ứng dụng ngoại tuyến; đổi ngôn ngữ giao diện.',
+    'ChillnGo hiện CHƯA có: đặt vé máy bay/tàu xe, đặt phòng khách sạn hay mua tour qua ChillnGo (chỉ thanh toán gói Premium và gói Đề xuất); nhắn tin riêng giữa người dùng; tin (story); chia sẻ lại bài (repost); đánh giá/chấm điểm địa điểm; lưu riêng từng địa điểm (chỉ lưu được cả hành trình); ứng dụng ngoại tuyến.',
     'Hành trình không lưu giờ khởi hành hay giờ đến cụ thể: chỉ có ngày, thứ tự điểm dừng, phương tiện, và quãng đường/thời gian di chuyển ước tính giữa các điểm khi có.',
     'Chi phí trong hành trình là ước tính do tác giả tự nhập, không phải giá niêm yết.',
   ].join('\n'),

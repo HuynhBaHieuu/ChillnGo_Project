@@ -1,11 +1,13 @@
 import { Schema, model } from 'mongoose'
 
-import { env } from '../env.js'
 import { HttpError } from '../lib/errors.js'
+import { aiDailyLimitFor } from '../lib/plans.js'
+import { User } from './User.js'
 
 /**
  * How many AI requests (an AI clone, a chat message) each user made per day,
  * so one person cannot spend the whole model quota. Days are Vietnam days.
+ * The allowance depends on the plan: more for Premium (lib/plans.ts).
  */
 const aiUsageSchema = new Schema(
   {
@@ -27,18 +29,25 @@ function today(): string {
   return new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10)
 }
 
+/** AI requests this account may make per day: its plan's allowance. */
+export async function aiDailyLimitOf(userId: string): Promise<number> {
+  const user = await User.findById(userId).select('premiumUntil').lean()
+  return aiDailyLimitFor(user)
+}
+
 export async function aiCallsLeft(userId: string): Promise<number> {
-  const usage = await AiUsage.findOne({ userId, day: today() }).lean()
-  return Math.max(0, env.aiDailyLimit - (usage?.count ?? 0))
+  const [usage, limit] = await Promise.all([AiUsage.findOne({ userId, day: today() }).lean(), aiDailyLimitOf(userId)])
+  return Math.max(0, limit - (usage?.count ?? 0))
 }
 
 /** Uses up one of today's AI requests, or answers 429 when none are left. */
 export async function takeAiCall(userId: string): Promise<void> {
+  const limit = await aiDailyLimitOf(userId)
   try {
     // Only matches while under the limit; at the limit the upsert collides with
     // today's row on the unique index instead of creating a second one.
     await AiUsage.findOneAndUpdate(
-      { userId, day: today(), count: { $lt: env.aiDailyLimit } },
+      { userId, day: today(), count: { $lt: limit } },
       { $inc: { count: 1 } },
       { upsert: true },
     )
@@ -46,7 +55,7 @@ export async function takeAiCall(userId: string): Promise<void> {
     if ((error as { code?: number }).code !== 11000) throw error
     throw new HttpError(
       429,
-      `Bạn đã dùng hết ${env.aiDailyLimit} lượt AI hôm nay. Hãy quay lại vào ngày mai nhé.`,
+      `Bạn đã dùng hết ${limit} lượt AI hôm nay. Hãy quay lại vào ngày mai hoặc nâng cấp Premium để có thêm lượt.`,
       'AI_DAILY_LIMIT',
     )
   }

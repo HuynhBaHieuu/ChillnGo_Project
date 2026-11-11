@@ -33,6 +33,7 @@ import { z } from 'zod'
 
 import { destroyImages, ownPostCoverId, signPostCoverUpload } from '../lib/cloudinary.js'
 import { MAX_COMPANIONS, visibleCompanions } from '../lib/companions.js'
+import { isPremium } from '../lib/plans.js'
 import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { purgeAt, restoreCutoff } from '../lib/retention.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
@@ -231,7 +232,7 @@ async function authorsOf(posts: TripPostDocument[], viewerId: string | undefined
     ...new Set(posts.flatMap((p) => [p.authorId, ...visibleCompanions(p.companions, p.authorId, viewerId).map((c) => c.userId)])),
   ]
   const users = await User.find({ _id: { $in: ids } })
-    .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount createdAt')
+    .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount premiumUntil createdAt')
     .lean()
   return users.map((u) => ({
     _id: u._id,
@@ -246,6 +247,7 @@ async function authorsOf(posts: TripPostDocument[], viewerId: string | undefined
     followingCount: u.followingCount,
     postCount: u.postCount,
     role: 'user' as const,
+    isPremium: isPremium(u),
     createdAt: (u as unknown as { createdAt: Date }).createdAt.toISOString(),
   }))
 }
@@ -458,7 +460,7 @@ postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {
   const comments = all.filter((c) => canSee(c) && (!c.parentId || rootVisible.get(c.parentId) === true))
 
   const authors = await User.find({ _id: { $in: [...new Set(comments.map((c) => c.authorId))] } })
-    .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount createdAt')
+    .select('username displayName avatarUrl coverUrl bio location followerCount followingCount postCount premiumUntil createdAt')
     .lean()
   res.json({
     items: comments.map((c) => ({
@@ -486,6 +488,7 @@ postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {
       followingCount: u.followingCount,
       postCount: u.postCount,
       role: 'user' as const,
+      isPremium: isPremium(u),
       createdAt: (u as unknown as { createdAt: Date }).createdAt.toISOString(),
     })),
   })

@@ -19,9 +19,12 @@ import { tempPasswordMessage } from '../emails/tempPassword.js'
 import { env } from '../env.js'
 import { lockAccount } from '../lib/accountLock.js'
 import { audit } from '../lib/audit.js'
+import { orderView } from '../lib/billing.js'
+import { businessView, reviewSchema } from '../lib/businesses.js'
 import { HttpError, duplicateKeyField } from '../lib/errors.js'
 import { sendMail } from '../lib/mailer.js'
 import { ADMIN_MODULES, canManageAccount, effectivePermissions } from '../lib/permissions.js'
+import { PRODUCTS, PRODUCT_IDS } from '../lib/plans.js'
 import { findTarget, hideTarget, removeTarget, unhideTarget } from '../lib/reportTargets.js'
 import type { ReportTarget, TargetSnapshot } from '../lib/reportTargets.js'
 import {
@@ -47,10 +50,12 @@ import {
 import { AiDraft } from '../models/AiDraft.js'
 import { AiUsage } from '../models/AiUsage.js'
 import { AuditLog } from '../models/AuditLog.js'
+import { BUSINESS_STATUSES, Business } from '../models/Business.js'
 import { CheckIn } from '../models/CheckIn.js'
 import { countFollowsOf } from '../models/Follow.js'
 import { Livestream } from '../models/Livestream.js'
 import { notify } from '../models/Notification.js'
+import { ORDER_STATUSES, Order } from '../models/Order.js'
 import { PostComment } from '../models/PostInteraction.js'
 import { Report } from '../models/Report.js'
 import { getSettings, Setting } from '../models/Setting.js'
@@ -137,6 +142,8 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
   since30.setHours(0, 0, 0, 0)
 
   const seesReports = effectivePermissions(actor).includes('reports')
+  const seesBusinesses = effectivePermissions(actor).includes('businesses')
+  const seesRevenue = effectivePermissions(actor).includes('revenue')
 
   const [total, verified, locked, googleLinked, new7, new30, byDay, byRole, adminActions7, pendingReports] =
     await Promise.all([
@@ -179,12 +186,27 @@ adminRouter.get('/stats', requirePermission('stats'), async (_req, res) => {
     return { date: key, count: counts.get(key) ?? 0 }
   })
 
+  const [pendingBusinesses, revenue] = await Promise.all([
+    seesBusinesses ? Business.countDocuments({ status: 'pending' }) : Promise.resolve(null),
+    seesRevenue
+      ? Promise.all([
+          Order.aggregate<{ revenue: number }>([
+            { $match: { status: 'paid', paidAt: { $gte: since30 } } },
+            { $group: { _id: null, revenue: { $sum: '$amount' } } },
+          ]),
+          User.countDocuments({ premiumUntil: { $gt: new Date() } }),
+        ]).then(([rows, premiumMembers]) => ({ revenue30: rows[0]?.revenue ?? 0, premiumMembers }))
+      : Promise.resolve(null),
+  ])
+
   res.json({
     scope: full ? 'full' : 'users',
     users: { total, verified, locked, googleLinked, new7, new30 },
     content: await contentStats(new Date(now - 7 * DAY), since30),
     signupsByDay,
     ...(pendingReports !== null && { pendingReports }),
+    ...(pendingBusinesses !== null && { pendingBusinesses }),
+    ...(revenue !== null && { revenue }),
     ...(full && {
       byRole: Object.fromEntries(byRole.map((r) => [r._id, r.count])),
       adminActions7,
@@ -667,6 +689,157 @@ adminRouter.post('/moderation/:targetType/:targetId/unhide', requirePermission('
     { previousAction: target.action },
   )
   res.json({ ok: true })
+})
+
+/* ------------------------------------------------------------- businesses */
+
+const businessListSchema = z.object({
+  status: z.enum(BUSINESS_STATUSES).optional().catch(undefined),
+  q: z.string().trim().max(100).optional().catch(undefined),
+  page: pageSchema,
+})
+
+/** GET /api/admin/businesses?status&q&page — business pages, oldest waiting first when filtered to "pending". */
+adminRouter.get('/businesses', requirePermission('businesses'), async (req, res) => {
+  const query = businessListSchema.parse(req.query)
+  const filter: Record<string, unknown> = {}
+  if (query.status) filter.status = query.status
+  if (query.q) {
+    const pattern = new RegExp(escapeRegex(query.q), 'i')
+    filter.$or = [{ name: pattern }, { address: pattern }, { city: pattern }, { phone: pattern }]
+  }
+  const [items, total] = await Promise.all([
+    Business.find(filter)
+      .sort({ createdAt: query.status === 'pending' ? 1 : -1 })
+      .skip((query.page - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE),
+    Business.countDocuments(filter),
+  ])
+  const owners = await User.find({ _id: { $in: items.map((b) => b.ownerId) } })
+    .select('username displayName avatarUrl email')
+    .lean()
+  const ownerById = new Map(owners.map((o) => [o._id, o]))
+  res.json({
+    items: items.map((b) => {
+      const owner = ownerById.get(b.ownerId)
+      return {
+        ...businessView(b, { owner: true }),
+        reviewedAt: b.reviewedAt?.toISOString() ?? null,
+        owner: owner
+          ? { _id: owner._id, username: owner.username, displayName: owner.displayName, avatarUrl: owner.avatarUrl, email: owner.email }
+          : null,
+      }
+    }),
+    total,
+    page: query.page,
+    pageSize: PAGE_SIZE,
+  })
+})
+
+const REVIEW_MESSAGES = {
+  approve: (name: string) => `Cơ sở “${name}” đã được duyệt và hiển thị công khai.`,
+  reject: (name: string, reason: string) => `Cơ sở “${name}” chưa được duyệt: ${reason}`,
+  hide: (name: string, reason: string) => `Cơ sở “${name}” đã bị ẩn: ${reason}`,
+  restore: (name: string) => `Cơ sở “${name}” đã được hiển thị lại.`,
+}
+
+/**
+ * POST /api/admin/businesses/:id/review { action, reason } — approve, reject
+ * (with a reason, the owner can fix and resend), hide (with a reason) or
+ * restore a hidden one. The owner is notified.
+ */
+adminRouter.post('/businesses/:id/review', requirePermission('businesses'), async (req, res) => {
+  const actor = currentUser(res)
+  const { action, reason } = reviewSchema.parse(req.body)
+  const business = isValidObjectId(String(req.params.id)) ? await Business.findById(String(req.params.id)) : null
+  if (!business) throw new HttpError(404, 'Không tìm thấy cơ sở kinh doanh.', 'NOT_FOUND')
+
+  const allowed: Record<typeof action, string[]> = {
+    approve: ['pending', 'rejected'],
+    reject: ['pending'],
+    hide: ['approved'],
+    restore: ['hidden'],
+  }
+  if (!allowed[action].includes(business.status)) {
+    throw new HttpError(409, 'Trạng thái cơ sở đã thay đổi. Hãy tải lại danh sách.', 'INVALID_STATE')
+  }
+
+  const status = { approve: 'approved', reject: 'rejected', hide: 'hidden', restore: 'approved' }[action]
+  business.set({
+    status,
+    statusReason: action === 'reject' || action === 'hide' ? reason : '',
+    reviewedBy: actor._id,
+    reviewedAt: new Date(),
+  })
+  await business.save()
+  await audit(req, actor, `business.${action}`, { type: 'business', id: String(business._id), label: business.name }, { reason })
+  await notify([business.ownerId], {
+    type: 'business',
+    actorId: null,
+    message: REVIEW_MESSAGES[action](business.name, reason),
+  })
+  res.json({ business: businessView(business, { owner: true }) })
+})
+
+/* ---------------------------------------------------------------- revenue */
+
+const orderListSchema = z.object({
+  status: z.enum(ORDER_STATUSES).optional().catch(undefined),
+  page: pageSchema,
+})
+
+/**
+ * GET /api/admin/orders?status&page — every order, newest first, with the
+ * buyer, plus the revenue summary: paid total, last 30 days, per product,
+ * Premium members and businesses in "Đề xuất" right now.
+ */
+adminRouter.get('/orders', requirePermission('revenue'), async (req, res) => {
+  const query = orderListSchema.parse(req.query)
+  const filter: Record<string, unknown> = query.status ? { status: query.status } : {}
+  const now = new Date()
+  const since30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+  const [items, total, byProduct, last30, premiumMembers, promotedBusinesses] = await Promise.all([
+    Order.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((query.page - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE),
+    Order.countDocuments(filter),
+    Order.aggregate<{ _id: string; revenue: number; count: number }>([
+      { $match: { status: 'paid' } },
+      { $group: { _id: '$product', revenue: { $sum: '$amount' }, count: { $sum: 1 } } },
+    ]),
+    Order.aggregate<{ revenue: number; count: number }>([
+      { $match: { status: 'paid', paidAt: { $gte: since30 } } },
+      { $group: { _id: null, revenue: { $sum: '$amount' }, count: { $sum: 1 } } },
+    ]),
+    User.countDocuments({ premiumUntil: { $gt: now } }),
+    Business.countDocuments({ status: 'approved', promotedUntil: { $gt: now } }),
+  ])
+
+  const buyers = await User.find({ _id: { $in: items.map((o) => o.userId) } }).select('username displayName').lean()
+  const buyerById = new Map(buyers.map((b) => [b._id, b]))
+  res.json({
+    summary: {
+      revenue: byProduct.reduce((sum, p) => sum + p.revenue, 0),
+      paidOrders: byProduct.reduce((sum, p) => sum + p.count, 0),
+      revenue30: last30[0]?.revenue ?? 0,
+      paidOrders30: last30[0]?.count ?? 0,
+      byProduct: PRODUCT_IDS.map((id) => {
+        const row = byProduct.find((p) => p._id === id)
+        return { product: id, name: PRODUCTS[id].name, revenue: row?.revenue ?? 0, count: row?.count ?? 0 }
+      }),
+      premiumMembers,
+      promotedBusinesses,
+    },
+    items: items.map((o) => {
+      const buyer = buyerById.get(o.userId)
+      return { ...orderView(o), buyer: buyer ? { _id: buyer._id, username: buyer.username, displayName: buyer.displayName } : null }
+    }),
+    total,
+    page: query.page,
+    pageSize: PAGE_SIZE,
+  })
 })
 
 /* ------------------------------------------------------------ livestreams */

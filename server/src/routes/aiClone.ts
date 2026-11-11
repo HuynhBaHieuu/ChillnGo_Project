@@ -27,7 +27,6 @@ import { rateLimit } from 'express-rate-limit'
 import { Types, isValidObjectId } from 'mongoose'
 import { z } from 'zod'
 
-import { env } from '../env.js'
 import { AiOutputError, AiUnavailableError } from '../ai/aiService.js'
 import { destinationOf } from '../ai/candidates.js'
 import { checklistItems, defaultChecklist, sortChecklist } from '../ai/checklist.js'
@@ -46,7 +45,7 @@ import { creditClone, isServerPostId, readableJourney } from '../lib/journeys.js
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { AiDraft } from '../models/AiDraft.js'
-import { aiCallsLeft, giveBackAiCall, takeAiCall } from '../models/AiUsage.js'
+import { aiCallsLeft, aiDailyLimitOf, giveBackAiCall, takeAiCall } from '../models/AiUsage.js'
 import { ChecklistTemplate } from '../models/ChecklistTemplate.js'
 import { Destination } from '../models/Destination.js'
 import { Itinerary, itineraryView } from '../models/Itinerary.js'
@@ -161,7 +160,7 @@ async function draftResponse(draft: DraftRecord) {
     committedItineraryId: draft.committedItineraryId,
     expiresAt: draft.expiresAt.toISOString(),
     callsLeft: await aiCallsLeft(draft.userId),
-    dailyLimit: env.aiDailyLimit,
+    dailyLimit: await aiDailyLimitOf(draft.userId),
   }
 }
 
@@ -229,7 +228,7 @@ aiCloneRouter.get('/posts/:id/ai-clone', requireAuth, loadCurrentUser, async (re
     })),
     sourceDays: post.days.length,
     callsLeft: await aiCallsLeft(user._id),
-    dailyLimit: env.aiDailyLimit,
+    dailyLimit: await aiDailyLimitOf(user._id),
   })
 })
 

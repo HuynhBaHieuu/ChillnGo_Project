@@ -2,7 +2,7 @@
  * /api/livestreams — live video sessions.
  *
  *   GET    /api/livestreams?authors=a,b          streams live right now that you may watch
- *   GET    /api/livestreams/config               what this server offers (recording on/off)
+ *   GET    /api/livestreams/config               what this server offers (recording on/off) and the video quality your plan allows
  *   GET    /api/livestreams/history?host=id      a host's past streams, with their statistics
  *   GET    /api/livestreams/replays?authors=a,b  recorded past streams you may watch again
  *   POST   /api/livestreams                      go live → { livestream, connection }
@@ -24,6 +24,10 @@
  *
  * The host is always the signed-in user; nothing in a request body can name a
  * different one. LiveKit specifics live in lib/livekit.ts.
+ *
+ * A replay is kept 30 days after it is ready, 365 when the host is Premium at
+ * that moment (lib/plans.ts); then its file is deleted and it shows as having
+ * no recording. Checked whenever the stream is read (applyRetention).
  */
 
 import { waitUntil } from '@vercel/functions'
@@ -51,7 +55,8 @@ import {
   stopRecording,
 } from '../lib/livekit.js'
 import type { RecordingState } from '../lib/livekit.js'
-import { deletePrefix, dvrPlaylist, hlsPrefix, recordingKey, replayLink } from '../lib/recordings.js'
+import { DAY_MS, isPremium, liveQualityFor, replayDaysFor } from '../lib/plans.js'
+import { deleteObject, deletePrefix, dvrPlaylist, hlsPrefix, recordingKey, replayLink } from '../lib/recordings.js'
 import { signDvrAccess, verifyDvrAccess } from '../lib/token.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
@@ -72,15 +77,20 @@ const BLOCKED = () => new HttpError(403, 'Người phát đã chặn bạn khỏ
 
 /* ---------------------------------------------------------------- helpers */
 
-type Author = { _id: string; username: string; displayName: string; avatarUrl: string }
+type Author = { _id: string; username: string; displayName: string; avatarUrl: string; isPremium: boolean }
 
 async function authorsById(ids: string[]): Promise<Map<string, Author>> {
-  const users = await User.find({ _id: { $in: [...new Set(ids)] } }).select('username displayName avatarUrl').lean()
-  return new Map(users.map((u) => [u._id, { _id: u._id, username: u.username, displayName: u.displayName, avatarUrl: u.avatarUrl }]))
+  const users = await User.find({ _id: { $in: [...new Set(ids)] } }).select('username displayName avatarUrl premiumUntil').lean()
+  return new Map(
+    users.map((u) => [
+      u._id,
+      { _id: u._id, username: u.username, displayName: u.displayName, avatarUrl: u.avatarUrl, isPremium: isPremium(u) },
+    ]),
+  )
 }
 
 function unknownAuthor(id: string): Author {
-  return { _id: id, username: 'deleted', displayName: 'Tài khoản đã xoá', avatarUrl: '' }
+  return { _id: id, username: 'deleted', displayName: 'Tài khoản đã xoá', avatarUrl: '', isPremium: false }
 }
 
 function toView(stream: LivestreamDocument, host: Author) {
@@ -108,10 +118,14 @@ function toView(stream: LivestreamDocument, host: Author) {
     /** Viewers can rewind: the stream is live and being recorded (HLS segments on the way). */
     dvr: stream.status === 'live' && stream.recording?.status === 'recording' && Boolean(stream.recording.egressId),
     recording: {
-      status: stream.recording?.status ?? 'none',
+      // An expired replay is gone: to the clients it is simply not recorded.
+      status: stream.recording?.status === 'expired' ? 'none' : (stream.recording?.status ?? 'none'),
       // Filled in by withReplayLink, as a signed link for a viewer who may watch.
       url: null as string | null,
       durationSec: stream.recording?.durationSec ?? 0,
+      /** When the replay will be deleted; null while there is none (yet). */
+      expiresAt: stream.recording?.expiresAt?.toISOString() ?? null,
+      expired: stream.recording?.status === 'expired',
     },
     thumbnailUrl: stream.thumbnailUrl ?? '',
     host,
@@ -200,7 +214,27 @@ function applyRecordingState(stream: LivestreamDocument, state: RecordingState):
  * LIVE badge behind). For an ended one: checks on a recording still being
  * processed, in case no webhook reported it.
  */
+/**
+ * Keeping time of a ready replay: sets its end the first time it is seen
+ * ready (by the host's plan then), and deletes it once that has passed.
+ */
+async function applyRetention(stream: LivestreamDocument): Promise<void> {
+  if (stream.recording?.status !== 'ready') return
+  if (!stream.recording.expiresAt) {
+    const host = await User.findById(stream.hostId).select('premiumUntil').lean()
+    stream.set('recording.expiresAt', new Date(Date.now() + replayDaysFor(host) * DAY_MS))
+    await stream.save()
+    return
+  }
+  if (stream.recording.expiresAt.getTime() > Date.now()) return
+  const key = stream.recording.key
+  stream.set('recording.status', 'expired')
+  await stream.save()
+  if (key) waitUntil(deleteObject(key).catch((error: unknown) => console.error('Could not delete expired replay:', error)))
+}
+
 async function reconcile(stream: LivestreamDocument): Promise<void> {
+  if (stream.status === 'ended') await applyRetention(stream)
   if (!isLiveKitConfigured()) return
 
   if (stream.status === 'ended') {
@@ -277,8 +311,10 @@ function perUser(windowMs: number, limit: number, message: string, code?: string
 /* ------------------------------------------------------------------ routes */
 
 /** GET /api/livestreams/config — lets the web app offer only what the server can do. */
-livestreamsRouter.get('/config', (_req, res) => {
-  res.json({ live: isLiveKitConfigured(), recording: isRecordingConfigured() })
+livestreamsRouter.get('/config', optionalAuth, async (_req, res) => {
+  const userId = res.locals.userId as string | undefined
+  const user = userId ? await User.findById(userId).select('premiumUntil').lean() : null
+  res.json({ live: isLiveKitConfigured(), recording: isRecordingConfigured(), quality: liveQualityFor(user) })
 })
 
 const listSchema = z.object({
@@ -357,11 +393,12 @@ livestreamsRouter.get('/replays', optionalAuth, async (req, res) => {
   if (authors) filter.hostId = { $in: authors }
   if (before) filter.startedAt = { $lt: new Date(before) }
   const streams = await Livestream.find(filter).sort({ startedAt: -1 }).limit(12)
-  await Promise.all(streams.map(reconcile)) // a replay still processing may be ready now
+  await Promise.all(streams.map(reconcile)) // a replay still processing may be ready now, or past its keeping time
+  const kept = streams.filter((s) => s.recording?.status !== 'expired')
 
-  const hosts = await authorsById(streams.map((s) => s.hostId))
+  const hosts = await authorsById(kept.map((s) => s.hostId))
   res.json({
-    items: await Promise.all(streams.map((s) => withReplayLink(s, hosts.get(s.hostId) ?? unknownAuthor(s.hostId)))),
+    items: await Promise.all(kept.map((s) => withReplayLink(s, hosts.get(s.hostId) ?? unknownAuthor(s.hostId)))),
     nextBefore: streams.length === 12 ? streams[11].startedAt.toISOString() : null,
   })
 })
@@ -421,7 +458,7 @@ livestreamsRouter.post('/', requireAuth, loadCurrentUser, startLimiter, async (r
   }
 
   const connection = await connectionFor(stream.roomName, host, 'host')
-  res.status(201).json({ livestream: toView(stream, host), connection })
+  res.status(201).json({ livestream: toView(stream, { _id: host._id, username: host.username, displayName: host.displayName, avatarUrl: host.avatarUrl, isPremium: isPremium(host) }), connection })
 
   // After answering, so the host is not kept waiting (waitUntil keeps a
   // Vercel function alive for it): start the recording, tell the followers.

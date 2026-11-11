@@ -15,6 +15,8 @@ export interface LiveAuthor {
   username: string
   displayName: string
   avatarUrl: string
+  /** Shows the Premium crown; sent for hosts. */
+  isPremium?: boolean
 }
 
 export type LiveAudience = 'public' | 'followers' | 'private'
@@ -41,7 +43,7 @@ export interface Livestream {
   uniqueViewers: number
   commentCount: number
   reactions: Record<ReactionKind, number>
-  recording: { status: RecordingStatus; url: string | null; durationSec: number }
+  recording: { status: RecordingStatus; url: string | null; durationSec: number; expiresAt?: string | null; expired?: boolean }
   /** Live and being recorded: viewers can rewind (see getDvrPlaylist). */
   dvr: boolean
   /** The replay's cover, chosen by the host. Empty: none (cards fall back to the host's photo). */
@@ -68,6 +70,8 @@ export interface LiveConnection {
 export interface LiveConfig {
   live: boolean
   recording: boolean
+  /** Video the signed-in host may publish: 720p, or 1080p with Premium. */
+  quality?: string
 }
 
 function withAvatar<T extends { avatarUrl: string; username: string }>(person: T): T {
@@ -83,7 +87,7 @@ export function showComment(comment: LiveComment): LiveComment {
 }
 
 export function getConfig(): Promise<LiveConfig> {
-  return http<LiveConfig>('/api/livestreams/config', { auth: false })
+  return http<LiveConfig>('/api/livestreams/config')
 }
 
 /** Streams live right now; `authors` narrows to those accounts (the Newsfeed). */

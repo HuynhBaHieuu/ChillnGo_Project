@@ -19,6 +19,7 @@ import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { Follow, followingIdsOf, follows, friendIdsOf } from '../models/Follow.js'
 import { notify } from '../models/Notification.js'
+import { isPremium } from '../lib/plans.js'
 import { User, adjustCount } from '../models/User.js'
 import type { UserDocument } from '../models/User.js'
 
@@ -39,6 +40,7 @@ function publicProfile(user: UserDocument) {
     followingCount: user.followingCount,
     postCount: user.postCount,
     role: 'user' as const,
+    isPremium: isPremium(user),
     createdAt: user.createdAt.toISOString(),
   }
 }

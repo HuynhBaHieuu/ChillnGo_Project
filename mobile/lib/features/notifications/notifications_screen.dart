@@ -25,6 +25,8 @@ const _icons = {
   'invite_accepted': LucideIcons.users,
   'moderation': LucideIcons.shieldAlert,
   'report_resolved': LucideIcons.flag,
+  'billing': LucideIcons.crown,
+  'business': LucideIcons.building2,
 };
 
 /// Where a notification leads: the stream, the post, or the person who followed you.
@@ -32,6 +34,8 @@ String? _targetOf(AppNotification n) {
   if (n.livestreamId != null) return '/live/${n.livestreamId}';
   if (n.postId != null) return '/posts/${n.postId}';
   if (n.type == 'follow' && n.actorId != null) return '/users/${n.actorId}';
+  if (n.type == 'billing') return '/premium';
+  if (n.type == 'business') return '/business';
   return null;
 }
 

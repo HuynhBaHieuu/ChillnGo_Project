@@ -27,6 +27,7 @@ import 'post_actions.dart';
 import 'trip_card.dart';
 import '../../ui/navigation.dart';
 import '../../core/i18n.dart';
+import '../../ui/premium_badge.dart';
 
 /// /posts/:id: a journey (web: PostDetailPage).
 class PostDetailScreen extends ConsumerStatefulWidget {
@@ -153,7 +154,12 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(author.displayName, style: AppText.label),
+                                    Row(
+                                      children: [
+                                        Flexible(child: Text(author.displayName, style: AppText.label, overflow: TextOverflow.ellipsis)),
+                                        if (author.isPremium) ...[const SizedBox(width: 6), const PremiumBadge(show: true)],
+                                      ],
+                                    ),
                                     Text(t('Đăng {time}', {'time': relativeTime(post.createdAt)}), style: AppText.meta),
                                   ],
                                 ),
