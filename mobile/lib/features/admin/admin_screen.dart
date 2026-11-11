@@ -15,6 +15,7 @@ import 'admin_panels.dart';
 import 'catalog_panel.dart';
 import '../../core/i18n.dart';
 import 'business_panels.dart';
+import 'news_panel.dart';
 
 class _Section {
   const _Section({required this.path, required this.label, required this.title, required this.description, required this.icon, required this.allowed});
@@ -72,6 +73,14 @@ List<_Section> get _sections => [
     description: (_) => t('Hồ sơ homestay, khách sạn, quán ăn, cà phê và tour: duyệt, từ chối kèm lý do, ẩn hoặc hiển thị lại.'),
     icon: LucideIcons.building2,
     allowed: (user) => hasModule(user, 'businesses'),
+  ),
+  _Section(
+    path: 'news',
+    label: t('Tin tức'),
+    title: t('Tin tức du lịch'),
+    description: (_) => t('Chọn nguồn tin (báo, Google News, YouTube, mạng xã hội) để ChillnGo tự cào, tóm tắt và đăng lên Newsfeed.'),
+    icon: LucideIcons.newspaper,
+    allowed: (user) => hasModule(user, 'news'),
   ),
   _Section(
     path: 'revenue',
@@ -228,6 +237,7 @@ class AdminScreen extends ConsumerWidget {
                         'content' => ContentPanel(actor: user),
                         'businesses' => const BusinessesPanel(),
                         'revenue' => const RevenuePanel(),
+                        'news' => const NewsPanel(),
                         'catalog' => const CatalogPanel(),
                         'audit' => const AuditPanel(),
                         _ => const SettingsPanel(),

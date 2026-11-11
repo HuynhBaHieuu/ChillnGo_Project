@@ -1137,6 +1137,8 @@ class AdminStats {
     this.pendingReports,
     this.pendingBusinesses,
     this.revenue30,
+    this.newsToday,
+    this.newsPending,
     this.premiumMembers,
     this.content,
   });
@@ -1161,6 +1163,10 @@ class AdminStats {
 
   /// Paid in the last 30 days, and Premium members now; only with the Revenue module.
   final int? revenue30;
+
+  /// With the news permission: news published today and waiting for review.
+  final int? newsToday;
+  final int? newsPending;
   final int? premiumMembers;
 
   /// Journeys, check-ins, streams, moderation and AI use (web: AdminStats.content).
@@ -1189,6 +1195,8 @@ class AdminStats {
       pendingReports: json['pendingReports'] == null ? null : intOf(json['pendingReports']),
       pendingBusinesses: json['pendingBusinesses'] == null ? null : intOf(json['pendingBusinesses']),
       revenue30: json['revenue'] == null ? null : intOf(mapOf(json['revenue'])['revenue30']),
+      newsToday: json['news'] == null ? null : intOf(mapOf(json['news'])['today']),
+      newsPending: json['news'] == null ? null : intOf(mapOf(json['news'])['pending']),
       premiumMembers: json['revenue'] == null ? null : intOf(mapOf(json['revenue'])['premiumMembers']),
     );
   }
