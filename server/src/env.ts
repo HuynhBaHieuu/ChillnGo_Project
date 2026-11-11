@@ -176,5 +176,10 @@ export const env = {
   /** The same for a Premium account (lib/plans.ts). */
   aiDailyLimitPremium: Number(process.env.AI_DAILY_LIMIT_PREMIUM) || 100,
   payos: readPayOS(),
+  /**
+   * Shared secret of the news scheduler (Vercel Cron, the GitHub Action):
+   * they call GET /api/news/cron with "Authorization: Bearer <CRON_SECRET>". Unset: no scheduled runs.
+   */
+  cronSecret: process.env.CRON_SECRET?.trim() || null,
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }

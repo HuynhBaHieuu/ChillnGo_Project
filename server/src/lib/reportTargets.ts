@@ -10,6 +10,7 @@ import { HttpError } from './errors.js'
 import { excerpt } from './reports.js'
 import type { ReportTargetType } from './reports.js'
 import { Business, BusinessPost } from '../models/Business.js'
+import { NewsItem } from '../models/News.js'
 import { CheckIn } from '../models/CheckIn.js'
 import { PostComment } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
@@ -108,6 +109,22 @@ export async function findTarget(type: ReportTargetType, id: string): Promise<Re
     }
   }
 
+  if (type === 'news') {
+    const item = await NewsItem.findById(id).lean()
+    if (!item) return null
+    return {
+      type,
+      id,
+      // News has no author on ChillnGo; reports go to moderators only.
+      ownerId: `news:${item.sourceId}`,
+      visible: item.status === 'published',
+      hidden: Boolean(item.moderation?.hidden),
+      action: item.moderation?.action ?? null,
+      hiddenBy: item.moderation?.by ?? null,
+      snapshot: { title: excerpt(item.title, 150), text: excerpt(item.summary || item.excerpt), imageUrl: item.imageUrl, postId: null },
+    }
+  }
+
   if (type === 'businessPost') {
     const post = await BusinessPost.findById(id).lean()
     if (!post) return null
@@ -156,6 +173,8 @@ export async function hideTarget(type: ReportTargetType, id: string, by: string,
     await Business.updateOne({ _id: id }, { $set })
   } else if (type === 'businessPost') {
     await BusinessPost.updateOne({ _id: id }, { $set })
+  } else if (type === 'news') {
+    await NewsItem.updateOne({ _id: id }, { $set })
   } else {
     throw new HttpError(400, 'Không thể ẩn một tài khoản. Hãy dùng Khoá tài khoản.', 'INVALID_ACTION')
   }
@@ -184,6 +203,8 @@ export async function removeTarget(type: ReportTargetType, id: string, by: strin
     const comment = await PostComment.findById(id).lean()
     if (!comment) throw notFound()
     await removeCommentThread(comment.postId, String(comment._id), comment.parentId)
+  } else if (type === 'news') {
+    await NewsItem.updateOne({ _id: id }, { $set: { ...moderation, status: 'hidden', pinned: false } })
   } else if (type === 'business') {
     // A business page is not deleted: it stays hidden until a moderator shows it again.
     await Business.updateOne({ _id: id }, { $set: moderation })
@@ -217,6 +238,12 @@ export async function unhideTarget(type: ReportTargetType, id: string): Promise<
     const comment = await PostComment.findByIdAndUpdate(id, { $set }).lean()
     if (!comment) throw new HttpError(404, 'Bình luận này đã bị xoá hẳn, không khôi phục được.', 'NOT_FOUND')
     await recountComments(comment.postId)
+  } else if (type === 'news') {
+    const item = await NewsItem.findById(id)
+    if (!item) throw notFound()
+    const removed = item.moderation?.action === 'remove'
+    item.set({ ...$set, ...(removed ? { status: 'published' } : {}) })
+    await item.save()
   } else if (type === 'business') {
     await Business.updateOne({ _id: id }, { $set })
   } else if (type === 'businessPost') {

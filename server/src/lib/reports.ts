@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 import type { AdminModule } from './permissions.js'
 
-export const REPORT_TARGET_TYPES = ['post', 'comment', 'checkin', 'user', 'business', 'businessPost'] as const
+export const REPORT_TARGET_TYPES = ['post', 'comment', 'checkin', 'user', 'business', 'businessPost', 'news'] as const
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number]
 
 export const REPORT_REASONS = ['spam', 'inappropriate', 'scam', 'misinformation', 'harassment', 'other'] as const
@@ -56,7 +56,10 @@ export const resolveSchema = z.object({
 
 /** An account cannot be hidden or removed, only locked; content can have any decision. */
 export function allowedActions(targetType: ReportTargetType): ResolveAction[] {
-  return targetType === 'user' ? ['dismiss', 'lock'] : [...RESOLVE_ACTIONS]
+  if (targetType === 'user') return ['dismiss', 'lock']
+  // News comes from outside sources: there is no ChillnGo account to lock.
+  if (targetType === 'news') return ['dismiss', 'hide', 'remove']
+  return [...RESOLVE_ACTIONS]
 }
 
 /** Locking an account is the Users module's power, so it needs that permission too. */

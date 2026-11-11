@@ -24,7 +24,8 @@ type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
  * - user: a signed-in account
  * - staff: an admin with the matching permission
  * - superadmin: the super admin only
- * - webhook: LiveKit (signed Authorization header) or PayOS (signed body)
+ * - webhook: LiveKit (signed Authorization header), PayOS (signed body), the news
+ *   scheduler (Bearer CRON_SECRET) or the news worker (X-Worker-Key)
  * - dvr-link: anyone holding the signed `access` link from GET /api/livestreams/{id}/dvr
  */
 type Access = 'public' | 'optional' | 'user' | 'staff' | 'superadmin' | 'webhook' | 'dvr-link'
@@ -273,6 +274,26 @@ const OPERATIONS: Operation[] = [
   { method: 'delete', path: '/api/businesses/me/posts/:postId', summary: 'Delete one of your ads.', access: 'user' },
   { method: 'get', path: '/api/businesses/:slug', summary: 'A business page and its ads.', access: 'optional', response: 'BusinessPageResponse' },
 
+  // News
+  {
+    method: 'get',
+    path: '/api/news',
+    summary: 'Published travel news, newest first; pinned news leads the first page.',
+    access: 'optional',
+    response: 'NewsPage',
+    query: [
+      { name: 'region', description: 'north, central, south, islands or overseas.', schema: { type: 'string', enum: ['north', 'central', 'south', 'islands', 'overseas'] } },
+      { name: 'before', description: 'ISO date: news published before it (the nextBefore of the previous page).', schema: { type: 'string', format: 'date-time' } },
+      { name: 'limit', description: 'Page size, 1–50 (default 20).', schema: { type: 'integer' } },
+    ],
+  },
+  { method: 'get', path: '/api/news/saved', summary: 'News you saved.', access: 'user' },
+  { method: 'post', path: '/api/news/:id/save', summary: 'Save or unsave a news item (toggle).', access: 'user' },
+  { method: 'post', path: '/api/news/:id/click', summary: 'Count a click through to the original article.', access: 'public' },
+  { method: 'get', path: '/api/news/cron', summary: 'News scheduler: fetch due sources and run the AI step.', access: 'webhook', response: 'NewsRunResult' },
+  { method: 'get', path: '/api/news/worker/sources', summary: 'News worker: social sources due now.', access: 'webhook', response: 'WorkerSources' },
+  { method: 'post', path: '/api/news/worker/ingest', summary: 'News worker: items it fetched for one source, or the error it met.', access: 'webhook', body: true },
+
   // Admin
   { method: 'get', path: '/api/admin/stats', summary: 'Dashboard counts.', access: 'staff' },
   { method: 'get', path: '/api/admin/users', summary: 'Search and page through accounts.', access: 'staff' },
@@ -292,6 +313,21 @@ const OPERATIONS: Operation[] = [
   { method: 'get', path: '/api/admin/businesses', summary: 'Business pages to review.', access: 'staff' },
   { method: 'post', path: '/api/admin/businesses/:id/review', summary: 'Approve, reject, hide or restore a business page: { action, reason }.', access: 'staff', body: true },
   { method: 'get', path: '/api/admin/orders', summary: 'Orders and the revenue summary.', access: 'staff' },
+  { method: 'get', path: '/api/admin/news/sources', summary: 'News sources with their last run.', access: 'staff' },
+  { method: 'post', path: '/api/admin/news/sources', summary: 'Add a news source.', access: 'staff', body: true, status: 201 },
+  { method: 'put', path: '/api/admin/news/sources/:id', summary: 'Replace a news source.', access: 'staff', body: true },
+  { method: 'delete', path: '/api/admin/news/sources/:id', summary: 'Delete a news source (its items stay).', access: 'staff' },
+  { method: 'post', path: '/api/admin/news/sources/preview', summary: 'Fetch a source without saving it: its first items.', access: 'staff', body: true },
+  { method: 'post', path: '/api/admin/news/sources/:id/run', summary: 'Fetch one news source now.', access: 'staff' },
+  { method: 'post', path: '/api/admin/news/run', summary: 'Fetch every enabled server-side news source now.', access: 'staff' },
+  { method: 'get', path: '/api/admin/news/items', summary: 'News items by status, source or title.', access: 'staff' },
+  { method: 'patch', path: '/api/admin/news/items/:id', summary: 'Edit a news item: summary, regions, destinations, pinned.', access: 'staff', body: true },
+  { method: 'post', path: '/api/admin/news/items/:id/review', summary: 'Approve, reject, hide or unhide a news item.', access: 'staff', body: true },
+  { method: 'post', path: '/api/admin/news/items/review', summary: 'Approve, reject, hide or unhide many news items.', access: 'staff', body: true },
+  { method: 'get', path: '/api/admin/news/runs', summary: 'News fetch history.', access: 'staff' },
+  { method: 'get', path: '/api/admin/news/worker', summary: "The news worker's key status and last call.", access: 'staff' },
+  { method: 'post', path: '/api/admin/news/worker/key', summary: 'Create a new news worker key (shown once).', access: 'staff', status: 201 },
+  { method: 'delete', path: '/api/admin/news/worker/key', summary: 'Revoke the news worker key.', access: 'staff' },
   { method: 'get', path: '/api/admin/catalog/meta', summary: 'Place categories and the tag vocabularies.', access: 'staff' },
   { method: 'get', path: '/api/admin/catalog/destinations', summary: 'Every destination, with its place count.', access: 'staff' },
   { method: 'post', path: '/api/admin/catalog/destinations', summary: 'Add a destination.', access: 'staff', body: true, status: 201 },
@@ -353,7 +389,7 @@ const ACCESS_TEXT: Record<Access, string> = {
   user: 'Needs a signed-in account.',
   staff: 'Needs an admin account with the matching permission.',
   superadmin: 'Needs the super admin account.',
-  webhook: 'Called by LiveKit (signed Authorization header) or PayOS (HMAC signature in the body). Not for clients.',
+  webhook: 'Called by LiveKit (signed Authorization header), PayOS (HMAC signature in the body), the news scheduler (Bearer CRON_SECRET) or the news worker (X-Worker-Key). Not for clients.',
   'dvr-link': 'Authenticated by the signed `access` query value.',
 }
 
@@ -817,6 +853,54 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
       posts: {
         type: 'array',
         items: { allOf: [ref('BusinessAd'), { type: 'object', required: ['business'], properties: { business: ref('Business') } }] },
+      },
+    },
+  },
+  NewsItem: {
+    type: 'object',
+    required: ['_id', 'sourceName', 'url', 'title', 'summary', 'publishedAt'],
+    properties: {
+      _id: str(),
+      sourceId: str(),
+      sourceName: str(),
+      sourceType: { type: 'string', enum: ['rss', 'google_news', 'youtube_channel', 'social'] },
+      platform: orNull(str()),
+      url: str('The original; open it to read the news.'),
+      title: str(),
+      summary: str('AI summary in Vietnamese, or the source’s own excerpt.'),
+      imageUrl: str(),
+      kind: { type: 'string', enum: ['article', 'video', 'post'] },
+      author: str(),
+      publishedAt: time(),
+      pinned: { type: 'boolean' },
+      regions: { type: 'array', items: str() },
+      destinations: { type: 'array', items: str() },
+      savedByMe: { type: 'boolean', description: 'Only when signed in.' },
+    },
+  },
+  NewsPage: list('NewsItem', { nextBefore }),
+  NewsRunResult: {
+    type: 'object',
+    required: ['sources', 'enriched'],
+    properties: {
+      sources: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['sourceId', 'name', 'ok'],
+          properties: { sourceId: str(), name: str(), ok: { type: 'boolean' }, created: int(), fetched: int(), duplicates: int(), filtered: int(), error: str() },
+        },
+      },
+      enriched: int('News items the AI summarised and tagged in this run.'),
+    },
+  },
+  WorkerSources: {
+    type: 'object',
+    required: ['items'],
+    properties: {
+      items: {
+        type: 'array',
+        items: { type: 'object', required: ['_id', 'platform'], properties: { _id: str(), name: str(), platform: str(), query: str(), url: str() } },
       },
     },
   },
