@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Copy, KeyRound, Loader2, Pencil, Pin, PinOff, Play, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { Copy, ExternalLink, KeyRound, Loader2, Pencil, Pin, PinOff, Play, Plus, RefreshCw, Search, Sparkles, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -407,6 +407,7 @@ function ItemsTab({ status, onNotice }: { status: ItemTab; onNotice: (notice: No
                   {item.pinned && <Badge variant="solid">{t('Đã ghim')}</Badge>}
                   {item.aiStatus === 'failed' && <Badge variant="outline">{t('AI lỗi, dùng trích đoạn')}</Badge>}
                   {item.aiStatus === 'skipped' && <Badge variant="outline">{t('Chưa có AI')}</Badge>}
+                  {(item.content?.length ?? 0) === 0 && <Badge variant="outline">{t('Chưa có bài viết')}</Badge>}
                   <span className="text-xs text-muted-foreground">
                     {newsOrigin(item)} · {formatDateTime(item.publishedAt)}
                   </span>
@@ -450,7 +451,7 @@ function ItemsTab({ status, onNotice }: { status: ItemTab; onNotice: (notice: No
                 )}
                 <Button size="sm" variant="ghost" onClick={() => setEditing(item)}>
                   <Pencil />
-                  {t('Sửa tóm tắt')}
+                  {t('Sửa bài')}
                 </Button>
               </div>
             </li>
@@ -477,13 +478,25 @@ function ItemsTab({ status, onNotice }: { status: ItemTab; onNotice: (notice: No
 }
 
 function EditItemDialog({ item, onClose, onSaved }: { item: NewsItem; onClose: () => void; onSaved: () => void }) {
-  const [summary, setSummary] = useState(item.summary)
+  const [headline, setHeadline] = useState(item.headline ?? '')
+  const [summary, setSummary] = useState(item.aiSummary ?? '')
+  // One paragraph per block; blocks are separated by an empty line.
+  const [content, setContent] = useState((item.content ?? []).join('\n\n'))
+  const [images, setImages] = useState(item.images)
   const [regions, setRegions] = useState<Region[]>(item.regions)
   const [destinations, setDestinations] = useState(item.destinations.join(', '))
+  const paragraphs = content
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+
   const save = useMutation({
     mutationFn: () =>
       newsService.patchItem(item._id, {
+        headline: headline.trim(),
         summary: summary.trim(),
+        content: paragraphs,
+        images,
         regions,
         destinations: destinations
           .split(',')
@@ -492,18 +505,59 @@ function EditItemDialog({ item, onClose, onSaved }: { item: NewsItem; onClose: (
       }),
     onSuccess: onSaved,
   })
+  // The AI's new post replaces what is in the form; nothing is saved twice.
+  const rewrite = useMutation({
+    mutationFn: () => newsService.rewriteItem(item._id),
+    onSuccess: (fresh) => {
+      setHeadline(fresh.headline ?? '')
+      setSummary(fresh.aiSummary ?? '')
+      setContent((fresh.content ?? []).join('\n\n'))
+      setImages(fresh.images)
+      setRegions(fresh.regions)
+      setDestinations(fresh.destinations.join(', '))
+    },
+  })
+  const busy = save.isPending || rewrite.isPending
+  const failure = (save.error ?? rewrite.error) as Error | null
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t('Sửa tin')}</DialogTitle>
-          <DialogDescription className="line-clamp-2">{item.title}</DialogDescription>
+          <DialogTitle>{t('Sửa bài')}</DialogTitle>
+          <DialogDescription>
+            <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:underline">
+              <ExternalLink className="size-3.5 shrink-0" aria-hidden />
+              <span className="line-clamp-1">{item.originalTitle ?? item.title}</span>
+            </a>
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-foreground/10 p-3">
+            <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+              {item.writtenAt
+                ? t('AI viết bài này lúc {time}.', { time: formatDateTime(item.writtenAt) })
+                : t('Tin này chưa có bài viết. AI có thể đọc bài gốc và viết ngay.')}
+            </p>
+            <Button type="button" variant="outline" size="sm" onClick={() => rewrite.mutate()} disabled={busy}>
+              {rewrite.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
+              {rewrite.isPending ? t('Đang viết…') : t('Viết lại bằng AI')}
+            </Button>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="ni-headline">{t('Tiêu đề hiển thị')}</Label>
+            <Input
+              id="ni-headline"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              maxLength={200}
+              placeholder={item.originalTitle ?? item.title}
+            />
+            <p className="text-xs text-muted-foreground">{t('Để trống thì dùng tiêu đề của nguồn.')}</p>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="ni-summary">{t('Tóm tắt hiển thị trên Newsfeed')}</Label>
-            <Textarea id="ni-summary" rows={5} value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={600} />
+            <Textarea id="ni-summary" rows={3} value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={600} />
             {item.excerpt && (
               <details className="text-xs text-muted-foreground">
                 <summary className="cursor-pointer">{t('Xem trích đoạn gốc')}</summary>
@@ -511,6 +565,43 @@ function EditItemDialog({ item, onClose, onSaved }: { item: NewsItem; onClose: (
               </details>
             )}
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="ni-content">{t('Nội dung bài')}</Label>
+            <Textarea id="ni-content" rows={12} value={content} onChange={(e) => setContent(e.target.value)} className="leading-relaxed" />
+            <p className={cn('text-xs', paragraphs.length > 8 ? 'text-destructive' : 'text-muted-foreground')}>
+              {t('{count}/8 đoạn. Mỗi đoạn cách nhau một dòng trống.', { count: paragraphs.length })}
+            </p>
+          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">{t('Ảnh ({count})', { count: images.length })}</legend>
+            {images.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('Bài này không có ảnh.')}</p>
+            ) : (
+              <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {images.map((url, index) => (
+                  <li key={url} className="relative">
+                    <img src={url} alt="" referrerPolicy="no-referrer" loading="lazy" className="aspect-square w-full rounded-lg bg-muted object-cover" />
+                    {index === 0 && (
+                      <Badge variant="solid" className="absolute bottom-1 left-1">
+                        {t('Ảnh bìa')}
+                      </Badge>
+                    )}
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute right-1 top-1 size-6 rounded-full"
+                      aria-label={t('Bỏ ảnh {n}', { n: index + 1 })}
+                      title={t('Bỏ ảnh {n}', { n: index + 1 })}
+                      onClick={() => setImages((list) => list.filter((x) => x !== url))}
+                    >
+                      <X className="size-3.5" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </fieldset>
           <fieldset className="space-y-2">
             <legend className="text-sm font-medium">{t('Vùng')}</legend>
             <div className="flex flex-wrap gap-3">
@@ -529,13 +620,21 @@ function EditItemDialog({ item, onClose, onSaved }: { item: NewsItem; onClose: (
             <Label htmlFor="ni-dest">{t('Địa điểm (cách nhau bằng dấu phẩy)')}</Label>
             <Input id="ni-dest" value={destinations} onChange={(e) => setDestinations(e.target.value)} placeholder={t('Đà Lạt, Hội An')} />
           </div>
-          {save.isError && <p className="text-sm text-destructive">{(save.error as Error).message}</p>}
+          {failure && <p className="text-sm text-destructive">{failure.message}</p>}
         </div>
         <DialogFooter>
+          {item.status === 'published' && (
+            <Button asChild variant="ghost" className="sm:mr-auto">
+              <a href={`/news/${item._id}`} target="_blank" rel="noopener noreferrer">
+                <ExternalLink />
+                {t('Xem trang tin')}
+              </a>
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose}>
             {t('Huỷ')}
           </Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+          <Button onClick={() => save.mutate()} disabled={busy || paragraphs.length > 8}>
             {save.isPending && <Loader2 className="animate-spin" />}
             {t('Lưu thay đổi')}
           </Button>

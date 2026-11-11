@@ -32,7 +32,13 @@ export async function toggleSave(id: string): Promise<boolean> {
   return saved
 }
 
-/** Counts a click through to the original; never fails the click itself. */
+/** GET /api/news/:id — one published item with its post. */
+export async function getNewsItem(id: string): Promise<NewsItem> {
+  const { item } = await http<{ item: NewsItem }>(`/api/news/${id}`)
+  return item
+}
+
+/** Counts a reader opening the post; never fails the page itself. */
 export function recordClick(id: string): void {
   void http(`/api/news/${id}/click`, { method: 'POST', auth: false }).catch(() => undefined)
 }
@@ -97,8 +103,17 @@ export function getItems(params: { status?: NewsStatus; sourceId?: string; q?: s
   return http(`/api/admin/news/items${qs ? `?${qs}` : ''}`)
 }
 
-export async function patchItem(id: string, patch: Partial<Pick<NewsItem, 'summary' | 'regions' | 'destinations' | 'pinned'>>): Promise<NewsItem> {
+export async function patchItem(
+  id: string,
+  patch: Partial<Pick<NewsItem, 'headline' | 'summary' | 'content' | 'images' | 'regions' | 'destinations' | 'pinned'>>,
+): Promise<NewsItem> {
   const { item } = await http<{ item: NewsItem }>(`/api/admin/news/items/${id}`, { method: 'PATCH', body: patch })
+  return item
+}
+
+/** POST /api/admin/news/items/:id/rewrite — the AI reads the original again and writes the post anew. */
+export async function rewriteItem(id: string): Promise<NewsItem> {
+  const { item } = await http<{ item: NewsItem }>(`/api/admin/news/items/${id}/rewrite`, { method: 'POST' })
   return item
 }
 
