@@ -139,6 +139,18 @@ describe('news pipeline rules', () => {
     assert.equal(parseAiAnswer('[{"id": 1}]'), null)
   })
 
+  it('fills in the ids by position when the model leaves them out but answers every item', () => {
+    const text = '{"results": [{"relevant":true,"summary":"A","region":"north","destinations":[]},{"relevant":false,"summary":"","region":null,"destinations":[]}]}'
+    assert.deepEqual(parseAiAnswer(text, ['a', 'b']), [
+      { id: 'a', relevant: true, summary: 'A', region: 'north', destinations: [] },
+      { id: 'b', relevant: false, summary: '', region: null, destinations: [] },
+    ])
+    // A count that does not match cannot be trusted by position.
+    assert.equal(parseAiAnswer(text, ['a']), null)
+    // Ids the model did give win over the position.
+    assert.deepEqual(parseAiAnswer('[{"id":"z","relevant":true}]', ['a'])?.map((a) => a.id), ['z'])
+  })
+
   it('accepts only the exact cron secret', () => {
     assert.doesNotThrow(() => verifyCronSecret('Bearer s3cret-value', 's3cret-value'))
     assert.throws(() => verifyCronSecret('Bearer wrong', 's3cret-value'))

@@ -250,13 +250,23 @@ const aiAnswer = z.array(
   }),
 )
 
-/** The first JSON array in a model's answer. */
-export function parseAiAnswer(text: string) {
+/**
+ * The first JSON array in a model's answer. A model that leaves the ids out
+ * but answers every item, in order, is still understood: `ids` are the items
+ * asked about, in the order they were sent.
+ */
+export function parseAiAnswer(text: string, ids: string[] = []) {
   const start = text.indexOf('[')
   const end = text.lastIndexOf(']')
   if (start === -1 || end <= start) return null
   try {
-    return aiAnswer.parse(JSON.parse(text.slice(start, end + 1)))
+    const raw: unknown = JSON.parse(text.slice(start, end + 1))
+    if (Array.isArray(raw) && raw.length === ids.length) {
+      raw.forEach((entry: unknown, i) => {
+        if (entry && typeof entry === 'object' && typeof (entry as { id?: unknown }).id !== 'string') (entry as { id?: string }).id = ids[i]
+      })
+    }
+    return aiAnswer.parse(raw)
   } catch {
     return null
   }
@@ -264,11 +274,12 @@ export function parseAiAnswer(text: string) {
 
 const SYSTEM = [
   'Bạn là biên tập viên tin du lịch của ChillnGo, mạng xã hội du lịch Việt Nam.',
-  'Với mỗi tin, trả về: relevant (true nếu tin liên quan du lịch, điểm đến, ẩm thực, lễ hội, lưu trú, phương tiện đi lại hoặc kinh nghiệm đi chơi; false nếu là quảng cáo, chính trị, tai nạn không liên quan du lịch, hoặc nội dung rác),',
+  'Với mỗi tin, trả về một phần tử gồm: id (chép đúng id của tin đầu vào),',
+  'relevant (true nếu tin liên quan du lịch, điểm đến, ẩm thực, lễ hội, lưu trú, phương tiện đi lại hoặc kinh nghiệm đi chơi; false nếu là quảng cáo, chính trị, tai nạn không liên quan du lịch, hoặc nội dung rác),',
   'summary (2–3 câu tiếng Việt tự nhiên, chỉ dựa trên tiêu đề và mô tả được cho, không bịa thêm chi tiết; để trống nếu relevant = false),',
   'region (một trong: north, central, south, islands, overseas; null nếu không rõ),',
   'destinations (tối đa 5 tên điểm đến, CHỈ chọn từ danh sách được cho, viết đúng như danh sách).',
-  'Chỉ trả về một mảng JSON, không giải thích.',
+  'Chỉ trả về JSON dạng {"results": [...]} với đúng một phần tử cho mỗi tin, theo thứ tự tin đầu vào, không giải thích.',
 ].join(' ')
 
 /** AI summary, regions and destinations for queued items; then their status. Returns how many were handled. */
@@ -294,7 +305,8 @@ export async function enrichQueued(limit = AI_ITEMS_PER_RUN): Promise<number> {
         ],
         'news-enrich',
       )
-      answer = parseAiAnswer(text)
+      answer = parseAiAnswer(text, batch.map((item) => String(item._id)))
+      if (!answer) console.warn(`[news] AI answer not understood: ${text.replace(/\s+/g, ' ').slice(0, 300)}`)
     } catch (error) {
       console.warn(`[news] AI unavailable: ${(error as Error).message}`)
     }
