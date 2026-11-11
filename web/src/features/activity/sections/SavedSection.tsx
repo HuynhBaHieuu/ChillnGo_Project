@@ -1,20 +1,23 @@
-import { Bookmark, MapPin } from 'lucide-react'
+import { Bookmark, MapPin, Newspaper } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { ActivityTabs, Empty, ErrorPanel, ListSkeleton, NotAvailable, SectionHeader } from '@/features/activity/components'
 import { journeyStats } from '@/features/activity/format'
 import { useSavedJourneys, useUnsave } from '@/features/activity/hooks'
+import { useSavedNews } from '@/features/news/hooks'
+import { NewsCard } from '@/features/news/NewsCard'
 import { t } from '@/i18n'
 
 export function SavedSection() {
   return (
     <>
-      <SectionHeader title={t('Đã lưu')} description={t('Những hành trình bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')} />
+      <SectionHeader title={t('Đã lưu')} description={t('Những hành trình và tin du lịch bạn đã lưu để xem lại. Chỉ mình bạn thấy được mục này.')} />
       <ActivityTabs
         label={t('Loại đã lưu')}
         tabs={[
           { value: 'journeys', label: t('Hành trình'), content: <SavedJourneys /> },
+          { value: 'news', label: t('Tin du lịch'), content: <SavedNews /> },
           {
             value: 'places',
             label: t('Địa điểm'),
@@ -86,5 +89,34 @@ function SavedJourneys() {
         </li>
       ))}
     </ul>
+  )
+}
+
+function SavedNews() {
+  const saved = useSavedNews()
+
+  if (saved.isPending) return <ListSkeleton rows={4} />
+  if (saved.isError) return <ErrorPanel error={saved.error} onRetry={() => void saved.refetch()} />
+  if (saved.data.length === 0) {
+    return (
+      <Empty
+        icon={Newspaper}
+        title={t('Chưa lưu tin nào')}
+        description={t('Bấm biểu tượng lưu ở một tin du lịch trên Newsfeed để giữ nó ở đây đọc sau.')}
+        action={
+          <Button asChild variant="outline" size="sm" className="rounded-full">
+            <Link to="/feed?tab=news">{t('Xem tin du lịch')}</Link>
+          </Button>
+        }
+      />
+    )
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {saved.data.map((item) => (
+        <NewsCard key={item._id} item={{ ...item, savedByMe: true }} compact />
+      ))}
+    </div>
   )
 }

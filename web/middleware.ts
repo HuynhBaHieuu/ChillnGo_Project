@@ -375,7 +375,7 @@ Cập nhật ngày 10 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nà
 - **Tài khoản:** email, tên đăng nhập, tên hiển thị và mật khẩu (chỉ lưu dạng băm bcrypt). Đăng nhập bằng Google: email, tên và ảnh đại diện từ tài khoản Google đó.
 - **Hồ sơ:** ảnh đại diện, ảnh bìa, giới thiệu và nơi sống bạn tự điền.
 - **Nội dung bạn đăng:** hành trình, bình luận, lượt thích, check-in (kèm ảnh và địa điểm nếu bạn gắn), livestream cùng bình luận, cảm xúc và bản ghi khi tính năng ghi hình bật.
-- **Hoạt động:** người bạn theo dõi, thông báo, lịch sử tìm kiếm, lịch sử thay đổi tài khoản.
+- **Hoạt động:** người bạn theo dõi, tin du lịch bạn đã lưu, thông báo, lịch sử tìm kiếm, lịch sử thay đổi tài khoản.
 - **Tính năng AI:** bản nháp lịch trình AI, nội dung trò chuyện với trợ lý và số lượt AI đã dùng mỗi ngày.
 - **Thanh toán:** đơn hàng Premium và gói Đề xuất (mã đơn, gói, số tiền, trạng thái, thời điểm thanh toán, mã tham chiếu từ PayOS). ChillnGo không nhận và không lưu số thẻ, số tài khoản hay mật khẩu ngân hàng.
 - **Tài khoản doanh nghiệp:** thông tin cơ sở (tên, loại hình, địa chỉ, vị trí, số điện thoại, website, ảnh, giá, giờ mở cửa, giới thiệu), bài quảng cáo và kết quả duyệt.
@@ -385,6 +385,8 @@ Cập nhật ngày 10 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nà
 Để chạy các tính năng bạn dùng, gửi email xác nhận và đặt lại mật khẩu, gửi thông báo, chống lạm dụng, xử lý tài khoản vi phạm và kích hoạt gói bạn đã mua.
 
 **Nội dung được tài trợ:** cơ sở kinh doanh mua gói Đề xuất hiện trong mục "Gợi ý nổi bật" ở trang Khám phá, luôn có nhãn "Tài trợ". Vị trí này không dựa trên dữ liệu cá nhân của bạn: mọi người thấy cùng một danh sách, xếp ngẫu nhiên. ChillnGo không bán dữ liệu cho doanh nghiệp, không hiển thị quảng cáo của mạng quảng cáo bên thứ ba và không dùng công cụ phân tích hay theo dõi của bên thứ ba.
+
+**Tin du lịch:** tab "Tin du lịch" và các tin xen trong Newsfeed được tổng hợp từ nguồn công khai (báo điện tử, Google News, YouTube, mạng xã hội) do quản trị viên chọn. ChillnGo chỉ lưu tiêu đề, tóm tắt (có thể do AI viết), ảnh và đường dẫn; bấm vào tin là mở trang gốc của nguồn. Lượt mở chỉ được đếm tổng, không ghi lại ai đã mở.
 
 ## Dịch vụ xử lý dữ liệu
 

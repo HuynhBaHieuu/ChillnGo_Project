@@ -30,7 +30,7 @@ const SECTIONS: Section[] = translatedList<Section, 'label' | 'hint'>([
   { slug: 'search-history', label: 'Lịch sử tìm kiếm', hint: 'Những gì bạn đã tìm', icon: Search, render: () => <SearchHistorySection /> },
   { slug: 'account-history', label: 'Lịch sử tài khoản', hint: 'Các thay đổi trên tài khoản', icon: Clock, render: () => <AccountHistorySection /> },
   { slug: 'recently-deleted', label: 'Đã xoá gần đây', hint: 'Khôi phục trong 30 ngày', icon: Trash2, render: () => <RecentlyDeletedSection /> },
-  { slug: 'saved', label: 'Đã lưu', hint: 'Hành trình bạn đã lưu', icon: Bookmark, render: () => <SavedSection /> },
+  { slug: 'saved', label: 'Đã lưu', hint: 'Hành trình và tin du lịch đã lưu', icon: Bookmark, render: () => <SavedSection /> },
 ], ['label', 'hint'])
 
 /**

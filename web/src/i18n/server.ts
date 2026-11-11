@@ -43,6 +43,9 @@ const RULES: Rule[] = [
   [/^Cơ sở “(.*)” đã được duyệt và hiển thị công khai\.$/s, (m) => ['Cơ sở “{name}” đã được duyệt và hiển thị công khai.', { name: m[1] }]],
   [/^Cơ sở “(.*)” chưa được duyệt: (.*)$/s, (m) => ['Cơ sở “{name}” chưa được duyệt: {reason}', { name: m[1], reason: m[2] }]],
   [/^Cơ sở “(.*)” đã bị ẩn: (.*)$/s, (m) => ['Cơ sở “{name}” đã bị ẩn: {reason}', { name: m[1], reason: m[2] }]],
+  [/^Nguồn trả về lỗi HTTP (\d+)$/, (m) => ['Nguồn trả về lỗi HTTP {status}', { status: m[1] }]],
+  [/^Không tải được nguồn: (.*)$/s, (m) => ['Không tải được nguồn: {error}', { error: m[1] }]],
+  [/^YouTube không trả về RSS cho kênh này \((.*)\)\. Hãy thử lại sau/s, (m) => ['YouTube không trả về RSS cho kênh này ({error}). Hãy thử lại sau, hoặc thêm kênh dưới dạng nguồn mạng xã hội "YouTube" để máy cào lấy bằng Agent Reach.', { error: translateServerMessage(m[1]) }]],
   [/^Cơ sở “(.*)” đã được hiển thị lại\.$/s, (m) => ['Cơ sở “{name}” đã được hiển thị lại.', { name: m[1] }]],
 ]
 
