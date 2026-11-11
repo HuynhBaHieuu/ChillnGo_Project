@@ -1,15 +1,16 @@
-/// Travel news in the Newsfeed (web/src/features/news/NewsCard.tsx): a title,
-/// a short summary and a picture. Reading it means opening the original.
+/// A travel news post in the Newsfeed (web/src/features/news/NewsCard.tsx),
+/// shaped like a journey card: cover, headline, summary. It opens the post's
+/// own screen (/news/:id); the original article is linked from there.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/format.dart';
 import '../../core/i18n.dart';
 import '../../core/labels.dart';
-import '../../core/links.dart';
 import '../../core/theme.dart';
 import '../../data/api.dart';
 import '../../data/services/news_service.dart';
@@ -45,10 +46,7 @@ class _NewsCardState extends ConsumerState<NewsCard> {
 
   NewsItem get item => widget.item;
 
-  void _open() {
-    NewsService.recordClick(item.id);
-    openExternal(item.url);
-  }
+  void _open() => context.push('/news/${item.id}');
 
   Future<void> _toggleSave(bool saved) async {
     setState(() => _saving = true);
@@ -79,11 +77,11 @@ class _NewsCardState extends ConsumerState<NewsCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (item.imageUrl.isNotEmpty && !widget.compact)
+          if (item.imageUrl.isNotEmpty)
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
               child: AspectRatio(
-                aspectRatio: 16 / 9,
+                aspectRatio: widget.compact ? 16 / 8 : 16 / 10,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -131,12 +129,12 @@ class _NewsCardState extends ConsumerState<NewsCard> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(item.title, style: AppText.h3),
+                Text(item.title, maxLines: 3, overflow: TextOverflow.ellipsis, style: widget.compact ? AppText.h3 : AppText.h2),
                 if (item.summary.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Text(
                     item.summary,
-                    maxLines: widget.compact ? 2 : 4,
+                    maxLines: widget.compact ? 2 : 3,
                     overflow: TextOverflow.ellipsis,
                     style: AppText.body.copyWith(color: AppColors.meta),
                   ),
@@ -167,13 +165,6 @@ class _NewsCardState extends ConsumerState<NewsCard> {
                         ),
                     ],
                   ),
-                ),
-                AppIconButton(
-                  icon: LucideIcons.externalLink,
-                  label: item.kind == 'video' ? t('Xem video') : t('Đọc bài gốc'),
-                  size: 36,
-                  color: AppColors.meta,
-                  onPressed: _open,
                 ),
                 if (signedIn)
                   AppIconButton(

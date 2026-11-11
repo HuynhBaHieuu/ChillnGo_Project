@@ -591,8 +591,8 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
   Future<void> _edit(NewsItem item) async {
     final saved = await showAppSheet<bool>(
       context,
-      title: t('Sửa tin'),
-      description: item.title,
+      title: t('Sửa bài'),
+      description: item.originalTitle.isEmpty ? item.title : item.originalTitle,
       tall: true,
       builder: (_) => _ItemForm(item: item),
     );
@@ -670,6 +670,7 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
                     if (item.pinned) AppBadge(t('Đã ghim'), tone: BadgeTone.primary),
                     if (item.aiStatus == 'failed') AppBadge(t('AI lỗi, dùng trích đoạn'), tone: BadgeTone.outline),
                     if (item.aiStatus == 'skipped') AppBadge(t('Chưa có AI'), tone: BadgeTone.outline),
+                    if (item.content.isEmpty) AppBadge(t('Chưa có bài viết'), tone: BadgeTone.outline),
                     for (final r in item.regions) AppBadge(regionLabel(r), tone: BadgeTone.outline),
                     for (final d in item.destinations) AppBadge('📍 $d', tone: BadgeTone.outline),
                   ],
@@ -702,7 +703,7 @@ class _ItemsTabState extends ConsumerState<_ItemsTab> {
                         onPressed: _busy == null ? () => _pin(item) : null,
                       ),
                     AppButton(
-                      label: t('Sửa tóm tắt'),
+                      label: t('Sửa bài'),
                       icon: LucideIcons.pencil,
                       size: ButtonSize.sm,
                       variant: ButtonVariant.ghost,
@@ -738,17 +739,62 @@ class _ItemForm extends StatefulWidget {
 }
 
 class _ItemFormState extends State<_ItemForm> {
-  late final _summary = TextEditingController(text: widget.item.summary);
+  late final _headline = TextEditingController(text: widget.item.headline);
+  late final _summary = TextEditingController(text: widget.item.aiSummary);
+  // One paragraph per block; blocks are separated by an empty line.
+  late final _content = TextEditingController(text: widget.item.content.join('\n\n'));
   late final _destinations = TextEditingController(text: widget.item.destinations.join(', '));
   late final Set<String> _regions = {...widget.item.regions};
+  late List<String> _images = [...widget.item.images];
+  late String? _writtenAt = widget.item.writtenAt;
   var _saving = false;
+  var _rewriting = false;
   String? _error;
+
+  List<String> get _paragraphs => _content.text
+      .split(RegExp(r'\n\s*\n'))
+      .map((p) => p.replaceAll(RegExp(r'\s+'), ' ').trim())
+      .where((p) => p.isNotEmpty)
+      .toList();
 
   @override
   void dispose() {
+    _headline.dispose();
     _summary.dispose();
+    _content.dispose();
     _destinations.dispose();
     super.dispose();
+  }
+
+  /// The AI's new post replaces what is in the form.
+  Future<void> _rewrite() async {
+    setState(() {
+      _rewriting = true;
+      _error = null;
+    });
+    try {
+      final fresh = await NewsService.rewriteItem(widget.item.id);
+      if (!mounted) return;
+      setState(() {
+        _headline.text = fresh.headline;
+        _summary.text = fresh.aiSummary;
+        _content.text = fresh.content.join('\n\n');
+        _destinations.text = fresh.destinations.join(', ');
+        _regions
+          ..clear()
+          ..addAll(fresh.regions);
+        _images = [...fresh.images];
+        _writtenAt = fresh.writtenAt;
+        _rewriting = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _rewriting = false;
+          _error = errorMessage(e);
+        });
+      }
+    }
   }
 
   Future<void> _save() async {
@@ -758,7 +804,10 @@ class _ItemFormState extends State<_ItemForm> {
     });
     try {
       await NewsService.patchItem(widget.item.id, {
+        'headline': _headline.text.trim(),
         'summary': _summary.text.trim(),
+        'content': _paragraphs,
+        'images': _images,
         'regions': _regions.toList(),
         'destinations': _destinations.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
       });
@@ -775,16 +824,91 @@ class _ItemFormState extends State<_ItemForm> {
 
   @override
   Widget build(BuildContext context) {
+    final written = _writtenAt;
+    final count = _paragraphs.length;
+    final busy = _saving || _rewriting;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppTextField(controller: _summary, label: t('Tóm tắt hiển thị trên Newsfeed'), maxLines: 6, minLines: 4, maxLength: 600),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.borderStrong),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                written != null
+                    ? t('AI viết bài này lúc {time}.', {'time': formatDateTime(written)})
+                    : t('Tin này chưa có bài viết. AI có thể đọc bài gốc và viết ngay.'),
+                style: AppText.meta,
+              ),
+              const SizedBox(height: 8),
+              AppButton(
+                label: _rewriting ? t('Đang viết…') : t('Viết lại bằng AI'),
+                icon: LucideIcons.sparkles,
+                size: ButtonSize.sm,
+                variant: ButtonVariant.outline,
+                loading: _rewriting,
+                onPressed: busy ? null : _rewrite,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        AppTextField(controller: _headline, label: t('Tiêu đề hiển thị'), hint: t('Để trống thì dùng tiêu đề của nguồn.'), maxLength: 200, maxLines: 2, minLines: 1),
+        const SizedBox(height: 12),
+        AppTextField(controller: _summary, label: t('Tóm tắt hiển thị trên Newsfeed'), maxLines: 5, minLines: 3, maxLength: 600),
         if (widget.item.excerpt.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(t('Xem trích đoạn gốc'), style: AppText.label.copyWith(fontSize: 13)),
           const SizedBox(height: 4),
           Text(widget.item.excerpt, maxLines: 8, overflow: TextOverflow.ellipsis, style: AppText.meta),
         ],
+        const SizedBox(height: 12),
+        AppTextField(controller: _content, label: t('Nội dung bài'), maxLines: 16, minLines: 8, onChanged: (_) => setState(() {})),
+        const SizedBox(height: 4),
+        Text(
+          t('{count}/8 đoạn. Mỗi đoạn cách nhau một dòng trống.', {'count': count}),
+          style: AppText.meta.copyWith(fontSize: 12, color: count > 8 ? AppColors.destructive : AppColors.meta),
+        ),
+        const SizedBox(height: 12),
+        Text(t('Ảnh ({count})', {'count': _images.length}), style: AppText.label),
+        const SizedBox(height: 8),
+        if (_images.isEmpty)
+          Text(t('Bài này không có ảnh.'), style: AppText.meta)
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (index, url) in _images.indexed)
+                SizedBox(
+                  width: 92,
+                  height: 92,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      NetImage(url, radius: AppRadius.md),
+                      if (index == 0) Positioned(left: 4, bottom: 4, child: AppBadge(t('Ảnh bìa'), tone: BadgeTone.overlay)),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: AppIconButton(
+                          icon: LucideIcons.x,
+                          label: t('Bỏ ảnh {n}', {'n': index + 1}),
+                          size: 32,
+                          color: AppColors.white,
+                          onPressed: () => setState(() => _images = _images.where((x) => x != url).toList()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         const SizedBox(height: 12),
         Text(t('Vùng'), style: AppText.label),
         const SizedBox(height: 8),
@@ -804,7 +928,7 @@ class _ItemFormState extends State<_ItemForm> {
         AppTextField(controller: _destinations, label: t('Địa điểm (cách nhau bằng dấu phẩy)'), hint: t('Đà Lạt, Hội An')),
         if (_error != null) ...[const SizedBox(height: 12), Text(_error!, style: AppText.meta.copyWith(color: AppColors.destructive))],
         const SizedBox(height: 16),
-        AppButton(label: t('Lưu thay đổi'), loading: _saving, onPressed: _saving ? null : _save),
+        AppButton(label: t('Lưu thay đổi'), loading: _saving, onPressed: busy || count > 8 ? null : _save),
         const SizedBox(height: 8),
       ],
     );

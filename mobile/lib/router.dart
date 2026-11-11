@@ -32,6 +32,7 @@ import 'features/discover/discover_screen.dart';
 import 'features/discover/interest_screen.dart';
 import 'features/editor/post_editor_screen.dart';
 import 'features/feed/feed_screen.dart';
+import 'features/feed/news_detail_screen.dart';
 import 'features/itinerary/itineraries_screen.dart';
 import 'features/itinerary/itinerary_detail_screen.dart';
 import 'features/itinerary/itinerary_edit_screen.dart';
@@ -166,6 +167,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/live/:id',
       builder: (_, state) => LiveScreen(id: state.pathParameters['id'] ?? ''),
+    ),
+
+    GoRoute(
+      path: '/news/:id',
+      builder: (_, state) => NewsDetailScreen(id: state.pathParameters['id'] ?? ''),
     ),
 
     GoRoute(path: '/posts/new', builder: (_, _) => const PostEditorScreen()),
