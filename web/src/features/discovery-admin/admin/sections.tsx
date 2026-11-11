@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Flag,
   MapPinned,
+  Newspaper,
   Settings,
   ShieldCheck,
   Users,
@@ -23,6 +24,7 @@ import { AuditLogPanel } from './AuditLogPanel'
 import { BusinessesPanel } from './BusinessesPanel'
 import { HiddenContentPanel } from './HiddenContentPanel'
 import { LiveStreamsPanel } from './LiveStreamsPanel'
+import { NewsPanel } from './news/NewsPanel'
 import { ReportsPanel } from './ReportsPanel'
 import { RevenuePanel } from './RevenuePanel'
 import { SettingsPanel } from './SettingsPanel'
@@ -133,6 +135,15 @@ export const ADMIN_SECTIONS: AdminSection[] = translatedList<AdminSection, 'labe
     icon: Building2,
     allowed: (user) => hasModule(user, 'businesses'),
     render: ({ onNotice }) => <BusinessesPanel onNotice={onNotice} />,
+  },
+  {
+    path: 'news',
+    label: 'Tin tức',
+    title: 'Tin tức du lịch',
+    description: () => t('Chọn nguồn tin (báo, Google News, YouTube, mạng xã hội) để ChillnGo tự cào, tóm tắt và đăng lên Newsfeed.'),
+    icon: Newspaper,
+    allowed: (user) => hasModule(user, 'news'),
+    render: ({ onNotice }) => <NewsPanel onNotice={onNotice} />,
   },
   {
     path: 'revenue',

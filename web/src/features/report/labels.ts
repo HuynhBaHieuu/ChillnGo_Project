@@ -20,6 +20,7 @@ export const REPORT_TARGET_LABELS: Record<ReportTargetType, MessageKey> = {
   user: 'tài khoản',
   business: 'cơ sở kinh doanh',
   businessPost: 'bài quảng cáo',
+  news: 'tin du lịch',
 }
 
 export const REPORT_STATUS_LABELS: Record<ReportStatus, MessageKey> = {

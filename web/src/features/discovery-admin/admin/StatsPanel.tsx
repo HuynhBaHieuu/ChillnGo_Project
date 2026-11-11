@@ -25,7 +25,7 @@ export function StatsPanel() {
     return <p className="text-sm text-destructive">{(stats.error as Error).message}</p>
   }
 
-  const { users, content, signupsByDay, scope, byRole, adminActions7, pendingReports, pendingBusinesses, revenue } = stats.data
+  const { users, content, signupsByDay, scope, byRole, adminActions7, pendingReports, pendingBusinesses, revenue, news } = stats.data
 
   return (
     <div className="space-y-8">
@@ -52,6 +52,22 @@ export function StatsPanel() {
             <span className="mt-2 block font-display text-3xl tabular-nums">{pendingBusinesses.toLocaleString(localeTag())}</span>
           </span>
           <span className="text-sm font-semibold underline-offset-4 hover:underline">{t('Mở hàng chờ duyệt')} →</span>
+        </Link>
+      )}
+
+      {news && (
+        <Link
+          to="/admin/news"
+          className="grid gap-4 rounded-2xl border border-foreground/15 bg-card p-5 transition-colors hover:bg-muted/60 sm:grid-cols-2"
+        >
+          <span>
+            <span className="block text-xs font-medium text-muted-foreground">{t('Tin mới hôm nay')}</span>
+            <span className="mt-2 block font-display text-3xl tabular-nums">{news.today.toLocaleString(localeTag())}</span>
+          </span>
+          <span>
+            <span className="block text-xs font-medium text-muted-foreground">{t('Tin chờ duyệt')}</span>
+            <span className="mt-2 block font-display text-3xl tabular-nums">{news.pending.toLocaleString(localeTag())}</span>
+          </span>
         </Link>
       )}
 

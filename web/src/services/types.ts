@@ -65,7 +65,7 @@ export interface User {
    * Admin modules this account may use. Sent by the API; absent on mock users.
    * See web/src/lib/roles.ts.
    */
-  permissions?: ('users' | 'content' | 'reports' | 'categories' | 'stats' | 'businesses' | 'revenue')[]
+  permissions?: ('users' | 'content' | 'reports' | 'categories' | 'stats' | 'businesses' | 'revenue' | 'news')[]
   /** Premium right now: shows the crown badge. Sent by the API; absent on mock users. */
   isPremium?: boolean
   /** Only on your own account: when Premium ends. */
@@ -237,7 +237,7 @@ export interface ModerationInfo {
   reason: string
 }
 
-export type ReportTargetType = 'post' | 'comment' | 'checkin' | 'user' | 'business' | 'businessPost'
+export type ReportTargetType = 'post' | 'comment' | 'checkin' | 'user' | 'business' | 'businessPost' | 'news'
 export type ReportReason = 'spam' | 'inappropriate' | 'scam' | 'misinformation' | 'harassment' | 'other'
 export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
 export type ReportAction = 'none' | 'hide' | 'remove' | 'lock'
@@ -679,3 +679,76 @@ export type BusinessInput = Pick<
 >
 
 export type BusinessAdInput = Pick<BusinessAd, 'title' | 'content' | 'photos' | 'offer'>
+
+/* ------------------------------------------------------------------ News */
+
+export type NewsSourceType = 'rss' | 'google_news' | 'youtube_channel' | 'social'
+export type SocialPlatform = 'twitter' | 'reddit' | 'youtube' | 'facebook' | 'instagram' | 'xiaohongshu' | 'bilibili'
+export type NewsStatus = 'queued' | 'pending' | 'published' | 'rejected' | 'hidden'
+
+/** Travel news gathered from outside sources (server/src/lib/news). */
+export interface NewsItem {
+  _id: ObjectId
+  sourceId: ObjectId
+  sourceName: string
+  sourceType: NewsSourceType
+  platform: SocialPlatform | null
+  /** The original: readers open it to read the news. */
+  url: string
+  title: string
+  /** AI summary in Vietnamese, or the source's own excerpt. */
+  summary: string
+  imageUrl: string
+  kind: 'article' | 'video' | 'post'
+  author: string
+  publishedAt: ISODate
+  pinned: boolean
+  regions: Region[]
+  destinations: string[]
+  savedByMe?: boolean
+  /** Admin views only. */
+  status?: NewsStatus
+  statusReason?: string
+  excerpt?: string
+  aiSummary?: string
+  aiStatus?: 'pending' | 'done' | 'skipped' | 'failed'
+  clickCount?: number
+  createdAt?: ISODate
+}
+
+export interface NewsSource {
+  _id: ObjectId
+  name: string
+  type: NewsSourceType
+  url: string
+  query: string
+  platform: SocialPlatform | null
+  includeKeywords: string[]
+  excludeKeywords: string[]
+  defaultRegion: Region | null
+  enabled: boolean
+  autoPublish: boolean
+  intervalMinutes: number
+  lastRunAt: ISODate | null
+  lastStatus: 'ok' | 'error' | null
+  lastError: string
+  lastNewCount: number
+  createdAt: ISODate
+  counts?: Partial<Record<NewsStatus, number>>
+}
+
+export type NewsSourceInput = Omit<NewsSource, '_id' | 'lastRunAt' | 'lastStatus' | 'lastError' | 'lastNewCount' | 'createdAt' | 'counts'>
+
+export interface NewsRun {
+  _id: ObjectId
+  sourceId: ObjectId
+  sourceName: string
+  trigger: 'schedule' | 'manual' | 'worker'
+  fetched: number
+  created: number
+  duplicates: number
+  filtered: number
+  error: string
+  durationMs: number
+  createdAt: ISODate
+}

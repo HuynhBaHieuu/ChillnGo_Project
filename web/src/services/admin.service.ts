@@ -65,6 +65,8 @@ export interface AdminStats {
   pendingBusinesses?: number
   /** Paid in the last 30 days and Premium members now; only with the Revenue permission. */
   revenue?: { revenue30: number; premiumMembers: number }
+  /** With the news permission: news published today and waiting for review. */
+  news?: { today: number; pending: number }
 }
 
 export interface AuditEntry {
