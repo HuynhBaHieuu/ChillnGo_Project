@@ -36,6 +36,7 @@ export const APP_ROUTES = [
   '/discover',
   '/discover/interest/:tag',
   '/posts/new',
+  '/news/:id',
   '/posts/:id',
   '/posts/:id/edit',
   '/activity/:section?',
@@ -386,7 +387,7 @@ Cập nhật ngày 10 tháng 11 năm 2026. ChillnGo lưu những dữ liệu nà
 
 **Nội dung được tài trợ:** cơ sở kinh doanh mua gói Đề xuất hiện trong mục "Gợi ý nổi bật" ở trang Khám phá, luôn có nhãn "Tài trợ". Vị trí này không dựa trên dữ liệu cá nhân của bạn: mọi người thấy cùng một danh sách, xếp ngẫu nhiên. ChillnGo không bán dữ liệu cho doanh nghiệp, không hiển thị quảng cáo của mạng quảng cáo bên thứ ba và không dùng công cụ phân tích hay theo dõi của bên thứ ba.
 
-**Tin du lịch:** tab "Tin du lịch" và các tin xen trong Newsfeed được tổng hợp từ nguồn công khai (báo điện tử, Google News, YouTube, mạng xã hội) do quản trị viên chọn. ChillnGo chỉ lưu tiêu đề, tóm tắt (có thể do AI viết), ảnh và đường dẫn; bấm vào tin là mở trang gốc của nguồn. Lượt mở chỉ được đếm tổng, không ghi lại ai đã mở.
+**Tin du lịch:** tab "Tin du lịch" và các tin xen trong Newsfeed được tổng hợp từ nguồn công khai (báo điện tử, Google News, YouTube, mạng xã hội) do quản trị viên chọn. Mỗi tin là một bài do AI viết lại bằng tiếng Việt từ bài gốc; ChillnGo lưu bài viết đó, đường dẫn tới các ảnh của bài gốc và đường dẫn bài gốc, không lưu nguyên văn bài gốc. Bấm vào tin là mở trang chi tiết trong ChillnGo; ảnh được tải thẳng từ máy chủ của nguồn (không gửi kèm địa chỉ trang bạn đang xem), và nút "Đọc bài gốc" mở trang của nguồn. Lượt mở chỉ được đếm tổng, không ghi lại ai đã mở.
 
 ## Dịch vụ xử lý dữ liệu
 

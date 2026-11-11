@@ -23,6 +23,7 @@ import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
 import { ItineraryEditPage } from '@/features/itinerary-clone/ItineraryEditPage'
 import { AiDraftPage } from '@/features/ai-clone/AiDraftPage'
+import { NewsDetailPage } from '@/features/news/NewsDetailPage'
 import { EditProfilePage } from '@/features/social/EditProfilePage'
 import { LiveNowPage } from '@/features/livestream/LiveNowPage'
 import { ProfilePage } from '@/features/social/ProfilePage'
@@ -44,6 +45,8 @@ export const router = createBrowserRouter([
       { path: '/feed', element: <FeedPage /> },
       { path: '/discover', element: <DiscoverPage /> },
       { path: '/discover/interest/:tag', element: <InterestPage /> },
+
+      { path: '/news/:id', element: <NewsDetailPage /> },
 
       { path: '/posts/:id', element: <PostDetailPage /> },
       {

@@ -686,19 +686,30 @@ export type NewsSourceType = 'rss' | 'google_news' | 'youtube_channel' | 'social
 export type SocialPlatform = 'twitter' | 'reddit' | 'youtube' | 'facebook' | 'instagram' | 'xiaohongshu' | 'bilibili'
 export type NewsStatus = 'queued' | 'pending' | 'published' | 'rejected' | 'hidden'
 
-/** Travel news gathered from outside sources (server/src/lib/news). */
+/**
+ * A travel news post: written by the AI from an outside source's article
+ * (server/src/lib/news), shown with the original's pictures.
+ */
 export interface NewsItem {
   _id: ObjectId
   sourceId: ObjectId
   sourceName: string
   sourceType: NewsSourceType
   platform: SocialPlatform | null
-  /** The original: readers open it to read the news. */
+  /** The original article, linked at the end of the post. */
   url: string
+  /** The AI's Vietnamese headline, or the source's own title. */
   title: string
   /** AI summary in Vietnamese, or the source's own excerpt. */
   summary: string
+  /** The cover picture. */
   imageUrl: string
+  /** Every picture of the post, the cover first. */
+  images: string[]
+  /** The post's paragraphs. Only on the post's own page and in admin views. */
+  content?: string[]
+  /** The source's own title. Only on the post's own page and in admin views. */
+  originalTitle?: string
   kind: 'article' | 'video' | 'post'
   author: string
   publishedAt: ISODate
@@ -709,6 +720,10 @@ export interface NewsItem {
   /** Admin views only. */
   status?: NewsStatus
   statusReason?: string
+  /** The headline as stored ('' when the AI has not written one). */
+  headline?: string
+  /** When the AI last wrote the post; null when it never did. */
+  writtenAt?: ISODate | null
   excerpt?: string
   aiSummary?: string
   aiStatus?: 'pending' | 'done' | 'skipped' | 'failed'

@@ -18,6 +18,17 @@ export function useNews(region?: Region, enabled = true) {
   })
 }
 
+/** One news post with its paragraphs and pictures. */
+export function useNewsItem(id: string | undefined) {
+  const viewerId = useViewerId()
+  return useQuery({
+    queryKey: ['news', 'item', id ?? '', viewerId],
+    queryFn: () => newsService.getNewsItem(id as string),
+    enabled: Boolean(id),
+    staleTime: 60_000,
+  })
+}
+
 export function useSavedNews(enabled = true) {
   const viewerId = useViewerId()
   return useQuery({
@@ -27,12 +38,13 @@ export function useSavedNews(enabled = true) {
   })
 }
 
-/** Saves or unsaves a news item, updating every cached list at once. */
+/** Saves or unsaves a news item, updating every cached list and the post's own page at once. */
 export function useToggleSaveNews() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => newsService.toggleSave(id),
     onSuccess: (saved, id) => {
+      queryClient.setQueriesData<NewsItem>({ queryKey: ['news', 'item', id] }, (item) => item && { ...item, savedByMe: saved })
       queryClient.setQueriesData<InfiniteData<NewsPage>>({ queryKey: ['news'] }, (data) => {
         if (!data || !('pages' in data)) return data
         return {
