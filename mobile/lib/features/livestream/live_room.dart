@@ -17,6 +17,7 @@ import 'package:livekit_client/livekit_client.dart';
 import '../../data/json.dart';
 import '../../data/models.dart';
 import '../../core/i18n.dart';
+import '../../state/session.dart';
 
 /// Same topic the server sends on (server/src/lib/livekit.ts).
 const dataTopic = 'chillngo';
@@ -93,6 +94,12 @@ class LiveRoom extends ChangeNotifier {
   String? error;
 
   bool get isHost => connection.role == 'host';
+
+  /// Premium hosts publish 1080p, everyone else 720p (server/src/lib/plans.ts).
+  CameraCaptureOptions _capture(CameraPosition position) => CameraCaptureOptions(
+    cameraPosition: position,
+    params: (appContainer.read(sessionProvider).user?.isPremium ?? false) ? VideoParametersPresets.h1080_169 : VideoParametersPresets.h720_169,
+  );
   bool get hasVideo => video != null && !(video!.muted);
 
   void _notify() {
@@ -233,7 +240,7 @@ class LiveRoom extends ChangeNotifier {
           try {
             await local.setCameraEnabled(
               true,
-              cameraCaptureOptions: CameraCaptureOptions(cameraPosition: frontCamera ? CameraPosition.front : CameraPosition.back),
+              cameraCaptureOptions: _capture(frontCamera ? CameraPosition.front : CameraPosition.back),
             );
             backCamera = !frontCamera;
             video = _camera;
@@ -280,7 +287,7 @@ class LiveRoom extends ChangeNotifier {
         await local.setCameraEnabled(false);
         camOn = false;
       } else {
-        await local.setCameraEnabled(true, cameraCaptureOptions: CameraCaptureOptions(cameraPosition: backCamera ? CameraPosition.back : CameraPosition.front));
+        await local.setCameraEnabled(true, cameraCaptureOptions: _capture(backCamera ? CameraPosition.back : CameraPosition.front));
         video = _camera;
         camOn = true;
       }

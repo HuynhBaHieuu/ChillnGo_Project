@@ -1,4 +1,5 @@
 import { Bookmark, Copy, FileText, MapPin } from 'lucide-react'
+import { PremiumBadge } from '@/components/PremiumBadge'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { PageContainer } from '@/app/layout/PageContainer'
@@ -88,8 +89,9 @@ export function ProfilePage() {
             </Avatar>
 
             <div>
-              <h1 className="font-display text-4xl tracking-tight">
+              <h1 className="flex items-center gap-2 font-display text-4xl tracking-tight">
                 {user.displayName}
+                <PremiumBadge user={user} className="p-1 [&_svg]:size-4" />
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">@{user.username}</p>
             </div>

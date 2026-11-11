@@ -46,14 +46,20 @@ const livestreamSchema = new Schema(
     blockedUserIds: { type: [String], default: [] },
     /**
      * The recording, when the host asked for one. "recording" while live,
-     * "processing" until the file is uploaded, then "ready" or "failed".
+     * "processing" until the file is uploaded, then "ready" or "failed";
+     * "expired" once its keeping time is over and the file is deleted.
      * `key` is the file's path in the (private) bucket; viewers get signed links.
      */
     recording: {
-      status: { type: String, enum: ['none', 'recording', 'processing', 'ready', 'failed'], default: 'none' },
+      status: { type: String, enum: ['none', 'recording', 'processing', 'ready', 'failed', 'expired'], default: 'none' },
       egressId: { type: String, default: null },
       key: { type: String, default: null },
       durationSec: { type: Number, default: 0 },
+      /**
+       * The replay is deleted after this: 30 days after it is first seen
+       * ready, 365 when its host is Premium then (lib/plans.ts).
+       */
+      expiresAt: { type: Date, default: null },
     },
     /** The replay's cover picture, chosen by the host once the replay is ready. Empty: none chosen. */
     thumbnailUrl: { type: String, default: '' },

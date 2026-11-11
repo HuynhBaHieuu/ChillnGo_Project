@@ -9,7 +9,7 @@
  *         disconnected states.
  */
 
-import { DisconnectReason, LocalVideoTrack, Room, RoomEvent, Track } from 'livekit-client'
+import { DisconnectReason, LocalVideoTrack, Room, RoomEvent, Track, VideoPresets } from 'livekit-client'
 import type { RemoteParticipant, RemoteTrack, VideoCaptureOptions } from 'livekit-client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -17,6 +17,7 @@ import { mediaErrorMessage } from '@/features/livestream/media'
 import type { DevicePick } from '@/features/livestream/media'
 import type { LiveComment, LiveConnection, ReactionKind } from '@/services/livestream.service'
 import { t } from '@/i18n'
+import { useAuthStore } from '@/store/auth.store'
 
 /** Same topic the server sends on (server/src/lib/livekit.ts). */
 const DATA_TOPIC = 'chillngo'
@@ -114,10 +115,15 @@ export function useLiveRoom({ connection, hostId, devices, ...handlers }: Option
   const publishCamera = useCallback(
     async (room: Room, options?: VideoCaptureOptions) => {
       const local = room.localParticipant
-      await local.setCameraEnabled(true, options).catch((e: unknown) => {
-        if (!options) throw e
-        return local.setCameraEnabled(true)
-      })
+      // Premium hosts publish 1080p, everyone else 720p (server/src/lib/plans.ts).
+      const preset = useAuthStore.getState().user?.isPremium ? VideoPresets.h1080 : VideoPresets.h720
+      await local
+        .setCameraEnabled(true, { resolution: preset.resolution, ...options }, { videoEncoding: preset.encoding })
+        .catch((e: unknown) => {
+          // A camera that cannot do the size (or the chosen device) still goes live with its defaults.
+          if (!options) return local.setCameraEnabled(true).catch(() => Promise.reject(e))
+          return local.setCameraEnabled(true)
+        })
       const track = cameraTrack(room)
       if (!track) throw new Error('camera')
       cameraChanged(track)

@@ -479,6 +479,12 @@
   "ko": "선택…",
   "zh": "选择…"
  },
+ "Chủ cơ sở: {name}": {
+  "en": "Owner: {name}",
+  "ja": "オーナー：{name}",
+  "ko": "운영자: {name}",
+  "zh": "负责人：{name}"
+ },
  "CÁCH CHILLNGO HOẠT ĐỘNG": {
   "en": "HOW CHILLNGO WORKS",
   "ja": "CHILLNGOのしくみ",
@@ -1094,6 +1100,12 @@
   "ko": "예산 {amount}",
   "zh": "预算 {amount}"
  },
+ "Nhiều lượt AI, livestream 1080p, giữ video lâu hơn": {
+  "en": "More AI requests, 1080p livestreams, replays kept longer",
+  "ja": "AI 回数の追加、1080p 配信、アーカイブの長期保存",
+  "ko": "AI 횟수 증가, 1080p 라이브, 다시보기 장기 보관",
+  "zh": "更多 AI 次数、1080p 直播、回放保存更久"
+ },
  "Những gì bạn vừa nhập chưa được lưu. Rời trang sẽ mất các thay đổi này.": {
   "en": "What you just entered isn't saved. Leaving will lose these changes.",
   "ja": "入力した内容はまだ保存されていません。移動すると変更が失われます。",
@@ -1282,6 +1294,12 @@
   "ja": "プロフィール",
   "ko": "프로필",
   "zh": "个人主页"
+ },
+ "Trang cơ sở, bài quảng cáo, gói Đề xuất": {
+  "en": "Business page, ads, Featured package",
+  "ja": "ビジネスページ・広告・おすすめ掲載",
+  "ko": "비즈니스 페이지, 광고, 추천 노출",
+  "zh": "商家页面、广告、推荐套餐"
  },
  "Trong email “Xác nhận email đăng ký tài khoản ChillnGo”, giữ lâu nút Xác nhận email để sao chép liên kết, rồi dán vào đây.": {
   "en": "In the email “Xác nhận email đăng ký tài khoản ChillnGo”, long-press Confirm email to copy the link, then paste it here.",

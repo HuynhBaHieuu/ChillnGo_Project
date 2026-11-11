@@ -27,6 +27,7 @@ import 'live_room.dart';
 import 'live_widgets.dart';
 import '../../ui/navigation.dart';
 import '../../core/i18n.dart';
+import '../../ui/premium_badge.dart';
 
 Map<String, String?> get _audienceNote => {'public': null, 'followers': t('Chỉ người theo dõi'), 'private': t('Chỉ mình bạn xem được')};
 
@@ -586,6 +587,11 @@ class _LiveViewState extends ConsumerState<_LiveView> {
                                   text: stream.host.displayName,
                                   style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.cream),
                                 ),
+                                if (stream.host.isPremium)
+                                  const WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Padding(padding: EdgeInsets.only(left: 5), child: PremiumBadge(show: true, size: 10)),
+                                  ),
                                 TextSpan(
                                   text:
                                       t(' · bắt đầu {time}{value}{value2}', {'time': relativeTime(stream.startedAt), 'value': _audienceNote[stream.audience] != null ? ' · ${_audienceNote[stream.audience]}' : '', 'value2': stream.recording.status == 'recording' ? t(' · Đang được ghi lại') : ''}),

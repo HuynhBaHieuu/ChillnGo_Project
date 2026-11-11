@@ -1,4 +1,5 @@
 import { CalendarRange, Pencil, Trash2, UserPlus, Wallet } from 'lucide-react'
+import { PremiumBadge } from '@/components/PremiumBadge'
 import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
@@ -108,8 +109,9 @@ export function PostDetailPage() {
                 <AvatarFallback>{post.author.displayName.charAt(0)}</AvatarFallback>
               </Avatar>
               <span>
-                <span className="block text-sm group-hover:underline">
+                <span className="flex items-center gap-1.5 text-sm group-hover:underline">
                   {post.author.displayName}
+                  <PremiumBadge user={post.author} />
                 </span>
                 <time
                   dateTime={post.createdAt}

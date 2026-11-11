@@ -37,7 +37,7 @@ import type { Notice } from './shared'
 
 const ALL = 'all'
 const STATUSES: ReportStatus[] = ['pending', 'resolved', 'dismissed']
-const TYPES: ReportTargetType[] = ['post', 'comment', 'checkin', 'user']
+const TYPES: ReportTargetType[] = ['post', 'comment', 'checkin', 'user', 'business', 'businessPost']
 
 interface Selected {
   targetType: ReportTargetType

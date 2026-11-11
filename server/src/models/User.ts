@@ -2,6 +2,7 @@ import { Schema, Types, model } from 'mongoose'
 import type { InferSchemaType } from 'mongoose'
 
 import { ADMIN_MODULES, ROLES, effectivePermissions } from '../lib/permissions.js'
+import { isPremium } from '../lib/plans.js'
 
 /**
  * User collection. Field names match `User` in web/src/services/types.ts.
@@ -57,6 +58,11 @@ const userSchema = new Schema(
     passwordResetSentAt: { type: Date, select: false },
     /** Sign-in tokens issued before this no longer work. Set by a password reset. */
     passwordChangedAt: { type: Date },
+
+    /** Premium until then (lib/plans.ts). Null: never bought. */
+    premiumUntil: { type: Date, default: null },
+    /** The `premiumUntil` the renewal reminder went out for, so it is sent once per period. */
+    premiumReminderFor: { type: Date, default: null },
   },
   { timestamps: true, versionKey: false },
 )
@@ -83,6 +89,8 @@ export function toPublicUser(user: UserRecord) {
     postCount: user.postCount,
     role: user.role,
     permissions: effectivePermissions(user),
+    isPremium: isPremium(user),
+    premiumUntil: user.premiumUntil?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
   }
 }

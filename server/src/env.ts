@@ -80,6 +80,24 @@ function readLiveKit() {
 }
 
 /**
+ * PayOS (https://payos.vn), the payment gateway for Premium and the business
+ * "Đề xuất" package: the buyer pays by VietQR bank transfer. Keys from
+ * my.payos.vn > Kênh thanh toán. Unset: buying answers 503, nothing else changes.
+ */
+function readPayOS() {
+  const clientId = process.env.PAYOS_CLIENT_ID?.trim()
+  const apiKey = process.env.PAYOS_API_KEY?.trim()
+  const checksumKey = process.env.PAYOS_CHECKSUM_KEY?.trim()
+  if (!clientId || !apiKey || !checksumKey) return null
+  return {
+    clientId,
+    apiKey,
+    checksumKey,
+    apiUrl: (process.env.PAYOS_API_URL?.trim() || 'https://api-merchant.payos.vn').replace(/\/$/, ''),
+  }
+}
+
+/**
  * Where livestream recordings are uploaded: any S3-compatible bucket
  * (Backblaze B2, Cloudflare R2, AWS S3…). LiveKit records the room and
  * uploads the MP4 itself. The bucket stays private: each allowed viewer gets
@@ -153,7 +171,10 @@ export const env = {
   gemini: process.env.GEMINI_API_KEY?.trim()
     ? { apiKey: process.env.GEMINI_API_KEY.trim(), model: process.env.GEMINI_MODEL?.trim() || 'gemini-3.8-flash' }
     : null,
-  /** AI requests (an AI clone, a chat message) each user may make per day. */
-  aiDailyLimit: Number(process.env.AI_DAILY_LIMIT_PER_USER) || 20,
+  /** AI requests (an AI clone, a chat message) each free account may make per day. */
+  aiDailyLimit: Number(process.env.AI_DAILY_LIMIT_PER_USER) || 10,
+  /** The same for a Premium account (lib/plans.ts). */
+  aiDailyLimitPremium: Number(process.env.AI_DAILY_LIMIT_PREMIUM) || 100,
+  payos: readPayOS(),
   mailFrom: process.env.MAIL_FROM?.trim() || `ChillnGo <${smtp?.user ?? 'no-reply@chillngo.local'}>`,
 }

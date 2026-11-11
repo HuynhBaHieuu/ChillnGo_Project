@@ -18,6 +18,8 @@ export const REPORT_TARGET_LABELS: Record<ReportTargetType, MessageKey> = {
   comment: 'bình luận',
   checkin: 'check-in',
   user: 'tài khoản',
+  business: 'cơ sở kinh doanh',
+  businessPost: 'bài quảng cáo',
 }
 
 export const REPORT_STATUS_LABELS: Record<ReportStatus, MessageKey> = {

@@ -9,6 +9,8 @@ import { Schema, model } from 'mongoose'
 /**
  * 'moderation': your content was hidden or removed, or your account locked, after reports.
  * 'report_resolved': something you reported has been looked at.
+ * 'billing': a payment went through, or Premium / the "Đề xuất" package is about to run out.
+ * 'business': an admin approved, rejected or hid your business page.
  */
 export const NOTIFICATION_TYPES = [
   'follow',
@@ -20,6 +22,8 @@ export const NOTIFICATION_TYPES = [
   'invite_accepted',
   'moderation',
   'report_resolved',
+  'billing',
+  'business',
 ] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 

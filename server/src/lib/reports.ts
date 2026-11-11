@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 import type { AdminModule } from './permissions.js'
 
-export const REPORT_TARGET_TYPES = ['post', 'comment', 'checkin', 'user'] as const
+export const REPORT_TARGET_TYPES = ['post', 'comment', 'checkin', 'user', 'business', 'businessPost'] as const
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number]
 
 export const REPORT_REASONS = ['spam', 'inappropriate', 'scam', 'misinformation', 'harassment', 'other'] as const
