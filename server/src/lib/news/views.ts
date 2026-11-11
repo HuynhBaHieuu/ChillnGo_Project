@@ -49,8 +49,13 @@ export const previewSchema = z.object({
   query: z.string().trim().max(200).default(''),
 })
 
+const httpsLink = z.string().trim().max(1000).regex(/^https:\/\/\S+$/, 'Ảnh phải là đường dẫn https://')
+
 export const itemPatchSchema = z.object({
+  headline: z.string().trim().max(200, 'Tiêu đề tối đa 200 ký tự').optional(),
   summary: z.string().trim().max(600, 'Tóm tắt tối đa 600 ký tự').optional(),
+  content: z.array(z.string().trim().min(1).max(1500, 'Mỗi đoạn tối đa 1500 ký tự')).max(8, 'Tối đa 8 đoạn').optional(),
+  images: z.array(httpsLink).max(12, 'Tối đa 12 ảnh').optional(),
   regions: z.array(z.enum(NEWS_REGIONS)).max(5).optional(),
   destinations: z.array(z.string().trim().min(1).max(80)).max(5).optional(),
   pinned: z.boolean().optional(),
@@ -115,8 +120,9 @@ export function sourceView(source: NewsSourceDocument) {
   }
 }
 
-/** Public view; `admin` adds the review fields. */
-export function itemView(item: NewsItemDocument, opts: { admin?: boolean; saved?: boolean } = {}) {
+/** Public view of a card; `detail` adds the post itself, `admin` the review fields. */
+export function itemView(item: NewsItemDocument, opts: { admin?: boolean; detail?: boolean; saved?: boolean } = {}) {
+  const images = item.images.length > 0 ? item.images : item.imageUrl ? [item.imageUrl] : []
   return {
     _id: String(item._id),
     sourceId: item.sourceId,
@@ -124,9 +130,10 @@ export function itemView(item: NewsItemDocument, opts: { admin?: boolean; saved?
     sourceType: item.sourceType,
     platform: item.platform ?? null,
     url: item.url,
-    title: item.title,
+    title: item.headline || item.title,
     summary: item.summary || item.excerpt,
-    imageUrl: item.imageUrl,
+    imageUrl: images[0] ?? '',
+    images,
     kind: item.kind,
     author: item.author,
     publishedAt: item.publishedAt.toISOString(),
@@ -134,7 +141,10 @@ export function itemView(item: NewsItemDocument, opts: { admin?: boolean; saved?
     regions: item.regions,
     destinations: item.destinations,
     ...(opts.saved !== undefined && { savedByMe: opts.saved }),
+    ...((opts.detail || opts.admin) && { content: item.content, originalTitle: item.title }),
     ...(opts.admin && {
+      headline: item.headline,
+      writtenAt: item.writtenAt?.toISOString() ?? null,
       status: item.status,
       statusReason: item.statusReason,
       excerpt: item.excerpt,

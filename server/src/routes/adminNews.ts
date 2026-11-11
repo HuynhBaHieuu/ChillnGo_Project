@@ -10,7 +10,9 @@
  *   POST   /sources/:id/run             fetch one server-side source now, then the AI step
  *   POST   /run                         fetch every enabled server-side source now
  *   GET    /items?status&sourceId&q&page   items by status
- *   PATCH  /items/:id                   edit summary, regions, destinations, pinned
+ *   GET    /items/:id                   one item in any status, with its post
+ *   PATCH  /items/:id                   edit headline, summary, paragraphs, pictures, regions, destinations, pinned
+ *   POST   /items/:id/rewrite           the AI reads the original again and writes the post anew
  *   POST   /items/:id/review            approve | reject | hide | unhide
  *   POST   /items/review                the same for many items
  *   GET    /runs?page                   fetch history, newest first
@@ -26,7 +28,7 @@ import { z } from 'zod'
 
 import { audit } from '../lib/audit.js'
 import { HttpError } from '../lib/errors.js'
-import { enrichQueued, fetchSource, rotateWorkerKey, revokeWorkerKey, runDueSources, runSource } from '../lib/news/pipeline.js'
+import { enrichQueued, fetchSource, rewriteItem, rotateWorkerKey, revokeWorkerKey, runDueSources, runSource } from '../lib/news/pipeline.js'
 import {
   REVIEW_TRANSITIONS,
   bulkReviewSchema,
@@ -148,7 +150,10 @@ adminNewsRouter.get('/items', async (req, res) => {
   const filter: Record<string, unknown> = {}
   if (query.status) filter.status = query.status
   if (query.sourceId) filter.sourceId = query.sourceId
-  if (query.q) filter.title = new RegExp(escapeRegex(query.q), 'i')
+  if (query.q) {
+    const q = new RegExp(escapeRegex(query.q), 'i')
+    filter.$or = [{ title: q }, { headline: q }]
+  }
   const [items, total] = await Promise.all([
     NewsItem.find(filter)
       .sort(query.status === 'published' ? { pinned: -1, publishedAt: -1 } : { createdAt: -1 })
@@ -165,10 +170,23 @@ async function loadItem(id: string) {
   return item
 }
 
+adminNewsRouter.get('/items/:id', async (req, res) => {
+  res.json({ item: itemView(await loadItem(String(req.params.id)), { admin: true }) })
+})
+
+adminNewsRouter.post('/items/:id/rewrite', async (req, res) => {
+  const item = await loadItem(String(req.params.id))
+  await rewriteItem(item)
+  await audit(req, currentUser(res), 'news.item.rewrite', { type: 'news_item', id: String(item._id), label: item.title.slice(0, 120) })
+  res.json({ item: itemView(item, { admin: true }) })
+})
+
 adminNewsRouter.patch('/items/:id', async (req, res) => {
   const input = itemPatchSchema.parse(req.body)
   const item = await loadItem(String(req.params.id))
   item.set(input)
+  // The cover is the first picture.
+  if (input.images) item.imageUrl = input.images[0] ?? ''
   await item.save()
   await audit(req, currentUser(res), input.pinned === undefined ? 'news.item.edit' : input.pinned ? 'news.item.pin' : 'news.item.unpin', {
     type: 'news_item',

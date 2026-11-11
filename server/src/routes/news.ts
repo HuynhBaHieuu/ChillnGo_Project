@@ -4,14 +4,16 @@
  *
  *   GET  /api/news?region&before        published news, newest first (pinned first on the first page)
  *   GET  /api/news/saved                news the signed-in user saved
+ *   GET  /api/news/:id                  one published item with its post (paragraphs, pictures)
  *   POST /api/news/:id/save             save / unsave (toggle)
- *   POST /api/news/:id/click            counts a click through to the original
+ *   POST /api/news/:id/click            counts a reader opening the post
  *   GET  /api/news/cron                 the scheduler (Bearer CRON_SECRET): fetch due sources, run the AI step
  *   GET  /api/news/worker/sources       the news worker (X-Worker-Key): social sources due now
  *   POST /api/news/worker/ingest        the news worker: items it fetched, or the error it met
  *
- * Only a title, a short summary, a picture and the link are kept; readers
- * open the original to read it.
+ * Each item is a post written by the AI from the original (lib/news/pipeline);
+ * the original's text is not kept, its pictures are shown by link and the
+ * post ends with the link back.
  */
 
 import { Router } from 'express'
@@ -133,6 +135,13 @@ async function loadPublished(id: string) {
   if (!item) throw new HttpError(404, 'Không tìm thấy tin.', 'NOT_FOUND')
   return item
 }
+
+newsRouter.get('/:id', optionalAuth, async (req, res) => {
+  const item = await loadPublished(String(req.params.id))
+  const viewerId = res.locals.userId as string | undefined
+  const saved = viewerId ? Boolean(await NewsSave.exists({ userId: viewerId, itemId: String(item._id) })) : undefined
+  res.json({ item: itemView(item, { detail: true, saved }) })
+})
 
 newsRouter.post('/:id/click', clickLimiter, async (req, res) => {
   const item = await loadPublished(String(req.params.id))

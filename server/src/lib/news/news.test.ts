@@ -5,6 +5,7 @@ import {
   canonicalUrl,
   channelIdInPage,
   googleNewsUrl,
+  imageLink,
   parseFeed,
   passesKeywords,
   plainText,
@@ -13,7 +14,8 @@ import {
   youtubeChannelId,
   youtubeFeedUrl,
 } from './feeds.js'
-import { initialStatus, parseAiAnswer, statusAfterAi, verifyCronSecret } from './pipeline.js'
+import { extractArticle, imagesInHtml, looksLikePhoto, pickImages, readablePage } from './article.js'
+import { MAX_HEADLINE, MAX_PARAGRAPHS, MAX_PARAGRAPH_CHARS, initialStatus, parseWritten, statusAfterAi, verifyCronSecret } from './pipeline.js'
 
 const RSS = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -132,23 +134,31 @@ describe('news pipeline rules', () => {
     assert.equal(statusAfterAi(false, true), 'pending')
   })
 
-  it('reads the JSON array inside an AI answer and drops bad fields', () => {
-    const answer = parseAiAnswer('Đây là kết quả:\n[{"id":"1","relevant":true,"summary":"Tóm tắt","region":"mars","destinations":["Đà Lạt"]}]\nHết.')
-    assert.deepEqual(answer, [{ id: '1', relevant: true, summary: 'Tóm tắt', region: null, destinations: ['Đà Lạt'] }])
-    assert.equal(parseAiAnswer('không có JSON'), null)
-    assert.equal(parseAiAnswer('[{"id": 1}]'), null)
+  it('reads the post inside an AI answer and drops bad fields', () => {
+    const post = parseWritten(
+      'Đây là kết quả:\n{"relevant":true,"headline":"Mùa <b>dã quỳ</b> Đà Lạt","summary":"Tóm tắt","content":["Đoạn một.","   ","Đoạn hai."],"region":"mars","destinations":["Đà Lạt"]}\nHết.',
+    )
+    assert.deepEqual(post, {
+      relevant: true,
+      headline: 'Mùa dã quỳ Đà Lạt',
+      summary: 'Tóm tắt',
+      content: ['Đoạn một.', 'Đoạn hai.'],
+      region: null,
+      destinations: ['Đà Lạt'],
+    })
+    assert.equal(parseWritten('không có JSON'), null)
+    assert.equal(parseWritten('{"headline":"thiếu relevant"}'), null)
   })
 
-  it('fills in the ids by position when the model leaves them out but answers every item', () => {
-    const text = '{"results": [{"relevant":true,"summary":"A","region":"north","destinations":[]},{"relevant":false,"summary":"","region":null,"destinations":[]}]}'
-    assert.deepEqual(parseAiAnswer(text, ['a', 'b']), [
-      { id: 'a', relevant: true, summary: 'A', region: 'north', destinations: [] },
-      { id: 'b', relevant: false, summary: '', region: null, destinations: [] },
-    ])
-    // A count that does not match cannot be trusted by position.
-    assert.equal(parseAiAnswer(text, ['a']), null)
-    // Ids the model did give win over the position.
-    assert.deepEqual(parseAiAnswer('[{"id":"z","relevant":true}]', ['a'])?.map((a) => a.id), ['z'])
+  it('keeps a post within its limits', () => {
+    const paragraphs = Array.from({ length: 12 }, (_, i) => `Đoạn ${i} ${'x'.repeat(2000)}`)
+    const post = parseWritten(JSON.stringify({ relevant: true, headline: 'h'.repeat(400), content: paragraphs, destinations: ['a', 'b', 'c', 'd', 'e', 'f'] }))!
+    assert.equal(post.headline.length, MAX_HEADLINE)
+    assert.equal(post.content.length, MAX_PARAGRAPHS)
+    assert.ok(post.content.every((paragraph) => paragraph.length <= MAX_PARAGRAPH_CHARS))
+    assert.equal(post.destinations.length, 5)
+    // An item the AI finds unrelated carries no post.
+    assert.deepEqual(parseWritten('{"relevant":false}')?.content, [])
   })
 
   it('accepts only the exact cron secret', () => {
@@ -156,5 +166,72 @@ describe('news pipeline rules', () => {
     assert.throws(() => verifyCronSecret('Bearer wrong', 's3cret-value'))
     assert.throws(() => verifyCronSecret(undefined, 's3cret-value'))
     assert.throws(() => verifyCronSecret('Bearer anything', null))
+  })
+})
+
+describe('news articles', () => {
+  it('repairs picture links feeds get wrong', () => {
+    assert.equal(imageLink('//cdn.example.com/a.jpg'), 'https://cdn.example.com/a.jpg')
+    assert.equal(imageLink('https://saigoneer.com///media.example.net/img/28.webp'), 'https://media.example.net/img/28.webp')
+    assert.equal(imageLink('http://example.com/a.jpg#top'), 'https://example.com/a.jpg')
+    assert.equal(imageLink('/files/a.jpg', 'https://example.com/tin/1'), 'https://example.com/files/a.jpg')
+    assert.equal(imageLink('/files/a.jpg'), '')
+    assert.equal(imageLink('data:image/png;base64,AAAA'), '')
+    assert.equal(imageLink('javascript:alert(1)'), '')
+  })
+
+  it('tells photographs from decorations and thumbnails', () => {
+    assert.ok(looksLikePhoto('https://example.com/2026/11/hoi-an.jpg'))
+    assert.ok(looksLikePhoto('https://example.com/zoom/1200_630/hoi-an.jpg'))
+    assert.ok(!looksLikePhoto('https://example.com/static/logo.png'))
+    assert.ok(!looksLikePhoto('https://example.com/img/loading.gif'))
+    assert.ok(!looksLikePhoto('https://example.com/zoom/80_80/author.jpg'))
+    assert.ok(!looksLikePhoto('https://example.com/a-150x150.jpg'))
+  })
+
+  it('keeps each picture once, in order, up to the limit', () => {
+    const picked = pickImages(
+      ['', 'https://example.com/a.jpg', 'https://example.com/a.jpg?w=600', 'https://example.com/icon-x.png', 'https://example.com/b.jpg', 'https://example.com/c.jpg'],
+      2,
+    )
+    assert.deepEqual(picked, ['https://example.com/a.jpg', 'https://example.com/b.jpg'])
+  })
+
+  it('finds pictures behind lazy-loading attributes and skips small ones', () => {
+    const html = `
+      <img src="placeholder.gif" data-src="/img/one.jpg">
+      <img srcset="/img/two-480.jpg 480w, /img/two-1200.jpg 1200w">
+      <img src="/img/tiny.jpg" width="60" height="60">
+      <img loading="lazy" src="//cdn.example.com/three.jpg" alt="">`
+    assert.deepEqual(imagesInHtml(html, 'https://example.com/tin/1'), [
+      'https://example.com/img/one.jpg',
+      'https://example.com/img/two-1200.jpg',
+      'https://cdn.example.com/three.jpg',
+    ])
+  })
+
+  it('reads the text and pictures of an article page, cover first', () => {
+    const paragraph = 'Tháng 11, đồi núi Đà Lạt rực vàng hoa dã quỳ, du khách kéo về săn mây từ sáng sớm ở Cầu Đất và đồi chè. '
+    const page = `<!doctype html><html><head><title>Đà Lạt mùa hoa</title>
+      <meta property="og:image" content="https://img.example.com/cover.jpg"></head>
+      <body><nav><a href="/">Trang chủ</a><img src="/logo.png"></nav>
+      <article><h1>Đà Lạt mùa hoa dã quỳ</h1>
+        <p>${paragraph.repeat(3)}</p><img src="/img/doi-che.jpg">
+        <p>${paragraph.repeat(3)}</p><img src="/img/cau-dat.jpg">
+        <p>${paragraph.repeat(3)}</p>
+      </article><footer>Bản quyền thuộc về báo</footer></body></html>`
+    const article = extractArticle(page, 'https://bao.example.com/da-lat')
+    assert.ok(article.text.includes('săn mây'))
+    assert.ok(!article.text.includes('Bản quyền'))
+    assert.deepEqual(article.images, ['https://img.example.com/cover.jpg', 'https://bao.example.com/img/doi-che.jpg', 'https://bao.example.com/img/cau-dat.jpg'])
+    assert.deepEqual(extractArticle('', 'https://bao.example.com/x'), { text: '', images: [] })
+  })
+
+  it('opens only public article pages', () => {
+    assert.ok(readablePage('https://vnexpress.net/da-lat-123.html'))
+    assert.ok(!readablePage('https://news.google.com/rss/articles/CBMi'))
+    assert.ok(!readablePage('http://localhost:3000/x'))
+    assert.ok(!readablePage('http://169.254.169.254/latest'))
+    assert.ok(!readablePage('not a link'))
   })
 })

@@ -46,7 +46,7 @@ export const GUIDE_INDEX: Record<GuideTopic, string> = {
   assistant: 'trợ lý AI làm được gì và không làm được gì',
   premium: 'gói Premium: giá, quyền lợi (lượt AI, livestream 1080p, giữ video xem lại, huy hiệu), cách mua bằng PayOS, gia hạn',
   business: 'tài khoản doanh nghiệp: đăng ký cơ sở (homestay, khách sạn, quán ăn, cà phê, tour), chờ duyệt, bài quảng cáo, gói Đề xuất ở trang Khám phá',
-  news: 'tin tức du lịch trên Newsfeed: tab Dành cho bạn / Đang theo dõi / Tin du lịch, lọc theo vùng, đọc bài gốc, lưu tin, báo cáo tin',
+  news: 'tin tức du lịch trên Newsfeed: tab Dành cho bạn / Đang theo dõi / Tin du lịch, lọc theo vùng, trang chi tiết của tin (bài viết và ảnh), đọc bài gốc, lưu tin, báo cáo tin',
   not_available: 'những tính năng ChillnGo chưa có',
 }
 
@@ -179,7 +179,7 @@ const GUIDE: Record<GuideTopic, string> = {
 
   news: [
     'Newsfeed → tab "Tin du lịch": tin tức du lịch mới nhất ChillnGo tổng hợp từ báo điện tử, Google News, YouTube và mạng xã hội. Lọc theo vùng: Miền Bắc, Miền Trung, Miền Nam, Hải đảo, Nước ngoài. Bấm "Xem thêm tin" để tải thêm.',
-    'Mỗi tin có tiêu đề, đoạn tóm tắt 2–3 câu (AI viết), ảnh và nguồn. Bấm vào tin hoặc "Đọc bài gốc" để mở bài trên trang của nguồn. Tin không có bình luận hay lượt thích.',
+    'Mỗi tin là một bài viết: ảnh bìa, tiêu đề, đoạn tóm tắt và nguồn. Bấm vào tin để mở trang chi tiết ngay trong ChillnGo: bài do AI viết lại bằng tiếng Việt từ bài gốc, kèm các ảnh của bài; tin là video YouTube thì xem được ngay trên trang. Cuối trang có tên nguồn và nút "Đọc bài gốc" để mở bài trên trang của nguồn. Tin không có bình luận hay lượt thích.',
     'Bấm biểu tượng lưu để giữ tin; xem lại ở Hoạt động của bạn → Đã lưu → tab "Tin du lịch". Thấy tin sai hoặc không phù hợp thì bấm "…" → Báo cáo.',
     'Quản trị viên có quyền Tin tức chọn nguồn tin và duyệt tin ở trang Quản trị → Tin tức. Người dùng thường không thêm nguồn tin được; muốn gợi ý nguồn thì liên hệ ChillnGo.',
   ].join('\n'),

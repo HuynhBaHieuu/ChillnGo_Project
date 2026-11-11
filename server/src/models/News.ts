@@ -61,8 +61,9 @@ export type NewsStatus = (typeof NEWS_STATUSES)[number]
 export const NEWS_KINDS = ['article', 'video', 'post'] as const
 
 /**
- * One piece of news. Only what is needed to point at it is kept (title, a
- * short excerpt, a picture, the link); readers open the original to read it.
+ * One piece of news, shown as a post of its own: a headline, a summary and a
+ * few paragraphs the AI wrote in Vietnamese from the original, the original's
+ * pictures (as links) and the link back. The original's text is never stored.
  */
 const newsItemSchema = new Schema(
   {
@@ -72,12 +73,22 @@ const newsItemSchema = new Schema(
     platform: { type: String, default: null },
     /** Canonical link (tracking parameters removed); one item per link. */
     url: { type: String, required: true, unique: true },
+    /** The source's own title; also what duplicates are recognised by. */
     title: { type: String, required: true },
+    /** The title readers see: Vietnamese, from the AI, editable by admins. '' until written. */
+    headline: { type: String, default: '' },
     /** The source's own description, plain text, at most 500 characters. */
     excerpt: { type: String, default: '' },
     /** 2–3 sentences in Vietnamese from the AI, editable by admins. */
     summary: { type: String, default: '' },
+    /** The post itself: paragraphs the AI wrote from the original, editable by admins. */
+    content: { type: [String], default: [] },
+    /** The cover picture. */
     imageUrl: { type: String, default: '' },
+    /** Every picture of the post, the cover first (links to the original's pictures). */
+    images: { type: [String], default: [] },
+    /** When the AI last wrote the post; null for items from before posts were written. */
+    writtenAt: { type: Date, default: null },
     kind: { type: String, enum: NEWS_KINDS, default: 'article' },
     author: { type: String, default: '' },
     publishedAt: { type: Date, required: true },
