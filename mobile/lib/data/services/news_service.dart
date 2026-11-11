@@ -18,6 +18,9 @@ class NewsItem {
     required this.title,
     required this.summary,
     required this.imageUrl,
+    this.images = const [],
+    this.content = const [],
+    this.originalTitle = '',
     required this.kind,
     required this.author,
     required this.publishedAt,
@@ -28,6 +31,9 @@ class NewsItem {
     this.status,
     this.statusReason = '',
     this.excerpt = '',
+    this.headline = '',
+    this.aiSummary = '',
+    this.writtenAt,
     this.aiStatus,
     this.clickCount = 0,
   });
@@ -38,9 +44,21 @@ class NewsItem {
   final String sourceType;
   final String? platform;
   final String url;
+  /// The AI's Vietnamese headline, or the source's own title.
   final String title;
   final String summary;
+
+  /// The cover picture.
   final String imageUrl;
+
+  /// Every picture of the post, the cover first.
+  final List<String> images;
+
+  /// The post's paragraphs. Only on the post's own screen and in admin views.
+  final List<String> content;
+
+  /// The source's own title. Only on the post's own screen and in admin views.
+  final String originalTitle;
 
   /// article | video | post
   final String kind;
@@ -55,6 +73,13 @@ class NewsItem {
   final String? status;
   final String statusReason;
   final String excerpt;
+
+  /// The headline and summary as stored ('' when the AI has not written them).
+  final String headline;
+  final String aiSummary;
+
+  /// When the AI last wrote the post; null when it never did.
+  final String? writtenAt;
   final String? aiStatus;
   final int clickCount;
 
@@ -68,6 +93,9 @@ class NewsItem {
     title: str(json['title']),
     summary: str(json['summary']),
     imageUrl: str(json['imageUrl']),
+    images: stringList(json['images']),
+    content: stringList(json['content']),
+    originalTitle: str(json['originalTitle']),
     kind: str(json['kind'], 'article'),
     author: str(json['author']),
     publishedAt: str(json['publishedAt']),
@@ -78,6 +106,9 @@ class NewsItem {
     status: strOrNull(json['status']),
     statusReason: str(json['statusReason']),
     excerpt: str(json['excerpt']),
+    headline: str(json['headline']),
+    aiSummary: str(json['aiSummary']),
+    writtenAt: strOrNull(json['writtenAt']),
     aiStatus: strOrNull(json['aiStatus']),
     clickCount: intOf(json['clickCount']),
   );
@@ -92,6 +123,9 @@ class NewsItem {
     title: title,
     summary: summary,
     imageUrl: imageUrl,
+    images: images,
+    content: content,
+    originalTitle: originalTitle,
     kind: kind,
     author: author,
     publishedAt: publishedAt,
@@ -102,6 +136,9 @@ class NewsItem {
     status: status,
     statusReason: statusReason,
     excerpt: excerpt,
+    headline: headline,
+    aiSummary: aiSummary,
+    writtenAt: writtenAt,
     aiStatus: aiStatus,
     clickCount: clickCount,
   );
@@ -280,7 +317,10 @@ abstract final class NewsService {
   /// Saves or unsaves; returns whether it is now saved.
   static Future<bool> toggleSave(String id) async => boolOf((await Api.post('/api/news/$id/save'))['saved']);
 
-  /// Counts a click through to the original; never fails the click itself.
+  /// One published item with its post (paragraphs and pictures).
+  static Future<NewsItem> get(String id) async => NewsItem.fromJson(mapOf((await Api.get('/api/news/$id'))['item']));
+
+  /// Counts a reader opening the post; never fails the screen itself.
   static void recordClick(String id) {
     Api.post('/api/news/$id/click', auth: false).catchError((_) => <String, dynamic>{});
   }
@@ -322,6 +362,9 @@ abstract final class NewsService {
   }
 
   static Future<void> patchItem(String id, Json patch) async => Api.patch('/api/admin/news/items/$id', body: patch);
+
+  /// The AI reads the original again and writes the post anew.
+  static Future<NewsItem> rewriteItem(String id) async => NewsItem.fromJson(mapOf((await Api.post('/api/admin/news/items/$id/rewrite'))['item']));
 
   /// approve | reject | hide | unhide.
   static Future<int> review(List<String> ids, String action, {String reason = ''}) async =>
