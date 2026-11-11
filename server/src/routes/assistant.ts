@@ -2,8 +2,8 @@
  * POST /api/assistant/chat { messages } → the reply, streamed as plain text
  *
  * ChillnGo's AI assistant: travel advice from the journeys people have posted,
- * and help using the website. Each turn asks Muse, then LiveKit Inference, then
- * Gemini (ai/llm.ts), moving on when one fails or runs out; the browser only
+ * and help using the website. Each turn asks Gemini, then LiveKit Inference
+ * (ai/llm.ts), moving on when one fails or runs out; the browser only
  * ever sees the reply. The conversation lives in the browser and comes with
  * each question: nothing is stored.
  *
