@@ -1,8 +1,8 @@
 /**
- * The models behind the AI assistant and AI clone, tried in order: Muse, then
- * LiveKit Inference, then Google Gemini. When one fails (out of tokens,
+ * The models behind the AI assistant, AI clone and news summaries, tried in
+ * order: Google Gemini, then LiveKit Inference. When one fails (out of tokens,
  * overloaded, unreachable) the next is asked; one not configured is left out.
- * All speak OpenAI-style chat completions, so one request shape serves them all.
+ * Both speak OpenAI-style chat completions, so one request shape serves them all.
  *
  * After a 429 or 402 (out of quota or credit) a model is skipped for as long
  * as it asked (else a minute), so a spent quota does not add a failed call to
@@ -20,7 +20,7 @@ const TIMEOUT_MS = 90_000
 const TEMPERATURE = 0.2
 
 export interface Provider {
-  name: 'muse' | 'livekit' | 'gemini'
+  name: 'gemini' | 'livekit'
   url: string
   key: string
   model: string
@@ -31,10 +31,9 @@ const pausedUntil = new Map<Provider['name'], number>()
 /** The models to ask, in order. Paused ones are left out, unless every one is paused. */
 export async function providers(): Promise<Provider[]> {
   const all: Provider[] = []
-  if (env.muse) all.push({ name: 'muse', url: env.muse.url, key: env.muse.apiKey, model: env.muse.model })
+  if (env.gemini) all.push({ name: 'gemini', url: GEMINI_URL, key: env.gemini.apiKey, model: env.gemini.model })
   const token = await inferenceToken()
   if (token) all.push({ name: 'livekit', url: INFERENCE_CHAT_URL, key: token, model: env.assistantModel })
-  if (env.gemini) all.push({ name: 'gemini', url: GEMINI_URL, key: env.gemini.apiKey, model: env.gemini.model })
   const ready = all.filter((p) => Date.now() >= (pausedUntil.get(p.name) ?? 0))
   return ready.length > 0 ? ready : all
 }
@@ -86,7 +85,7 @@ async function complete(provider: Provider, messages: ChatMessage[], task: strin
 
 export async function chat(messages: ChatMessage[], task: string): Promise<string> {
   const list = await providers()
-  if (list.length === 0) throw new AiUnavailableError('No AI model configured (Muse, LiveKit Inference, Gemini).')
+  if (list.length === 0) throw new AiUnavailableError('No AI model configured (Gemini, LiveKit Inference).')
   for (const provider of list) {
     try {
       return await complete(provider, messages, task)
