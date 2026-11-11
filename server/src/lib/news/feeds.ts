@@ -77,6 +77,33 @@ export function canonicalUrl(raw: string): string | null {
   return url.toString().replace(/^http:/, 'https:')
 }
 
+/**
+ * A picture link as stored: absolute and https, or '' when it cannot be one.
+ * Repairs the two shapes feeds get wrong: "//host/path" (no scheme) and
+ * "https://site///host/path" (a scheme-less link glued onto the site).
+ */
+export function imageLink(raw: string, base?: string): string {
+  const value = raw.trim()
+  if (!value || value.startsWith('data:')) return ''
+  let url: URL
+  try {
+    url = new URL(value.startsWith('//') ? `https:${value}` : value, base)
+  } catch {
+    return ''
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
+  const glued = /^\/\/+([a-z0-9-]+(?:\.[a-z0-9-]+)+)(\/.*)$/i.exec(url.pathname)
+  if (glued) {
+    try {
+      url = new URL(`https://${glued[1]}${glued[2]}${url.search}`)
+    } catch {
+      return ''
+    }
+  }
+  url.hash = ''
+  return url.toString().replace(/^http:/, 'https:')
+}
+
 const fold = (text: string) =>
   text
     .normalize('NFD')
@@ -152,7 +179,7 @@ export function parseFeed(xml: string): RawNewsItem[] {
         url,
         title,
         excerpt: truncate(plainText(html), 500),
-        imageUrl: imageUrl.startsWith('http') ? imageUrl : '',
+        imageUrl: imageLink(imageUrl, url),
         publishedAt: date(textOf(item.pubDate) || textOf(item['dc:date'])),
         author: plainText(textOf(item['dc:creator']) || textOf(item.author) || textOf((item.source as Node)?.['#text'] ?? '')),
         kind: 'article' as const,
@@ -177,7 +204,7 @@ export function parseFeed(xml: string): RawNewsItem[] {
         url,
         title,
         excerpt: truncate(plainText(html), 500),
-        imageUrl: thumb || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : firstImage(html)),
+        imageUrl: imageLink(thumb || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : firstImage(html)), url),
         publishedAt: date(textOf(entry.published) || textOf(entry.updated)),
         author: plainText(textOf((entry.author as Node | undefined)?.name) || feedAuthor),
         kind: videoId ? ('video' as const) : ('article' as const),
