@@ -169,6 +169,7 @@ export function DimensionalSwitchSlider({
               <img
                 data-part="image"
                 src={item.image}
+                referrerPolicy="no-referrer"
                 alt={item.text ?? ''}
                 draggable={false}
                 className="size-full object-cover"
