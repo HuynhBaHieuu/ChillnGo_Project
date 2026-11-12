@@ -99,6 +99,8 @@ const newsItemSchema = new Schema(
     destinations: { type: [String], default: [] },
     aiStatus: { type: String, enum: ['pending', 'done', 'skipped', 'failed'], default: 'pending' },
     aiAttempts: { type: Number, default: 0 },
+    /** Failed tries at writing the post of an item that is already reviewed (see pipeline.enrichQueued). */
+    writeAttempts: { type: Number, default: 0 },
     clickCount: { type: Number, default: 0 },
     reviewedBy: { type: String, default: null },
     reviewedAt: { type: Date, default: null },

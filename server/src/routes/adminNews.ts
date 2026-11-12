@@ -125,9 +125,9 @@ adminNewsRouter.post('/sources/:id/run', async (req, res) => {
     throw new HttpError(400, 'Nguồn mạng xã hội được cào bằng máy cào, không chạy trên máy chủ.', 'WORKER_SOURCE')
   }
   const result = await runSource(source, 'manual')
-  const enriched = await enrichQueued()
+  const { handled: enriched, posts } = await enrichQueued()
   await audit(req, currentUser(res), 'news.source.run', { type: 'news_source', id: String(source._id), label: source.name })
-  res.json({ result, enriched, source: sourceView(source) })
+  res.json({ result, enriched, posts, source: sourceView(source) })
 })
 
 adminNewsRouter.post('/run', async (req, res) => {

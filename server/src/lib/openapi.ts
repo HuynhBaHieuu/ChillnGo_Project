@@ -898,7 +898,23 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
           properties: { sourceId: str(), name: str(), ok: { type: 'boolean' }, created: int(), fetched: int(), duplicates: int(), filtered: int(), error: str() },
         },
       },
-      enriched: int('News items the AI summarised and tagged in this run.'),
+      enriched: int('News items the AI wrote a post for, or tried to, in this run.'),
+      posts: {
+        type: 'array',
+        description: 'What happened to each of those items.',
+        items: {
+          type: 'object',
+          properties: {
+            id: str(),
+            title: str(),
+            articleChars: int('Characters of the original article that could be read (0: the page gave none).'),
+            paragraphs: int(),
+            images: int(),
+            status: str(),
+            error: str('Why no post was written, when none was.'),
+          },
+        },
+      },
     },
   },
   WorkerSources: {

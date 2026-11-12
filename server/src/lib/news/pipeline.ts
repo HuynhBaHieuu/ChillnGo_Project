@@ -50,6 +50,8 @@ const AI_CONCURRENCY = 2
 /** No new post is started after this long, so a run ends well inside one function call. */
 const AI_BUDGET_MS = 150_000
 const AI_MAX_ATTEMPTS = 3
+/** Tries at writing the post of an item that is already published or waiting for review. */
+const WRITE_MAX_ATTEMPTS = 5
 export const MAX_HEADLINE = 200
 export const MAX_SUMMARY = 600
 export const MAX_PARAGRAPHS = 8
@@ -242,8 +244,8 @@ export async function runDueSources(trigger: 'schedule' | 'manual' = 'schedule')
   for (const source of sources) {
     results.push({ sourceId: String(source._id), name: source.name, ...(await runSource(source, trigger)) })
   }
-  const enriched = await enrichQueued()
-  return { sources: results, enriched }
+  const ai = await enrichQueued()
+  return { sources: results, enriched: ai.handled, posts: ai.posts }
 }
 
 /* ------------------------------------------------------------------- AI */
@@ -294,8 +296,22 @@ const SYSTEM = [
   'Nếu relevant = false thì headline, summary để trống và content là mảng rỗng. Chỉ trả về JSON, không giải thích.',
 ].join(' ')
 
-/** The post of one item: the AI's writing and the original's pictures. Null when no model gave a usable answer. */
-export async function writePost(item: NewsItemDocument, known: string[]): Promise<{ post: WrittenPost; images: string[] } | null> {
+export interface WrittenResult {
+  post: WrittenPost
+  images: string[]
+  /** Characters of the original article that could be read; 0 when the page gave none. */
+  articleChars: number
+}
+
+/** A line of the user message for items an admin (or an auto-posting source) already accepted. */
+const REVIEWED = 'Tin này đã được biên tập viên ChillnGo duyệt là tin du lịch: đặt relevant = true và luôn viết headline, summary và content.'
+
+/**
+ * The post of one item: the AI's writing and the original's pictures, or why
+ * there is none. `reviewed`: the item is already accepted, so the AI is not
+ * asked whether it is travel news and must write.
+ */
+export async function writePost(item: NewsItemDocument, known: string[], reviewed = false): Promise<WrittenResult | { error: string }> {
   // Videos and social posts have no article page; they are written from their title and description.
   const article = item.kind === 'article' ? await fetchArticle(item.url) : { text: '', images: [] }
   let text: string
@@ -305,9 +321,9 @@ export async function writePost(item: NewsItemDocument, known: string[]): Promis
         { role: 'system', content: SYSTEM },
         {
           role: 'user',
-          content: `Danh sách điểm đến: ${known.join(', ') || '(trống)'}\n\nTin:\n${JSON.stringify({
+          content: `Danh sách điểm đến: ${known.join(', ') || '(trống)'}\n\n${reviewed ? `${REVIEWED}\n\n` : ''}Tin:\n${JSON.stringify({
             title: item.title,
-            description: item.excerpt,
+            description: item.excerpt || item.summary,
             source: item.sourceName,
             article: article.text,
           })}`,
@@ -316,19 +332,16 @@ export async function writePost(item: NewsItemDocument, known: string[]): Promis
       'news-write',
     )
   } catch (error) {
-    console.warn(`[news] AI unavailable: ${(error as Error).message}`)
-    return null
+    return { error: `AI unavailable: ${(error as Error).message}` }
   }
   const post = parseWritten(text)
-  if (!post) {
-    console.warn(`[news] AI answer not understood: ${text.replace(/\s+/g, ' ').slice(0, 300)}`)
-    return null
-  }
-  return { post, images: pickImages([...article.images, imageLink(item.imageUrl)]) }
+  if (!post) return { error: `AI answer not understood: ${text.replace(/\s+/g, ' ').slice(0, 200)}` }
+  if (reviewed && post.content.length === 0) return { error: 'AI wrote no paragraphs' }
+  return { post: reviewed ? { ...post, relevant: true } : post, images: pickImages([...article.images, imageLink(item.imageUrl)]), articleChars: article.text.length }
 }
 
 /** What a written post changes on its item (status is the caller's business). */
-function postFields(item: NewsItemDocument, { post, images }: { post: WrittenPost; images: string[] }, known: Map<string, string>) {
+function postFields(item: NewsItemDocument, { post, images }: WrittenResult, known: Map<string, string>) {
   return {
     aiStatus: 'done' as const,
     headline: post.headline,
@@ -347,53 +360,81 @@ async function knownDestinations() {
   return { names, folded: new Map(names.map((n) => [n.toLowerCase(), n])) }
 }
 
+/** What the AI step did with one item, for the run's answer and the logs. */
+export interface PostReport {
+  id: string
+  title: string
+  status: string
+  articleChars?: number
+  paragraphs?: number
+  images?: number
+  error?: string
+}
+
 /**
  * The AI step: writes the post of queued items and decides their status, then
- * (with what is left of the run) writes posts for items published before
- * posts existed. Stops starting new items when `budgetMs` is spent, so a
- * scheduled run always fits in one function call. Returns how many were handled.
+ * (with what is left of the run) writes posts for items that were published
+ * or put in the review queue without one. Those are already accepted, so the
+ * AI only writes; a failed try is counted apart (writeAttempts) and the item
+ * is tried again by later runs. Stops starting new items when `budgetMs` is
+ * spent, so a scheduled run always fits in one function call.
  */
-export async function enrichQueued(limit = AI_ITEMS_PER_RUN, budgetMs = AI_BUDGET_MS): Promise<number> {
+export async function enrichQueued(limit = AI_ITEMS_PER_RUN, budgetMs = AI_BUDGET_MS): Promise<{ handled: number; posts: PostReport[] }> {
   const queued = await NewsItem.find({ status: 'queued', aiStatus: 'pending' }).sort({ createdAt: 1 }).limit(limit)
   const unwritten =
     queued.length < limit && (await aiAvailable())
-      ? await NewsItem.find({ status: { $in: ['published', 'pending'] }, writtenAt: null, aiAttempts: { $lt: AI_MAX_ATTEMPTS } })
+      ? await NewsItem.find({
+          status: { $in: ['published', 'pending'] },
+          writtenAt: null,
+          // Items stored before this counter existed have none.
+          writeAttempts: { $not: { $gte: WRITE_MAX_ATTEMPTS } },
+        })
           .sort({ publishedAt: -1 })
           .limit(limit - queued.length)
       : []
   const todo = [...queued, ...unwritten]
-  if (todo.length === 0) return 0
+  if (todo.length === 0) return { handled: 0, posts: [] }
   const sources = new Map(
     (await NewsSource.find({ _id: { $in: [...new Set(todo.map((q) => q.sourceId))] } }).lean()).map((s) => [String(s._id), s]),
   )
   const known = await knownDestinations()
   const deadline = Date.now() + budgetMs
-  let handled = 0
+  const posts: PostReport[] = []
 
   const handle = async (item: NewsItemDocument) => {
     const wasQueued = item.status === 'queued'
     const auto = Boolean(sources.get(item.sourceId)?.autoPublish)
-    const result = await writePost(item, known.names)
-    if (result && wasQueued) {
-      item.set(
-        result.post.relevant
-          ? { ...postFields(item, result, known.folded), status: statusAfterAi(auto, true), statusReason: '' }
-          : { aiStatus: 'done', status: 'rejected', statusReason: 'AI: không liên quan du lịch' },
-      )
-    } else if (result) {
-      // Already reviewed: only the post is added; the AI's opinion on relevance changes nothing.
-      item.set(result.post.relevant ? postFields(item, result, known.folded) : { aiAttempts: AI_MAX_ATTEMPTS })
+    const result = await writePost(item, known.names, !wasQueued)
+    if ('error' in result) {
+      console.warn(`[news] no post for ${String(item._id)}: ${result.error}`)
+      if (wasQueued) {
+        const attempts = item.aiAttempts + 1
+        // After a few failed tries a queued item goes on without a post; later runs still try to write it.
+        item.set(
+          attempts >= AI_MAX_ATTEMPTS
+            ? { aiAttempts: attempts, aiStatus: 'failed', status: auto ? 'published' : 'pending' }
+            : { aiAttempts: attempts },
+        )
+      } else {
+        item.set({ writeAttempts: (item.writeAttempts ?? 0) + 1 })
+      }
+    } else if (wasQueued && !result.post.relevant) {
+      item.set({ aiStatus: 'done', status: 'rejected', statusReason: 'AI: không liên quan du lịch' })
     } else {
-      const attempts = item.aiAttempts + 1
-      // After a few failed tries a queued item goes on without a post.
-      item.set(
-        attempts >= AI_MAX_ATTEMPTS && wasQueued
-          ? { aiAttempts: attempts, aiStatus: 'failed', status: auto ? 'published' : 'pending' }
-          : { aiAttempts: attempts },
-      )
+      item.set({
+        ...postFields(item, result, known.folded),
+        ...(wasQueued && { status: statusAfterAi(auto, true), statusReason: '' }),
+      })
     }
     await item.save()
-    handled += 1
+    posts.push({
+      id: String(item._id),
+      title: truncate(item.title, 80),
+      status: item.status,
+      ...('error' in result
+        ? { error: truncate(result.error, 200) }
+        : { articleChars: result.articleChars, paragraphs: result.post.content.length, images: result.images.length }),
+    })
   }
 
   let next = 0
@@ -402,15 +443,17 @@ export async function enrichQueued(limit = AI_ITEMS_PER_RUN, budgetMs = AI_BUDGE
       while (next < todo.length && Date.now() < deadline) await handle(todo[next++])
     }),
   )
-  return handled
+  return { handled: posts.length, posts }
 }
 
 /** An admin asks for the post of one item to be written again. Its status stays as it is. */
 export async function rewriteItem(item: NewsItemDocument): Promise<void> {
   const known = await knownDestinations()
-  const result = await writePost(item, known.names)
-  if (!result) throw new HttpError(503, 'AI chưa viết được bài này. Hãy thử lại sau.', 'AI_UNAVAILABLE')
-  if (!result.post.relevant) throw new HttpError(422, 'AI cho rằng tin này không liên quan du lịch nên không viết bài.', 'NOT_RELEVANT')
+  const result = await writePost(item, known.names, true)
+  if ('error' in result) {
+    console.warn(`[news] rewrite of ${String(item._id)} failed: ${result.error}`)
+    throw new HttpError(503, 'AI chưa viết được bài này. Hãy thử lại sau.', 'AI_UNAVAILABLE')
+  }
   item.set(postFields(item, result, known.folded))
   await item.save()
 }
