@@ -710,6 +710,8 @@ export interface NewsItem {
   content?: string[]
   /** The source's own title. Only on the post's own page and in admin views. */
   originalTitle?: string
+  /** Where the post's destinations are, for the map. Only on the post's own page. */
+  places?: { name: string; lat: number; lng: number }[]
   kind: 'article' | 'video' | 'post'
   author: string
   publishedAt: ISODate

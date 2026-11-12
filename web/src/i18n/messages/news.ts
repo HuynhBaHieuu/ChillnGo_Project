@@ -414,4 +414,9 @@ export const news = {
   'AI cho rằng tin này không liên quan du lịch nên không viết bài.': { en: 'The AI finds this news unrelated to travel, so it wrote no post.', zh: 'AI 认为这条资讯与旅行无关，因此没有撰写文章。', ja: 'AIはこのニュースが旅行と無関係だと判断したため、記事を書きませんでした。', ko: 'AI가 이 뉴스를 여행과 무관하다고 보아 글을 쓰지 않았어요.' },
   'Chia sẻ tin': { en: 'Share this news', zh: '分享资讯', ja: 'ニュースを共有', ko: '뉴스 공유' },
   'Xem ảnh': { en: 'View picture', zh: '查看图片', ja: '写真を見る', ko: '사진 보기' },
+  'Ngày đăng': { en: 'Published', zh: '发布日期', ja: '公開日', ko: '게시일' },
+  'Nội dung bài viết': { en: 'The post', zh: '文章内容', ja: '記事の内容', ko: '게시글 내용' },
+  'Bản đồ địa điểm': { en: 'Map of places', zh: '地点地图', ja: '場所の地図', ko: '장소 지도' },
+  'Bản đồ các địa điểm trong bài {title}': { en: 'Map of the places in {title}', zh: '《{title}》中的地点地图', ja: '「{title}」に出てくる場所の地図', ko: '{title}에 나오는 장소 지도' },
+  'Nguồn bài viết': { en: 'Source', zh: '文章来源', ja: '記事の出典', ko: '글 출처' },
 } satisfies Messages

@@ -27,6 +27,7 @@ import { dueWorkerSources, ingest, runDueSources, verifyCronSecret, verifyWorker
 import { itemView, workerIngestSchema } from '../lib/news/views.js'
 import { optionalAuth, requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
+import { Destination } from '../models/Destination.js'
 import { NOT_MODERATED } from '../models/moderation.js'
 import { NEWS_REGIONS, NewsItem, NewsSave, NewsSource } from '../models/News.js'
 
@@ -140,7 +141,11 @@ newsRouter.get('/:id', optionalAuth, async (req, res) => {
   const item = await loadPublished(String(req.params.id))
   const viewerId = res.locals.userId as string | undefined
   const saved = viewerId ? Boolean(await NewsSave.exists({ userId: viewerId, itemId: String(item._id) })) : undefined
-  res.json({ item: itemView(item, { detail: true, saved }) })
+  // Where the catalog destinations it mentions are, for the page's map.
+  const places = item.destinations.length
+    ? (await Destination.find({ name: { $in: item.destinations } }).select('name lat lng').lean()).map((d) => ({ name: d.name, lat: d.lat, lng: d.lng }))
+    : []
+  res.json({ item: { ...itemView(item, { detail: true, saved }), places } })
 })
 
 newsRouter.post('/:id/click', clickLimiter, async (req, res) => {

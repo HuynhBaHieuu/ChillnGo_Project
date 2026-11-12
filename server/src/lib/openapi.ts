@@ -875,6 +875,11 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
       images: { type: 'array', items: str(), description: 'Every picture of the post, the cover first.' },
       content: { type: 'array', items: str(), description: 'The post’s paragraphs, written by the AI from the original. Only on GET /api/news/:id.' },
       originalTitle: str('The source’s own title. Only on GET /api/news/:id.'),
+      places: {
+        type: 'array',
+        description: 'Where the destinations are, for a map. Only on GET /api/news/:id.',
+        items: { type: 'object', properties: { name: str(), lat: { type: 'number' }, lng: { type: 'number' } } },
+      },
       kind: { type: 'string', enum: ['article', 'video', 'post'] },
       author: str(),
       publishedAt: time(),
