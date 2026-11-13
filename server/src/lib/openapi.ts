@@ -118,6 +118,8 @@ const OPERATIONS: Operation[] = [
   { method: 'get', path: '/api/posts/liked-ids', summary: 'Ids of journeys the signed-in user liked.', access: 'user' },
   { method: 'get', path: '/api/posts/:id', summary: 'One journey, day by day and stop by stop.', access: 'optional', response: 'JourneyResponse' },
   { method: 'post', path: '/api/posts/:id/like', summary: 'Like or unlike a journey.', access: 'user' },
+  { method: 'get', path: '/api/posts/bookmarks', summary: 'Journeys the signed-in user saved: { postId, savedAt }, newest first.', access: 'user' },
+  { method: 'post', path: '/api/posts/:id/bookmark', summary: 'Save or unsave a journey.', access: 'user' },
   { method: 'get', path: '/api/posts/:id/comments', summary: "A journey's comments.", access: 'optional', response: 'JourneyCommentList' },
   { method: 'post', path: '/api/posts/:id/comments', summary: 'Comment on a journey.', access: 'user', body: true, status: 201 },
   { method: 'delete', path: '/api/posts/:id/comments/:commentId', summary: 'Delete a comment.', access: 'user' },
