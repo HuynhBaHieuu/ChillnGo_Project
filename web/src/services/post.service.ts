@@ -2,9 +2,10 @@
  * Trip post reads and writes.
  *
  * Journeys by real accounts are stored by the API (server/src/routes/posts.ts):
- * creating, editing, publishing and deleting go there. Seed journeys, likes,
- * comments and bookmarks are still mock data in `db`; serverPosts.ts copies the
- * API's journeys into `db` before each read so both kinds behave the same.
+ * creating, editing, publishing and deleting go there, and so do likes,
+ * comments and bookmarks on them. Seed journeys and what happens on them are
+ * still mock data in `db`; serverPosts.ts copies the API's journeys into `db`
+ * before each read so both kinds behave the same.
  */
 
 import {
@@ -20,6 +21,7 @@ import { http } from './http'
 import {
   dropServerPost,
   isServerPostId,
+  setBookmarked,
   setLiked,
   syncServerPosts,
   upsertAuthors,
@@ -136,11 +138,19 @@ export async function getPostById(
   viewerId: ObjectId | null,
 ): Promise<TripPostWithAuthor> {
   if (isServerPostId(id)) {
-    const { post, authors, likedByMe } = await http<{ post: ServerTripPost; authors: User[]; likedByMe: boolean }>(
-      `/api/posts/${id}`,
-    )
+    const { post, authors, likedByMe, bookmarkedByMe } = await http<{
+      post: ServerTripPost
+      authors: User[]
+      likedByMe: boolean
+      bookmarkedByMe: boolean
+    }>(`/api/posts/${id}`)
     upsertAuthors(authors)
-    if (viewerId) setLiked(viewerId, post._id, likedByMe)
+    if (viewerId) {
+      setLiked(viewerId, post._id, likedByMe)
+      // Keep the date it was saved, which orders "Đã lưu".
+      const saved = db.bookmarks.some((b) => b.userId === viewerId && b.postId === post._id)
+      if (saved !== bookmarkedByMe) setBookmarked(viewerId, post._id, bookmarkedByMe)
+    }
     return decorate(upsertServerPost(post), viewerId)
   }
 
@@ -276,6 +286,17 @@ export async function toggleBookmark(
   postId: ObjectId,
   viewerId: ObjectId,
 ): Promise<{ bookmarkCount: number; bookmarkedByMe: boolean }> {
+  if (isServerPostId(postId)) {
+    const result = await http<{ bookmarkCount: number; bookmarkedByMe: boolean }>(`/api/posts/${postId}/bookmark`, {
+      method: 'POST',
+    })
+    setBookmarked(viewerId, postId, result.bookmarkedByMe)
+    const stored = db.tripPosts.find((p) => p._id === postId)
+    if (stored) stored.bookmarkCount = result.bookmarkCount
+    return result
+  }
+
+  // Seed journeys are still mock data: saving one lasts until the page is reloaded.
   await delay()
   const post = assertFound(
     db.tripPosts.find((p) => p._id === postId),
