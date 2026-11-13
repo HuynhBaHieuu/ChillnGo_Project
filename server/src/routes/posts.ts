@@ -7,6 +7,8 @@
  *   GET    /api/posts/:id                  published: anyone; draft: the author and those invited along; deleted: the author only
  *   GET    /api/posts/liked-ids            ids of the journeys you have liked
  *   POST   /api/posts/:id/like             like / unlike (toggle); tells the author
+ *   GET    /api/posts/bookmarks            the journeys you have saved: { postId, savedAt }, newest first
+ *   POST   /api/posts/:id/bookmark         save / unsave (toggle); private, nobody is told
  *   GET    /api/posts/:id/comments         comments on a published journey (+ their authors)
  *   POST   /api/posts/:id/comments         comment or reply; tells the author / the person replied to
  *   POST   /api/posts/cover-signature      one signed Cloudinary upload (cover or stop photo)
@@ -41,7 +43,7 @@ import { currentUser, loadCurrentUser } from '../middleware/staff.js'
 import { friendIdsOf } from '../models/Follow.js'
 import { NOT_MODERATED, isModerated, moderationView } from '../models/moderation.js'
 import { Notification, notify } from '../models/Notification.js'
-import { PostComment, PostLike } from '../models/PostInteraction.js'
+import { PostBookmark, PostComment, PostLike } from '../models/PostInteraction.js'
 import { TripPost } from '../models/TripPost.js'
 import type { TripPostDocument } from '../models/TripPost.js'
 import { User } from '../models/User.js'
@@ -318,6 +320,7 @@ async function destroyPost(post: TripPostDocument) {
   const postId = String(post._id)
   await Promise.all([
     PostLike.deleteMany({ postId }),
+    PostBookmark.deleteMany({ postId }),
     PostComment.deleteMany({ postId }),
     Notification.deleteMany({ postId }),
   ])
@@ -365,6 +368,16 @@ postsRouter.get('/liked-ids', requireAuth, loadCurrentUser, async (_req, res) =>
   res.json({ ids: likes.map((l) => l.postId) })
 })
 
+/**
+ * GET /api/posts/bookmarks — what you saved, newest first. Ids only: the
+ * clients already hold the published journeys, and a saved journey that has
+ * since been deleted or hidden is simply not found among them.
+ */
+postsRouter.get('/bookmarks', requireAuth, loadCurrentUser, async (_req, res) => {
+  const saves = await PostBookmark.find({ userId: currentUser(res)._id }).sort({ createdAt: -1 }).limit(500).lean()
+  res.json({ items: saves.map((s) => ({ postId: s.postId, savedAt: s.createdAt.toISOString() })) })
+})
+
 postsRouter.get('/:id', optionalAuth, async (req, res) => {
   const id = String(req.params.id)
   const post = isValidObjectId(id) ? await TripPost.findById(id) : null
@@ -375,8 +388,18 @@ postsRouter.get('/:id', optionalAuth, async (req, res) => {
   // Hidden by moderation: only its author still sees it.
   const moderatedAway = post && isModerated(post.moderation) && post.authorId !== viewerId
   if (!post || !visible || moderatedAway) throw new HttpError(404, 'Không tìm thấy hành trình.', 'NOT_FOUND')
-  const likedByMe = viewerId ? Boolean(await PostLike.exists({ postId: String(post._id), userId: viewerId })) : false
-  res.json({ post: toView(post, viewerId), authors: await authorsOf([post], viewerId), likedByMe })
+  const [liked, bookmarked] = viewerId
+    ? await Promise.all([
+        PostLike.exists({ postId: String(post._id), userId: viewerId }),
+        PostBookmark.exists({ postId: String(post._id), userId: viewerId }),
+      ])
+    : [null, null]
+  res.json({
+    post: toView(post, viewerId),
+    authors: await authorsOf([post], viewerId),
+    likedByMe: Boolean(liked),
+    bookmarkedByMe: Boolean(bookmarked),
+  })
 })
 
 /* ------------------------------------------------------ likes & comments */
@@ -399,6 +422,12 @@ async function recountLikes(postId: string): Promise<number> {
   const likeCount = await PostLike.countDocuments({ postId })
   await TripPost.updateOne({ _id: postId }, { $set: { likeCount } })
   return likeCount
+}
+
+async function recountBookmarks(postId: string): Promise<number> {
+  const bookmarkCount = await PostBookmark.countDocuments({ postId })
+  await TripPost.updateOne({ _id: postId }, { $set: { bookmarkCount } })
+  return bookmarkCount
 }
 
 export async function recountComments(postId: string): Promise<number> {
@@ -443,6 +472,27 @@ postsRouter.post('/:id/like', requireAuth, loadCurrentUser, writeLimiter, async 
   }
 
   res.json({ likeCount: await recountLikes(postId), likedByMe })
+})
+
+/** POST /api/posts/:id/bookmark → { bookmarkCount, bookmarkedByMe }. Saving is private: no notification. */
+postsRouter.post('/:id/bookmark', requireAuth, loadCurrentUser, writeLimiter, async (req, res) => {
+  const user = currentUser(res)
+  const post = await loadPublished(String(req.params.id), user._id)
+  const postId = String(post._id)
+
+  const removed = await PostBookmark.findOneAndDelete({ postId, userId: user._id })
+  let bookmarkedByMe = false
+  if (!removed) {
+    try {
+      await PostBookmark.create({ postId, userId: user._id })
+    } catch (error) {
+      // A double tap raced us: the bookmark already exists.
+      if ((error as { code?: number }).code !== 11000) throw error
+    }
+    bookmarkedByMe = true
+  }
+
+  res.json({ bookmarkCount: await recountBookmarks(postId), bookmarkedByMe })
 })
 
 postsRouter.get('/:id/comments', optionalAuth, async (req, res) => {

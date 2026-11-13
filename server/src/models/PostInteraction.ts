@@ -45,3 +45,17 @@ postCommentSchema.index({ postId: 1, createdAt: 1 })
 postCommentSchema.index({ authorId: 1, createdAt: -1 })
 
 export const PostComment = model('PostComment', postCommentSchema)
+
+/** `userId` saved journey `postId` ("Lưu hành trình"). The pair is unique. Only the saver sees it. */
+const postBookmarkSchema = new Schema(
+  {
+    postId: { type: String, required: true },
+    userId: { type: String, required: true },
+  },
+  { timestamps: { createdAt: true, updatedAt: false }, versionKey: false },
+)
+
+postBookmarkSchema.index({ postId: 1, userId: 1 }, { unique: true })
+postBookmarkSchema.index({ userId: 1, createdAt: -1 })
+
+export const PostBookmark = model('PostBookmark', postBookmarkSchema)
