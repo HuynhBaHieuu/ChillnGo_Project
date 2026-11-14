@@ -37,8 +37,9 @@ type FeedTab = (typeof TABS)[number]
 const REGIONS: Region[] = ['north', 'central', 'south', 'islands', 'overseas']
 
 /**
- * Three tabs. "Dành cho bạn": the timeline with a travel news item after
- * every three entries. "Đang theo dõi": the timeline alone. "Tin du lịch":
+ * Three tabs. "Dành cho bạn": everyone's journeys, check-ins and replays,
+ * newest first, with a travel news item after every three entries.
+ * "Đang theo dõi": only yours and the people you follow. "Tin du lịch":
  * news only, by region. The tab and the region live in the URL.
  */
 export function FeedPage() {
@@ -64,7 +65,9 @@ export function FeedPage() {
           tab === 'news'
             ? t('Tin tức du lịch mới nhất, ChillnGo tổng hợp và tóm tắt từ báo chí, YouTube và mạng xã hội.')
             : isAuthenticated
-              ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi, kèm tin du lịch mới.')
+              ? tab === 'following'
+                ? t('Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi.')
+                : t('Hành trình, check-in và live mới nhất của mọi người trên ChillnGo, kèm tin du lịch mới.')
               : t('Những hành trình và check-in mới nhất trên ChillnGo, kèm tin du lịch mới. Đăng nhập để chỉ xem người bạn theo dõi.')
         }
         action={
@@ -86,10 +89,10 @@ export function FeedPage() {
           </TabsList>
         </div>
         <TabsContent value="for-you">
-          <Timeline withNews />
+          <Timeline everyone withNews />
         </TabsContent>
         <TabsContent value="following">
-          <Timeline withNews={false} />
+          <Timeline everyone={false} withNews={false} />
         </TabsContent>
         <TabsContent value="news">
           <NewsTab region={region} onRegion={(r) => setParam('region', r ?? null)} />
@@ -163,12 +166,12 @@ function RegionChip({ active, onClick, children }: { active: boolean; onClick: (
 }
 
 /**
- * Trip posts and photo check-ins (from the API), newest first. Signed in:
- * yours and the people you follow. Signed out: everyone's. `withNews`: one
- * news item after every three entries.
+ * Trip posts, photo check-ins and replays (from the API), newest first.
+ * `everyone`, or signed out: everyone's. Otherwise yours and the people you
+ * follow. `withNews`: one news item after every three entries.
  */
-function Timeline({ withNews }: { withNews: boolean }) {
-  const { data: posts, isPending, isError, error } = useFeed()
+function Timeline({ everyone, withNews }: { everyone: boolean; withNews: boolean }) {
+  const { data: posts, isPending, isError, error } = useFeed(everyone)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
   const viewerId = useViewerId()
@@ -176,20 +179,22 @@ function Timeline({ withNews }: { withNews: boolean }) {
   const following = useQuery({
     queryKey: ['following', viewerId],
     queryFn: () => socialService.getFollowingIds(viewerId as string),
-    enabled: Boolean(viewerId),
+    enabled: Boolean(viewerId) && !everyone,
   })
-  const authors = viewerId ? [viewerId, ...(following.data ?? [])] : undefined
+  const authors = viewerId && !everyone ? [viewerId, ...(following.data ?? [])] : undefined
+  // Ready once we know whose entries to ask for.
+  const ready = !authors || following.isSuccess
   const checkins = useQuery({
     queryKey: ['checkins', 'feed', authors?.join(',') ?? 'everyone'],
     queryFn: () => checkinService.listCheckIns(authors),
-    enabled: !viewerId || following.isSuccess,
+    enabled: ready,
   })
 
   // Who is live right now. Polled: the list changes as streams start and end.
   const live = useQuery({
     queryKey: ['livestreams', 'feed', authors?.join(',') ?? 'everyone'],
     queryFn: () => livestreamService.listLive(authors),
-    enabled: !viewerId || following.isSuccess,
+    enabled: ready,
     refetchInterval: 20_000,
   })
 
@@ -197,7 +202,7 @@ function Timeline({ withNews }: { withNews: boolean }) {
   const replays = useQuery({
     queryKey: ['livestreams', 'replays', 'feed', authors?.join(',') ?? 'everyone'],
     queryFn: () => livestreamService.listReplays(authors),
-    enabled: !viewerId || following.isSuccess,
+    enabled: ready,
   })
 
   const items = useMemo<FeedItem[]>(() => {

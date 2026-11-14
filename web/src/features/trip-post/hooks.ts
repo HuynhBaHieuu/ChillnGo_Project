@@ -5,7 +5,13 @@ import { postService, socialService } from '@/services'
 import type { TripPostPayload, TripPostWithAuthor } from '@/services/types'
 import { useViewerId } from '@/store'
 
-export function useFeed() {
+/**
+ * The Newsfeed's journeys, newest first. `everyone`: all published journeys
+ * ("Dành cho bạn"); otherwise yours and the people you follow ("Đang theo
+ * dõi"). Both keys start with qk.post.feed(viewerId), so posting, editing or
+ * deleting refreshes both tabs and a new post of yours lands on top.
+ */
+export function useFeed(everyone = false) {
   const viewerId = useViewerId()
   // Who you follow, including follows stored by the API. Same query as the
   // Newsfeed's check-ins and the Live page, so the cache is shared.
@@ -16,10 +22,10 @@ export function useFeed() {
   })
   const followingIds = following.data ?? []
   return useQuery({
-    queryKey: [...qk.post.feed(viewerId), followingIds.join(',')],
-    queryFn: () => postService.getFeed(viewerId, followingIds),
+    queryKey: everyone ? [...qk.post.feed(viewerId), 'everyone'] : [...qk.post.feed(viewerId), followingIds.join(',')],
+    queryFn: () => postService.getFeed(viewerId, followingIds, everyone),
     // If the API cannot say, still show what this session knows.
-    enabled: !viewerId || following.isSuccess || following.isError,
+    enabled: everyone || !viewerId || following.isSuccess || following.isError,
   })
 }
 

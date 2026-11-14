@@ -343,7 +343,8 @@ postsRouter.get('/', async (req, res) => {
   const { author } = listSchema.parse(req.query)
   const filter: Record<string, unknown> = { status: 'published', deletedAt: null, ...NOT_MODERATED }
   if (author) filter.authorId = author
-  const posts = await TripPost.find(filter).sort({ createdAt: -1 }).limit(200)
+  // Newest published first, so a draft written long ago and published today is not cut off by the limit.
+  const posts = await TripPost.find(filter).sort({ publishedAt: -1, createdAt: -1 }).limit(200)
   res.json({ items: posts.map((p) => toListView(p, undefined)), authors: await authorsOf(posts, undefined) })
 })
 

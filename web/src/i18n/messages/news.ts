@@ -13,6 +13,12 @@ export const news = {
     ja: 'ChillnGoが報道機関・YouTube・SNSから集めて要約した最新の旅行ニュースです。',
     ko: 'ChillnGo가 언론, YouTube, 소셜 미디어에서 모아 요약한 최신 여행 뉴스예요.',
   },
+  'Hành trình, check-in và live mới nhất của mọi người trên ChillnGo, kèm tin du lịch mới.': {
+    en: 'The latest journeys, check-ins and lives from everyone on ChillnGo, plus fresh travel news.',
+    zh: 'ChillnGo 上所有人最新的行程、签到和直播，以及最新旅游资讯。',
+    ja: 'ChillnGoのみんなの最新の旅程・チェックイン・ライブと、新しい旅行ニュースです。',
+    ko: 'ChillnGo 모든 사람의 최신 여정, 체크인, 라이브와 새 여행 뉴스예요.',
+  },
   'Hành trình và check-in mới nhất từ bạn và những người bạn đang theo dõi, kèm tin du lịch mới.': {
     en: 'The latest journeys and check-ins from you and the people you follow, plus fresh travel news.',
     zh: '你和你关注的人的最新行程与签到，以及最新旅游资讯。',
