@@ -18,7 +18,6 @@ import { NewsCard } from '@/features/news/NewsCard'
 import { PostComposer } from '@/features/trip-post/components/PostComposer'
 import { useFeed } from '@/features/trip-post/hooks'
 import { t } from '@/i18n'
-import { interleave } from '@/lib/feedMix'
 import { REGION_LABELS, newestFirst, postedAt } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { checkinService, livestreamService, socialService } from '@/services'
@@ -31,14 +30,15 @@ type FeedItem =
   | { kind: 'post'; at: string; post: TripPostWithAuthor }
   | { kind: 'checkin'; at: string; checkin: CheckIn }
   | { kind: 'replay'; at: string; stream: Livestream }
+  | { kind: 'news'; at: string; news: NewsItem }
 
 const TABS = ['for-you', 'following', 'news'] as const
 type FeedTab = (typeof TABS)[number]
 const REGIONS: Region[] = ['north', 'central', 'south', 'islands', 'overseas']
 
 /**
- * Three tabs. "Dành cho bạn": everyone's journeys, check-ins and replays,
- * newest first, with a travel news item after every three entries.
+ * Three tabs. "Dành cho bạn": everyone's journeys, check-ins, replays and
+ * travel news, all in one list, newest first.
  * "Đang theo dõi": only yours and the people you follow. "Tin du lịch":
  * news only, by region. The tab and the region live in the URL.
  */
@@ -168,7 +168,7 @@ function RegionChip({ active, onClick, children }: { active: boolean; onClick: (
 /**
  * Trip posts, photo check-ins and replays (from the API), newest first.
  * `everyone`, or signed out: everyone's. Otherwise yours and the people you
- * follow. `withNews`: one news item after every three entries.
+ * follow. `withNews`: travel news too, sorted in by publish time like the rest.
  */
 function Timeline({ everyone, withNews }: { everyone: boolean; withNews: boolean }) {
   const { data: posts, isPending, isError, error } = useFeed(everyone)
@@ -205,22 +205,22 @@ function Timeline({ everyone, withNews }: { everyone: boolean; withNews: boolean
     enabled: ready,
   })
 
+  // The first page of news (the newest 20) is enough to mix in. News that
+  // fails to load (API down) leaves the timeline as it was.
+  const news = useNews(undefined, withNews)
+  const newsItems = useMemo<NewsItem[]>(() => (withNews ? (news.data?.pages[0]?.items ?? []) : []), [withNews, news.data])
+
   const items = useMemo<FeedItem[]>(() => {
     const all: FeedItem[] = [
       ...(posts ?? []).map((post) => ({ kind: 'post' as const, at: postedAt(post), post })),
       // A check-in feed that fails to load (API down) should not hide the posts.
       ...(checkins.data ?? []).map((checkin) => ({ kind: 'checkin' as const, at: checkin.createdAt, checkin })),
       ...(replays.data?.items ?? []).map((stream) => ({ kind: 'replay' as const, at: stream.endedAt ?? stream.startedAt, stream })),
+      ...newsItems.map((item) => ({ kind: 'news' as const, at: item.publishedAt, news: item })),
     ]
-    // Newest first across every kind, by real time.
+    // Newest first across every kind, news included, by real time.
     return all.sort((a, b) => newestFirst(a.at, b.at))
-  }, [posts, checkins.data, replays.data])
-
-  // The first page of news is enough to mix in. News that fails to load
-  // (API down) leaves the timeline as it was.
-  const news = useNews(undefined, withNews)
-  const newsItems = useMemo<NewsItem[]>(() => (withNews ? (news.data?.pages[0]?.items ?? []) : []), [withNews, news.data])
-  const mixed = useMemo(() => interleave(items, newsItems, 3), [items, newsItems])
+  }, [posts, checkins.data, replays.data, newsItems])
 
   return (
     <>
@@ -250,7 +250,7 @@ function Timeline({ everyone, withNews }: { everyone: boolean; withNews: boolean
         </div>
       )}
 
-      {posts && mixed.length === 0 && !live.data?.length && (
+      {posts && items.length === 0 && !live.data?.length && (
         <EmptyState
           icon={Users}
           title={t('Newsfeed đang trống')}
@@ -263,19 +263,19 @@ function Timeline({ everyone, withNews }: { everyone: boolean; withNews: boolean
         />
       )}
 
-      {posts && mixed.length > 0 && (
+      {posts && items.length > 0 && (
         <div className="animate-fade-rise-delay flex flex-col gap-6">
-          {mixed.map((entry) => {
-            if (entry.kind === 'news') return <NewsCard key={`news-${entry.value._id}`} item={entry.value} />
-            const item = entry.value
-            return item.kind === 'post' ? (
+          {items.map((item) =>
+            item.kind === 'news' ? (
+              <NewsCard key={`news-${item.news._id}`} item={item.news} />
+            ) : item.kind === 'post' ? (
               <TripCard key={`post-${item.post._id}`} post={item.post} />
             ) : item.kind === 'replay' ? (
               <ReplayCard key={`replay-${item.stream._id}`} stream={item.stream} showHost featured />
             ) : (
               <CheckInCard key={`checkin-${item.checkin._id}`} checkin={item.checkin} viewerId={viewerId} />
-            )
-          })}
+            ),
+          )}
         </div>
       )}
     </>
