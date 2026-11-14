@@ -107,19 +107,22 @@ function byNewest(a: TripPost, b: TripPost): number {
  * GET /api/feed — published posts by the people `viewerId` follows, newest
  * first. The viewer's own posts are included so a new post shows up right away.
  * `followingIds` (socialService.getFollowingIds) adds the follows stored by the
- * API, which `db.follows` does not know about.
+ * API, which `db.follows` does not know about. `everyone`: every published
+ * post, newest first, whoever wrote it (the "Dành cho bạn" tab); signed out,
+ * that is all there is.
  */
 export async function getFeed(
   viewerId: ObjectId | null,
   followingIds: ObjectId[] = [],
+  everyone = false,
 ): Promise<TripPostWithAuthor[]> {
   await Promise.all([delay(), syncServerPosts()])
 
-  if (!viewerId) {
+  if (!viewerId || everyone) {
     return db.tripPosts
       .filter((p) => p.status === 'published')
       .sort(byNewest)
-      .map((p) => decorate(p, null))
+      .map((p) => decorate(p, viewerId))
   }
 
   const authors = new Set([
