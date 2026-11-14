@@ -41,6 +41,7 @@ import { uploadToCloudinary } from '@/lib/cloudinaryUpload'
 import type { SignedUpload } from '@/lib/cloudinaryUpload'
 import { prepareImageForUpload } from '@/lib/images'
 import { t } from '@/i18n'
+import { newestFirst, postedAt } from '@/lib/format'
 
 export type { ServerTripPost } from './serverPosts'
 
@@ -95,8 +96,9 @@ export function decorate(post: TripPost, viewerId: ObjectId | null): TripPostWit
   }
 }
 
-function byNewest(a: { createdAt: string }, b: { createdAt: string }): number {
-  return Date.parse(b.createdAt) - Date.parse(a.createdAt)
+/** Newest first by when each journey was published (createdAt for sample journeys). */
+function byNewest(a: TripPost, b: TripPost): number {
+  return newestFirst(postedAt(a), postedAt(b))
 }
 
 /* ----------------------------------------------------------------- reads */
@@ -207,17 +209,22 @@ export async function createPost(payload: TripPostPayload): Promise<TripPost> {
   return clone(stored)
 }
 
+/** Journey photos (the cover and the ones beside it) are all this shape: the Newsfeed card's 16:10. */
+export const JOURNEY_PHOTO_ASPECT = 16 / 10
+
 /**
  * Uploads a journey image (the cover, or a stop's photo) and returns its
- * address. The file is shrunk in the browser to `maxSide`, then sent straight
- * to Cloudinary with a signature from the API.
+ * address. The file is shrunk in the browser to `maxSide` (and cropped to
+ * `aspect` when given), then sent straight to Cloudinary with a signature
+ * from the API.
  */
 export async function uploadJourneyImage(
   original: File,
   onProgress?: (percent: number) => void,
   maxSide = 1920,
+  aspect?: number,
 ): Promise<string> {
-  const file = await prepareImageForUpload(original, maxSide)
+  const file = await prepareImageForUpload(original, maxSide, aspect)
   const signature = await http<SignedUpload & { publicId: string }>('/api/posts/cover-signature', { method: 'POST' })
   const uploaded = await uploadToCloudinary(signature, file, onProgress)
   if (!uploaded.secure_url) throw new ApiError(t('Không nhận được địa chỉ ảnh sau khi tải lên.'), 0)

@@ -221,6 +221,8 @@ function toView(post: TripPostDocument, viewerId: string | undefined) {
     status: post.status,
     createdAt: post.createdAt.toISOString(),
     updatedAt: post.updatedAt.toISOString(),
+    /** When it went public: a draft written long ago and published today is new in the Newsfeed. */
+    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : null,
     deletedAt: post.deletedAt ? post.deletedAt.toISOString() : null,
     purgeAt: post.deletedAt ? purgeAt(post.deletedAt).toISOString() : null,
     /** Only the author hears that their journey was hidden by moderation. */

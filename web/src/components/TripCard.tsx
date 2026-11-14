@@ -13,11 +13,21 @@ import {
   REGION_LABELS,
   formatCount,
   formatVndShort,
+  postedAt,
   relativeTime,
   tripLengthLabel,
 } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { TripPostWithAuthor } from '@/services/types'
+
+/**
+ * The wide Newsfeed card. From `md` up it is a row of fixed height with the
+ * cover at 16:10 on the left (16rem tall × 25.6rem wide), so every journey's
+ * picture is the same size; below `md` the cover sits on top, full width, at
+ * 16:10. Uploads are cropped to 16:10 too (CoverPicker), so nothing is lost.
+ */
+const FEED_ROW = 'md:flex md:h-64'
+const FEED_COVER = 'aspect-[16/10] w-full md:aspect-auto md:h-full md:w-[25.6rem]'
 
 interface TripCardProps {
   post: TripPostWithAuthor
@@ -37,20 +47,16 @@ export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
     >
       <Link
         to={`/posts/${post._id}`}
-        className={cn('group block', isGrid ? '' : 'sm:flex')}
+        className={cn('group block', !isGrid && FEED_ROW)}
       >
-        {/* Cover */}
-        <div
-          className={cn(
-            'relative shrink-0 overflow-hidden bg-white/5',
-            isGrid ? 'aspect-[4/3] w-full' : 'aspect-[16/10] w-full sm:aspect-auto sm:w-64 md:w-80',
-          )}
-        >
+        {/* Cover: one fixed frame on every card, whatever the photo's own
+            shape. The photo is cropped to fill it, never sizes the card. */}
+        <div className={cn('relative shrink-0 overflow-hidden bg-white/5', isGrid ? 'aspect-[4/3] w-full' : FEED_COVER)}>
           <img
             src={post.coverUrl}
             alt=""
             loading="lazy"
-            className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
           {/* Trip length is metadata, not a call to action, so it stays off the
               accent — a grid of cards would otherwise put a dozen sunset chips
@@ -61,7 +67,7 @@ export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
         </div>
 
         {/* Body */}
-        <div className="flex min-w-0 flex-1 flex-col gap-3 p-5">
+        <div className={cn('flex min-w-0 flex-1 flex-col p-5', isGrid ? 'gap-3' : 'gap-2.5 overflow-hidden')}>
           <div className="flex items-center gap-2.5">
             <Avatar className="size-7">
               <AvatarImage src={post.author.avatarUrl} alt="" />
@@ -72,16 +78,16 @@ export function TripCard({ post, layout = 'feed', className }: TripCardProps) {
               ·
             </span>
             <time
-              dateTime={post.createdAt}
+              dateTime={postedAt(post)}
               className="shrink-0 text-xs text-muted-foreground"
             >
-              {relativeTime(post.createdAt)}
+              {relativeTime(postedAt(post))}
             </time>
           </div>
 
           <h3
             className={cn(
-              'font-display leading-tight tracking-tight',
+              'line-clamp-2 font-display leading-tight tracking-tight',
               isGrid ? 'text-xl' : 'text-2xl',
             )}
           >
@@ -144,13 +150,8 @@ export function TripCardSkeleton({ layout = 'feed' }: { layout?: 'feed' | 'grid'
 
   return (
     <GlassCard className="overflow-hidden">
-      <div className={cn(isGrid ? '' : 'sm:flex')}>
-        <Skeleton
-          className={cn(
-            'rounded-none',
-            isGrid ? 'aspect-[4/3] w-full' : 'aspect-[16/10] w-full sm:aspect-auto sm:w-64 md:w-80',
-          )}
-        />
+      <div className={cn(!isGrid && FEED_ROW)}>
+        <Skeleton className={cn('shrink-0 rounded-none', isGrid ? 'aspect-[4/3] w-full' : FEED_COVER)} />
         <div className="flex flex-1 flex-col gap-3 p-5">
           <div className="flex items-center gap-2.5">
             <Skeleton className="size-7 rounded-full" />
