@@ -33,7 +33,19 @@ void upsertAuthors(List<User> authors) {
   }
 }
 
-/// Puts one API journey into `tripPosts`; like/comment/bookmark counts stay the demo database's.
+/// Records that [viewerId] has (or has not) saved a journey, in the demo
+/// bookmarks the rest of the service layer reads. [savedAt] orders "Đã lưu".
+void setBookmarked(String viewerId, String postId, bool saved, [String? savedAt]) {
+  final bookmarks = MockDb.instance.bookmarks;
+  final index = bookmarks.indexWhere((b) => b.userId == viewerId && b.postId == postId);
+  if (saved && index == -1) {
+    bookmarks.add(Bookmark(id: 'b_$postId', userId: viewerId, postId: postId, createdAt: savedAt ?? nowIso()));
+  }
+  if (!saved && index != -1) bookmarks.removeAt(index);
+}
+
+/// Puts one API journey into `tripPosts`. Its bookmark count is the API's;
+/// like, comment and clone counts stay the demo database's.
 TripPost upsertServerPost(TripPost post) {
   final db = MockDb.instance;
   _fromServer.add(post.id);
@@ -51,7 +63,6 @@ TripPost upsertServerPost(TripPost post) {
   stored
     ..likeCount = local.likeCount
     ..commentCount = local.commentCount
-    ..bookmarkCount = local.bookmarkCount
     ..cloneCount = local.cloneCount;
   db.tripPosts[index] = stored;
   return stored;
@@ -70,6 +81,7 @@ const _fresh = Duration(seconds: 5);
 Future<void> _pull(String? viewerId) async {
   final published = await Api.get('/api/posts', auth: false);
   final mine = viewerId == null ? <TripPost>[] : listOf((await Api.get('/api/posts/mine?status=all'))['items'], (p) => TripPost.fromJson(mapOf(p)));
+  final saved = viewerId == null ? null : listOf((await Api.get('/api/posts/bookmarks'))['items'], mapOf);
 
   upsertAuthors(listOf(published['authors'], (u) => User.fromJson(mapOf(u))));
   final seen = <String>{};
@@ -79,6 +91,14 @@ Future<void> _pull(String? viewerId) async {
   }
   for (final id in [..._fromServer]) {
     if (!seen.contains(id)) dropServerPost(id);
+  }
+
+  // Your bookmarks on API journeys are the API's to say; those on demo journeys stay as they are.
+  if (viewerId != null && saved != null) {
+    MockDb.instance.bookmarks.removeWhere((b) => b.userId == viewerId && isServerId(b.postId));
+    for (final item in saved) {
+      setBookmarked(viewerId, str(item['postId']), true, str(item['savedAt']));
+    }
   }
 }
 

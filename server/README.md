@@ -406,6 +406,8 @@ include.
 | `POST /api/posts/:id/companions` `{ userIds }` | the author | invites friends along (≤10 per journey; `400 NOT_FRIEND` otherwise) and tells them → `{ post, authors }` |
 | `POST /api/posts/:id/companions/respond` `{ accept }` | an invitee | accepts (the author is told) or declines (the invite is dropped) |
 | `DELETE /api/posts/:id/companions/:userId` | the author, or that companion | takes them off the journey |
+| `POST /api/posts/:id/bookmark` | signed in | saves / unsaves a published journey (toggle) → `{ bookmarkCount, bookmarkedByMe }`. Private: nobody is told |
+| `GET /api/posts/bookmarks` | signed in | `{ items: [{ postId, savedAt }] }`: the journeys you saved, newest first (stored in `postbookmarks`) |
 | `GET /api/notifications` | signed in | latest 50, newest first (`follow`, `live`, `invite`, `invite_accepted`, …) |
 | `POST /api/notifications/read` | signed in | marks all read |
 

@@ -2,8 +2,9 @@
  * The bridge between journeys stored by the API (server/src/routes/posts.ts)
  * and the mock collections the rest of the service layer still reads.
  *
- * Journeys written by real accounts live in MongoDB. Seed journeys, likes,
- * comments, bookmarks and clones are still mock data in `db`. Rather than
+ * Journeys written by real accounts live in MongoDB, with their likes,
+ * comments and bookmarks. Seed journeys, and what happens on them, are still
+ * mock data in `db`. Rather than
  * teaching every reader about two sources, the API's journeys are copied into
  * `db.tripPosts` (and their authors into `db.users`) before a read, so feeds,
  * Discover, bookmarks and cloning work on both unchanged.
@@ -11,7 +12,7 @@
  * Internal to services/: components never import this.
  */
 
-import { clone, db } from './client'
+import { clone, db, nowIso } from './client'
 import { http } from './http'
 import type { TripPost, User } from './types'
 import { themeFromText, travelCover } from '@/lib/photos'
@@ -45,10 +46,16 @@ export function setLiked(viewerId: string, postId: string, liked: boolean) {
 }
 
 /**
- * Puts one API journey into `db.tripPosts`. Like, comment and clone counts come
- * from the API; bookmarks are still counted by the mocks, so an existing copy
- * keeps its own.
+ * Records that `viewerId` has (or has not) saved a journey, in the mock bookmarks
+ * the rest of the service layer reads. `savedAt` orders "Đã lưu", newest first.
  */
+export function setBookmarked(viewerId: string, postId: string, saved: boolean, savedAt: string = nowIso()) {
+  const index = db.bookmarks.findIndex((b) => b.userId === viewerId && b.postId === postId)
+  if (saved && index === -1) db.bookmarks.push({ _id: `b_${postId}`, userId: viewerId, postId, createdAt: savedAt })
+  if (!saved && index !== -1) db.bookmarks.splice(index, 1)
+}
+
+/** Puts one API journey into `db.tripPosts`, its counts as the API gives them. */
 export function upsertServerPost(post: ServerTripPost): TripPost {
   fromServer.add(post._id)
   const index = db.tripPosts.findIndex((p) => p._id === post._id)
@@ -59,12 +66,8 @@ export function upsertServerPost(post: ServerTripPost): TripPost {
     db.tripPosts.unshift(stored)
     return stored
   }
-  const local = db.tripPosts[index]
-  db.tripPosts[index] = {
-    ...stored,
-    bookmarkCount: local.bookmarkCount,
-  }
-  return db.tripPosts[index]
+  db.tripPosts[index] = stored
+  return stored
 }
 
 /** Takes a journey out of `db.tripPosts` (deleted, or no longer visible). */
@@ -82,12 +85,13 @@ const FRESH_MS = 5_000
 
 async function pull(viewerId: string | null) {
   const published = await http<{ items: ServerTripPost[]; authors: User[] }>('/api/posts', { auth: false })
-  const [mine, liked] = viewerId
+  const [mine, liked, saved] = viewerId
     ? await Promise.all([
         http<{ items: ServerTripPost[] }>('/api/posts/mine?status=all').then((r) => r.items),
         http<{ ids: string[] }>('/api/posts/liked-ids').then((r) => r.ids),
+        http<{ items: { postId: string; savedAt: string }[] }>('/api/posts/bookmarks').then((r) => r.items),
       ])
-    : [[], null]
+    : [[], null, null]
 
   upsertAuthors(published.authors)
   const seen = new Set<string>()
@@ -103,6 +107,12 @@ async function pull(viewerId: string | null) {
     db.likes = db.likes.filter((l) => l.userId !== viewerId || !isServerPostId(l.postId))
     // `liked` is newest first; db.likes is oldest first.
     for (const postId of [...liked].reverse()) db.likes.push({ userId: viewerId, postId })
+  }
+
+  // Likewise your bookmarks: the API's for its journeys, the mocks' for seed journeys.
+  if (viewerId && saved) {
+    db.bookmarks = db.bookmarks.filter((b) => b.userId !== viewerId || !isServerPostId(b.postId))
+    for (const { postId, savedAt } of saved) setBookmarked(viewerId, postId, true, savedAt)
   }
 }
 

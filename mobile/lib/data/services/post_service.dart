@@ -1,5 +1,5 @@
-/// Journeys (trip posts). Real accounts' journeys are stored by the API;
-/// seed journeys, likes, comments and bookmarks are still demo data
+/// Journeys (trip posts). Real accounts' journeys, and bookmarks on them, are
+/// stored by the API; seed journeys, likes and comments are still demo data
 /// (same split as web/src/services/post.service.ts).
 library;
 
@@ -51,7 +51,14 @@ abstract final class PostService {
     if (isServerId(id)) {
       final data = await Api.get('/api/posts/$id');
       upsertAuthors(listOf(data['authors'], (u) => User.fromJson(mapOf(u))));
-      return decorate(upsertServerPost(_post(data)), viewerId);
+      final post = upsertServerPost(_post(data));
+      if (viewerId != null) {
+        // Keep the date it was saved, which orders "Đã lưu".
+        final saved = _db.bookmarks.any((b) => b.userId == viewerId && b.postId == post.id);
+        final bookmarkedByMe = data['bookmarkedByMe'] == true;
+        if (saved != bookmarkedByMe) setBookmarked(viewerId, post.id, bookmarkedByMe);
+      }
+      return decorate(post, viewerId);
     }
     await mockDelay();
     final post = assertFound(_db.postById(id), t('Không tìm thấy hành trình này. Có thể nó đã bị xoá.'));
@@ -120,6 +127,14 @@ abstract final class PostService {
   }
 
   static Future<({int bookmarkCount, bool bookmarkedByMe})> toggleBookmark(String postId, String viewerId) async {
+    if (isServerId(postId)) {
+      final data = await Api.post('/api/posts/$postId/bookmark');
+      final result = (bookmarkCount: intOf(data['bookmarkCount']), bookmarkedByMe: data['bookmarkedByMe'] == true);
+      setBookmarked(viewerId, postId, result.bookmarkedByMe);
+      _db.postById(postId)?.bookmarkCount = result.bookmarkCount;
+      return result;
+    }
+    // Demo journeys: saving one lasts until the app is closed.
     await mockDelay();
     final post = assertFound(_db.postById(postId), t('Không tìm thấy hành trình này.'));
     final index = _db.bookmarks.indexWhere((b) => b.userId == viewerId && b.postId == postId);
