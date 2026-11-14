@@ -19,7 +19,7 @@ import { PostComposer } from '@/features/trip-post/components/PostComposer'
 import { useFeed } from '@/features/trip-post/hooks'
 import { t } from '@/i18n'
 import { interleave } from '@/lib/feedMix'
-import { REGION_LABELS } from '@/lib/format'
+import { REGION_LABELS, newestFirst, postedAt } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { checkinService, livestreamService, socialService } from '@/services'
 import type { CheckIn } from '@/services/checkin.service'
@@ -202,12 +202,13 @@ function Timeline({ withNews }: { withNews: boolean }) {
 
   const items = useMemo<FeedItem[]>(() => {
     const all: FeedItem[] = [
-      ...(posts ?? []).map((post) => ({ kind: 'post' as const, at: post.createdAt, post })),
+      ...(posts ?? []).map((post) => ({ kind: 'post' as const, at: postedAt(post), post })),
       // A check-in feed that fails to load (API down) should not hide the posts.
       ...(checkins.data ?? []).map((checkin) => ({ kind: 'checkin' as const, at: checkin.createdAt, checkin })),
       ...(replays.data?.items ?? []).map((stream) => ({ kind: 'replay' as const, at: stream.endedAt ?? stream.startedAt, stream })),
     ]
-    return all.sort((a, b) => b.at.localeCompare(a.at))
+    // Newest first across every kind, by real time.
+    return all.sort((a, b) => newestFirst(a.at, b.at))
   }, [posts, checkins.data, replays.data])
 
   // The first page of news is enough to mix in. News that fails to load

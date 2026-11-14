@@ -58,39 +58,64 @@ function toBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, QUALITY))
 }
 
+/** Where a centred crop to `aspect` (width ÷ height) sits in a `width`×`height` picture. */
+export function centerCrop(width: number, height: number, aspect: number): Crop {
+  if (width / height > aspect) {
+    const w = Math.round(height * aspect)
+    return { x: Math.round((width - w) / 2), y: 0, width: w, height }
+  }
+  const h = Math.round(width / aspect)
+  return { x: 0, y: Math.round((height - h) / 2), width, height: h }
+}
+
+interface Crop {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 /**
  * Shrinks an image so its longest side is at most `maxSide` pixels and
  * re-encodes it as WebP (JPEG where the browser cannot write WebP). A phone
  * photo of 4–8 MB usually ends up at 200–600 KB, so uploads are fast even on
- * mobile data. Throws when the result is still over MAX_UPLOAD_BYTES.
+ * mobile data. With `aspect` (width ÷ height, e.g. 16 / 10), the picture is
+ * first cropped around its centre to that shape, so every upload of one kind
+ * comes out the same shape. Throws when the result is still over MAX_UPLOAD_BYTES.
  */
-export async function prepareImageForUpload(file: File, maxSide: number): Promise<File> {
+export async function prepareImageForUpload(file: File, maxSide: number, aspect?: number): Promise<File> {
   const image = await decode(file).catch(() => {
     throw new Error(t('Không đọc được ảnh này. Vui lòng chọn ảnh khác.'))
   })
 
   try {
-    const scale = Math.min(1, maxSide / Math.max(image.width, image.height))
-    if (scale === 1 && file.size <= SMALL_ENOUGH_BYTES) return file
+    const full: Crop = { x: 0, y: 0, width: image.width, height: image.height }
+    const crop = aspect ? centerCrop(image.width, image.height, aspect) : full
+    // A picture already within a pixel of the shape needs no cropping.
+    const cropped = Math.abs(crop.width - full.width) > 1 || Math.abs(crop.height - full.height) > 1
+    const area = cropped ? crop : full
+
+    const scale = Math.min(1, maxSide / Math.max(area.width, area.height))
+    if (!cropped && scale === 1 && file.size <= SMALL_ENOUGH_BYTES) return file
 
     const canvas = document.createElement('canvas')
-    canvas.width = Math.max(1, Math.round(image.width * scale))
-    canvas.height = Math.max(1, Math.round(image.height * scale))
+    canvas.width = Math.max(1, Math.round(area.width * scale))
+    canvas.height = Math.max(1, Math.round(area.height * scale))
     const ctx = canvas.getContext('2d')
     if (!ctx) return file
 
-    let blob = await toBlob(drawOn(ctx, canvas, image.source, false), 'image/webp')
+    let blob = await toBlob(drawOn(ctx, canvas, image.source, area, false), 'image/webp')
     let type = 'image/webp'
     // Safari cannot encode WebP and hands back PNG instead: use JPEG there, on
     // white, since JPEG has no transparency.
     if (!blob || blob.type !== 'image/webp') {
-      blob = await toBlob(drawOn(ctx, canvas, image.source, true), 'image/jpeg')
+      blob = await toBlob(drawOn(ctx, canvas, image.source, area, true), 'image/jpeg')
       type = 'image/jpeg'
     }
     if (!blob) return file
 
     // Re-encoding a small, already-compressed file can make it bigger.
-    const result = scale === 1 && blob.size >= file.size ? file : new File([blob], renamed(file.name, type), { type })
+    const result = !cropped && scale === 1 && blob.size >= file.size ? file : new File([blob], renamed(file.name, type), { type })
     if (result.size > MAX_UPLOAD_BYTES) throw new Error(t('Ảnh vẫn quá lớn sau khi nén. Vui lòng chọn ảnh khác.'))
     return result
   } finally {
@@ -102,6 +127,7 @@ function drawOn(
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   source: CanvasImageSource,
+  area: Crop,
   whiteBackground: boolean,
 ): HTMLCanvasElement {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -110,7 +136,7 @@ function drawOn(
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   }
   ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(source, 0, 0, canvas.width, canvas.height)
+  ctx.drawImage(source, area.x, area.y, area.width, area.height, 0, 0, canvas.width, canvas.height)
   return canvas
 }
 

@@ -29,7 +29,8 @@ export function NewsCard({ item, compact = false }: { item: NewsItem; compact?: 
   return (
     <GlassCard as="article" interactive className="overflow-hidden">
       {/* GlassCard wraps its children in a layer of its own, so the row is laid out here. */}
-      <div className={cn(!compact && 'sm:flex')}>
+      {/* Same frame as a journey card (TripCard): fixed height from `md` up, cover at 16:10. */}
+      <div className={cn(!compact && 'md:flex md:h-64')}>
         {cover && (
           <Link
             to={to}
@@ -37,7 +38,7 @@ export function NewsCard({ item, compact = false }: { item: NewsItem; compact?: 
             aria-hidden
             className={cn(
               'group relative block shrink-0 overflow-hidden bg-white/5',
-              compact ? 'aspect-[16/9] w-full' : 'aspect-[16/10] w-full sm:aspect-auto sm:w-64 md:w-80',
+              compact ? 'aspect-[16/9] w-full' : 'aspect-[16/10] w-full md:aspect-auto md:h-full md:w-[25.6rem]',
             )}
           >
             <img
@@ -46,7 +47,7 @@ export function NewsCard({ item, compact = false }: { item: NewsItem; compact?: 
               loading="lazy"
               referrerPolicy="no-referrer"
               onError={() => setBroken(true)}
-              className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03] motion-reduce:transition-none sm:absolute sm:inset-0"
+              className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03] motion-reduce:transition-none absolute inset-0"
             />
             {item.kind === 'video' && (
               <PlayCircle className="absolute left-1/2 top-1/2 size-14 -translate-x-1/2 -translate-y-1/2 text-white/90 drop-shadow-lg" aria-hidden />
@@ -54,7 +55,7 @@ export function NewsCard({ item, compact = false }: { item: NewsItem; compact?: 
           </Link>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col gap-3 p-5">
+        <div className={cn('flex min-w-0 flex-1 flex-col gap-3 p-5', !compact && 'md:overflow-hidden')}>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1 rounded-full bg-np-teal/15 px-2 py-0.5 text-[13px] font-medium text-np-teal">
               <Newspaper className="size-3.5" aria-hidden />
@@ -74,9 +75,9 @@ export function NewsCard({ item, compact = false }: { item: NewsItem; compact?: 
           </p>
 
           <Link to={to} className="group block space-y-2">
-            <h3 className={cn('font-display leading-tight tracking-tight group-hover:underline', compact ? 'text-xl' : 'text-2xl')}>{item.title}</h3>
+            <h3 className={cn('line-clamp-2 font-display leading-tight tracking-tight group-hover:underline', compact ? 'text-xl' : 'text-2xl')}>{item.title}</h3>
             {item.summary && (
-              <p className={cn('text-sm leading-relaxed text-muted-foreground', compact ? 'line-clamp-2' : 'line-clamp-3')}>{item.summary}</p>
+              <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{item.summary}</p>
             )}
           </Link>
 

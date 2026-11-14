@@ -22,7 +22,8 @@ interface CoverPickerProps {
 
 /**
  * The journey's photos: pick or drop up to 10 files, the first shown at the
- * card's 16:10 as the cover. Each image is shrunk in the browser and uploaded
+ * card's 16:10 as the cover. Each image is cropped to 16:10 around its centre
+ * and shrunk in the browser, then uploaded
  * to Cloudinary right away; `value` holds their addresses, saved with the journey.
  */
 export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: CoverPickerProps) {
@@ -58,7 +59,7 @@ export function CoverPicker({ value, onChange, fallbackUrl, disabled = false }: 
       setProcessing({ index: i + 1, total: accepted.length })
       setProgress(0)
       try {
-        current = [...current, await postService.uploadJourneyImage(file, setProgress)]
+        current = [...current, await postService.uploadJourneyImage(file, setProgress, undefined, postService.JOURNEY_PHOTO_ASPECT)]
         onChange(current)
       } catch (err) {
         problems.push(`${file.name}: ${(err as Error).message}`)

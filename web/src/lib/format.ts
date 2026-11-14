@@ -46,6 +46,16 @@ export function formatCount(count: number): string {
 }
 
 /** "2025-10-22T13:20:00.000Z" → "khoảng 2 tháng trước" */
+/** When a journey reached the Newsfeed: its publish time, else when it was written. */
+export function postedAt(post: { createdAt: string; publishedAt?: string | null }): string {
+  return post.publishedAt || post.createdAt
+}
+
+/** Newest first, by real time (string order breaks across ISO formats). */
+export function newestFirst(a: string, b: string): number {
+  return (Date.parse(b) || 0) - (Date.parse(a) || 0)
+}
+
 export function relativeTime(iso: string): string {
   return formatDistanceToNow(parseISO(iso), { addSuffix: true, locale: dateLocale() })
 }

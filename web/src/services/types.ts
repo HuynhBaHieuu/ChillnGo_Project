@@ -190,6 +190,8 @@ export interface TripPost {
   moderation?: ModerationInfo | null
   createdAt: ISODate
   updatedAt: ISODate
+  /** When it was published (from the API; sample journeys go by `createdAt`). */
+  publishedAt?: ISODate | null
 }
 
 /* --------------------------------------------------------------- Comment */
