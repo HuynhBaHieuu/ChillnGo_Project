@@ -30,8 +30,8 @@ export interface Product {
 }
 
 export const PRODUCTS: Record<ProductId, Product> = {
-  premium_month: { id: 'premium_month', kind: 'premium', name: 'Premium 1 tháng', days: 30, amount: 49_000 },
-  premium_year: { id: 'premium_year', kind: 'premium', name: 'Premium 1 năm', days: 365, amount: 490_000 },
+  premium_month: { id: 'premium_month', kind: 'premium', name: 'Premium 1 tháng', days: 30, amount: 2_000 },
+  premium_year: { id: 'premium_year', kind: 'premium', name: 'Premium 1 năm', days: 365, amount: 20_000 },
   business_boost_month: {
     id: 'business_boost_month',
     kind: 'boost',

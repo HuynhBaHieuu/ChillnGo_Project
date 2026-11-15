@@ -423,7 +423,7 @@ and never renewed automatically (buying again adds the days):
 
 | Product | Price | Gives |
 | --- | --- | --- |
-| `premium_month` / `premium_year` | 49.000đ / 30 days, 490.000đ / 365 days | 100 AI requests a day (free: 10), 1080p livestreams (free: 720p), replays kept 365 days (free: 30), the crown badge |
+| `premium_month` / `premium_year` | 2.000đ / 30 days, 20.000đ / 365 days | 100 AI requests a day (free: 10), 1080p livestreams (free: 720p), replays kept 365 days (free: 30), the crown badge |
 | `business_boost_month` | 199.000đ / 30 days | an approved business page and its ads in Discover's "Gợi ý nổi bật", marked "Tài trợ" |
 
 Prices and limits live in `src/lib/plans.ts`; the AI limits can be changed

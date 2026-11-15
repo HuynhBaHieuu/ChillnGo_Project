@@ -164,7 +164,7 @@ const GUIDE: Record<GuideTopic, string> = {
 
   premium: [
     'Gói Miễn phí: 10 lượt AI mỗi ngày (mỗi lần tạo hành trình bằng AI hoặc mỗi tin nhắn chat sửa bản nháp dùng 1 lượt), livestream 720p, video xem lại được giữ 30 ngày.',
-    'Gói Premium: 100 lượt AI mỗi ngày, livestream 1080p, video xem lại được giữ 365 ngày, huy hiệu vương miện cạnh tên. Giá 49.000đ cho 30 ngày hoặc 490.000đ cho 365 ngày.',
+    'Gói Premium: 100 lượt AI mỗi ngày, livestream 1080p, video xem lại được giữ 365 ngày, huy hiệu vương miện cạnh tên. Giá 2.000đ cho 30 ngày hoặc 20.000đ cho 365 ngày.',
     'Cách mua: menu Tài khoản → "ChillnGo Premium" (hoặc trang /premium) → chọn gói → "Thanh toán" → quét mã VietQR trên trang PayOS bằng app ngân hàng. Thanh toán xong ChillnGo tự kích hoạt và gửi thông báo.',
     'Không tự động gia hạn: muốn dùng tiếp thì mua thêm, số ngày được cộng dồn vào thời gian còn lại. Còn 3 ngày sẽ có thông báo nhắc. Lịch sử đơn hàng xem ở trang Premium.',
     'Thời hạn giữ video tính theo gói của người phát lúc video xem lại sẵn sàng.',

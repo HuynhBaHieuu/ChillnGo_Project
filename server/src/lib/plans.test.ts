@@ -52,8 +52,8 @@ describe('plans', () => {
       assert.ok(Number.isInteger(product.amount) && product.amount >= 2000, product.id)
       assert.ok(product.days > 0, product.id)
     }
-    assert.equal(PRODUCTS.premium_month.amount, 49_000)
-    assert.equal(PRODUCTS.premium_year.amount, 490_000)
+    assert.equal(PRODUCTS.premium_month.amount, 2_000)
+    assert.equal(PRODUCTS.premium_year.amount, 20_000)
     assert.equal(PRODUCTS.business_boost_month.amount, 199_000)
   })
 })
