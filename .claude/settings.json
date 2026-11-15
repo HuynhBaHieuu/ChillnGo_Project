@@ -3,5 +3,10 @@
     "taste-skill@taste-skill": false,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
     "superdesign@superdesign": true
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   }
 }
