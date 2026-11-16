@@ -7,12 +7,17 @@
  *   PATCH  /api/itineraries/:id/days         new day order: { dayIds }
  *   POST   /api/itineraries/:id/merge        append days of other journeys: { selections: [{ postId, dayIds, source? }] }
  *   DELETE /api/itineraries/:id/days/:dayId  remove a day
+ *   POST   /api/itineraries/:id/share        share a read-only link (keeps the link if already shared)
+ *   DELETE /api/itineraries/:id/share        stop sharing; the old link stops working
+ *   GET    /api/shared-itineraries/:token    a shared itinerary, for anyone with the link
  *
  * Journeys stored here are read here. The web app's sample journeys (ids like
  * p_001) live only in the browser, so for those it sends the days along
  * (`source`); they land in the sender's own private itinerary and nowhere else.
  * AI-adapted itineraries arrive through routes/aiClone.ts.
  */
+
+import { randomBytes } from 'node:crypto'
 
 import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
@@ -23,7 +28,8 @@ import { HttpError, rateLimitBody } from '../lib/errors.js'
 import { addDays, creditClone, isServerPostId, readableJourney, rekeyDays, totalCostOf } from '../lib/journeys.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { currentUser, loadCurrentUser } from '../middleware/staff.js'
-import { Itinerary, itineraryView } from '../models/Itinerary.js'
+import { Itinerary, itineraryView, sharedItineraryView } from '../models/Itinerary.js'
+import { User } from '../models/User.js'
 import type { ItineraryDocument } from '../models/Itinerary.js'
 import { daySchema } from './posts.js'
 
@@ -197,4 +203,53 @@ itinerariesRouter.delete('/:id/days/:dayId', writeLimiter, async (req, res) => {
   if (days.length <= 1) throw new HttpError(400, 'Lịch trình cần ít nhất một ngày.', 'LAST_DAY')
   await saveDays(itinerary, days.filter((d) => d._id !== String(req.params.dayId)))
   res.json({ itinerary: itineraryView(itinerary) })
+})
+
+/** 128 random bits, URL-safe: the link cannot be guessed from the itinerary or its owner. */
+function newShareToken(): string {
+  return randomBytes(16).toString('base64url')
+}
+
+itinerariesRouter.post('/:id/share', writeLimiter, async (req, res) => {
+  const itinerary = await loadOwn(currentUser(res)._id, String(req.params.id))
+  if (!itinerary.shareToken) {
+    itinerary.shareToken = newShareToken()
+    await itinerary.save()
+  }
+  res.json({ itinerary: itineraryView(itinerary) })
+})
+
+itinerariesRouter.delete('/:id/share', writeLimiter, async (req, res) => {
+  const itinerary = await loadOwn(currentUser(res)._id, String(req.params.id))
+  if (itinerary.shareToken) {
+    itinerary.shareToken = null
+    await itinerary.save()
+  }
+  res.json({ itinerary: itineraryView(itinerary) })
+})
+
+/** Read-only links to shared itineraries. No account needed. */
+export const sharedItinerariesRouter = Router()
+
+const sharedReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: rateLimitBody('Bạn thao tác quá nhanh. Vui lòng đợi vài phút.'),
+})
+
+sharedItinerariesRouter.get('/:token', sharedReadLimiter, async (req, res) => {
+  const token = String(req.params.token)
+  const itinerary = /^[A-Za-z0-9_-]{16,64}$/.test(token) ? await Itinerary.findOne({ shareToken: token }) : null
+  if (!itinerary) throw new HttpError(404, 'Link chia sẻ không còn hiệu lực.', 'NOT_FOUND')
+  const owner = isValidObjectId(itinerary.ownerId)
+    ? await User.findById(itinerary.ownerId).select('username displayName avatarUrl').lean()
+    : null
+  res.json({
+    itinerary: sharedItineraryView(
+      itinerary,
+      owner ? { username: owner.username, displayName: owner.displayName, avatarUrl: owner.avatarUrl ?? '' } : null,
+    ),
+  })
 })

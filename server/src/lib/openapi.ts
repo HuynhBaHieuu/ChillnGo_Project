@@ -157,6 +157,9 @@ const OPERATIONS: Operation[] = [
   { method: 'patch', path: '/api/itineraries/:id/days', summary: "Reorder or edit an itinerary's days.", access: 'user', body: true },
   { method: 'post', path: '/api/itineraries/:id/merge', summary: 'Add days from another journey.', access: 'user', body: true },
   { method: 'delete', path: '/api/itineraries/:id/days/:dayId', summary: 'Remove a day from an itinerary.', access: 'user' },
+  { method: 'post', path: '/api/itineraries/:id/share', summary: 'Share a read-only link to an itinerary (keeps the existing link).', access: 'user' },
+  { method: 'delete', path: '/api/itineraries/:id/share', summary: 'Stop sharing an itinerary; its old link stops working.', access: 'user' },
+  { method: 'get', path: '/api/shared-itineraries/:token', summary: 'A shared itinerary, read-only, for anyone with its link.', access: 'public', response: 'SharedItineraryResponse' },
 
   // Check-ins
   {
@@ -407,6 +410,7 @@ const TAGS: Record<string, string> = {
   posts: 'Journeys',
   'ai-drafts': 'AI clone',
   itineraries: 'Itineraries',
+  'shared-itineraries': 'Itineraries',
   checkins: 'Check-ins',
   livestreams: 'Livestreams',
   notifications: 'Notifications',
@@ -674,6 +678,28 @@ const RESPONSE_SCHEMAS: Record<string, Record<string, unknown>> = {
     },
   },
   JourneyList: list('Journey', { authors: authorsList }),
+  SharedItinerary: {
+    type: 'object',
+    description: 'An itinerary its owner shares by link: read-only, without the owner id or the link token.',
+    required: ['_id', 'title', 'startDate', 'days', 'totalEstCost', 'status'],
+    properties: {
+      _id: str(),
+      title: str(),
+      note: str(),
+      coverUrl: str(),
+      startDate: str('YYYY-MM-DD.'),
+      days: { type: 'array', items: ref('Day') },
+      totalEstCost: int('Estimated total in VND.'),
+      status: { type: 'string', enum: ['planning', 'confirmed', 'completed'] },
+      checklist: { type: ['object', 'null'] },
+      owner: {
+        type: ['object', 'null'],
+        properties: { username: str(), displayName: str(), avatarUrl: str() },
+      },
+      updatedAt: time(),
+    },
+  },
+  SharedItineraryResponse: { type: 'object', required: ['itinerary'], properties: { itinerary: ref('SharedItinerary') } },
   JourneyResponse: {
     type: 'object',
     required: ['post', 'authors'],

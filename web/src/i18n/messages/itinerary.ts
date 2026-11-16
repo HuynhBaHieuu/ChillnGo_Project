@@ -178,4 +178,38 @@ export const itinerary = {
   'Hoàn tác': { en: 'Undo', zh: '撤销', ja: '元に戻す', ko: '되돌리기' },
   'Dùng ảnh mặc định': { en: 'Use default photo', zh: '使用默认图片', ja: 'デフォルト画像を使う', ko: '기본 사진 사용' },
   'Chọn {thing}': { en: 'Choose {thing}', zh: '选择{thing}', ja: '{thing}を選ぶ', ko: '{thing} 선택' },
+
+  /* Day map beside the itinerary, and sharing by link */
+  'Chọn ngày': { en: 'Pick a day', zh: '选择日期', ja: '日を選ぶ', ko: '날짜 선택' },
+  'Ngày này chưa có điểm nào trên bản đồ. Chọn địa điểm từ ô tìm kiếm để ghim lên bản đồ.': {
+    en: 'This day has no stops on the map yet. Pick a place from the search box to pin it.',
+    zh: '这一天在地图上还没有地点。从搜索框选择地点即可标在地图上。',
+    ja: 'この日はまだ地図上にスポットがありません。検索欄から場所を選ぶと地図に表示されます。',
+    ko: '이 날은 아직 지도에 장소가 없어요. 검색창에서 장소를 고르면 지도에 표시돼요.',
+  },
+  'Chia sẻ': { en: 'Share', zh: '分享', ja: '共有', ko: '공유' },
+  'Đang chia sẻ': { en: 'Shared', zh: '已分享', ja: '共有中', ko: '공유 중' },
+  'Chia sẻ lịch trình': { en: 'Share itinerary', zh: '分享行程', ja: '旅程を共有', ko: '일정 공유' },
+  'Ai có link đều xem được lịch trình và bản đồ, không cần tài khoản. Chỉ bạn sửa được.': {
+    en: 'Anyone with the link can see the itinerary and map, no account needed. Only you can edit it.',
+    zh: '任何拿到链接的人都能查看行程和地图，无需账号。只有你可以编辑。',
+    ja: 'リンクを知っている人は誰でもアカウントなしで旅程と地図を見られます。編集できるのはあなただけです。',
+    ko: '링크가 있는 누구나 계정 없이 일정과 지도를 볼 수 있어요. 수정은 나만 할 수 있어요.',
+  },
+  'Link chia sẻ': { en: 'Share link', zh: '分享链接', ja: '共有リンク', ko: '공유 링크' },
+  'Sao chép link': { en: 'Copy link', zh: '复制链接', ja: 'リンクをコピー', ko: '링크 복사' },
+  'Đã sao chép link': { en: 'Link copied', zh: '已复制链接', ja: 'コピーしました', ko: '링크 복사됨' },
+  'Mở thử link': { en: 'Open link', zh: '打开链接', ja: 'リンクを開く', ko: '링크 열기' },
+  'Ngừng chia sẻ': { en: 'Stop sharing', zh: '停止分享', ja: '共有を停止', ko: '공유 중지' },
+  'Tạo link chia sẻ': { en: 'Create share link', zh: '生成分享链接', ja: '共有リンクを作成', ko: '공유 링크 만들기' },
+  'Link chia sẻ không còn hiệu lực': { en: 'This share link no longer works', zh: '该分享链接已失效', ja: 'この共有リンクは無効です', ko: '더 이상 유효하지 않은 공유 링크예요' },
+  'Người chia sẻ có thể đã tắt link này. Hãy xin họ link mới.': {
+    en: 'The person who shared it may have turned the link off. Ask them for a new one.',
+    zh: '分享者可能已关闭此链接。请向对方索取新链接。',
+    ja: '共有した人がリンクを無効にした可能性があります。新しいリンクを頼んでください。',
+    ko: '공유한 사람이 링크를 껐을 수 있어요. 새 링크를 요청해 주세요.',
+  },
+  'Lịch trình của {name}': { en: "{name}'s itinerary", zh: '{name} 的行程', ja: '{name}さんの旅程', ko: '{name}님의 일정' },
+  'Hiện tất cả': { en: 'Show all', zh: '显示全部', ja: 'すべて表示', ko: '전체 보기' },
+  'Chỉ hiện ngày này trên bản đồ': { en: 'Show only this day on the map', zh: '地图上只显示这一天', ja: 'この日だけ地図に表示', ko: '이 날만 지도에 표시' },
 } satisfies Messages

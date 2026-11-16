@@ -57,6 +57,7 @@ export const APP_ROUTES = [
   '/billing/result',
   '/business',
   '/b/:slug',
+  '/shared/:token',
   // The admin console sends any path under it to its index page.
   '/admin/*',
 ] as const

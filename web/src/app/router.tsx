@@ -22,6 +22,7 @@ import { InterestPage } from '@/features/discovery-admin/InterestPage'
 import { ItinerariesPage } from '@/features/itinerary-clone/ItinerariesPage'
 import { ItineraryDetailPage } from '@/features/itinerary-clone/ItineraryDetailPage'
 import { ItineraryEditPage } from '@/features/itinerary-clone/ItineraryEditPage'
+import { SharedItineraryPage } from '@/features/itinerary-clone/SharedItineraryPage'
 import { AiDraftPage } from '@/features/ai-clone/AiDraftPage'
 import { NewsDetailPage } from '@/features/news/NewsDetailPage'
 import { EditProfilePage } from '@/features/social/EditProfilePage'
@@ -147,6 +148,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: '/b/:slug', element: <BusinessPage /> },
+      { path: '/shared/:token', element: <SharedItineraryPage /> },
 
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },

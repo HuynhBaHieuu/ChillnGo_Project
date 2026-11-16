@@ -1,5 +1,5 @@
-import { ArrowLeft, Loader2, Plus, Save } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, Loader2, MapPinned, Plus, Save } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
@@ -7,13 +7,14 @@ import { PageContainer, PageHeader } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
 import { GlassCard } from '@/components/GlassCard'
-import { MapPreview } from '@/components/MapPreview'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { DayChip, DayMap, DayPills } from '@/features/itinerary-clone/components/DayMap'
+import { dayColor } from '@/features/map/geometry'
 import { useItinerary, useUpdateItinerary } from '@/features/itinerary-clone/hooks'
 import { withLegRoutes } from '@/features/map/legs'
 import { DayBuilder } from '@/features/trip-post/components/DayBuilder'
@@ -96,11 +97,14 @@ export function ItineraryEditPage() {
   }
 
   const [pinning, setPinning] = useState(false)
+  // The day the map beside the list is framed on; null shows the whole trip.
+  const [focusDay, setFocusDay] = useState<number | null>(null)
+  const sectionRefs = useRef(new Map<string, HTMLElement>())
   const totalEstCost = useMemo(() => (form ? totalCostOf(form.days) : 0), [form])
 
   if (isPending || (itinerary && !form)) {
     return (
-      <PageContainer>
+      <PageContainer wide>
         <Skeleton className="h-12 w-80" />
         <div className="mt-10 space-y-6">
           {[0, 1].map((i) => (
@@ -113,7 +117,7 @@ export function ItineraryEditPage() {
 
   if (isError || !itinerary || !form) {
     return (
-      <PageContainer>
+      <PageContainer wide>
         <EmptyState
           title={t('Không tìm thấy lịch trình')}
           description={t('Lịch trình này có thể đã bị xoá.')}
@@ -128,6 +132,18 @@ export function ItineraryEditPage() {
   }
 
   const busy = update.isPending || pinning
+  // A day can be deleted while focused.
+  const focus = focusDay !== null && focusDay < form.days.length ? focusDay : null
+
+  /** Frames the map on a day and, when asked, scrolls the list to it (a stop tapped on the map). */
+  function showDay(index: number | null, scroll = false) {
+    setFocusDay(index)
+    if (scroll && index !== null) {
+      const id = form?.days[index]?._id
+      const el = id ? sectionRefs.current.get(id) : undefined
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
   const backTo = `/itineraries/${itinerary._id}`
 
   function patch(change: Partial<FormState>) {
@@ -153,7 +169,7 @@ export function ItineraryEditPage() {
   }
 
   return (
-    <PageContainer>
+    <PageContainer wide>
       <Link
         to={backTo}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -169,9 +185,9 @@ export function ItineraryEditPage() {
 
       <form
         onSubmit={(e) => void submit(e)}
-        className="animate-fade-rise-delay grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"
+        className="animate-fade-rise-delay grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)] lg:items-start"
       >
-        <div className="space-y-8">
+        <div className="min-w-0 space-y-8">
           <GlassCard className="space-y-5 p-6">
             <h2 className="font-display text-2xl">{t('Thông tin chung')}</h2>
 
@@ -239,64 +255,105 @@ export function ItineraryEditPage() {
           <section className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-2xl">{t('Lịch trình ({n} ngày)', { n: form.days.length })}</h2>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={form.days.length >= 60}
-                onClick={() => setDays((days) => [...days, emptyDay(itinerary._id)])}
-              >
-                <Plus />
-                {t('Thêm ngày')}
-              </Button>
             </div>
 
-            {form.days.map((day, index) => (
-              <DayBuilder
-                key={day._id}
-                day={day}
-                index={index}
-                canRemove={form.days.length > 1}
-                dateLocked
-                onChange={(updated) => setDays((days) => days.map((d) => (d._id === updated._id ? updated : d)))}
-                onRemove={() => setDays((days) => days.filter((d) => d._id !== day._id))}
-              />
-            ))}
-          </section>
+            <div className="sticky top-20 z-10 -mx-2 rounded-2xl bg-background/90 px-2 py-2 backdrop-blur">
+              <DayPills days={form.days} value={focus} onChange={(i) => showDay(i, true)} />
+            </div>
 
-          <GlassCard as="section" aria-label={t('Bản đồ tuyến')} className="space-y-4 p-6">
-            <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
-            <MapPreview
-              days={form.days}
-              className="h-72 w-full"
-              label={t('Bản đồ tuyến đường của {title}', { title: form.title })}
-            />
-          </GlassCard>
+            {form.days.map((day, index) => {
+              const focused = focus === index
+              return (
+                <div
+                  key={day._id}
+                  ref={(el) => {
+                    if (el) sectionRefs.current.set(day._id, el)
+                    else sectionRefs.current.delete(day._id)
+                  }}
+                  // Working on a day (a click or a field) frames the map on it.
+                  onFocusCapture={() => focus !== index && setFocusDay(index)}
+                  onClick={() => focus !== index && setFocusDay(index)}
+                  className="scroll-mt-36 space-y-2 rounded-[1.4rem] transition-shadow"
+                  style={focused ? { boxShadow: `0 0 0 2px ${dayColor(index + 1)}` } : undefined}
+                >
+                  <div className="flex items-center gap-2 px-2 pt-2">
+                    <DayChip index={index} />
+                    <span className="truncate text-sm text-muted-foreground">{day.title}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFocusDay(focused ? null : index)
+                      }}
+                      aria-pressed={focused}
+                      title={focused ? t('Hiện tất cả') : t('Chỉ hiện ngày này trên bản đồ')}
+                      aria-label={focused ? t('Hiện tất cả') : t('Chỉ hiện ngày này trên bản đồ')}
+                      className="ml-auto rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      style={focused ? { color: dayColor(index + 1), backgroundColor: `color-mix(in srgb, ${dayColor(index + 1)} 14%, transparent)` } : undefined}
+                    >
+                      <MapPinned className="size-4" />
+                    </button>
+                  </div>
+                  <DayBuilder
+                    day={day}
+                    index={index}
+                    canRemove={form.days.length > 1}
+                    dateLocked
+                    onChange={(updated) => setDays((days) => days.map((d) => (d._id === updated._id ? updated : d)))}
+                    onRemove={() => {
+                      setDays((days) => days.filter((d) => d._id !== day._id))
+                      setFocusDay(null)
+                    }}
+                  />
+                </div>
+              )
+            })}
+
+            <button
+              type="button"
+              disabled={form.days.length >= 60}
+              onClick={() => {
+                const added = emptyDay(itinerary._id)
+                setDays((days) => [...days, added])
+                setFocusDay(form.days.length)
+                window.setTimeout(() => sectionRefs.current.get(added._id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground disabled:opacity-50"
+            >
+              <Plus className="size-4" />
+              {t('Thêm ngày')}
+            </button>
+          </section>
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-32">
-          <GlassCard className="space-y-4 p-6">
+        <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
+          <DayMap
+            days={form.days}
+            focus={focus}
+            onFocus={(i) => showDay(i, true)}
+            title={form.title}
+            className="h-[45vh] lg:h-[calc(100dvh-17rem)]"
+          />
+
+          <GlassCard className="flex flex-wrap items-center justify-between gap-4 p-5">
             <div>
               <p className="text-sm text-muted-foreground">{t('Tổng chi phí ước tính')}</p>
-              <p className="mt-1 font-display text-3xl">{formatVnd(totalEstCost)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t('Tự động cộng từ các điểm dừng.')}</p>
+              <p className="mt-0.5 font-display text-2xl">{formatVnd(totalEstCost)}</p>
             </div>
-
-            {update.isError && (
-              <p role="alert" className="text-sm text-destructive">
-                {translateServerMessage((update.error as Error).message)}
-              </p>
-            )}
-
-            <div className="space-y-2">
-              <GlassButton type="submit" size="lg" className="w-full" disabled={busy}>
+            <div className="flex items-center gap-2">
+              <Button asChild type="button" variant="ghost">
+                <Link to={backTo}>{t('Huỷ')}</Link>
+              </Button>
+              <GlassButton type="submit" size="lg" disabled={busy}>
                 {busy ? <Loader2 className="animate-spin" /> : <Save />}
                 {t('Lưu thay đổi')}
               </GlassButton>
-              <Button asChild type="button" variant="ghost" className="w-full">
-                <Link to={backTo}>{t('Huỷ')}</Link>
-              </Button>
             </div>
+            {update.isError && (
+              <p role="alert" className="w-full text-sm text-destructive">
+                {translateServerMessage((update.error as Error).message)}
+              </p>
+            )}
           </GlassCard>
         </aside>
       </form>

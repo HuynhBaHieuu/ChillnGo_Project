@@ -12,19 +12,20 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { ArrowLeft, GitMerge, Loader2, Pencil, Sparkles } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, GitMerge, Loader2, Pencil, Share2, Sparkles } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { PageContainer } from '@/app/layout/PageContainer'
 import { GlassButton } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
 import { GlassCard } from '@/components/GlassCard'
-import { MapPreview } from '@/components/MapPreview'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DayMap, DayPills } from '@/features/itinerary-clone/components/DayMap'
 import { MergeModal } from '@/features/itinerary-clone/components/MergeModal'
+import { ShareDialog } from '@/features/itinerary-clone/components/ShareDialog'
 import { SortableDay } from '@/features/itinerary-clone/components/SortableDay'
 import {
   useItinerary,
@@ -67,6 +68,10 @@ export function ItineraryDetailPage() {
   const [days, setDays] = useState<TripDay[]>([])
   const [syncedFrom, setSyncedFrom] = useState<ClonedItinerary | null>(null)
   const [mergeOpen, setMergeOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  // The day the map is framed on; null shows the whole trip.
+  const [focusDay, setFocusDay] = useState<number | null>(null)
+  const dayRefs = useRef(new Map<string, HTMLElement>())
 
   if (itinerary && itinerary !== syncedFrom) {
     setSyncedFrom(itinerary)
@@ -96,7 +101,7 @@ export function ItineraryDetailPage() {
 
   if (isPending) {
     return (
-      <PageContainer>
+      <PageContainer wide>
         <Skeleton className="h-12 w-96" />
         <div className="mt-10 space-y-4">
           {[0, 1, 2].map((i) => (
@@ -109,7 +114,7 @@ export function ItineraryDetailPage() {
 
   if (isError || !itinerary) {
     return (
-      <PageContainer>
+      <PageContainer wide>
         <EmptyState
           title={t('Không tìm thấy lịch trình')}
           description={t('Lịch trình này có thể đã bị xoá.')}
@@ -123,8 +128,18 @@ export function ItineraryDetailPage() {
     )
   }
 
+  // A day can be deleted while focused.
+  const focus = focusDay !== null && focusDay < days.length ? focusDay : null
+
+  /** Frames the map on a day and, when asked, scrolls the list to it (a stop tapped on the map). */
+  function showDay(index: number | null, scroll = false) {
+    setFocusDay(index)
+    const id = index === null ? undefined : days[index]?._id
+    if (scroll && id) dayRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
-    <PageContainer>
+    <PageContainer wide>
       <Link
         to="/itineraries"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -172,12 +187,16 @@ export function ItineraryDetailPage() {
             <GitMerge />
             {t('Ghép từ bài khác')}
           </GlassButton>
+          <GlassButton size="lg" onClick={() => setShareOpen(true)}>
+            <Share2 />
+            {itinerary.shareToken ? t('Đang chia sẻ') : t('Chia sẻ')}
+          </GlassButton>
         </div>
       </header>
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:items-start">
         {/* Draggable days */}
-        <section>
+        <section className="order-last min-w-0 lg:order-first">
           <div className="flex items-center justify-between gap-4">
             <h2 className="font-display text-2xl">{t('Các ngày')}</h2>
             {reorder.isPending && (
@@ -192,6 +211,10 @@ export function ItineraryDetailPage() {
             {t('Kéo thẻ để đổi thứ tự ngày. Ngày sẽ được đánh số và đổi ngày tháng lại theo thứ tự mới.')}
           </p>
 
+          <div className="sticky top-20 z-10 -mx-2 mt-4 rounded-2xl bg-background/90 px-2 py-2 backdrop-blur">
+            <DayPills days={days} value={focus} onChange={(i) => showDay(i, true)} />
+          </div>
+
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -202,24 +225,32 @@ export function ItineraryDetailPage() {
               strategy={verticalListSortingStrategy}
             >
               <ul className="mt-6 space-y-4">
-                {days.map((day) => (
-                  <SortableDay
+                {days.map((day, index) => (
+                  <div
                     key={day._id}
+                    className="scroll-mt-36"
+                    ref={(el) => {
+                      if (el) dayRefs.current.set(day._id, el)
+                      else dayRefs.current.delete(day._id)
+                    }}
+                  >
+                  <SortableDay
                     day={day}
+                    focused={focus === index}
+                    onSelect={() => setFocusDay(focus === index ? null : index)}
                     canRemove={days.length > 1}
                     onRemove={() => {
                       setDays((current) => current.filter((d) => d._id !== day._id))
                       removeDay.mutate(day._id)
+                      setFocusDay(null)
                     }}
                   />
+                  </div>
                 ))}
               </ul>
             </SortableContext>
           </DndContext>
-        </section>
-
-        {/* Live summary */}
-        <aside className="space-y-6 lg:sticky lg:top-32">
+          <div className="mt-10 space-y-8">
           <GlassCard className="p-6">
             <p className="text-sm text-muted-foreground">
               {t('Tổng chi phí')}
@@ -246,15 +277,6 @@ export function ItineraryDetailPage() {
               </div>
             </dl>
           </GlassCard>
-
-          <div>
-            <h2 className="font-display text-2xl">{t('Bản đồ tuyến')}</h2>
-            <MapPreview
-              days={days}
-              className="mt-4 h-72 w-full"
-              label={t('Bản đồ tuyến đường của {title}', { title: itinerary.title })}
-            />
-          </div>
 
           {itinerary.checklist && itinerary.checklist.groups.length > 0 && (
             <div>
@@ -296,6 +318,18 @@ export function ItineraryDetailPage() {
               })}
             </ul>
           </div>
+          </div>
+        </section>
+
+        {/* Live summary */}
+        <aside className="min-w-0 lg:sticky lg:top-24">
+          <DayMap
+            days={days}
+            focus={focus}
+            onFocus={(i) => showDay(i, true)}
+            title={itinerary.title}
+            className="h-[45vh] lg:h-[calc(100dvh-8rem)]"
+          />
         </aside>
       </div>
 
@@ -305,6 +339,7 @@ export function ItineraryDetailPage() {
         open={mergeOpen}
         onOpenChange={setMergeOpen}
       />
+      <ShareDialog itinerary={itinerary} open={shareOpen} onOpenChange={setShareOpen} />
     </PageContainer>
   )
 }

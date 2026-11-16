@@ -18,7 +18,7 @@ import { businessesRouter } from './routes/businesses.js'
 import { newsRouter } from './routes/news.js'
 import { checkinsRouter } from './routes/checkins.js'
 import { geoRouter } from './routes/geo.js'
-import { itinerariesRouter } from './routes/itineraries.js'
+import { itinerariesRouter, sharedItinerariesRouter } from './routes/itineraries.js'
 import { reportsRouter } from './routes/reports.js'
 import { livestreamsRouter } from './routes/livestreams.js'
 import { notificationsRouter } from './routes/notifications.js'
@@ -89,6 +89,7 @@ app.use('/api/activity', activityRouter)
 app.use('/api/geo', geoRouter)
 app.use('/api/assistant', assistantRouter)
 app.use('/api/itineraries', itinerariesRouter)
+app.use('/api/shared-itineraries', sharedItinerariesRouter)
 app.use('/api/reports', reportsRouter)
 app.use('/api/billing', billingRouter)
 app.use('/api/businesses', businessesRouter)

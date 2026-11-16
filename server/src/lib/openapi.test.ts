@@ -207,6 +207,12 @@ describe('OpenAPI description', () => {
       PublicSettings: { settings: { registrationOpen: true, announcement: '' } },
       JourneyList: { items: [journey], authors: [user] },
       JourneyResponse: { post: journey, authors: [user], likedByMe: false },
+      SharedItineraryResponse: {
+        itinerary: {
+          _id: 'i1', title: 'Hội An của tôi', note: '', coverUrl: '', startDate: '2026-06-20', days: journey.days, totalEstCost: 480000,
+          status: 'planning', checklist: null, owner: { username: 'lan', displayName: 'Lan', avatarUrl: '' }, updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      },
       JourneyCommentList: { items: [{ _id: 'c1', postId: 'p1', authorId: 'u1', parentId: null, content: 'Hay', likeCount: 0, hidden: false, createdAt: '2026-01-01T00:00:00.000Z' }], authors: [user] },
       CheckInList: { items: [{ _id: 'k1', caption: '', feeling: null, photos: [{ url: 'x', width: 1, height: 1 }], location: null, createdAt: '2026-01-01T00:00:00.000Z', deletedAt: null, purgeAt: null, author }] },
       LivestreamList: { items: [stream] },

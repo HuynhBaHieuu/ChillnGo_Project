@@ -11,7 +11,7 @@
 import { assertFound, db } from './client'
 import { http } from './http'
 import { isServerPostId, syncServerPosts } from './serverPosts'
-import type { ClonedItinerary, ObjectId } from './types'
+import type { ClonedItinerary, ObjectId, SharedItinerary } from './types'
 import { themeFromText, travelCover } from '@/lib/photos'
 import { t } from '@/i18n'
 
@@ -136,4 +136,27 @@ export async function removeItineraryDay(
 ): Promise<ClonedItinerary> {
   const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}/days/${dayId}`, { method: 'DELETE' })
   return withCover(itinerary)
+}
+
+/** POST /api/itineraries/:id/share — turns on the read-only link (the same link if already on). */
+export async function shareItinerary(id: ObjectId): Promise<ClonedItinerary> {
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}/share`, { method: 'POST' })
+  return withCover(itinerary)
+}
+
+/** DELETE /api/itineraries/:id/share — turns the link off; it stops working. */
+export async function unshareItinerary(id: ObjectId): Promise<ClonedItinerary> {
+  const { itinerary } = await http<ItineraryResponse>(`/api/itineraries/${id}/share`, { method: 'DELETE' })
+  return withCover(itinerary)
+}
+
+/** GET /api/shared-itineraries/:token — anyone with the link, signed in or not. */
+export async function getSharedItinerary(token: string): Promise<SharedItinerary> {
+  const { itinerary } = await http<{ itinerary: SharedItinerary }>(`/api/shared-itineraries/${encodeURIComponent(token)}`)
+  return itinerary
+}
+
+/** The link to send friends. */
+export function shareUrlOf(token: string): string {
+  return `${window.location.origin}/shared/${token}`
 }
