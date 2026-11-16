@@ -10,6 +10,8 @@ import type { MapPin, MapStop } from '@/features/map/geometry'
 import { useDrawnSegments } from '@/features/map/legs'
 import type { DrawnSegment } from '@/features/map/legs'
 import { MODE_ICON } from '@/features/map/modeIcons'
+import { googleMapsUrl } from '@/lib/geo'
+import { formatVnd } from '@/lib/format'
 import { mapLanguage, t } from '@/i18n'
 import { MODE_LABEL, formatDistance, formatDuration } from '@/lib/travel'
 import { cn } from '@/lib/utils'
@@ -93,6 +95,10 @@ export default function MapboxMap({
   const solidData = useMemo(() => lines(segments, false), [segments])
   const dashedData = useMemo(() => lines(segments, true), [segments])
 
+  // The stop whose card is open, if it is still on the map and in the shown day.
+  const [openStopId, setOpenStopId] = useState<string | null>(null)
+  const openStop = stops.find((s) => s.id === openStopId && (activeDay === null || s.day === activeDay))
+
   // The leg whose label is open, and where it was tapped. Closed when the day changes.
   const [picked, setPicked] = useState<{ day: number; index: number; lng: number; lat: number } | null>(null)
   const pickedSegment = picked && picked.day === activeDay ? segments[picked.index] : undefined
@@ -104,6 +110,11 @@ export default function MapboxMap({
       return
     }
     setPicked(null)
+    if (openStopId) {
+      // The first tap off a card closes it; the next one goes back to every day.
+      setOpenStopId(null)
+      return
+    }
     if (stops.length) setSelectedDay(null)
   }
 
@@ -298,6 +309,20 @@ export default function MapboxMap({
           </Popup>
         )}
 
+        {openStop && (
+          <Popup
+            longitude={openStop.lng}
+            latitude={openStop.lat}
+            anchor="bottom"
+            offset={18}
+            closeButton={false}
+            closeOnClick={false}
+            maxWidth="18rem"
+          >
+            <StopCard stop={openStop} onClose={() => setOpenStopId(null)} />
+          </Popup>
+        )}
+
         {stops.map((stop) => {
           const dimmed = activeDay !== null && stop.day !== activeDay
           return (
@@ -315,6 +340,8 @@ export default function MapboxMap({
                   // Not a click on the map, which would clear the pick.
                   event.stopPropagation()
                   setSelectedDay(stop.day)
+                  setPicked(null)
+                  setOpenStopId(stop.id)
                 }}
                 title={`${t('Ngày {n}', { n: stop.day })} · ${stop.order}. ${stop.name || t('Điểm dừng#one')}`}
                 aria-label={t('Ngày {day}, điểm {order}: {name}. Xem đường đi ngày {day}', {
@@ -372,6 +399,57 @@ export default function MapboxMap({
           {t('Chọn một ngày hoặc một điểm để xem đường đi')}
         </p>
       )}
+    </div>
+  )
+}
+
+/** A tapped stop: its photo, name, time, address, note and cost, and a way to get there. */
+function StopCard({ stop, onClose }: { stop: MapStop; onClose: () => void }) {
+  const cost = stop.costUnknown
+    ? t('Chưa có dữ liệu')
+    : stop.estCost && stop.estCost > 0
+      ? formatVnd(stop.estCost)
+      : t('Miễn phí')
+  return (
+    <div className="-m-2.5 w-64 overflow-hidden rounded-lg text-neutral-800">
+      {stop.photoUrl && (
+        <img src={stop.photoUrl} alt="" referrerPolicy="no-referrer" className="h-32 w-full object-cover" />
+      )}
+      <div className="space-y-1.5 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <span
+            className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+            style={{ backgroundColor: dayColor(stop.day) }}
+          >
+            {t('Ngày {n}', { n: stop.day })} · {stop.order}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t('Đóng')}
+            className="-mr-1 -mt-1 rounded-full px-1.5 text-base leading-none text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+          >
+            ×
+          </button>
+        </div>
+        <p className="text-sm font-semibold leading-snug">
+          {stop.startTime && <span className="mr-1.5 tabular-nums text-neutral-500">{stop.startTime}</span>}
+          {stop.name || t('Điểm dừng#one')}
+        </p>
+        {stop.address && <p className="text-xs text-neutral-500">{stop.address}</p>}
+        {stop.note && <p className="line-clamp-4 text-xs leading-relaxed text-neutral-700">{stop.note}</p>}
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <span className="text-xs font-semibold">{cost}</span>
+          <a
+            href={googleMapsUrl(stop.lat, stop.lng)}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-medium text-blue-600 underline-offset-2 hover:underline"
+          >
+            {t('Chỉ đường')} ↗
+          </a>
+        </div>
+      </div>
     </div>
   )
 }

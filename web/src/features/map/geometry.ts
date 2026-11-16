@@ -26,6 +26,13 @@ export interface MapStop {
   mode: TravelMode
   /** The road route into this stop, if one was cached when the journey was saved. */
   legRoute?: LegRoute
+  /** What the stop's card on the map shows when it is tapped. */
+  address?: string
+  note?: string
+  estCost?: number
+  costUnknown?: boolean
+  photoUrl?: string | null
+  startTime?: string
 }
 
 /** Every stop that has a real position, day by day, in itinerary order. */
@@ -40,6 +47,12 @@ export function stopsOfDays(days: TripDay[]): MapStop[] {
       order: i + 1,
       mode: modeOf(loc),
       legRoute: loc.legRoute,
+      address: loc.address,
+      note: loc.note,
+      estCost: loc.estCost,
+      costUnknown: loc.costUnknown,
+      photoUrl: loc.photoUrl,
+      startTime: loc.startTime,
     })),
   )
 }
