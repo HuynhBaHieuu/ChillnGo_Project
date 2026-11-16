@@ -36,6 +36,25 @@ const ACTION_LABELS: Record<string, MessageKey> = {
   'catalog.checklist.create': 'Thêm mục chuẩn bị#log',
   'catalog.checklist.update': 'Sửa mục chuẩn bị#log',
   'catalog.checklist.delete': 'Xoá mục chuẩn bị#log',
+  'business.approve': 'Duyệt doanh nghiệp#log',
+  'business.reject': 'Từ chối doanh nghiệp#log',
+  'business.hide': 'Ẩn doanh nghiệp#log',
+  'business.restore': 'Hiện lại doanh nghiệp#log',
+  'news.source.create': 'Thêm nguồn tin#log',
+  'news.source.update': 'Sửa nguồn tin#log',
+  'news.source.delete': 'Xoá nguồn tin#log',
+  'news.source.run': 'Cào nguồn tin#log',
+  'news.run_all': 'Cào tất cả nguồn#log',
+  'news.item.approve': 'Duyệt tin#log',
+  'news.item.reject': 'Loại tin#log',
+  'news.item.hide': 'Ẩn tin#log',
+  'news.item.unhide': 'Hiện lại tin#log',
+  'news.item.edit': 'Sửa tin#log',
+  'news.item.rewrite': 'Cho AI viết lại tin#log',
+  'news.item.pin': 'Ghim tin#log',
+  'news.item.unpin': 'Bỏ ghim tin#log',
+  'news.worker.key': 'Tạo mã máy cào#log',
+  'news.worker.revoke': 'Thu hồi mã máy cào#log',
   'settings.update': 'Đổi cấu hình hệ thống',
   'system.reset_users': 'Reset toàn bộ tài khoản',
   'system.seed_superadmin': 'Tạo Super Admin (script)',
@@ -68,6 +87,10 @@ function describe(entry: AuditEntry): string {
       return d.note ? `${count} · ${t('Ghi chú: {note}', { note: d.note })}` : count
     }
     case 'livestream.end':
+    case 'business.reject':
+    case 'business.hide':
+    case 'news.item.reject':
+    case 'news.item.hide':
       return d.reason ? t('Lý do: {reason}', { reason: d.reason }) : t('Không ghi lý do')
     case 'content.unhide':
       return d.previousAction === 'remove' ? t('Khôi phục nội dung đã gỡ') : t('Hiện lại nội dung đã ẩn')

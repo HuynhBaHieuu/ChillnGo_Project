@@ -1009,6 +1009,25 @@ Map<String, String> get _actionLabels => {
   'catalog.checklist.create': t('Thêm mục chuẩn bị#log'),
   'catalog.checklist.update': t('Sửa mục chuẩn bị#log'),
   'catalog.checklist.delete': t('Xoá mục chuẩn bị#log'),
+  'business.approve': t('Duyệt doanh nghiệp#log'),
+  'business.reject': t('Từ chối doanh nghiệp#log'),
+  'business.hide': t('Ẩn doanh nghiệp#log'),
+  'business.restore': t('Hiện lại doanh nghiệp#log'),
+  'news.source.create': t('Thêm nguồn tin#log'),
+  'news.source.update': t('Sửa nguồn tin#log'),
+  'news.source.delete': t('Xoá nguồn tin#log'),
+  'news.source.run': t('Cào nguồn tin#log'),
+  'news.run_all': t('Cào tất cả nguồn#log'),
+  'news.item.approve': t('Duyệt tin#log'),
+  'news.item.reject': t('Loại tin#log'),
+  'news.item.hide': t('Ẩn tin#log'),
+  'news.item.unhide': t('Hiện lại tin#log'),
+  'news.item.edit': t('Sửa tin#log'),
+  'news.item.rewrite': t('Cho AI viết lại tin#log'),
+  'news.item.pin': t('Ghim tin#log'),
+  'news.item.unpin': t('Bỏ ghim tin#log'),
+  'news.worker.key': t('Tạo mã máy cào#log'),
+  'news.worker.revoke': t('Thu hồi mã máy cào#log'),
   'settings.update': t('Đổi cấu hình hệ thống'),
   'system.reset_users': t('Reset toàn bộ tài khoản'),
   'system.seed_superadmin': t('Tạo Super Admin (script)'),
@@ -1033,7 +1052,7 @@ String _describe(AuditEntry entry) {
       final count = t('{n} báo cáo#log', {'n': d['reports'] is num ? d['reports'] : 0});
       final note = (d['note'] ?? '').toString();
       return note.isNotEmpty ? '$count · ${t('Ghi chú: {note}', {'note': note})}' : count;
-    case 'livestream.end':
+    case 'livestream.end' || 'business.reject' || 'business.hide' || 'news.item.reject' || 'news.item.hide':
       return (d['reason'] ?? '').toString().isNotEmpty ? t('Lý do: {value}', {'value': d['reason']}) : t('Không ghi lý do');
     case 'content.unhide':
       return d['previousAction'] == 'remove' ? t('Khôi phục nội dung đã gỡ') : t('Hiện lại nội dung đã ẩn');

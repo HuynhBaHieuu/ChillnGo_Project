@@ -21,6 +21,14 @@ export const catalogAdmin = {
   'Xoá {name}': { en: 'Delete {name}', zh: '删除 {name}', ja: '{name}を削除', ko: '{name} 삭제' },
   'Xoá {name}?': { en: 'Delete {name}?', zh: '删除 {name}？', ja: '{name}を削除しますか？', ko: '{name}을(를) 삭제할까요?' },
 
+  /* Place categories (server PLACE_CATEGORIES labels; Ăn uống, Cà phê, Mua sắm are translated elsewhere) */
+  'Tham quan': { en: 'Sightseeing', zh: '观光', ja: '観光', ko: '관광' },
+  'Thiên nhiên': { en: 'Nature', zh: '自然', ja: '自然', ko: '자연' },
+  'Văn hoá – lịch sử': { en: 'Culture & history', zh: '文化与历史', ja: '文化・歴史', ko: '문화·역사' },
+  'Trải nghiệm': { en: 'Activities', zh: '体验', ja: '体験', ko: '체험' },
+  'Về đêm': { en: 'Nightlife', zh: '夜生活', ja: 'ナイトライフ', ko: '나이트라이프' },
+  'Lưu trú': { en: 'Stays', zh: '住宿', ja: '宿泊', ko: '숙박' },
+
   /* Tags */
   'Mọi chuyến đi': { en: 'Every trip', zh: '所有行程', ja: 'すべての旅行', ko: '모든 여행' },
   'Biển': { en: 'Beach', zh: '海边', ja: 'ビーチ', ko: '바다' },
