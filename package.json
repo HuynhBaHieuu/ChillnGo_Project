@@ -8,7 +8,8 @@
     "build": "node scripts/run-all.mjs build",
     "typecheck": "node scripts/run-all.mjs typecheck",
     "seed": "npm --prefix server run seed --",
-    "seed:superadmin": "npm --prefix server run seed:superadmin --"
+    "seed:superadmin": "npm --prefix server run seed:superadmin --",
+    "seed:admin-demo": "npm --prefix server run seed:admin-demo --"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

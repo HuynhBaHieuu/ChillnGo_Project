@@ -15,7 +15,8 @@
     "seed": "tsx src/scripts/seed.ts",
     "seed:superadmin": "tsx src/scripts/seed-superadmin.ts",
     "seed:places": "tsx src/scripts/seed-places.ts",
-    "seed:moderation-test": "tsx src/scripts/seed-moderation-test.ts"
+    "seed:moderation-test": "tsx src/scripts/seed-moderation-test.ts",
+    "seed:admin-demo": "tsx src/scripts/seed-admin-demo.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
