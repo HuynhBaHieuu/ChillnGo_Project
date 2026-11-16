@@ -286,4 +286,8 @@ export const post = {
     ko: '여정이 프로필, 뉴스피드, 탐색 페이지에 더 이상 표시되지 않아요. 30일 이내에 내 활동 → 최근 삭제에서 복원할 수 있어요.',
   },
   'Chọn ảnh cho hành trình': { en: 'Choose photos for the journey', zh: '为行程选择照片', ja: '旅程の写真を選ぶ', ko: '여정 사진 선택' },
+  'Điểm trước': { en: 'Previous stop', zh: '上一个地点', ja: '前のスポット', ko: '이전 장소' },
+  'Điểm sau': { en: 'Next stop', zh: '下一个地点', ja: '次のスポット', ko: '다음 장소' },
+  '{a} / {b}': { en: '{a} of {b}', zh: '{a} / {b}', ja: '{a} / {b}', ko: '{a} / {b}' },
+  'Mở trong:': { en: 'Open in:', zh: '打开方式：', ja: '開く:', ko: '열기:' },
 } satisfies Messages

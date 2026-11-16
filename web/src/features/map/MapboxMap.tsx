@@ -1,5 +1,6 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+import { ChevronLeft, ChevronRight, Clock, ExternalLink, MapPin as PinIcon, Navigation, Wallet, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Layer, Marker, NavigationControl, Popup, Source } from 'react-map-gl/mapbox'
 import type { MapMouseEvent, MapRef } from 'react-map-gl/mapbox'
@@ -98,6 +99,15 @@ export default function MapboxMap({
   // The stop whose card is open, if it is still on the map and in the shown day.
   const [openStopId, setOpenStopId] = useState<string | null>(null)
   const openStop = stops.find((s) => s.id === openStopId && (activeDay === null || s.day === activeDay))
+  const openDayStops = openStop ? stops.filter((s) => s.day === openStop.day) : []
+
+  /** Opens a stop's panel and brings it into view above the panel. */
+  function openStopCard(stop: MapStop, fly: boolean) {
+    setOpenStopId(stop.id)
+    if (fly) {
+      mapRef.current?.easeTo({ center: [stop.lng, stop.lat], duration: 500, padding: { top: 40, bottom: 260, left: 40, right: 40 } })
+    }
+  }
 
   // The leg whose label is open, and where it was tapped. Closed when the day changes.
   const [picked, setPicked] = useState<{ day: number; index: number; lng: number; lat: number } | null>(null)
@@ -309,20 +319,6 @@ export default function MapboxMap({
           </Popup>
         )}
 
-        {openStop && (
-          <Popup
-            longitude={openStop.lng}
-            latitude={openStop.lat}
-            anchor="bottom"
-            offset={18}
-            closeButton={false}
-            closeOnClick={false}
-            maxWidth="18rem"
-          >
-            <StopCard stop={openStop} onClose={() => setOpenStopId(null)} />
-          </Popup>
-        )}
-
         {stops.map((stop) => {
           const dimmed = activeDay !== null && stop.day !== activeDay
           return (
@@ -332,7 +328,7 @@ export default function MapboxMap({
               latitude={stop.lat}
               anchor="center"
               // The picked day's stops sit above the others.
-              style={{ zIndex: stop.day === activeDay ? 2 : 1 }}
+              style={{ zIndex: stop.id === openStopId ? 3 : stop.day === activeDay ? 2 : 1 }}
             >
               <button
                 type="button"
@@ -341,7 +337,7 @@ export default function MapboxMap({
                   event.stopPropagation()
                   setSelectedDay(stop.day)
                   setPicked(null)
-                  setOpenStopId(stop.id)
+                  openStopCard(stop, false)
                 }}
                 title={`${t('Ngày {n}', { n: stop.day })} · ${stop.order}. ${stop.name || t('Điểm dừng#one')}`}
                 aria-label={t('Ngày {day}, điểm {order}: {name}. Xem đường đi ngày {day}', {
@@ -353,6 +349,7 @@ export default function MapboxMap({
                 className={cn(
                   'flex size-7 cursor-pointer items-center justify-center rounded-full border-2 border-white text-[11px] font-semibold text-white shadow-md transition-[opacity,transform] hover:scale-110',
                   stop.day === activeDay && 'scale-110',
+                  stop.id === openStopId && 'z-10 size-9 text-sm ring-4 ring-white/70',
                   dimmed && 'opacity-35',
                 )}
                 style={{ backgroundColor: dayColor(stop.day) }}
@@ -374,6 +371,20 @@ export default function MapboxMap({
           ))}
       </Map>
 
+      {openStop && (
+        <StopPanel
+          stop={openStop}
+          position={openDayStops.findIndex((s) => s.id === openStop.id) + 1}
+          count={openDayStops.length}
+          onStep={(direction) => {
+            const at = openDayStops.findIndex((s) => s.id === openStop.id)
+            const next = openDayStops[(at + direction + openDayStops.length) % openDayStops.length]
+            if (next) openStopCard(next, true)
+          }}
+          onClose={() => setOpenStopId(null)}
+        />
+      )}
+
       {stopDays.length > 0 && !controlled && (
         // The navbar's pills; 0 stands for "every day". Clear of the zoom buttons on the right.
         <div className="absolute left-2 right-12 top-2 z-10 flex">
@@ -394,7 +405,7 @@ export default function MapboxMap({
         </div>
       )}
 
-      {stopDays.length > 0 && activeDay === null && (
+      {stopDays.length > 0 && activeDay === null && !openStop && (
         <p className="pointer-events-none absolute inset-x-0 bottom-2 z-10 mx-auto w-fit rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-neutral-700 shadow">
           {t('Chọn một ngày hoặc một điểm để xem đường đi')}
         </p>
@@ -403,52 +414,123 @@ export default function MapboxMap({
   )
 }
 
-/** A tapped stop: its photo, name, time, address, note and cost, and a way to get there. */
-function StopCard({ stop, onClose }: { stop: MapStop; onClose: () => void }) {
+/**
+ * A tapped stop, docked at the bottom of the map as in a trip planner: its
+ * number in the day's colour, name, time, address, note, cost and photo,
+ * buttons to open it in Google Maps or get directions, and arrows to step
+ * through that day's stops.
+ */
+function StopPanel({
+  stop,
+  position,
+  count,
+  onStep,
+  onClose,
+}: {
+  stop: MapStop
+  position: number
+  count: number
+  onStep: (direction: 1 | -1) => void
+  onClose: () => void
+}) {
   const cost = stop.costUnknown
     ? t('Chưa có dữ liệu')
     : stop.estCost && stop.estCost > 0
       ? formatVnd(stop.estCost)
       : t('Miễn phí')
+  const color = dayColor(stop.day)
   return (
-    <div className="-m-2.5 w-64 overflow-hidden rounded-lg text-neutral-800">
-      {stop.photoUrl && (
-        <img src={stop.photoUrl} alt="" referrerPolicy="no-referrer" className="h-32 w-full object-cover" />
-      )}
-      <div className="space-y-1.5 p-3">
-        <div className="flex items-start justify-between gap-2">
-          <span
-            className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-            style={{ backgroundColor: dayColor(stop.day) }}
-          >
-            {t('Ngày {n}', { n: stop.day })} · {stop.order}
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('Đóng')}
-            className="-mr-1 -mt-1 rounded-full px-1.5 text-base leading-none text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-          >
-            ×
+    <div
+      role="dialog"
+      aria-label={stop.name || t('Điểm dừng#one')}
+      // Clicks here are not clicks on the map.
+      onClick={(e) => e.stopPropagation()}
+      className="absolute inset-x-2 bottom-2 z-30 flex max-h-[62%] flex-col overflow-hidden rounded-2xl bg-white text-neutral-800 shadow-2xl ring-1 ring-black/5 sm:inset-x-4 sm:bottom-4"
+    >
+      <div className="flex items-center gap-2 border-b border-neutral-100 px-4 py-2">
+        <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ color, backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }}>
+          {t('Ngày {n}', { n: stop.day })}
+        </span>
+        <div className="ml-auto flex items-center gap-1">
+          {count > 1 && (
+            <div className="flex items-center gap-1 rounded-full border border-neutral-200 px-1 py-0.5 text-xs">
+              <button type="button" onClick={() => onStep(-1)} aria-label={t('Điểm trước')} className="flex size-6 items-center justify-center rounded-full hover:bg-neutral-100">
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="font-semibold tabular-nums">{t('{a} / {b}', { a: position, b: count })}</span>
+              <button type="button" onClick={() => onStep(1)} aria-label={t('Điểm sau')} className="flex size-6 items-center justify-center rounded-full hover:bg-neutral-100">
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          )}
+          <button type="button" onClick={onClose} aria-label={t('Đóng')} className="flex size-8 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100">
+            <X className="size-4" />
           </button>
         </div>
-        <p className="text-sm font-semibold leading-snug">
-          {stop.startTime && <span className="mr-1.5 tabular-nums text-neutral-500">{stop.startTime}</span>}
-          {stop.name || t('Điểm dừng#one')}
-        </p>
-        {stop.address && <p className="text-xs text-neutral-500">{stop.address}</p>}
-        {stop.note && <p className="line-clamp-4 text-xs leading-relaxed text-neutral-700">{stop.note}</p>}
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <span className="text-xs font-semibold">{cost}</span>
-          <a
-            href={googleMapsUrl(stop.lat, stop.lng)}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-blue-600 underline-offset-2 hover:underline"
-          >
-            {t('Chỉ đường')} ↗
-          </a>
+      </div>
+
+      <div className="flex gap-4 overflow-y-auto p-4 sm:p-5">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: color }}>
+              {stop.order}
+            </span>
+            <h3 className="text-lg font-bold leading-snug">{stop.name || t('Điểm dừng#one')}</h3>
+          </div>
+
+          {stop.photoUrl && (
+            <img src={stop.photoUrl} alt="" referrerPolicy="no-referrer" className="mt-3 h-36 w-full rounded-xl object-cover sm:hidden" />
+          )}
+
+          {stop.note && <p className="mt-3 line-clamp-4 text-[15px] leading-relaxed text-neutral-700">{stop.note}</p>}
+
+          <ul className="mt-3 space-y-2 text-sm text-neutral-600">
+            {stop.startTime && (
+              <li className="flex gap-2.5">
+                <Clock className="mt-0.5 size-4 shrink-0 text-neutral-400" strokeWidth={1.75} />
+                {stop.startTime}
+              </li>
+            )}
+            <li className="flex gap-2.5">
+              <PinIcon className="mt-0.5 size-4 shrink-0 text-neutral-400" strokeWidth={1.75} />
+              <span>{stop.address || `${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)}`}</span>
+            </li>
+            <li className="flex gap-2.5">
+              <Wallet className="mt-0.5 size-4 shrink-0 text-neutral-400" strokeWidth={1.75} />
+              <span className="font-medium text-neutral-800">{cost}</span>
+            </li>
+          </ul>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-neutral-700">{t('Mở trong:')}</span>
+            <a
+              href={googleMapsUrl(stop.lat, stop.lng)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-sm font-semibold text-neutral-800 hover:bg-neutral-50"
+            >
+              <PinIcon className="size-4 text-red-500" /> Google Maps
+              <ExternalLink className="size-3.5 text-neutral-400" />
+            </a>
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${stop.lat},${stop.lng}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-sm font-semibold text-neutral-800 hover:bg-neutral-50"
+            >
+              <Navigation className="size-4 text-blue-600" /> {t('Chỉ đường')}
+            </a>
+          </div>
         </div>
+
+        {stop.photoUrl && (
+          <img
+            src={stop.photoUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="hidden h-40 w-56 shrink-0 rounded-xl object-cover sm:block"
+          />
+        )}
       </div>
     </div>
   )
