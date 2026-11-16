@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { dayColor } from '@/features/map/geometry'
 import { dayCostOf } from '@/lib/itinerary'
 import { localeTag, t } from '@/i18n'
 import { formatLongDate, formatVnd } from '@/lib/format'
@@ -13,10 +14,14 @@ interface SortableDayProps {
   day: TripDay
   canRemove: boolean
   onRemove: () => void
+  /** The map beside the list is framed on this day. */
+  focused?: boolean
+  /** Picks this day on the map. */
+  onSelect?: () => void
 }
 
 /** One draggable day card in the itinerary detail view. */
-export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
+export function SortableDay({ day, canRemove, onRemove, focused = false, onSelect }: SortableDayProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: day._id })
 
@@ -25,9 +30,15 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
     // needs a real DOM ref on this node.
     <li
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        ...(focused ? { boxShadow: `0 0 0 2px ${dayColor(day.dayNumber)}` } : {}),
+      }}
+      onClick={onSelect}
       className={cn(
         'list-none border border-border bg-card p-5 transition-colors',
+        onSelect && 'cursor-pointer',
         isDragging && 'z-20 opacity-90',
       )}
     >
@@ -43,7 +54,8 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-muted-foreground">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="size-2 rounded-full" style={{ backgroundColor: dayColor(day.dayNumber) }} aria-hidden />
             {t('Ngày {n}', { n: day.dayNumber })}
           </p>
           <h3 className="mt-1 font-display text-xl">
@@ -63,7 +75,10 @@ export function SortableDay({ day, canRemove, onRemove }: SortableDayProps) {
               type="button"
               variant="ghost"
               size="icon"
-              onClick={onRemove}
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
               aria-label={t('Xoá ngày {n}', { n: day.dayNumber })}
               className="text-muted-foreground hover:text-destructive"
             >

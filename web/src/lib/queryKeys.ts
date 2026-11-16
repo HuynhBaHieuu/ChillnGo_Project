@@ -39,6 +39,7 @@ export const qk = {
     all: ['itineraries'] as const,
     mine: (ownerId: string) => ['itineraries', 'mine', ownerId] as const,
     detail: (id: string, viewerId: string | null) => ['itineraries', 'detail', id, viewerId] as const,
+    shared: (token: string) => ['itineraries', 'shared', token] as const,
   },
   aiClone: {
     options: (postId: string) => ['ai-clone', 'options', postId] as const,

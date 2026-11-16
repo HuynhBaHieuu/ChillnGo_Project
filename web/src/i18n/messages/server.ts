@@ -448,6 +448,7 @@ export const server = {
   /* --------------------------------------------------------- itineraries */
   'Thiếu dữ liệu hành trình để sao chép.': { en: 'Missing journey data to clone.', zh: '缺少要复制的行程数据。', ja: 'クローンする旅程データがありません。', ko: '복제할 여정 데이터가 없습니다.' },
   'Không tìm thấy lịch trình.': { en: 'Itinerary not found.', zh: '未找到该行程。', ja: '旅程が見つかりません。', ko: '일정을 찾을 수 없습니다.' },
+  'Link chia sẻ không còn hiệu lực.': { en: 'This share link no longer works.', zh: '该分享链接已失效。', ja: 'この共有リンクは無効です。', ko: '더 이상 유효하지 않은 공유 링크입니다.' },
   'Lịch trình tối đa 60 ngày.': { en: 'Itineraries can be at most 60 days.', zh: '行程最多 60 天。', ja: '旅程は最大60日です。', ko: '일정은 최대 60일입니다.' },
   'Không tìm thấy ngày này.': { en: 'Day not found.', zh: '未找到这一天。', ja: 'この日が見つかりません。', ko: '이 날짜를 찾을 수 없습니다.' },
   'Hãy đặt tên cho lịch trình.': { en: 'Give the itinerary a name.', zh: '请为行程命名。', ja: '旅程に名前を付けてください。', ko: '일정 이름을 입력하세요.' },

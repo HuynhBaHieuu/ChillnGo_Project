@@ -344,7 +344,24 @@ export interface ClonedItinerary {
   days: TripDay[]
   totalEstCost: number
   status: ItineraryStatus
+  /** Set while the owner shares a read-only link (/shared/<token>); null when private. */
+  shareToken?: string | null
   createdAt: ISODate
+  updatedAt: ISODate
+}
+
+/** An itinerary opened from its share link: read-only, with who made it. */
+export interface SharedItinerary {
+  _id: ObjectId
+  title: string
+  note: string
+  coverUrl: string
+  startDate: DateOnly
+  days: TripDay[]
+  totalEstCost: number
+  status: ItineraryStatus
+  checklist?: AiChecklist | null
+  owner: { username: string; displayName: string; avatarUrl: string } | null
   updatedAt: ISODate
 }
 

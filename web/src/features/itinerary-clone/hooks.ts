@@ -95,3 +95,30 @@ export function useRemoveDay(itineraryId: string) {
     },
   })
 }
+
+/** Turns the read-only share link on or off. */
+export function useShareItinerary(itineraryId: string) {
+  const queryClient = useQueryClient()
+  const viewerId = useViewerId()
+
+  return useMutation({
+    mutationFn: (share: boolean) =>
+      share ? itineraryService.shareItinerary(itineraryId) : itineraryService.unshareItinerary(itineraryId),
+    onSuccess: (updated) => {
+      // Keep the sources the detail view already loaded.
+      queryClient.setQueryData(qk.itinerary.detail(itineraryId, viewerId), (current: typeof updated | undefined) =>
+        current ? { ...current, shareToken: updated.shareToken ?? null } : updated,
+      )
+    },
+  })
+}
+
+/** An itinerary opened from its share link. */
+export function useSharedItinerary(token: string | undefined) {
+  return useQuery({
+    queryKey: qk.itinerary.shared(token ?? ''),
+    queryFn: () => itineraryService.getSharedItinerary(token as string),
+    enabled: Boolean(token),
+    retry: false,
+  })
+}
